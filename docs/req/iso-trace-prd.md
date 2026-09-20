@@ -1,5 +1,5 @@
 ---
-summary: Product requirements for iso-trace — the problem, users, as-is story, goals and non-goals, prioritised capabilities, slices, constraints, success criteria and open questions. DRAFT v0.1.
+summary: Product requirements for iso-trace — the problem, users, as-is story, goals and non-goals, prioritised capabilities, slices, constraints, success criteria and open questions. DRAFT v0.2.
 read_when:
   - deciding whether something is in scope, or which priority it has
   - planning a slice or writing a design doc that must serve a stated capability
@@ -8,8 +8,10 @@ read_when:
 
 # iso-trace — Product Requirements
 
-**Status:** draft v0.1 (2026-09-20). Evolves in place: a wrong requirement is edited, not
-superseded. Capability IDs are assigned when a design doc, milestone or test first cites one.
+**Status:** draft v0.2 (2026-09-21). Evolves in place: a wrong requirement is edited, not
+superseded. *v0.2:* two experiments on a test bed answered where requirements are authored,
+moved change control into P0, and replaced the first slice plan with what actually ran.
+Capability IDs are assigned when a design doc, milestone or test first cites one.
 Terms follow [`CONTEXT.md`](../../CONTEXT.md).
 
 ## Problem
@@ -105,7 +107,10 @@ iso-trace is the shared kernel under all three.
 | Extract markers from Markdown/Quarto sources and from test code | First test framework: the pilot's |
 | Import product repos at a pin | Several repos into one ledger |
 | Build the ledger and write the trace lock | The lock's diff is what a reviewer reads |
-| Check — violations always fail; gaps fail from their stage on | Every finding in one pass, each naming file and line; stable exit codes |
+| Check — violations always fail; gaps fail from their stage on | Every finding in one pass, each naming file and line and the next move; stable exit codes; no rule hidden — the rules are data and printable |
+| Baseline guard | Recognise the tags a project already cuts as baselines; a frozen item changes, and an item is added, only with a cited change request that is accepted and lists it |
+| Impact set of a change | Several items at once, deduplicated, as the line a change request needs — the one verb an agent asked for that did not exist |
+| Set up a product repo | Generate the trace configuration and the stanza; ship the skill with the engine |
 | Trace one item forward and backward | The assessor's fourth question |
 | Record test results from a test-run report | Appended per run, tied to a commit; never typed |
 | Emit tables as data for the existing render machine | Replaces the hand-typed traceability matrix; the engine knows nothing about Word |
@@ -121,8 +126,7 @@ of the three reasons the project exists — but the call on ordering is open.
 
 | Capability | Notes |
 |---|---|
-| Suspect detection by content hash | Links, and rendered documents against their source |
-| Impact of a change request | Which requirements, design elements, tests and documents are touched |
+| Suspect detection by content hash | Tracked against the item, never cleared by being touched; also rendered documents against their source |
 | The five-step assessment demo, one command per step | See *Success criteria* |
 | Collector for the Git host | Pull requests, reviews, tags, releases, issues — with the host's own timestamps |
 | Drift check on a Word document | IDs and generated tables compared with the ledger at the document's pin |
@@ -141,19 +145,21 @@ changes · checks running in product-repo pull requests · a team-facing interfa
 
 Incremental, each end to end, each leaving something in use.
 
-1. **Generated traceability record for the pilot project.** Trace schema, markers, import,
-   ledger, trace lock, check, emitted table rendered into the existing Word template. Done
-   when that document contains no hand-typed ID.
-2. **Work-product register and events.** The prose checklist and the per-document issue tags
-   become ledger data; the register is generated.
-3. **Test results.** Results collected from test-run reports fill the last columns of the
-   traceability record.
+0. **The authoring workflow, proven before the engine exists** — *done.* A test bed with a
+   product repo, a ledger repo and a throwaway stand-in for the engine. A greenfield slice and
+   a change after a baseline, each run by an agent that had only the repo's guide, a skill
+   and tool output. Results: [`docs/tests/`](../tests/beacon-authoring-experiment.md). The
+   stand-in dies; what it settled is in the design docs.
+1. **The product-repo half as an engine** — scan, check, rules, trace, results, the baseline
+   guard, the impact set, setting up a repo. Done when the test bed runs on the engine instead
+   of the stand-in, with the stand-in's scenarios as its fixtures.
+2. **The ledger** — import several product repos at a pin, the trace lock, emitted tables
+   rendered into a Word template. Done when a traceability record contains no hand-typed ID.
+3. **Work-product register and events** — the register is generated; a document's issue and
+   a baseline are events with pinned evidence pointers.
 
-Then P1, ordered by what the pilot's first real change request needs.
-
-💡 Slice 1 runs against a pilot that is under live assessment. The alternative is to prove it
-on a copy of the pilot's data first and switch the real document over only once the generated
-table matches the hand-typed one cell for cell.
+Then P1, ordered by what the first real project needs. The live pilot under assessment stays
+as its plan declares; nothing there changes mid-assessment.
 
 ## Constraints
 
@@ -186,25 +192,33 @@ table matches the hand-typed one cell for cell.
 4. A second trace schema with different ID families runs with **no engine code change**.
 5. An agent given only the built-in help and the status view **finds a gap and proposes the
    fix as a pull request** with no other instruction.
+6. An agent given an ordinary request that would change frozen requirements **stops before
+   editing and hands over the impact set** — and, once the change request is accepted, builds
+   under it with every changed and added item cited. *(The stand-in passed 5 and 6; the engine
+   must.)*
 
 ## Open questions
 
-- **Where is a requirement's text canonical?** *Answered provisionally* — in the product
-  repo's repo memory, with the formal bilingual specification a projection of it; see D5 in
-  [`data-architecture.md`](../design/data-architecture.md), which also keeps the two options
-  that lost. Under test in [`docs/tests/`](../tests/beacon-authoring-experiment.md). What
-  stays open: how a stored translation is reviewed and when it becomes suspect.
+- **Where is a requirement's text canonical?** *Answered and validated* — in the product repo's
+  repo memory, with the formal bilingual specification a projection of it (D5). What stays
+  open: how a stored translation is reviewed and when it becomes suspect.
+- **Where does the trace schema live** when a project spans several product repos? The test
+  bed kept it in the product repo, because a local check needs it.
+- **Derived IDs are not immutable.** A component's ID is its path and a test case's ID is its
+  name; renaming either changes it. Neither experiment renamed anything.
 - What is the smallest event shape that answers what, when, where and how for every evidence
   form — including forms with no document, such as a repository or a tracker feature?
 - How does a transition that happens outside any repository — a signature on a Word copy —
   become an event without anyone typing a fact?
 - Which states does a work product with a non-document evidence form actually pass through?
-- Marker syntax for each source type, and the ID conventions a trace schema may declare.
+- The reviewer's and the assessor's surfaces are decisions on paper; none has met a reviewer.
 
 ## Related
 
-- Settled design decisions and their rejected alternatives:
-  [`docs/design/data-architecture.md`](../design/data-architecture.md)
+- Settled design decisions, their rejected alternatives, and the product-repo half of the
+  model: [`docs/design/data-architecture.md`](../design/data-architecture.md)
+- The surface as its users meet it: [`docs/design/surface-architecture.md`](../design/surface-architecture.md)
+- Where the work stands: [`docs/progress/overview-iso-trace.md`](../progress/overview-iso-trace.md)
 - The standard's work products in brief:
   [`docs/references/iso29110-work-product-cheatsheet.md`](../references/iso29110-work-product-cheatsheet.md)
 - Legacy traceability example: `_examples/` at the repo root — real signed documents, kept
