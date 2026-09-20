@@ -1,5 +1,5 @@
 ---
-summary: Data architecture of qmstrace. Settled — decisions D1–D8 with their rejected alternatives, and the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, item text, baselines, change-request citation, the kinds of finding). Not yet written — the ledger half (work-product states, events, evidence pointers, import at a pin, the trace lock, ledger layout).
+summary: Data architecture of qmstrace. Settled — decisions D1–D9 with their rejected alternatives; the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, citation across repos, item text, baselines, change-request citation, the kinds of finding); and the ledger's import at a pin with the trace lock, v0. Not yet written — work-product states, events, evidence pointers, the ledger layout, the profile's format.
 read_when:
   - deciding how trace data, work-product state or evidence is stored or moves
   - about to reopen one of the settled decisions below
@@ -79,7 +79,7 @@ headings, signature blocks, information-item order — is rendered.
 | Repo memory | What being traced adds |
 |---|---|
 | `docs/req/<subject>-prd.md` | nothing — stays casual, carries no IDs |
-| `docs/req/<subject>-srs.md` | the requirement items: ID heading, one checkable statement, kind, origin, verification method |
+| `docs/req/<subject>-srs.md` | the requirement items: ID heading, one checkable statement, category, origin, verification method |
 | `docs/design/*.md` | a section that is a design element gets an ID and a `Satisfies:` line |
 | source modules, tests | `Implements:` in the module docstring; a `verifies` tag on the test |
 | `docs/progress/`, `docs/adr/` | untouched — not traced |
@@ -265,6 +265,26 @@ the **one** it is there to secure.
 - **Rejected — the name `Quality`.** Two of the ten values — the constraints and the legal
   ones — are not quality characteristics.
 
+### D9 — The project's trace schema lives in the ledger; a product repo names it and keeps what is local *(provisional)*
+
+Two product repos of one project must agree on link types, coverage rules, required fields
+and their values, where the agreement and the change requests are, and which repos belong to
+the project. That is one file in the ledger repo. A product repo's own trace configuration
+names that file and adds only what is local: the item types it declares, their ID patterns,
+the files to scan, its baselines. `rules` prints what is in force and says which file each
+part comes from.
+
+- **Tried in the fourth experiment, with no friction**: the agent never needed to change a
+  rule, and the precedent was already there — a product repo already depended on the ledger
+  for origins and change requests.
+- **Rejected — the full schema duplicated in each product repo.** Two copies of the rules
+  drift, and nothing says which is right.
+- 💡 **Still open — a generated, verified copy in each product repo** instead of a path to the
+  ledger. Under D9 as tried, a product repo checked out on its own cannot be checked at all;
+  a generated copy, with the ledger verifying at import that it matches, would allow it, at
+  the cost of a generated block to keep current. The choice turns on whether product repos
+  are ever worked on without the ledger beside them.
+
 ## The product-repo half (v0)
 
 What a product repo carries and how it is read. Everything here was exercised by an agent
@@ -309,7 +329,9 @@ told it whether it was done.
   which of the two it is counting.
 
 **Known limit.** Derived IDs are not immutable: renaming a module or a test function changes
-its ID, which the glossary forbids for an item. Neither experiment renamed anything. Open.
+its ID, which the glossary forbids for an item. No experiment has renamed anything. Open. In
+the ledger a derived ID is also **qualified by its repo**, because two repos of one project
+can both have `tests/unit/test_config.py` — and in the fourth experiment they did.
 
 ### The trace configuration
 
@@ -348,9 +370,36 @@ source = "<where they are declared>"
   output — never silently accepted. An invented origin threaded through a trace is the most
   expensive error this system can let through, and the cheapest to catch.
 - A requirement's classification is one `Category` from the profile's list (D8).
-- 💡 **Where the trace schema lives is open.** The glossary defines it per project; the test
-  bed put it in the product repo, because a local check needs it. With two product repos the
-  two must agree — the next experiment decides.
+- **Where it lives across repos:** the shared part sits in the ledger, the local part here (D9).
+
+### Across repos (v0)
+
+Exercised once, with two product repos — see the fourth experiment.
+
+- **A requirement has one home.** It is declared in the repo that owns it, under that repo's
+  subject; another repo cites it by ID exactly like a local item, and a sibling's requirement
+  re-declared locally is a violation that says whose it is.
+- **Locally, a sibling is read from its working tree and the output says so** — "not pinned".
+  Only the ledger's import reads at a pin.
+- **The thread between two repos runs through the origin.** Requirements are product-scoped —
+  "The gateway shall…" — so a client's design element cannot satisfy a gateway requirement,
+  and did not try to. What joins the two sides is the agreement clause both derive from: in
+  the test bed three clauses have requirements in both repos. A project-wide view should be
+  organised by origin clause; none is yet.
+- **A true marker is not sufficient: the verdict has to land on whoever can act on it.** A
+  client test that really does fail when the gateway's guard breaks would, tagged with the
+  gateway's requirement, redden a requirement in a repo whose code is fine — or, tagged only
+  with the client's, redden the client's for a gateway fault. `verifies` across repos is
+  allowed; it is not the natural cross-repo link.
+- 💡 **The link agents reach for across repos is a dependency, and the model does not have
+  one.** A client design element *assumes* something of the gateway: that re-registering is
+  harmless, that an unknown agent gets a 404, that the gateway owns the client-ID pattern — the
+  last "a negative delegation, which `Satisfies` gets backwards". Three times the agent had a
+  sibling's ID in mind and wrote a comment because no marker fitted. Such a link would count
+  toward **no coverage rule**; its job is to carry suspicion and the impact set across the
+  repo boundary, which today stop at the repo's edge. It would be checked at import against
+  the pin, not against a colleague's uncommitted working tree. Open: adopt it, and under what
+  name — `Assumes` or `Depends-on`.
 
 ### Item text
 
@@ -363,6 +412,9 @@ with every run of whitespace — line breaks too — collapsed to one space, and
 - Rewording is a change. So is a changed link field: an origin that gains a clause changes what
   the requirement derives from.
 - Citing a change request is not a change, which is why that one line is excluded.
+- **A field-only change is still a change, and it is noisy**: moving eleven requirements from
+  one classification field to another made 24 downstream items suspect though no behaviour
+  changed. The next baseline cleared them, as D7 says; in between, the list was all noise.
 
 ### Kinds of finding
 
@@ -371,6 +423,38 @@ with every run of whitespace — line breaks too — collapsed to one space, and
 | **Violation** | Wrong at any stage: an unknown or malformed ID, a marker pointing at the wrong type of item, a missing required field, an item declared where it is not read, an external ID its source does not declare, a frozen item changed or added without an accepted change request that lists it, a frozen heading deleted | always |
 | **Gap** | A coverage rule not yet met. Expected in the middle of the work; the agent uses the list as its work queue | the gate only — and, in the engine, only from the rule's stage on |
 | **Suspect** | Downstream of an item that changed since the last baseline. Needs a fresh look, not necessarily an edit | never — it clears at the next baseline (D7) |
+
+Two coverage rules are known to pull the wrong way, and are open:
+
+- **`Verify-by: inspection` or `analysis` is a free pass.** "Needs a test" applies only to
+  `Verify-by: test`, so the cheapest way to close that gap is to change one word. An
+  inspection or an analysis needs a recorded basis — it is a verification record, which
+  belongs to the ledger half — and until then such items are listed apart, so the shortcut
+  shows.
+- **"Every design element needs a test" can push a decorative tag** onto an element whose
+  honest tests are all requirement tests.
+
+**The check cannot tell a true marker from a decorative one.** It verifies that a marker
+exists and points at the right kind of item; only breaking the code shows whether the tagged
+test would notice. In the fourth experiment the agent did exactly that to its own work and
+found a marker that could not fail. That procedure is the author's, not only the reviewer's.
+
+## The ledger's import (v0)
+
+Run in the ledger repo, by the project side, once per baseline or whenever the project is to
+be judged as a whole. Exercised in the fourth experiment by the driver, not by an agent.
+
+- `import NAME@PIN …` reads each named product repo **at the pin** — never its working tree —
+  with the project's schema, and takes the union: authored IDs must be unique across the
+  project, derived IDs are qualified by repo, links are validated and coverage rules applied
+  across the union. Whether a requirement is covered *across all repos* is answered here and
+  nowhere else.
+- It writes the **trace lock** (D1): a header of pins — name, pin, commit — then one sorted
+  line per item (ID, type, repo, file, text digest) and per link. Generated, committed, never
+  edited. **A second run at the same pins is byte-identical** and leaves the working tree
+  clean; moving one pin back a commit changed thirteen lines and brought a gap back.
+- **A pin that carries no trace configuration is an error**, not an empty project. The first
+  form silently imported nothing from a pin older than the repo's configuration file.
 
 ## Verified notes
 
@@ -420,8 +504,8 @@ The ledger half, and what joins it to the half above:
 - Events and evidence pointers: the smallest shape that answers what, when, where and how.
 - How a transition that happens outside any repository — a signature on a Word copy — becomes
   an event without anyone typing a fact.
-- Import of a product repo's markers at a pin; a project spanning several product repos.
-- The trace lock's shape (D1), and with it item-level suspects.
+- A project-wide view organised by origin clause; the dependency link across repos.
+- Item-level suspects, and with them the trace lock's use as the record of what was reviewed.
 - The ledger repo's file layout; the profile's format.
 - Flow end to end: markers → extract → import at a pin → in-memory build → rules → emitted
   tables.

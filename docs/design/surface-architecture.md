@@ -9,7 +9,7 @@ read_when:
 
 # qmstrace — User-Facing Surface & Agent Experience
 
-> Source: the PRD, experiments E1 and E3 on the beacon test bed, and the design conversation behind decisions D1–D7 · Date: 2026-09-21 · Mode: Design · Surface: Hybrid — a command line (primary), generated documents, a generated read-only view
+> Source: the PRD, experiments E1, E3 and E4 on the beacon test bed, and the design conversation behind decisions D1–D7 · Date: 2026-09-21 · Mode: Design · Surface: Hybrid — a command line (primary), generated documents, a generated read-only view
 > See also: [Data Architecture](data-architecture.md) · [Product Requirements](../req/qmstrace-prd.md) · [Experiments](../tests/beacon-authoring-experiment.md)
 
 Terms follow [`CONTEXT.md`](../../CONTEXT.md). Two marks are used throughout: **✔ validated**
@@ -80,7 +80,8 @@ flowchart TD
 | `qmstrace results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
 | `qmstrace impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
-| Ledger-side verbs | Import a product repo at a pin; emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
+| `qmstrace import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
+| Other ledger-side verbs | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
 
 ### The authoring surface
 
@@ -231,6 +232,8 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 | "Two counts that disagree" | Test cases versus runs of them | Label every count |
 | "This requirement failed" | A test case that verifies several items failed | Mark the test case **shared**, with what else it verifies |
 | "No suspects" | The suspects were cleared by touching a file | Never let a suspect clear itself (D7) |
+| "An empty project" | A pin older than the repo's trace configuration | Refuse the import and say why |
+| "Covered" | `Verify-by: inspection`, with nothing recorded anywhere | List such items apart, until an inspection has a recorded basis |
 
 ## 6. Information Architecture / API Ergonomics
 
@@ -279,11 +282,22 @@ aspiration — each line is a defect found, or a behaviour observed, on the test
   step, not a dead end.
 - **The tool is on the path.** The test bed invoked it by a relative path, which cost the
   agent a directory change before every command.
+- **The header stays short.** By the fourth experiment it had grown to eight lines before the
+  first finding — "running `check` in a loop, that is most of the output". A quiet form that
+  prints only findings is wanted; what was scanned belongs to `status`.
+- **The stanza names the subject.** The guide said `<subject>-srs.md` and nothing said what
+  the subject was called; the agent guessed.
+- **The loop includes breaking the code.** The check verifies that a marker exists; only a
+  broken requirement shows whether the tagged test would notice. An agent that ran this pass
+  unasked found a marker in its own work that could not fail. The skill's loop gains the step
+  — *break it, watch the tagged test fail* — between checking and the gate. It took minutes.
 
 ### What the surface cannot do, and says so
 
-Three rules bind an agent that no check can enforce; the skill states them, and review
-catches what it can. **A marker states a fact** — tag a test with a requirement only if the
+Four rules bind an agent that no check can enforce; the skill states them, and review
+catches what it can. **The verdict has to land on whoever can act on it** — a marker across a
+repo boundary can be true and still put a failure on the wrong team's requirement. **A marker
+states a fact** — tag a test with a requirement only if the
 test would fail when the requirement is broken. **A requirement describes every
 configuration** — a new setting with a no-op default still changes the text. **When a
 requirement is gated, the work downstream of it is gated too.**
@@ -310,4 +324,5 @@ Each is marked 💡 where it bites.
 | 2 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
 | 3 | **Machine-readable output**: which commands, and is the contract versioned? | §7 |
 | 4 | **May an explicit, recorded review clear a suspect before the next baseline?** It adds a verb and a record, and removes noise from long-lived branches | [D7](data-architecture.md) |
-| 5 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
+| 5 | **A quiet form of `check`**, and how much of the header survives in the default form | §6 |
+| 6 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |

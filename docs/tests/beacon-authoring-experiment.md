@@ -107,7 +107,7 @@ Fixed before the first run.
 | E1 | Greenfield slice under option A: from the agreement's five clauses to working, traced code | **done — 2026-09-20**; option A holds |
 | E2 | Same brief under option C (no markers in the loop; a curator pass adds them afterwards) — the comparison | not needed — E1 did not leave the choice open; kept as the on-ramp scenario for an existing repo |
 | E3 | Change after a baseline: an ordinary request that would change frozen requirements, with no change request raised — does the agent stop and ask, and what does it hand over | **done — 2026-09-20**; the baseline held; suspects are broken as designed |
-| E4 | A second product repo joins: the field agent, the other half of the gateway. Requirements with one home cited across repos; the project's trace schema shared from the ledger; import of both repos at a pin | running — 2026-09-21 |
+| E4 | A second product repo joins: the field agent, the other half of the gateway. Requirements with one home cited across repos; the project's trace schema shared from the ledger; import of both repos at a pin | **done — 2026-09-21**; one home held, the import works; the cross-repo link agents want is a different one |
 | E5 | The five-step assessment demo against the bed | planned |
 
 ## Results
@@ -412,7 +412,123 @@ say that. After the run the driver tags both repos and runs the import in the le
 | E4-8 | Schema location | Friction the agent reports about rules living in the ledger; anything it needed there and could not change |
 | E4-9 | Friction | Its feedback file |
 
-*Results pending.*
+**Verdict: D2 holds, and the model is missing a link.** One home per requirement held without
+effort, the shared schema caused no friction, and the ledger's import of two repos at a pin is
+clean, deterministic and sensitive to the pin. But the agent wrote **no marker across the repo
+boundary**, and on examination it was right not to: the links it could have written were
+false, or true and misplaced. The link it wanted does not exist yet.
+
+Run: one fresh Opus teammate, about 25 minutes, two turns. Ten requirements under the client's
+own subject, five design elements, five modules, 53 test cases (67 runs); requirements first,
+then design, then code, then system tests against the real gateway in-process. End state:
+`beacon-agent` at tag `e4-end`; both repos imported into the ledger, the lock committed.
+
+| # | Measure | Result |
+|---|---|---|
+| E4-1 | One home per requirement | **Held.** Ten `REQ-BAG` requirements, nothing copied from the gateway; "never redeclare a sibling's requirement" went straight into the specification's header |
+| E4-2 | Cross-repo citation | **None written — see below.** Seven mentions of gateway items, all in prose or comments |
+| E4-3 | Boundaries | **Held.** Gateway, ledger and the project's schema untouched |
+| E4-4 | Origins | **Held.** Every origin real. The agent refused to invent a clause for re-registering after a gateway restart, and noticed the gateway's tracker has the mirror question open: "one decision, two repos waiting" |
+| E4-5 | `Category`, first use | **Sensible.** 4 functional suitability, 3 security, 3 reliability. The "categories with no requirement" prompt made it weigh a performance requirement and raise it as an open question — "exactly the behaviour you want from a nudge that isn't a gate" |
+| E4-6 | Marker honesty across repos | **Not applicable as designed** (no cross-repo markers); replaced by the check below |
+| E4-7 | Import at a pin | **Held.** 21 requirements, 208 links, 0 violations, 0 gaps. A second run is byte-identical and leaves the ledger's working tree clean. Moving one pin back a commit changes 13 lock lines and brings back a gap. Both repos have `tests/unit/test_config.py`: qualifying derived IDs by repo was needed |
+| E4-8 | Schema location | **No friction reported.** The agent never needed to change a rule; `rules` told it where each part came from |
+| E4-9 | Friction | Eleven points; the testable ones confirmed |
+
+#### Why no marker crossed the boundary
+
+Asked directly, the agent's answer was candid: "Not decided against, and not never came up —
+worse than both." It read the instruction *cite it by ID, exactly like a local item* and never
+turned it into a question about any one test. Three times a sibling's ID was in its head at
+the moment a marker could have been written, and three times it wrote a comment instead.
+Reasoning it through afterwards:
+
+- **`Satisfies` is correctly absent.** Every gateway requirement reads "The gateway shall…".
+  The field agent is not the gateway, so nothing in it can satisfy one.
+- **`verifies` had two candidates, and one was false.** "Registering twice is harmless" looked
+  the most obviously right and would have been a lie: the test passes whether or not the
+  gateway is idempotent. *Confirmed independently by the driver* — with idempotent
+  registration broken in the gateway, all 67 client tests still pass; likewise with
+  unknown-field refusal broken. Only with the API-key guard disabled does one client test
+  fail.
+- **That one true link it would still decline.** The test is already tagged with the client's
+  own security requirement, so a gateway regression would redden *the client's* requirement in
+  a repo whose code is fine. **"True isn't sufficient; the verdict has to land on whoever can
+  act on it."**
+- **The link it wanted is a dependency.** A client design element *assumes* something of the
+  gateway: re-registering is harmless only while the gateway is idempotent; a known limitation
+  is caused by the gateway answering 404 to an unknown agent; the client declines to validate
+  its ID because the gateway owns the pattern — "a negative delegation, which `Satisfies` gets
+  backwards". Such a link should count toward no coverage rule. Its job is to **carry
+  suspicion and impact across the repo boundary**: the first change request's "downstream"
+  section was written by hand and stops at the repo's edge — "a hand-maintained matrix by
+  another name". It also noted that a cross-repo link should be checked at import against the
+  pin, not against a colleague's uncommitted working tree.
+
+**Where the two repos actually join: the origin.** Read from the committed lock, three
+agreement clauses have requirements on both sides — a stable client ID, nothing sensitive in a
+payload, an API key on every call — each with gateway-side and client-side requirements
+deriving from it. The cross-repo thread runs through the shared clause, not through a direct
+link between the repos. No view shows this yet.
+
+#### The gate cannot tell a true marker from a decorative one
+
+The agent ran its own mutation pass — break the code one requirement at a time, watch the
+tagged tests fail — and **found a lie in its own work**: a test tagged "every call carries the
+API key" asserted only that a *wrong* key is refused, which stays true if the agent sends no
+key at all. The check was green throughout. It fixed the test, and the same pass caught a
+requirement that said less than the code did. Its suggestion: the skill states the rule ("a
+marker states a fact") and gives no procedure; add the step to the loop. The whole pass took a
+few minutes. This is the same procedure the driver has used to read marker honesty in every
+experiment — it belongs to the author, not only to the reviewer.
+
+#### Findings for the design
+
+- **`Verify-by: inspection` is a free pass.** The "needs a test" rule applies only to
+  `Verify-by: test`; an item marked `inspection` or `analysis` needs nothing recorded
+  anywhere, so the cheapest way to close a gap is to change one word. The agent felt the pull
+  on "no listening port" and chose a test. → *An inspection or an analysis needs a recorded
+  basis — it is a verification record — and until that exists the tool lists such items
+  apart, so the shortcut is visible.*
+- **A coverage rule can push decorative tags.** "Every design element needs a test" is natural
+  for a policy or a parser; for an element whose honest tests are all requirement tests, a
+  second tag is "close to decorative, which is the thing the skill warns about everywhere
+  else".
+- **An ignore pattern can hide logic.** Both scaffolds point the console script at
+  `__init__.py`, which the component scan ignores — the gateway's entry point has been outside
+  the trace since E1. The agent moved its own into a module.
+- **The subject is never named where the agent can see it.** The guide says
+  `<subject>-srs.md`; nothing says what the subject is called. It guessed.
+- **A cross-repo open question has no home.** Whether an agent re-registers after the gateway
+  forgets it sits in two trackers, in two repos, as two half-questions. It belongs to the
+  project.
+- **Commit hashes in trackers — the third report.** Now three sources disagree: the skill
+  forbids them, the neighbouring repo's tracker is full of them, and the developer's own
+  conventions ask for them. The agent followed the skill "and my tracker is worse for it".
+- **The banner grew.** Eight lines before every finding; "running `check` in a loop, that is
+  most of the output". A quiet form is wanted.
+- *From the setup:* a field-only change (the move to `Category`) made 24 downstream items
+  suspect though no behaviour changed, and the next baseline cleared them; importing a pin
+  older than the repo's trace configuration silently gave an empty project — now an error
+  that says why.
+
+#### The driver's own regression
+
+`results` crashed in every repo: a regression from the stand-in's rewrite for this
+experiment. Every command was re-run after the rewrite except that one. The agent found it in
+minutes — and drew the right conclusion from it: `check` verifies that markers exist;
+`results` is the only command that connects a marker to whether the test passes. A throwaway
+tool with no tests is why the stand-in dies; the engine's first slice takes its scenarios as
+fixtures, one per command.
+
+#### Caveats
+
+One run, a strong model, a small client. The schema-in-the-ledger option was tried with both
+repos checked out side by side; a product repo on its own cannot be checked at all under it,
+which the alternative — a generated, verified copy — would allow. The dependency link was
+asked for, not tried.
+
+Raw material: `_playground/2026-09-21_beacon-e4/` (local).
 
 ## Where findings go
 

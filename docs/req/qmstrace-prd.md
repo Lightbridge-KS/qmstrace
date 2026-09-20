@@ -202,8 +202,13 @@ as its plan declares; nothing there changes mid-assessment.
 - **Where is a requirement's text canonical?** *Answered and validated* — in the product repo's
   repo memory, with the formal bilingual specification a projection of it (D5). What stays
   open: how a stored translation is reviewed and when it becomes suspect.
-- **Where does the trace schema live** when a project spans several product repos? The test
-  bed kept it in the product repo, because a local check needs it.
+- **Where does the trace schema live** when a project spans several product repos?
+  *Provisionally* in the ledger, named by each product repo (D9); open is whether a product
+  repo gets a generated, verified copy so that it can be checked on its own.
+- **The cross-repo link agents reach for is a dependency**, and the model has none. Adopt it,
+  and under what name?
+- **An inspection or an analysis needs a recorded basis**; today `Verify-by: inspection` closes
+  a gap with nothing behind it.
 - **Derived IDs are not immutable.** A component's ID is its path and a test case's ID is its
   name; renaming either changes it. Neither experiment renamed anything.
 - What is the smallest event shape that answers what, when, where and how for every evidence

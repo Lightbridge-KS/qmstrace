@@ -21,7 +21,7 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       sources → strict intermediate data → formal targets — [PRD](../req/qmstrace-prd.md) § As-is story
 - [x] Glossary, 52 terms across four clusters — [`CONTEXT.md`](../../CONTEXT.md)
 - [x] PRD draft v0.1 — [`docs/req/qmstrace-prd.md`](../req/qmstrace-prd.md)
-- [x] Decisions D1–D8 with the alternatives that lost —
+- [x] Decisions D1–D9 with the alternatives that lost —
       [`data-architecture.md`](../design/data-architecture.md) § Settled decisions
 - [x] Spike: composite foreign keys can police link rules in the in-memory database —
       [`data-architecture.md`](../design/data-architecture.md) § Verified notes
@@ -51,6 +51,12 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       and the names that lost: [`surface-architecture.md`](../design/surface-architecture.md) §6
 - [x] **D8 — a requirement carries one `Category`** from the profile's list; the functional /
       non-functional split is derived, so a template with those two headings still renders
+- [x] **E4 — a second product repo joins.** One home per requirement held; the shared schema
+      in the ledger caused no friction (**D9, provisional**); the import of two repos at a pin is
+      clean, deterministic and sensitive to the pin. The agent wrote no marker across the repo
+      boundary — rightly: the links available were false, or true and misplaced. The link it
+      wanted is a dependency, which the model lacks. Its own mutation pass found a marker that
+      could not fail. Test-bed tag `e4-end`; findings in both design docs
 
 ## Now
 
@@ -58,17 +64,16 @@ Nothing in flight. The design docs now hold everything the two experiments settl
 
 ## Next
 
-- [ ] **Stand-in, second fix round** — item-level suspects that never clear by being touched;
-      an impact command that unions several items and emits the `Impacts` line; a warning when
-      a change request lists an item that never changed; configurable baseline tag patterns
-      and subject scope; the skill lines E3 asked for
-- [ ] **E4 — a second product repo joins.** Requirements implemented across two repos; import
-      into the ledger at a pin. Tests D2 and decides where the trace schema lives
-- [ ] **E5 — the five-step assessment demo** against the bed
+- [ ] **Plan the first engine slice** (plan mode): the product-repo half as a real package,
+      with the stand-in's scenarios as fixtures, one per command — the fourth experiment's
+      regression is the argument. Write `system-architecture.md` (C1–C2) and `docs/structure/`
+      as part of it; revisit the agent guide's straight-to-main rule then
 - [ ] **Grilling session** on the ledger half: the event shape, work-product states for
-      non-document evidence forms, and how a signature on a Word copy becomes an event
-- [ ] `system-architecture.md` (C1–C2) — when the first engine slice is planned
-- [ ] Plan the first engine slice; `docs/structure/` just before building
+      non-document evidence forms, how a signature on a Word copy becomes an event — and, new
+      from E4, the recorded basis of an inspection, which is a verification record
+- [ ] **E5 — the five-step assessment demo** against the bed, once the engine has a ledger
+- [ ] A real session launched by a person in a test-bed repo, to confirm what the spawned
+      teammates showed
 
 ## Deferred
 
@@ -82,15 +87,24 @@ Nothing in flight. The design docs now hold everything the two experiments settl
 
 ## Open questions
 
-Attached to scheduled work; standalone ones live in the PRD.
+Attached to scheduled work; standalone ones live in the PRD. `rg 💡` lists every marker.
 
-- 💡 **Where does the trace schema live?** The test bed put item types, link types and coverage
-  rules in the *product repo*, because a local check needs them; the glossary defines the
-  trace schema per *project*. With two product repos the two must agree. E4 decides.
+- 💡 **Adopt a dependency link across repos — and under what name, `Assumes` or `Depends-on`?**
+  It counts toward no coverage rule; it carries suspicion and the impact set across the repo
+  boundary, and is checked at import against the pin. (`data-architecture.md` § Across repos)
+- 💡 **A path to the ledger, or a generated, verified copy of the schema in each product repo?**
+  (D9) It turns on whether a product repo is ever worked on without the ledger beside it.
 - 💡 **May an explicit, recorded review clear a suspect before the next baseline?** (D7)
-- **Derived IDs are not immutable** — a module's path, a test function's name. Not exercised yet.
-- The 💡 markers still open: `CONTEXT.md` (two), the PRD (one), `data-architecture.md` (two),
-  `surface-architecture.md` (two). `rg 💡` lists them.
+- 💡 **Commit hashes in a tracker.** Three reports now, and three sources that disagree: the
+  skill forbids typed facts, the test bed's first tracker is full of hashes, and the
+  developer's own conventions ask for them. One wrong hash was found in E1. A ruling is needed
+  — it is a convention beyond this repo.
+- **`Verify-by: inspection` is a free pass** until an inspection has a recorded basis.
+- **"Every design element needs a test" can push a decorative tag.**
+- **Derived IDs are not immutable** — a module's path, a test function's name. Not exercised.
+- **A cross-repo open question has no home**: whether an agent re-registers after the gateway
+  forgets it sits in two trackers as two half-questions. It belongs to the project.
+- Older markers still open: `CONTEXT.md` (two), the PRD (one), `surface-architecture.md` (two).
 
 ## Confirmed contracts
 
@@ -116,6 +130,13 @@ Learnings that bind the design. All of these have landed in the design docs name
 - **Re-wrapping a paragraph is not a change; rewording is; a changed link field is.**
 - **The standard lets a project name its own baselines.** The engine recognises the tags a
   project already cuts — a release tag is the product baseline — rather than imposing its own.
+- **The thread between two repos runs through the origin clause**, not through a direct link.
+- **A true marker is not sufficient: the verdict has to land on whoever can act on it.**
+- **The check cannot tell a true marker from a decorative one** — breaking the code can, and
+  the author does it, not only the reviewer.
+- **A pin with no trace configuration is an error, not an empty project.**
+- **Every command has a fixture.** The stand-in's one regression was the one command not
+  re-run after a rewrite.
 - **The applicable baselines are the ones reachable from `HEAD`.** Maintenance lines and
   hotfix branches see their own; the pull-request gate runs on the merge result.
 
