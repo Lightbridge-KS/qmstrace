@@ -13,8 +13,10 @@ this file.)
    standard's, the organisation's document control, the engine's); this file says which wins
 3. [`docs/req/iso-trace-prd.md`](docs/req/iso-trace-prd.md) — what and for whom
 4. [`docs/design/data-architecture.md`](docs/design/data-architecture.md) — decisions D1…,
-   each with the alternative that lost
-5. [`docs/tests/`](docs/tests/) — the experiments: what was tested, how, and what was found
+   each with the alternative that lost, and the product-repo half of the model
+5. [`docs/design/surface-architecture.md`](docs/design/surface-architecture.md) — the commands,
+   the findings contract, the stanza and the skill, as their users meet them
+6. [`docs/tests/`](docs/tests/) — the experiments: what was tested, how, and what was found
 
 ## The shape, in one picture
 

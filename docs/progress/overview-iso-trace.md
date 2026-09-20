@@ -36,24 +36,19 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
 - [x] **Decided: the stand-in dies.** It stays throwaway; its findings graduate into the design
       docs and its scenarios seed the engine's fixtures. The engine's first slice is planned
       from the docs, not grown from the stand-in
-- [x] Baselines checked against a real GitFlow repo with tagged releases — three amendments
-      to D6 agreed (see *Now*)
+- [x] Baselines checked against a real repository with a release-branch workflow, a
+      maintenance line and tagged releases — **D6 amended**: the tag pattern is configuration
+      and a release tag is the product baseline; a scope is a subject with item types; an added
+      item is judged against its subject's own requirements baseline
+- [x] **What the test bed settled has graduated into the design docs**: D5 marked validated;
+      six terms added to [`CONTEXT.md`](../../CONTEXT.md) and two revised; the product-repo
+      half written in [`data-architecture.md`](../design/data-architecture.md) — the chain,
+      marker syntax v0, the trace configuration with rules as data, item text, kinds of
+      finding; [`surface-architecture.md`](../design/surface-architecture.md) written; PRD v0.2
 
 ## Now
 
-- [ ] **Fold the three agreed amendments into D6**: the tag pattern is configuration per
-      scope, with the release tag as the product baseline; a baseline's scope is a subject
-      together with item types, not the whole repo; "an added item needs a change request" is
-      judged against that subject's own requirements baseline
-- [ ] **Graduate what the test bed has settled into design docs** — it currently lives only in
-      experiment results and in a stand-in outside this repo:
-  - [ ] `CONTEXT.md` — add *subject*, *frozen*, *gate*, *impact set*; revise *suspect*, *baseline*
-  - [ ] `data-architecture.md` — marker syntax v0, the trace-configuration shape with rules as
-        data, what counts as an item's text, D6 as amended, D7
-  - [ ] `surface-architecture.md` (new) — commands, finding codes and their wording, exit
-        semantics, the stanza, the skill, and the principles E1 and E3 validated; human
-        surfaces marked unvalidated
-  - [ ] PRD v0.2 — answered questions, P0 additions, slices as they actually ran
+Nothing in flight. The design docs now hold everything the two experiments settled.
 
 ## Next
 
@@ -89,12 +84,14 @@ Attached to scheduled work; standalone ones live in the PRD.
 - 💡 **May an explicit, recorded review clear a suspect before the next baseline?** (D7)
 - **`Kind: functional | non-functional`** should become a quality characteristic (E1, D-a) —
   deferred once to keep E3 to one variable; schedule with the second fix round or E4.
-- The 💡 markers still open in `CONTEXT.md` (two) and the PRD (two).
+- **Derived IDs are not immutable** — a module's path, a test function's name. Not exercised yet.
+- The 💡 markers still open: `CONTEXT.md` (two), the PRD (one), `data-architecture.md` (two),
+  `surface-architecture.md` (three). `rg 💡` lists them.
 
 ## Confirmed contracts
 
-Learnings that now bind the design. Each is promoted into a design doc under *Now*; it stays
-here until it has landed there.
+Learnings that bind the design. All of these have landed in the design docs named under
+*Done*; they are kept here as the short list to read first.
 
 - **Steer by tool output first, prose second.** In both experiments the agent learned what
   mattered from the first command it ran, not from the guide.
@@ -121,5 +118,6 @@ here until it has landed there.
 ## Related
 
 - Requirements: [`docs/req/iso-trace-prd.md`](../req/iso-trace-prd.md)
-- Design: [`docs/design/data-architecture.md`](../design/data-architecture.md)
+- Design: [`data-architecture.md`](../design/data-architecture.md) ·
+  [`surface-architecture.md`](../design/surface-architecture.md)
 - Experiments: [`docs/tests/beacon-authoring-experiment.md`](../tests/beacon-authoring-experiment.md)
