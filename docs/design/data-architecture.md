@@ -1,5 +1,5 @@
 ---
-summary: Data architecture of iso-trace — SKELETON. Holds the settled decisions, their rejected alternatives, verified notes, and the lineage from the earlier traceability spec. The model itself (items, links, work products, events, evidence pointers, ledger layout) is not written yet.
+summary: Data architecture of iso-trace. Settled — decisions D1–D7 with their rejected alternatives, and the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, item text, baselines, change-request citation, the kinds of finding). Not yet written — the ledger half (work-product states, events, evidence pointers, import at a pin, the trace lock, ledger layout).
 read_when:
   - deciding how trace data, work-product state or evidence is stored or moves
   - about to reopen one of the settled decisions below
@@ -8,9 +8,11 @@ read_when:
 
 # Data architecture
 
-**Status:** skeleton (2026-09-20). Decisions and verified notes only. The sections under
-*Not yet written* wait for the open questions in the [PRD](../req/iso-trace-prd.md) to be
-worked through. Terms follow [`CONTEXT.md`](../../CONTEXT.md).
+**Status:** half written (2026-09-21). The decisions and the **product-repo half** are settled
+— the latter by two experiments on a test bed, so it is marked *v0*: proven once, on one small
+application. The **ledger half**, under *Not yet written*, waits for the next experiment and
+for the open questions in the [PRD](../req/iso-trace-prd.md). Terms follow
+[`CONTEXT.md`](../../CONTEXT.md).
 
 ## Settled decisions
 
@@ -67,7 +69,7 @@ products, states, conformance requirements) is likewise data.
   Because the database is built in memory on every run and never committed, the engine can
   generate a schema as strict as a hand-written one.
 
-### D5 — Author where the work happens; formalise in the ledger repo *(provisional — under test)*
+### D5 — Author where the work happens; formalise in the ledger repo
 
 The developer launches the coding agent in the **product repo**, and the agent writes repo
 memory in a slightly stricter form. The ledger repo imports it at a pin and generates the
@@ -104,7 +106,7 @@ Consequences:
 The options considered — kept in full because this choice is the one most likely to be
 revisited:
 
-- **A — Author where the work happens; formalise in the ledger repo.** *Chosen, provisionally.*
+- **A — Author where the work happens; formalise in the ledger repo.** *Chosen.*
   The agent writes stricter repo memory with markers; the ledger imports and generates.
   For: one place to work, nothing retyped, links authored when the knowledge arises. Against:
   baselined text sits where agents edit freely (guarded as above); every source type needs an
@@ -120,16 +122,68 @@ revisited:
   created late, where assessors expect it updated at each stage; it abandons D1. **Kept as the
   on-ramp** for an existing repo that has no markers yet.
 
-Under test on the beacon test bed: [`docs/tests/beacon-authoring-experiment.md`](../tests/beacon-authoring-experiment.md).
-Revisit if the experiment shows markers that are wrong, dishonest, or costly to review.
+**Validated on the beacon test bed** — a greenfield slice (E1) and a change after a baseline
+(E3): [`docs/tests/beacon-authoring-experiment.md`](../tests/beacon-authoring-experiment.md).
+Both were one run with a strong model on a small application; revisit if wider use shows
+markers that are wrong, dishonest, or costly to review. The ledger half of this decision —
+import at a pin, generated formal documents — is not yet tested (E4).
 
-### D6 — A baseline is an annotated Git tag; the trace configuration says what it freezes
+### D6 — A baseline is a tag the project already cuts; the trace configuration says which tags are baselines and what each freezes
 
-`baseline/<scope>/<n>` — for example `baseline/requirements/1` — declares a baseline in a
-product repo. The repo's trace configuration maps each scope to the item types it freezes.
-Tagger and date come from Git, so they are collected, not typed. The agent learns that an
-item is frozen from tool output (`status` marks it), never from a field in the document.
+**The standard lets a project name its own baselines** in its version-control strategy, and a
+project usually has: a release tag is already the product baseline, and a plan may already
+name a requirements and a design baseline. So the engine *recognises* baselines by a
+configured tag pattern and never imposes a name of its own — above all, it never asks for a
+second tag beside a release.
 
+```toml
+[baselines.requirements]                       # default pattern; a plan's own name works as well,
+tag    = '^baseline/(?P<subject>[a-z0-9-]+)/requirements/(?P<n>\d+)$'   # e.g. '^(?P<subject>[a-z]+)-req-v…$'
+covers = ["requirement"]
+
+[baselines.product]                            # the release tag IS the product baseline
+tag     = '^v\d+\.\d+\.\d+$'                    # pre-release tags are a different scope, or none
+subject = "*"
+covers  = ["requirement", "design_element", "component", "test_case"]
+```
+
+- **A scope is a subject together with item types — never the whole repo.** A *subject* is
+  the `<subject>` of `docs/req/<subject>-srs.md` and the key inside its item IDs. A product
+  repo carries several subjects at once, each claimed by a different project; freezing one
+  must not freeze another.
+- **"An added item needs a change request" is judged against that subject's own requirements
+  baseline.** A subject begun after a product baseline is a new project under its own
+  agreement, not a string of change requests against the last release.
+- **The applicable baselines are the ones reachable from `HEAD`.** A maintenance line sees its
+  own last release; a hotfix branch cut from the release branch sees only what was released.
+  A feature branch older than a tag does not see it — the pull-request gate runs on the merge
+  result, where the tag is reachable, so the change is still caught before it lands.
+- **The tag is annotated.** Tagger and date are then collected facts. A lightweight baseline
+  tag carries neither and is reported as weaker evidence; old ones are not rewritten.
+- **After a product baseline, a code change carries its change request by pull-request or
+  commit convention (D7), not by item text** — a fix rarely rewords a requirement.
+- **Two events, linked by the pin:** the baseline of items is a tag in the product repo; the
+  issue of a controlled document rendered from them is an event in the ledger repo.
+- The agent learns that an item is frozen from tool output, never from a field in the document.
+
+How the standard's baselines fall onto a release-branch workflow, none of it new work:
+
+| The standard's baseline | What the project already cuts |
+|---|---|
+| Requirements | an annotated tag on the integration branch once the specification is validated |
+| Design | an annotated tag on the integration branch once the design is approved |
+| Construction | the point where the release branch is cut |
+| Software | a pre-release tag on the release branch |
+| Product | the annotated release tag on the main branch, with the published release |
+
+A project declares the ones it uses; the standard does not require all five by name.
+
+- **Rejected — one tag name imposed by the engine** (the first form of this decision,
+  `baseline/<scope>/<n>` for the whole repo). It ignored release tags that already are
+  baselines, names a signed plan may already declare, and the fact that one repo carries
+  several subjects. Checking it against a real repository with a release-branch workflow, a
+  maintenance line and fourteen release tags is what exposed all three. *Kept as the default
+  pattern.*
 - **Rejected — a committed baseline file** listing IDs and content hashes. Diffable, but a
   second record beside Git that an agent can edit; the trace lock at the tagged commit already
   is that snapshot (D1).
@@ -164,6 +218,116 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
   from it; a change request reserves the ID of any item it adds; and when a requirement is
   gated, the work downstream of it is gated too — a rule for the skill and for review, because
   no check can compare code with a requirement's prose.
+
+## The product-repo half (v0)
+
+What a product repo carries and how it is read. Everything here was exercised by an agent
+working from nothing but the repo's own guide, a skill and tool output — see
+[`docs/tests/`](../tests/beacon-authoring-experiment.md).
+
+### The chain
+
+```
+origin clause ◀─Origin── requirement ◀─Satisfies── design element ◀─Implements── component
+ (declared in                ▲                           ▲
+  the ledger)                └────────── verifies ───────┴──────── test case ──▶ test result
+```
+
+Every arrow is authored at its downstream end and points upstream (D1); the forward view is
+derived. **Every link type is many-to-many, and the tooling must say so**: an agent that did
+not know was tempted to bend the module layout toward one-to-one, because the tool was what
+told it whether it was done.
+
+### Marker syntax v0
+
+| Item | Declared as | Its ID | Link marker |
+|---|---|---|---|
+| Requirement | a heading `### <ID> — <title>` in the subject's specification file, followed by one checkable statement and its fields | authored, from the trace schema's pattern | `- Origin: <clause>[, <clause>]` |
+| Design element | a heading `## <ID> — <title>` in a design document | authored | `Satisfies: <requirement>[, …]` |
+| Component | a source module | derived — the module's path | `Implements: <design element>` in the module docstring |
+| Test case | a test function | derived — the test runner's own identifier for it | the test framework's own tagging, e.g. `@pytest.mark.verifies("<ID>")`, on the function or its class |
+
+- **A field whose name is a link marker *is* the link.** `Origin` is at once a required field
+  of a requirement and its link to the clause; nothing else declares it.
+- Fields are `- Key: value` lines under the heading; bold keys are accepted. Several targets
+  are comma-separated.
+- A heading inside a code fence is not a declaration. Frontmatter is tolerated and ignored.
+- **The file an item is declared in matters**, because each item type is read from the file
+  patterns its trace schema names. An item declared elsewhere is invisible — and must be
+  reported, not silently skipped.
+- A test's level — unit, integration, system — comes from where it sits and is **information,
+  not a rule**. It is a claim that is easy to fake, and some design elements can only be
+  verified from outside.
+- A test case is a *test function*. A parametrised function is one test case that runs several
+  times; results are aggregated per test case, worst verdict first, and every count says
+  which of the two it is counting.
+
+**Known limit.** Derived IDs are not immutable: renaming a module or a test function changes
+its ID, which the glossary forbids for an item. Neither experiment renamed anything. Open.
+
+### The trace configuration
+
+One file at the product repo's root declares everything the tool enforces there. **Nothing is
+hidden in the tool**, and the skill shipped with it never restates a rule — it points at the
+command that prints them. Three of the six defects found in the first experiment were one
+defect: a rule that lived in code, or in prose that disagreed with the code.
+
+```toml
+[items.requirement]            # one block per item type
+id_pattern = '^REQ-<KEY>-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+required   = ["Origin", "Verify-by"]
+fields     = { "Verify-by" = ["test", "inspection", "analysis"] }
+
+[links]                        # marker = who may carry it, what it may point at
+Satisfies = { from = ["design_element"], to = ["requirement"] }
+
+[[rules]]                      # coverage rules are data; an unmet rule is a gap
+code  = "G02"
+item  = "requirement"
+where = { "Verify-by" = "test" }          # optional: narrows the rule by a field's value
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[external.agreement]           # IDs declared outside this repo: cited here, never declared here
+prefix = "AGR-"
+source = "<where they are declared>"
+
+[baselines.<scope>]            # D6
+[change_requests]              # D7
+```
+
+- **External IDs resolve or are announced as unverified.** A cited ID its source does not
+  declare is a violation that lists the real ones. An unreachable source is stated in the
+  output — never silently accepted. An invented origin threaded through a trace is the most
+  expensive error this system can let through, and the cheapest to catch.
+- The first experiment's `Kind: functional | non-functional` field is **withdrawn from v0**: it
+  is binary, ambiguous for a security *behaviour*, and it silently changed what coverage
+  meant. The standard organises a specification by quality characteristic; the field should
+  be that. Not yet tried.
+- 💡 **Where the trace schema lives is open.** The glossary defines it per project; the test
+  bed put it in the product repo, because a local check needs it. With two product repos the
+  two must agree — the next experiment decides.
+
+### Item text
+
+An item's **text** is its title and its body up to the next heading, link fields included,
+with every run of whitespace — line breaks too — collapsed to one space, and with the
+`Change:` line left out.
+
+- Re-wrapping a paragraph is not a change. It is the most common harmless edit an agent makes,
+  and the first implementation got it wrong.
+- Rewording is a change. So is a changed link field: an origin that gains a clause changes what
+  the requirement derives from.
+- Citing a change request is not a change, which is why that one line is excluded.
+
+### Kinds of finding
+
+| Kind | Meaning | Fails |
+|---|---|---|
+| **Violation** | Wrong at any stage: an unknown or malformed ID, a marker pointing at the wrong type of item, a missing required field, an item declared where it is not read, an external ID its source does not declare, a frozen item changed or added without an accepted change request that lists it, a frozen heading deleted | always |
+| **Gap** | A coverage rule not yet met. Expected in the middle of the work; the agent uses the list as its work queue | the gate only — and, in the engine, only from the rule's stage on |
+| **Suspect** | Downstream of an item that changed since the last baseline. Needs a fresh look, not necessarily an edit | never — it clears at the next baseline (D7) |
 
 ## Verified notes
 
@@ -206,13 +370,21 @@ software requirements.
 
 ## Not yet written
 
-- Core model: item, link, work product, event, evidence pointer, baseline — and how they join.
-- Trace schema and profile formats.
-- Marker syntax per source type.
-- Ledger repo file layout; the trace lock's shape.
-- Flow: markers → extract → import at a pin → in-memory build → rules → emitted tables.
+The ledger half, and what joins it to the half above:
+
+- Work products, their states and transitions — including evidence forms that are not
+  documents.
+- Events and evidence pointers: the smallest shape that answers what, when, where and how.
+- How a transition that happens outside any repository — a signature on a Word copy — becomes
+  an event without anyone typing a fact.
+- Import of a product repo's markers at a pin; a project spanning several product repos.
+- The trace lock's shape (D1), and with it item-level suspects.
+- The ledger repo's file layout; the profile's format.
+- Flow end to end: markers → extract → import at a pin → in-memory build → rules → emitted
+  tables.
 - Extension points: rules, collectors, extractors.
 
-Four of these are expensive to change later and get designed in full before the first slice:
-**marker syntax** (copied into code across repos), **ID conventions** (cited in signed
-documents), **event and evidence-pointer shape** (append-only), **ledger layout**.
+Four things are expensive to change later and get designed in full before the first engine
+slice. Two are now drafted above as v0 — **marker syntax** (copied into code across repos) and
+**ID conventions** (cited in signed documents). Two are not — the **event and
+evidence-pointer shape** (append-only) and the **ledger layout**.
