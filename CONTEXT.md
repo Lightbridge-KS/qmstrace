@@ -67,8 +67,9 @@ _Avoid_: approval, acceptance, V&V
 
 **Baseline**:
 An approved set of work-product revisions frozen as the team's single reference, changed only
-through a change request.
-_Avoid_: release (a release is one baseline — the product baseline), snapshot, freeze
+through a change request. A project names its own baselines; a release is one of them — the
+product baseline — and each freezes a subject, not a repository.
+_Avoid_: release (a release is one baseline, not the concept), snapshot, freeze
 
 **Stage**:
 The project's position in the profile's activity sequence, from requirements through
@@ -80,7 +81,8 @@ A work product or component placed under version control and baselining.
 _Avoid_: CI (collides with continuous integration)
 
 **Change Request**:
-A proposed change to a baselined work product, carrying its impact analysis.
+A proposed change to a baselined work product, carrying its impact analysis. It names every
+item it touches and reserves the ID of any item it adds.
 _Avoid_: feature request, ticket
 
 **Correction**:
@@ -110,10 +112,25 @@ A uniquely identified unit of engineering content that can be traced: an origin 
 case, a requirement, a design element, a component, a test case.
 _Avoid_: node, entity, artifact, need
 
+**Subject**:
+A named body of requirements within a product — the name of its specification and the key
+inside its item IDs. A project claims one or more subjects, and a baseline freezes a subject.
+_Avoid_: module, feature, project, component
+
 **Item ID**:
 An item's identifier: immutable once committed and never reused. Retiring an item changes
 its status, not its ID.
 _Avoid_: key, number
+
+**Item Text**:
+An item's title and body, its link fields included, with layout ignored. It is what a baseline
+freezes and what a change is measured against: re-wrapping a paragraph is not a change,
+rewording is, and so is a changed origin.
+_Avoid_: content, body, hash
+
+**Frozen**:
+Said of an item whose text is fixed by a baseline reachable from the current commit.
+_Avoid_: locked, read-only, baselined (that describes a work product, not an item)
 
 **Status**:
 Whether an item is active, withdrawn, or superseded.
@@ -154,9 +171,15 @@ not allow, a malformed ID.
 _Avoid_: gap, warning
 
 **Suspect**:
-Something whose upstream content changed after it was last reviewed — a link, a translation,
-a rendered document. It needs a fresh look, not necessarily a change.
+Something downstream of content that changed after it was last reviewed — an item, a
+translation, a rendered document. It needs a fresh look, not necessarily a change, and it
+never stops being suspect merely by being touched.
 _Avoid_: stale, dirty, outdated, broken
+
+**Impact Set**:
+Everything downstream of the items a change would touch — what a change request's impact
+analysis has to name.
+_Avoid_: blast radius, dependencies, affected files
 
 **Forward Trace / Backward Trace**:
 Walking from an origin toward test results, or from a result back to the origin. Backward
@@ -170,6 +193,11 @@ _Avoid_: test (unqualified)
 **Test Result**:
 The verdict of one test case in one run. Appended, never edited, never typed by hand.
 _Avoid_: test status, outcome
+
+**Gate**:
+The check that work must pass to be accepted: no violations, and no gaps the current stage
+forbids. Distinct from the check run while authoring, which lists gaps without failing.
+_Avoid_: CI, build, lint
 
 ### Evidence
 
@@ -238,6 +266,11 @@ _Avoid_: QMS repo, docs repo
 **Engine**:
 iso-trace itself — the tool. It holds no project data.
 _Avoid_: platform, system
+
+**Stanza**:
+The short generated block in a product repo's agent guide saying that the repo is traced and
+what that asks of an agent working there.
+_Avoid_: prompt, instructions, system prompt
 
 **Import**:
 Reading a product repo's markers into a ledger at a pin.
