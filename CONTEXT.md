@@ -151,6 +151,12 @@ The customer-side source a requirement traces back to: an agreement clause or a
 terms-of-reference clause.
 _Avoid_: source, parent
 
+**Category**:
+The one concern a requirement is there to secure, taken from the profile's list — functional
+suitability, security, reliability and the rest. The functional / non-functional split is
+derived from it, never authored.
+_Avoid_: kind, type, quality, non-functional (as a category of its own)
+
 **Trace Schema**:
 One project's declaration of its item types, ID patterns, allowed link types, and coverage
 rules.

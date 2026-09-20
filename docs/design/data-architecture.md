@@ -1,5 +1,5 @@
 ---
-summary: Data architecture of qmstrace. Settled — decisions D1–D7 with their rejected alternatives, and the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, item text, baselines, change-request citation, the kinds of finding). Not yet written — the ledger half (work-product states, events, evidence pointers, import at a pin, the trace lock, ledger layout).
+summary: Data architecture of qmstrace. Settled — decisions D1–D8 with their rejected alternatives, and the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, item text, baselines, change-request citation, the kinds of finding). Not yet written — the ledger half (work-product states, events, evidence pointers, import at a pin, the trace lock, ledger layout).
 read_when:
   - deciding how trace data, work-product state or evidence is stored or moves
   - about to reopen one of the settled decisions below
@@ -219,6 +219,52 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
   gated, the work downstream of it is gated too — a rule for the skill and for review, because
   no check can compare code with a requirement's prose.
 
+### D8 — A requirement carries one `Category`, from the profile's list; the functional / non-functional split is derived
+
+```markdown
+### REQ-XYZ-10 — A call carries an API key
+The gateway shall reject, with status 401, a request that does not carry a valid API key.
+- Category: security
+- Origin: AGR-5
+- Verify-by: test
+```
+
+The standard's requirements specification lists ten categories for the requirements
+description, and *functional* is only one of them: functional suitability · performance
+efficiency · compatibility · usability · reliability · maintainability · portability ·
+security · design and construction constraints · legal and regulative. A requirement names
+the **one** it is there to secure.
+
+- **It dissolves the ambiguity the first experiment hit.** "Is rejecting with 401 functional?"
+  has no good answer; "which category is this requirement there to secure?" does — security.
+  A requirement that seems to need two categories is usually two requirements, the same rule
+  as *one checkable statement*.
+- **The split is derived, never authored.** Functional suitability is *functional*; the other
+  nine are *non-functional*. The reverse mapping is impossible, so the finer field is strictly
+  more informative. The first adopter's controlled template groups requirements under
+  Functional / Non-functional headings; that layout is rendered from the category. A legacy ID
+  scheme that encodes the split stays a matter of the trace schema's ID pattern.
+- **The allowed values belong to the profile**, not to the engine — the standard is data. A
+  trace schema may add to them; medical-device work would add `safety`, which newer quality
+  models carry and this standard's text does not.
+- **No coverage rule depends on it.** How a requirement is verified stays with `Verify-by`.
+  The one use beyond rendering is informational: `status` lists the categories under which a
+  subject has no requirement — a prompt, never a gap, because the standard says a
+  specification *may* have them.
+- The generated specification groups requirements by category in the standard's order, so an
+  assessor maps it one to one.
+
+- **Rejected — `Kind: functional | non-functional`**, the first form. Binary, ambiguous for a
+  security *behaviour*, and in the first stand-in it silently changed what coverage meant. It
+  was the one field the agent that wrote the first specification was not confident about.
+- **Rejected — several categories per requirement.** Truer for a few items, but every
+  requirement would then appear in several sections, and "which one do I put first" is the
+  same judgement without the discipline.
+- **Rejected — no field.** The generated specification could not be grouped, and nothing
+  would prompt the author to consider the qualities at all.
+- **Rejected — the name `Quality`.** Two of the ten values — the constraints and the legal
+  ones — are not quality characteristics.
+
 ## The product-repo half (v0)
 
 What a product repo carries and how it is read. Everything here was exercised by an agent
@@ -276,8 +322,8 @@ defect: a rule that lived in code, or in prose that disagreed with the code.
 [items.requirement]            # one block per item type
 id_pattern = '^REQ-<KEY>-\d{2}$'
 files      = ["docs/req/*-srs.md"]
-required   = ["Origin", "Verify-by"]
-fields     = { "Verify-by" = ["test", "inspection", "analysis"] }
+required   = ["Category", "Origin", "Verify-by"]
+fields     = { "Verify-by" = ["test", "inspection", "analysis"] }   # Category's values come from the profile (D8)
 
 [links]                        # marker = who may carry it, what it may point at
 Satisfies = { from = ["design_element"], to = ["requirement"] }
@@ -301,10 +347,7 @@ source = "<where they are declared>"
   declare is a violation that lists the real ones. An unreachable source is stated in the
   output — never silently accepted. An invented origin threaded through a trace is the most
   expensive error this system can let through, and the cheapest to catch.
-- The first experiment's `Kind: functional | non-functional` field is **withdrawn from v0**: it
-  is binary, ambiguous for a security *behaviour*, and it silently changed what coverage
-  meant. The standard organises a specification by quality characteristic; the field should
-  be that. Not yet tried.
+- A requirement's classification is one `Category` from the profile's list (D8).
 - 💡 **Where the trace schema lives is open.** The glossary defines it per project; the test
   bed put it in the product repo, because a local check needs it. With two product repos the
   two must agree — the next experiment decides.

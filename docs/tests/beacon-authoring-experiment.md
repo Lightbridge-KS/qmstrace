@@ -189,7 +189,8 @@ rules living inside the tool — so the fix was structural:
 
 #### Findings for the model
 
-- **D-a — `Kind: functional | non-functional` is the wrong field.** It is binary, ambiguous
+- **D-a — `Kind: functional | non-functional` is the wrong field** *(settled since as D8: one
+  `Category` from the profile's list).* It is binary, ambiguous
   for a security *behaviour*, and it silently changed what coverage meant. The standard
   organises a specification by quality characteristic; the field should be that.
 - **D-b — A test's level is a claim, and an easy one to fake.** It comes from a folder name;

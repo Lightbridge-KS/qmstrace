@@ -21,7 +21,7 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       sources → strict intermediate data → formal targets — [PRD](../req/qmstrace-prd.md) § As-is story
 - [x] Glossary, 52 terms across four clusters — [`CONTEXT.md`](../../CONTEXT.md)
 - [x] PRD draft v0.1 — [`docs/req/qmstrace-prd.md`](../req/qmstrace-prd.md)
-- [x] Decisions D1–D7 with the alternatives that lost —
+- [x] Decisions D1–D8 with the alternatives that lost —
       [`data-architecture.md`](../design/data-architecture.md) § Settled decisions
 - [x] Spike: composite foreign keys can police link rules in the in-memory database —
       [`data-architecture.md`](../design/data-architecture.md) § Verified notes
@@ -49,6 +49,8 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
 - [x] **Renamed to `qmstrace`** — repository, command, trace configuration, skill, stanza
       markers; the thread command is `thread`, since the name already carries *trace*. Reasons
       and the names that lost: [`surface-architecture.md`](../design/surface-architecture.md) §6
+- [x] **D8 — a requirement carries one `Category`** from the profile's list; the functional /
+      non-functional split is derived, so a template with those two headings still renders
 
 ## Now
 
@@ -86,8 +88,6 @@ Attached to scheduled work; standalone ones live in the PRD.
   rules in the *product repo*, because a local check needs them; the glossary defines the
   trace schema per *project*. With two product repos the two must agree. E4 decides.
 - 💡 **May an explicit, recorded review clear a suspect before the next baseline?** (D7)
-- **`Kind: functional | non-functional`** should become a quality characteristic (E1, D-a) —
-  deferred once to keep E3 to one variable; schedule with the second fix round or E4.
 - **Derived IDs are not immutable** — a module's path, a test function's name. Not exercised yet.
 - The 💡 markers still open: `CONTEXT.md` (two), the PRD (one), `data-architecture.md` (two),
   `surface-architecture.md` (two). `rg 💡` lists them.
