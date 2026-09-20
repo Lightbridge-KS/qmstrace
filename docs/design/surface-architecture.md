@@ -1,5 +1,5 @@
 ---
-summary: The surface of iso-trace as its users meet it — the command line a coding agent and a developer drive in a product repo (validated by two experiments), the authoring surface of markers, stanza and skill, the findings contract and exit codes, and the still-unvalidated surfaces for reviewers working in Word and for an assessor.
+summary: The surface of qmstrace as its users meet it — the command line a coding agent and a developer drive in a product repo (validated by two experiments), the authoring surface of markers, stanza and skill, the findings contract and exit codes, and the still-unvalidated surfaces for reviewers working in Word and for an assessor.
 read_when:
   - adding, renaming or changing a command, a flag, a finding code, or the wording of a finding
   - changing the stanza or the skill an agent in a traced repo reads
@@ -7,10 +7,10 @@ read_when:
   - deciding whether a behaviour belongs in tool output or in prose guidance
 ---
 
-# iso-trace — User-Facing Surface & Agent Experience
+# qmstrace — User-Facing Surface & Agent Experience
 
 > Source: the PRD, experiments E1 and E3 on the beacon test bed, and the design conversation behind decisions D1–D7 · Date: 2026-09-21 · Mode: Design · Surface: Hybrid — a command line (primary), generated documents, a generated read-only view
-> See also: [Data Architecture](data-architecture.md) · [Product Requirements](../req/iso-trace-prd.md) · [Experiments](../tests/beacon-authoring-experiment.md)
+> See also: [Data Architecture](data-architecture.md) · [Product Requirements](../req/qmstrace-prd.md) · [Experiments](../tests/beacon-authoring-experiment.md)
 
 Terms follow [`CONTEXT.md`](../../CONTEXT.md). Two marks are used throughout: **✔ validated**
 — exercised on the test bed by an agent that had nothing but the repo's guide, the skill and
@@ -21,17 +21,17 @@ tool output; **◻ planned** — named in the PRD or a decision, not yet tried.
 The product-repo loop, in the order it is used. All six are ✔ validated.
 
 ```sh
-iso status                 # what was scanned; one line per requirement; what is frozen
-iso rules                  # what this repo counts as covered — the rules, from their source
-iso check                  # violations and gaps while authoring — gaps do not fail
-iso trace REQ-XYZ-05       # one thread: back to the origin, forward to the tests
-iso results report.xml     # the verdict per requirement, from a test-run report
-iso check --strict         # the gate: no violations, no gaps
+qmstrace status                 # what was scanned; one line per requirement; what is frozen
+qmstrace rules                  # what this repo counts as covered — the rules, from their source
+qmstrace check                  # violations and gaps while authoring — gaps do not fail
+qmstrace thread REQ-XYZ-05       # one thread: back to the origin, forward to the tests
+qmstrace results report.xml     # the verdict per requirement, from a test-run report
+qmstrace check --strict         # the gate: no violations, no gaps
 ```
 
 ## 1. Overview
 
-iso-trace answers an assessor's questions by query. Its users never meet a database or a web
+qmstrace answers an assessor's questions by query. Its users never meet a database or a web
 application: they meet **a command line in the repository they are already working in**,
 **documents in the word processor they already use**, and, for an assessment, **a page
 someone else drives**.
@@ -55,15 +55,15 @@ loop, and the ledger repo for the occasional, manager-side acts (D5).
 
 ```mermaid
 flowchart TD
-    iso["iso"] --> status["status ✔"]
-    iso --> check["check ✔"]
+    cli["qmstrace"] --> status["status ✔"]
+    cli --> check["check ✔"]
     check --> strict["--strict ✔ — the gate"]
-    iso --> rules["rules ✔"]
-    iso --> trace["trace ID ✔"]
-    iso --> results["results REPORT ✔"]
-    iso --> impact["impact ID… ◻"]
-    iso --> init["init ◻"]
-    iso --> ledger["ledger-side verbs ◻"]
+    cli --> rules["rules ✔"]
+    cli --> thread["thread ID ✔"]
+    cli --> results["results REPORT ✔"]
+    cli --> impact["impact ID… ◻"]
+    cli --> init["init ◻"]
+    cli --> ledger["ledger-side verbs ◻"]
     ledger --> import["import at a pin"]
     ledger --> emit["emit tables"]
     ledger --> event["record an event"]
@@ -72,14 +72,14 @@ flowchart TD
 
 | Touchpoint | What the user does with it | Status |
 |---|---|---|
-| `iso status` | Sees what was scanned — items and files per item type — then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]` | ✔ |
-| `iso check` | Lists every violation and gap in one pass, each with file, line and what to do next | ✔ |
-| `iso check --strict` | The gate: the same findings, and gaps fail | ✔ |
-| `iso rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation | ✔ |
-| `iso trace <ID>` | Walks one item backward to its origin and forward to its tests | ✔ |
-| `iso results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
-| `iso impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
-| `iso init` | Generates the trace configuration and the stanza in a product repo | ◻ |
+| `qmstrace status` | Sees what was scanned — items and files per item type — then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]` | ✔ |
+| `qmstrace check` | Lists every violation and gap in one pass, each with file, line and what to do next | ✔ |
+| `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
+| `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation | ✔ |
+| `qmstrace thread <ID>` | Walks one item backward to its origin and forward to its tests | ✔ |
+| `qmstrace results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
+| `qmstrace impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
+| `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
 | Ledger-side verbs | Import a product repo at a pin; emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
 
 ### The authoring surface
@@ -90,7 +90,7 @@ An agent spends far more time *writing* to this surface than invoking it.
 |---|---|---|
 | **Markers** | Item headings and link lines in repo memory; a docstring line in a module; the test framework's own tag on a test. Syntax: [Data Architecture § Marker syntax v0](data-architecture.md) | ✔ |
 | **The stanza** | A generated block of about ten lines in the product repo's agent guide: the repo is traced, the ID patterns, start with `status`, the gate command, frozen items change only through a change request, a marker states a fact, never type a date or a verdict | ✔ |
-| **The skill** | Shipped with the engine: the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `iso rules`** | ✔ |
+| **The skill** | Shipped with the engine: the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `qmstrace rules`** | ✔ |
 | **The trace configuration** | One file at the repo root: item types, link types, coverage rules, externals, baselines, change requests | ✔ |
 | **The trace lock's diff** | What a reviewer reads in a pull request when traceability changes (D1) | ◻ |
 
@@ -104,13 +104,15 @@ An agent spends far more time *writing* to this surface than invoking it.
 
 ## 3. Entry & Onboarding
 
-**In a product repo** ◻ — `iso init` writes the trace configuration and the stanza; the skill
-arrives with the engine. The first command is `iso status`. Both experiments started this way
+**In a product repo** ◻ — `qmstrace init` writes the trace configuration and the stanza; the skill
+arrives with the engine. The first command is `qmstrace status`. Both experiments started this way
 by hand, and in both the agent learned what mattered from that first command:
 
 > "The block surfaced in the first command I ran. `iso status` prints `[frozen]` per item and
 > `change requests: … (0 declared)` on the same screen. I knew the work was gated before I had
 > opened a single source file."
+>
+> *(Verbatim. The tool was then called `iso`.)*
 
 **For a reviewer** — nothing. The document arrives in the store they already use.
 
@@ -126,7 +128,7 @@ not a way of working.
 sequenceDiagram
     participant D as Developer
     participant A as Agent
-    participant T as iso
+    participant T as qmstrace
     D->>A: the brief, and where the agreement is
     A->>T: status
     T-->>A: nothing declared yet — and what was scanned
@@ -151,12 +153,12 @@ question for the customer instead.
 sequenceDiagram
     participant D as Developer
     participant A as Agent
-    participant T as iso
+    participant T as qmstrace
     participant L as Ledger repo
     D->>A: an ordinary request that touches frozen requirements
     A->>T: status
     T-->>A: [frozen] on every requirement · 0 change requests
-    A->>T: trace, per item
+    A->>T: thread, per item
     A-->>D: stopped before editing — the impact set, and what the agreement must say
     D->>L: raises the change request, accepted, reserving the new ID
     D->>A: go ahead
@@ -232,8 +234,25 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 
 ## 6. Information Architecture / API Ergonomics
 
+**The name is `qmstrace`** — for the repository, the package, the import and the command: one
+spelling everywhere, so an agent has one thing to get right. It says what the tool is — the
+trace layer under a quality-management system, where *trace* covers state tracking,
+traceability and the audit trail alike — and it claims no more than that: not a quality
+system itself, no document control, no signatures. It names no standard, because the
+standard is data (PRD goal 6).
+
+- **Rejected — `iso`**, the test bed's name: it is the standards body's own name, it collides
+  with disk-image tooling, and it ties the tool to one family of standards.
+- **Rejected — `qmsx`**: a trailing `x` on a command already means *run a package without
+  installing it* (`npx`, `uvx`, `pipx`, `bunx`), so to a developer — and to a model trained on
+  that convention — it implies the wrong thing; and "QMS, extended" promises a quality system.
+- **Cost accepted:** the name contains `trace`, so the verb that walks one item back to its
+  origin and forward to its tests is **`thread`**, not `trace` — already this project's word
+  for it: *follow a thread from claim to evidence*. The name also contains `strace`; a reader
+  may misparse it once.
+
 **The verbs are the questions.** `status` — where am I; `rules` — what is expected; `check` —
-what is wrong; `trace` — what hangs off this; `results` — did it pass; `impact` — what would
+what is wrong; `thread` — what hangs off this; `results` — did it pass; `impact` — what would
 change. An agent asked for exactly one verb that was missing, and nothing else.
 
 **One binary, two repo kinds.** 💡 Whether ledger-side verbs sit beside the product-repo ones
@@ -287,9 +306,8 @@ Each is marked 💡 where it bites.
 
 | # | Decision | Where |
 |---|---|---|
-| 1 | 💡 **The command's name.** The test bed used `iso`. It is short and it is the standard body's name; a collision with other tooling is possible | here |
-| 2 | **One binary for both repo kinds, or ledger verbs under a group of their own** (`iso ledger import …`)? The product-repo loop must stay six verbs wide | §6 |
-| 3 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
-| 4 | **Machine-readable output**: which commands, and is the contract versioned? | §7 |
-| 5 | **May an explicit, recorded review clear a suspect before the next baseline?** It adds a verb and a record, and removes noise from long-lived branches | [D7](data-architecture.md) |
-| 6 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
+| 1 | **One binary for both repo kinds, or ledger verbs under a group of their own** (`qmstrace ledger import …`)? The product-repo loop must stay six verbs wide | §6 |
+| 2 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
+| 3 | **Machine-readable output**: which commands, and is the contract versioned? | §7 |
+| 4 | **May an explicit, recorded review clear a suspect before the next baseline?** It adds a verb and a record, and removes noise from long-lived branches | [D7](data-architecture.md) |
+| 5 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |

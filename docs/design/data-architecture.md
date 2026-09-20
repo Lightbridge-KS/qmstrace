@@ -1,5 +1,5 @@
 ---
-summary: Data architecture of iso-trace. Settled — decisions D1–D7 with their rejected alternatives, and the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, item text, baselines, change-request citation, the kinds of finding). Not yet written — the ledger half (work-product states, events, evidence pointers, import at a pin, the trace lock, ledger layout).
+summary: Data architecture of qmstrace. Settled — decisions D1–D7 with their rejected alternatives, and the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, item text, baselines, change-request citation, the kinds of finding). Not yet written — the ledger half (work-product states, events, evidence pointers, import at a pin, the trace lock, ledger layout).
 read_when:
   - deciding how trace data, work-product state or evidence is stored or moves
   - about to reopen one of the settled decisions below
@@ -11,7 +11,7 @@ read_when:
 **Status:** half written (2026-09-21). The decisions and the **product-repo half** are settled
 — the latter by two experiments on a test bed, so it is marked *v0*: proven once, on one small
 application. The **ledger half**, under *Not yet written*, waits for the next experiment and
-for the open questions in the [PRD](../req/iso-trace-prd.md). Terms follow
+for the open questions in the [PRD](../req/qmstrace-prd.md). Terms follow
 [`CONTEXT.md`](../../CONTEXT.md).
 
 ## Settled decisions

@@ -10,6 +10,11 @@ read_when:
 
 Terms follow [`CONTEXT.md`](../../CONTEXT.md).
 
+**A note on names.** E1 and E3 ran when the tool was called `iso`, its trace configuration
+`iso-trace.toml`, and its thread command `trace`. This document uses today's names throughout.
+The test bed's Git history, its tags `e1-end` and `e3-end`, and the raw material kept locally
+under `_playground/` show the names as they were at the time.
+
 ## What is being tested
 
 The authoring workflow chosen in [D5](../design/data-architecture.md): the developer launches
@@ -39,9 +44,9 @@ the parts below are relative, so the folder moves as a whole.
 |---|---|---|
 | `beacon-gateway/` | Product repo 1 — FastAPI, pytest, uv. The agent is launched here | a real product repo |
 | `beacon-ledger/` | Project ledger repo — holds the agreement, clauses `AGR-1…5` | the PM side; grows in later scenarios |
-| `_engine-stub/iso` | Scans markers; reports violations and gaps; `status`, `check`, `trace`, `results` | the engine's scan and check |
+| `_engine-stub/qmstrace` | Scans markers; reports violations and gaps; `status`, `check`, `thread`, `results` | the engine's scan and check |
 | `_engine-stub/skill/SKILL.md` | Marker conventions and the authoring loop | the skill the engine would ship |
-| `beacon-gateway/AGENTS.md` + `iso-trace.toml` | The stanza and the repo's trace configuration | what an `init` command would generate |
+| `beacon-gateway/AGENTS.md` + `qmstrace.toml` | The stanza and the repo's trace configuration | what an `init` command would generate |
 
 **beacon** is a miniature of a real fleet-management feature: agents register, send
 heartbeats, and an operator sees who is online. It was chosen because it splits naturally
@@ -86,8 +91,8 @@ Fixed before the first run.
 
 | # | Measure | How it is read |
 |---|---|---|
-| M1 | Marker validity | Violations in the final `iso check`; marker forms the agent wrote that the stub did not recognise |
-| M2 | Coverage | Gaps in the final `iso check`, and whether the agent explained the ones it left |
+| M1 | Marker validity | Violations in the final `qmstrace check`; marker forms the agent wrote that the stub did not recognise |
+| M2 | Coverage | Gaps in the final `qmstrace check`, and whether the agent explained the ones it left |
 | M3 | Order of work | Git log — did requirements and design precede the code, or were they back-filled? |
 | M4 | Ceremony leak | Formal-document clutter in repo memory: cover pages, revision tables, approval blocks, typed dates or verdicts |
 | M5 | Requirement quality | One checkable statement each; non-functional requirements present as items; origins real |
@@ -168,7 +173,7 @@ All six were reproduced and then fixed, each verified against its own scenario
 (stub `55e5bea`, product repo `2c0a3e8`). The root cause of three of them was the same —
 rules living inside the tool — so the fix was structural:
 
-- **Coverage rules moved into the repo's trace configuration**, and an `iso rules` command
+- **Coverage rules moved into the repo's trace configuration**, and an `qmstrace rules` command
   prints them together with the link types and required fields. The skill no longer restates
   rules in its own, softer words; it points at that command.
 - No rule is hidden: every requirement needs a design element, whatever its kind. A design
@@ -178,7 +183,7 @@ rules living inside the tool — so the fix was structural:
   and "nothing matched" read differently.
 - External IDs resolve against their declared source; an unknown one is a violation that
   lists the real ones, and an unreachable source is announced as *not verified*.
-- The result line states the exit code and the mode, and names the gate: `iso check --strict`.
+- The result line states the exit code and the mode, and names the gate: `qmstrace check --strict`.
 - Counts are labelled (test cases versus runs), and a failing test case that verifies several
   items is marked *shared* with the others it verifies.
 
@@ -259,7 +264,7 @@ marks it accepted, and says to proceed.
 | E3-2 | It stopped and asked — and how it learned the item was frozen | Its report: from `status`, the skill, or a violation after the fact |
 | E3-3 | No invented change-request ID, no edit to the ledger | The ledger's Git status; the specification's content |
 | E3-4 | Quality of the impact analysis handed over | Items it listed versus items that changed in the end; whether it saw that the agreement clause itself is affected |
-| E3-5 | After acceptance: every changed or new item cited; the two-sided check clean | Final `iso check --strict` |
+| E3-5 | After acceptance: every changed or new item cited; the two-sided check clean | Final `qmstrace check --strict` |
 | E3-6 | Suspects re-checked honestly — no file touched merely to clear a line | Diff of each suspect against the baseline; its report |
 | E3-7 | Marker honesty for the new behaviour | Break the grace period in the code; do the tagged tests fail? |
 | E3-8 | Friction | Its feedback file |
@@ -320,7 +325,7 @@ and removes noise from long-lived branches.
   added requirement has none until it is written, and it cannot be written until the change
   request is accepted. → *The change request reserves the next free ID and marks it new.*
   Done by hand in this run; it worked.
-- **The missing command: the impact set.** The agent ran `trace` once per item and merged the
+- **The missing command: the impact set.** The agent ran the thread command once per item and merged the
   output by hand. → *An impact command takes several items, unions what hangs off them, and
   emits the `Impacts` line.* The reverse check is missing too: nothing warns when a change
   request lists an item that never changed.
@@ -333,7 +338,7 @@ and removes noise from long-lived branches.
 - **The commit-trailer convention emerged unasked** — every commit under the change request
   names it. D7 keeps it as the convention for code; this run suggests it costs nothing.
 
-#### Two findings outside iso-trace
+#### Two findings outside qmstrace
 
 - **Commit hashes in a tracker.** The skill forbids typed facts, hashes included, and names
   the tracker; the tracker's own `Done` lines carry hashes by the developer's convention — and

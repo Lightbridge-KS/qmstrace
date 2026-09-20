@@ -1,12 +1,12 @@
 ---
-summary: Repo-level progress tracker for iso-trace — what has landed, what is in flight, what comes next, what is deferred, the open questions attached to scheduled work, and the learnings that now bind the design. Pointers only; the content lives in the docs it links to.
+summary: Repo-level progress tracker for qmstrace — what has landed, what is in flight, what comes next, what is deferred, the open questions attached to scheduled work, and the learnings that now bind the design. Pointers only; the content lives in the docs it links to.
 read_when:
   - starting a session in this repo — read this first
   - deciding what to work on next, or whether something is already settled
   - finishing a piece of work — update this file in the same change
 ---
 
-# iso-trace — progress
+# qmstrace — progress
 
 **Phase: design, before any engine code.** The authoring workflow is being proven on a test
 bed with a throwaway stand-in for the engine; findings graduate into the design docs. This
@@ -18,9 +18,9 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
 ## Done
 
 - [x] Exploration of the three predecessors and the standard; the framing as a compiler —
-      sources → strict intermediate data → formal targets — [PRD](../req/iso-trace-prd.md) § As-is story
+      sources → strict intermediate data → formal targets — [PRD](../req/qmstrace-prd.md) § As-is story
 - [x] Glossary, 52 terms across four clusters — [`CONTEXT.md`](../../CONTEXT.md)
-- [x] PRD draft v0.1 — [`docs/req/iso-trace-prd.md`](../req/iso-trace-prd.md)
+- [x] PRD draft v0.1 — [`docs/req/qmstrace-prd.md`](../req/qmstrace-prd.md)
 - [x] Decisions D1–D7 with the alternatives that lost —
       [`data-architecture.md`](../design/data-architecture.md) § Settled decisions
 - [x] Spike: composite foreign keys can police link rules in the in-memory database —
@@ -45,6 +45,10 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       half written in [`data-architecture.md`](../design/data-architecture.md) — the chain,
       marker syntax v0, the trace configuration with rules as data, item text, kinds of
       finding; [`surface-architecture.md`](../design/surface-architecture.md) written; PRD v0.2
+
+- [x] **Renamed to `qmstrace`** — repository, command, trace configuration, skill, stanza
+      markers; the thread command is `thread`, since the name already carries *trace*. Reasons
+      and the names that lost: [`surface-architecture.md`](../design/surface-architecture.md) §6
 
 ## Now
 
@@ -86,7 +90,7 @@ Attached to scheduled work; standalone ones live in the PRD.
   deferred once to keep E3 to one variable; schedule with the second fix round or E4.
 - **Derived IDs are not immutable** — a module's path, a test function's name. Not exercised yet.
 - The 💡 markers still open: `CONTEXT.md` (two), the PRD (one), `data-architecture.md` (two),
-  `surface-architecture.md` (three). `rg 💡` lists them.
+  `surface-architecture.md` (two). `rg 💡` lists them.
 
 ## Confirmed contracts
 
@@ -117,7 +121,7 @@ Learnings that bind the design. All of these have landed in the design docs name
 
 ## Related
 
-- Requirements: [`docs/req/iso-trace-prd.md`](../req/iso-trace-prd.md)
+- Requirements: [`docs/req/qmstrace-prd.md`](../req/qmstrace-prd.md)
 - Design: [`data-architecture.md`](../design/data-architecture.md) ·
   [`surface-architecture.md`](../design/surface-architecture.md)
 - Experiments: [`docs/tests/beacon-authoring-experiment.md`](../tests/beacon-authoring-experiment.md)

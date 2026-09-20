@@ -1,4 +1,4 @@
-# iso-trace — Agent Guide
+# qmstrace — Agent Guide
 
 An engine that keeps the **state, traceability and audit evidence** of a software project's
 work products under ISO/IEC 29110, so an assessor's questions are answered by query instead
@@ -7,11 +7,11 @@ this file.)
 
 ## Orientation — read in this order
 
-1. [`docs/progress/overview-iso-trace.md`](docs/progress/overview-iso-trace.md) — where the
+1. [`docs/progress/overview-qmstrace.md`](docs/progress/overview-qmstrace.md) — where the
    work stands, what is next, the learnings that already bind the design
 2. [`CONTEXT.md`](CONTEXT.md) — the vocabulary. Three vocabularies collide here (the
    standard's, the organisation's document control, the engine's); this file says which wins
-3. [`docs/req/iso-trace-prd.md`](docs/req/iso-trace-prd.md) — what and for whom
+3. [`docs/req/qmstrace-prd.md`](docs/req/qmstrace-prd.md) — what and for whom
 4. [`docs/design/data-architecture.md`](docs/design/data-architecture.md) — decisions D1…,
    each with the alternative that lost, and the product-repo half of the model
 5. [`docs/design/surface-architecture.md`](docs/design/surface-architecture.md) — the commands,
@@ -27,7 +27,7 @@ product repos  (code, tests, repo memory + markers)     developer hat — daily,
 ledger repo    (the project's ledger, controlled-document sources, agreement, records)
       ▲                                                  manager hat — occasional
       │  installed into                                  ↔ the standard's project-management process
-iso-trace      (this repo: the tool — it holds no project data)
+qmstrace      (this repo: the tool — it holds no project data)
 ```
 
 ## Rules for working here
@@ -50,7 +50,7 @@ iso-trace      (this repo: the tool — it holds no project data)
 ## Experiments
 
 The test bed lives **outside this repo**, in a sibling workspace: `../_tests/beacon-experiment/`
-— a product repo, a ledger repo, and a throwaway stand-in for the engine (`_engine-stub/iso`)
+— a product repo, a ledger repo, and a throwaway stand-in for the engine (`_engine-stub/qmstrace`)
 with a stand-in skill. Its own README describes it; `docs/tests/` says what is tested and why.
 
 - **A teammate agent is always fresh, never a fork** — a fork inherits the conversation that

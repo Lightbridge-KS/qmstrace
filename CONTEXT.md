@@ -1,12 +1,12 @@
 ---
-summary: Ubiquitous language for iso-trace — the standard's vocabulary, the trace graph, evidence, and the repositories and documents involved.
+summary: Ubiquitous language for qmstrace — the standard's vocabulary, the trace graph, evidence, and the repositories and documents involved.
 read_when:
   - introducing, renaming, or disambiguating a domain term
   - naming a type, module, command, file, or column after a domain concept
   - a word from ISO/IEC 29110, the organisation's document control, and the engine seem to mean different things
 ---
 
-# iso-trace
+# qmstrace
 
 Keeps the state, traceability and audit evidence of a software project's work products, so
 that an assessor's questions are answered by query instead of by assembly. Three vocabularies
@@ -203,7 +203,7 @@ _Avoid_: CI, build, lint
 
 **Evidence**:
 The thing, in its home system, that proves a transition or a result happened — a merged pull
-request, a signed document revision, a test run, a tracker item. iso-trace never holds
+request, a signed document revision, a test run, a tracker item. qmstrace never holds
 evidence, only pointers to it.
 _Avoid_: proof, attachment, record (unqualified)
 
@@ -264,7 +264,7 @@ A repository holding project ledgers together with the sources of their controll
 _Avoid_: QMS repo, docs repo
 
 **Engine**:
-iso-trace itself — the tool. It holds no project data.
+qmstrace itself — the tool. It holds no project data.
 _Avoid_: platform, system
 
 **Stanza**:

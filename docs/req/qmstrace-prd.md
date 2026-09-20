@@ -1,12 +1,12 @@
 ---
-summary: Product requirements for iso-trace — the problem, users, as-is story, goals and non-goals, prioritised capabilities, slices, constraints, success criteria and open questions. DRAFT v0.2.
+summary: Product requirements for qmstrace — the problem, users, as-is story, goals and non-goals, prioritised capabilities, slices, constraints, success criteria and open questions. DRAFT v0.2.
 read_when:
   - deciding whether something is in scope, or which priority it has
   - planning a slice or writing a design doc that must serve a stated capability
   - a requirement turns out to be wrong — edit it here, in place
 ---
 
-# iso-trace — Product Requirements
+# qmstrace — Product Requirements
 
 **Status:** draft v0.2 (2026-09-21). Evolves in place: a wrong requirement is edited, not
 superseded. *v0.2:* two experiments on a test bed answered where requirements are authored,
@@ -70,7 +70,7 @@ Three earlier efforts each solved one part:
 | A retrofit tool: fetch → normalise → agent curates → gate → render, from Git-host history | The split between agent and deterministic code; evidence harvesting | Anything beyond three change-record forms |
 | An unbuilt design spec for a traceability data layer | The entity/link shape and three-tier validation | Work products, states, evidence; it hard-codes one project's ID scheme |
 
-iso-trace is the shared kernel under all three.
+qmstrace is the shared kernel under all three.
 
 ## Goals
 
@@ -218,7 +218,7 @@ as its plan declares; nothing there changes mid-assessment.
 - Settled design decisions, their rejected alternatives, and the product-repo half of the
   model: [`docs/design/data-architecture.md`](../design/data-architecture.md)
 - The surface as its users meet it: [`docs/design/surface-architecture.md`](../design/surface-architecture.md)
-- Where the work stands: [`docs/progress/overview-iso-trace.md`](../progress/overview-iso-trace.md)
+- Where the work stands: [`docs/progress/overview-qmstrace.md`](../progress/overview-qmstrace.md)
 - The standard's work products in brief:
   [`docs/references/iso29110-work-product-cheatsheet.md`](../references/iso29110-work-product-cheatsheet.md)
 - Legacy traceability example: `_examples/` at the repo root — real signed documents, kept
