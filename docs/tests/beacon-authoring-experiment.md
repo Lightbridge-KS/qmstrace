@@ -65,7 +65,7 @@ Candidate marker syntax v0, by item type:
 
 | Item | Declared as | Link marker |
 |---|---|---|
-| Requirement | `### REQ-BCN-NN — title` in `docs/req/*-srs.md`, with `Kind`, `Origin`, `Verify-by` | `Origin: AGR-N` |
+| Requirement | `### REQ-BCN-NN — title` in `docs/req/*-srs.md`, with `Category` (first `Kind`; see D8), `Origin`, `Verify-by` | `Origin: AGR-N` |
 | Design element | `## DSN-BCN-NN — title` in `docs/design/*.md` | `Satisfies: REQ-…` |
 | Component | a source module; its path is the ID | `Implements: DSN-…` in the module docstring |
 | Test case | a pytest test; its node id is the ID; level from `tests/<level>/` | `@pytest.mark.verifies("…")` |
@@ -107,7 +107,7 @@ Fixed before the first run.
 | E1 | Greenfield slice under option A: from the agreement's five clauses to working, traced code | **done — 2026-09-20**; option A holds |
 | E2 | Same brief under option C (no markers in the loop; a curator pass adds them afterwards) — the comparison | not needed — E1 did not leave the choice open; kept as the on-ramp scenario for an existing repo |
 | E3 | Change after a baseline: an ordinary request that would change frozen requirements, with no change request raised — does the agent stop and ask, and what does it hand over | **done — 2026-09-20**; the baseline held; suspects are broken as designed |
-| E4 | A second product repo joins (`beacon-agent`); requirements implemented across two repos; import into the ledger | planned |
+| E4 | A second product repo joins: the field agent, the other half of the gateway. Requirements with one home cited across repos; the project's trace schema shared from the ledger; import of both repos at a pin | running — 2026-09-21 |
 | E5 | The five-step assessment demo against the bed | planned |
 
 ## Results
@@ -358,6 +358,61 @@ alone would have stopped a less careful agent. The edit-first path (edit, get ca
 violation, revert) was exercised only in the driver's own nine scenarios, never by an agent.
 
 Raw material: `_playground/2026-09-20_beacon-e3/` (local).
+
+### E4 — a second product repo joins (2026-09-21)
+
+**What it tests.** D2 — one ledger per project, product repos carrying markers only — has so
+far been exercised with one product repo. E4 adds the second, and with it three things no
+earlier run touched: a requirement that has **one home** and is **cited from another repo**;
+**where the trace schema lives** when two repos must agree; and the ledger's **import of
+several repos at a pin**, which writes the trace lock (D1).
+
+**Setup.**
+
+- `beacon-agent/` — a new product repo: the field agent, the client half of beacon. Its own
+  subject, `REQ-BAG-NN` and `DSN-BAG-NN`. The gateway is installed as a development
+  dependency, so a test can run the client against the real gateway application in-process.
+  Gateway and ledger are read-only from there.
+- **The project's trace schema moved into the ledger** (`qmstrace.project.toml`): link types,
+  coverage rules, required fields and their values, the agreement, change requests, the list
+  of product repos. Each product repo's own file names it and keeps what is local — the item
+  types it declares, their ID patterns, the files to scan, its baselines. *This is the option
+  under test for the open question of where the trace schema lives; the alternative is a
+  generated, verified copy in each product repo.*
+- A local check reads a **sibling repo's document-declared items from its working tree** and
+  says so ("not pinned"); an item of a sibling is cited by ID exactly like a local one. A
+  sibling's requirement re-declared locally is a violation that says whose it is.
+- The ledger gained `import NAME@PIN …`: each repo is read at a pin, the project is judged as
+  a whole, and `trace.lock` is written. Derived IDs — a module's path, a test's name — are
+  qualified by repo there, because two repos may both have `tests/unit/test_config.py`.
+- The agreement gained clauses AGR-7 to AGR-9 for the field agent. The gateway's specification
+  moved from `Kind` to `Category` under change request CR-002, and `baseline/requirements/2`
+  was cut — which also exercised two things by hand: a field-only change made **24 downstream
+  items suspect**, and the new baseline cleared them, as D7 says it should.
+- Dry run before launch, in a scratch copy: a valid cross-repo citation is accepted; an
+  unknown ID, a link to the wrong type of item and a re-declared sibling requirement are each
+  reported with the next move.
+
+**Protocol.** One fresh Opus teammate, launched in `beacon-agent`. The brief asks for the
+field agent's first slice and says the gateway and the ledger are next door and read-only. It
+does **not** say that gateway requirements can be cited; the tool's first screen and the skill
+say that. After the run the driver tags both repos and runs the import in the ledger.
+
+**Measures**, fixed before the run:
+
+| # | Measure | How it is read |
+|---|---|---|
+| E4-1 | One home per requirement | No gateway requirement copied into the client's specification; client requirements declared under the client's own subject |
+| E4-2 | Cross-repo citation | Where a client test or design element really verifies or satisfies a gateway requirement, it says so with a valid ID — and only where true |
+| E4-3 | Boundaries | Gateway, ledger and the project's schema untouched; where the work needed something there, the agent asked |
+| E4-4 | Origins | Every client requirement cites a real clause; where the agreement ran out, the agent said so |
+| E4-5 | `Category`, first use by an agent | One per requirement, sensible, and not everything filed under functional suitability |
+| E4-6 | Marker honesty across repos | Break a gateway behaviour a client test claims to verify: does that test fail? |
+| E4-7 | Import at a pin (driver) | Zero violations across the union; project-wide coverage shown per requirement and per repo; the lock is byte-identical on a second run at the same pins, and changes when a pin moves |
+| E4-8 | Schema location | Friction the agent reports about rules living in the ledger; anything it needed there and could not change |
+| E4-9 | Friction | Its feedback file |
+
+*Results pending.*
 
 ## Where findings go
 
