@@ -1,0 +1,13 @@
+# Repo-local scratch bench — experiments, spikes, EDA (see _playground/README.md)
+_playground/
+
+# OS / harness noise
+.DS_Store
+.claude/.cc-writes/
+.claude/settings.local.json
+
+# Real signed QMS documents kept locally for reference — names and signatures, never tracked
+_examples/
+
+# Third-party course slides (training-use-only) — kept locally as reference, never published
+docs/references/tracability/DEPA-Slides/

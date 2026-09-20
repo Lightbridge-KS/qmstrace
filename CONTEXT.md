@@ -1,0 +1,278 @@
+---
+summary: Ubiquitous language for iso-trace — the standard's vocabulary, the trace graph, evidence, and the repositories and documents involved.
+read_when:
+  - introducing, renaming, or disambiguating a domain term
+  - naming a type, module, command, file, or column after a domain concept
+  - a word from ISO/IEC 29110, the organisation's document control, and the engine seem to mean different things
+---
+
+# iso-trace
+
+Keeps the state, traceability and audit evidence of a software project's work products, so
+that an assessor's questions are answered by query instead of by assembly. Three vocabularies
+meet here — the standard's, the organisation's document control, and the engine's own — and
+this glossary says which word wins.
+
+## Language
+
+### The standard
+
+**Profile**:
+A named catalogue taken from a standard: its work products, their applicable states, and the
+conformance requirements an assessment checks. ISO/IEC 29110 Basic is the first.
+_Avoid_: standard (the document, not the catalogue), template
+💡 Earlier discussion used "profile" for the per-project declaration — that is now **Trace
+Schema**. "Profile" keeps the meaning the standard and the assessors already give it.
+
+**Work Product**:
+A kind of output the profile requires of a project, defined by required content and
+applicable states — never by file format.
+_Avoid_: deliverable, document, artifact
+
+**Evidence Form**:
+The medium a project chooses for one work product: a controlled document, a section of one,
+a repository, a tracker feature, a release.
+_Avoid_: format, file type
+
+**Versioned Work Product**:
+A work product that is baselined and afterwards changed only through a change request —
+plan, requirements specification, design, test cases, traceability record.
+_Avoid_: living document
+
+**Dated Record**:
+A work product created once per real event and never re-versioned — meeting record, change
+request, verification record, validation record, progress status record. It exists only
+because the event happened.
+_Avoid_: log, form instance
+
+**State**:
+A lifecycle position the profile defines for a work product: initiated, verified, validated,
+approved, baselined, and the rest.
+_Avoid_: status (belongs to items), stage (belongs to the project)
+
+**Transition**:
+A work product's move from one state to another. The transition, not the file, is what an
+assessor asks to see evidence of.
+_Avoid_: update, promotion
+
+**Verification** (ทวนสอบ):
+The internal check that a work product was built right, done by someone other than its
+author and evidenced by a verification record.
+_Avoid_: review, QA, V&V
+
+**Validation** (ตรวจสอบและอนุมัติ):
+The customer's confirmation that the right thing was built, evidenced by a validation record
+signed by project manager and customer.
+_Avoid_: approval, acceptance, V&V
+
+**Baseline**:
+An approved set of work-product revisions frozen as the team's single reference, changed only
+through a change request.
+_Avoid_: release (a release is one baseline — the product baseline), snapshot, freeze
+
+**Stage**:
+The project's position in the profile's activity sequence, from requirements through
+assembly. It decides how complete the traceability is expected to be.
+_Avoid_: phase, sprint, state
+
+**Configuration Item**:
+A work product or component placed under version control and baselining.
+_Avoid_: CI (collides with continuous integration)
+
+**Change Request**:
+A proposed change to a baselined work product, carrying its impact analysis.
+_Avoid_: feature request, ticket
+
+**Correction**:
+A corrective action for a deviation from the *plan* — schedule, effort, a problem raised in
+review. Not a product change and not a code fault.
+_Avoid_: issue, bug
+
+**Defect**:
+A fault in the software found by a test or a review, owned until resolved and re-tested.
+_Avoid_: issue, correction
+
+**Role**:
+The hat the profile assigns to an act — project manager, analyst, designer, programmer,
+customer. One person may wear several; an act is recorded against a role, not only a name.
+_Avoid_: title, position
+
+**Assessor**:
+The external party who examines a project's evidence for certification.
+_Avoid_: auditor (an audit is the organisation's own internal quality check)
+💡 The team says "auditor" in conversation. The Thai scheme separates ผู้ประเมิน (assessor)
+from the internal audit; this glossary follows the scheme.
+
+### The trace graph
+
+**Item**:
+A uniquely identified unit of engineering content that can be traced: an origin clause, a use
+case, a requirement, a design element, a component, a test case.
+_Avoid_: node, entity, artifact, need
+
+**Item ID**:
+An item's identifier: immutable once committed and never reused. Retiring an item changes
+its status, not its ID.
+_Avoid_: key, number
+
+**Status**:
+Whether an item is active, withdrawn, or superseded.
+_Avoid_: state
+
+**Link**:
+A typed, directed relationship from one item to another — verifies, satisfies, implements,
+refines. It is declared at the downstream end: the test names the requirement it verifies.
+_Avoid_: edge, relation, reference, trace (as a noun)
+
+**Marker**:
+An item or link declaration written in the place where the item itself is authored — a
+heading, a line in a design section, a tag on a test.
+_Avoid_: annotation, tag (collides with a Git tag), comment
+
+**Origin**:
+The customer-side source a requirement traces back to: an agreement clause or a
+terms-of-reference clause.
+_Avoid_: source, parent
+
+**Trace Schema**:
+One project's declaration of its item types, ID patterns, allowed link types, and coverage
+rules.
+_Avoid_: profile, config, metamodel
+
+**Coverage Rule**:
+A statement of which links an item type must have, and from which stage onward.
+_Avoid_: check, constraint
+
+**Gap**:
+A coverage rule not yet satisfied. Before the rule's stage it is a progress signal; from that
+stage on it is a finding.
+_Avoid_: error, violation, hole
+
+**Violation**:
+Trace data that is wrong at any stage: an unknown ID, a link of a type the trace schema does
+not allow, a malformed ID.
+_Avoid_: gap, warning
+
+**Suspect**:
+Something whose upstream content changed after it was last reviewed — a link, a translation,
+a rendered document. It needs a fresh look, not necessarily a change.
+_Avoid_: stale, dirty, outdated, broken
+
+**Forward Trace / Backward Trace**:
+Walking from an origin toward test results, or from a result back to the origin. Backward
+links are authored; the forward trace is derived from them.
+_Avoid_: upstream/downstream trace
+
+**Test Case**:
+The planned, baselined description of a test and what it verifies.
+_Avoid_: test (unqualified)
+
+**Test Result**:
+The verdict of one test case in one run. Appended, never edited, never typed by hand.
+_Avoid_: test status, outcome
+
+### Evidence
+
+**Evidence**:
+The thing, in its home system, that proves a transition or a result happened — a merged pull
+request, a signed document revision, a test run, a tracker item. iso-trace never holds
+evidence, only pointers to it.
+_Avoid_: proof, attachment, record (unqualified)
+
+**Home System**:
+The system of record where a piece of evidence lives and is logged: the Git host, the
+tracker, the document store, the test runner.
+_Avoid_: source, backend, integration
+
+**Evidence Pointer**:
+A reference to evidence: its home system, its locator, and its pin.
+_Avoid_: link (reserved for items), URL, attachment
+
+**Pin**:
+The coordinate that fixes a pointer to one immutable version — a commit, a Git tag, a
+document revision.
+_Avoid_: version, snapshot
+
+**Admissible**:
+Evidence an assessor will accept: it carries the content the profile lists, lives in a
+system with a log, is versioned and baselined if it is a configuration item, and sits behind
+access control.
+_Avoid_: valid, compliant
+
+**Event**:
+An append-only record that something happened to a subject: what changed, who acted in which
+role, when the home system says it occurred, and the evidence pointer.
+_Avoid_: log entry, history, audit trail (the trail is the sum of events)
+
+**Collector**:
+A deterministic program that harvests facts — dates, commits, verdicts, actors, states — from
+a home system's own log. Facts are collected, never typed.
+_Avoid_: scraper, sync, importer
+
+### Repositories and documents
+
+**Project**:
+In the standard's sense: one agreement, one plan, one delivery. A project may span several
+product repos and is never itself a repository.
+_Avoid_: repo, product
+
+**Product Repo**:
+A repository holding a software product's code, tests and repo memory. It outlives many
+projects and carries markers, nothing more.
+_Avoid_: project repo, source repo
+
+**Repo Memory**:
+A product repo's casual, agent-first `docs/` tree — requirements, design, decisions,
+trackers. The upstream that formal documents are derived from.
+_Avoid_: documentation, wiki
+
+**Ledger**:
+The committed text record of one project: its items, links, work-product register, events
+and evidence pointers.
+_Avoid_: database, store, registry
+
+**Ledger Repo**:
+A repository holding project ledgers together with the sources of their controlled documents.
+_Avoid_: QMS repo, docs repo
+
+**Engine**:
+iso-trace itself — the tool. It holds no project data.
+_Avoid_: platform, system
+
+**Import**:
+Reading a product repo's markers into a ledger at a pin.
+_Avoid_: sync, fetch, collect (collectors harvest facts, imports read markers)
+
+**Trace Lock**:
+The generated, committed listing of every item and link in a ledger at one commit. Its diff
+is what a reviewer reads when traceability changes.
+_Avoid_: matrix, export, cache
+
+**Register**:
+A generated listing of the ledger for one audience: work-product register,
+configuration-item register, baselines table. Never maintained by hand.
+_Avoid_: checklist, index, spreadsheet
+
+**Controlled Document**:
+A document under the organisation's document-control procedure, identified by a DocID and
+released as numbered revisions.
+_Avoid_: QMS doc, official doc
+
+**Draft**:
+A rendered output of a ledger repo. Always marked as a draft and never authoritative.
+_Avoid_: version, copy
+
+**Issued Revision**:
+A revision assigned, signed and released under document control. From that moment the
+production copy is the master and the ledger repo's copy is not.
+_Avoid_: final, approved version, release
+
+**Reconcile**:
+Folding prose edits made on a Word copy back into the source. Generated tables are never
+reconciled; they are corrected in the ledger and rendered again.
+_Avoid_: merge, sync, round-trip
+
+**Drift**:
+A difference between an issued or staged document and the ledger at the pin it was rendered
+from — someone edited downstream what should have changed upstream.
+_Avoid_: suspect (that is upstream change awaiting review), mismatch
