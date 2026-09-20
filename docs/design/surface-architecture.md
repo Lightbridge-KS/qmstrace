@@ -1,0 +1,295 @@
+---
+summary: The surface of iso-trace as its users meet it — the command line a coding agent and a developer drive in a product repo (validated by two experiments), the authoring surface of markers, stanza and skill, the findings contract and exit codes, and the still-unvalidated surfaces for reviewers working in Word and for an assessor.
+read_when:
+  - adding, renaming or changing a command, a flag, a finding code, or the wording of a finding
+  - changing the stanza or the skill an agent in a traced repo reads
+  - designing anything a reviewer in Word or an assessor will see
+  - deciding whether a behaviour belongs in tool output or in prose guidance
+---
+
+# iso-trace — User-Facing Surface & Agent Experience
+
+> Source: the PRD, experiments E1 and E3 on the beacon test bed, and the design conversation behind decisions D1–D7 · Date: 2026-09-21 · Mode: Design · Surface: Hybrid — a command line (primary), generated documents, a generated read-only view
+> See also: [Data Architecture](data-architecture.md) · [Product Requirements](../req/iso-trace-prd.md) · [Experiments](../tests/beacon-authoring-experiment.md)
+
+Terms follow [`CONTEXT.md`](../../CONTEXT.md). Two marks are used throughout: **✔ validated**
+— exercised on the test bed by an agent that had nothing but the repo's guide, the skill and
+tool output; **◻ planned** — named in the PRD or a decision, not yet tried.
+
+## Cheat Sheet
+
+The product-repo loop, in the order it is used. All six are ✔ validated.
+
+```sh
+iso status                 # what was scanned; one line per requirement; what is frozen
+iso rules                  # what this repo counts as covered — the rules, from their source
+iso check                  # violations and gaps while authoring — gaps do not fail
+iso trace REQ-XYZ-05       # one thread: back to the origin, forward to the tests
+iso results report.xml     # the verdict per requirement, from a test-run report
+iso check --strict         # the gate: no violations, no gaps
+```
+
+## 1. Overview
+
+iso-trace answers an assessor's questions by query. Its users never meet a database or a web
+application: they meet **a command line in the repository they are already working in**,
+**documents in the word processor they already use**, and, for an assessment, **a page
+someone else drives**.
+
+**Surface type: hybrid.** The PRD names four users, and each has a different surface:
+
+| User | Surface | Status |
+|---|---|---|
+| The coding agent in a product repo — first-class | the command line; the stanza, the skill, the markers | ✔ validated |
+| The developer-manager | the same command line; the pull-request diff | ✔ command line · ◻ diff of the trace lock |
+| Reviewers and approvers | rendered Word drafts, in the document store. **They install nothing** | ◻ planned |
+| The assessor | a generated, read-only view, driven by someone else | ◻ planned |
+
+The engine is a tool **installed into** a product repo or a ledger repo; it holds no project
+data. There are two launch sites, one per hat: the product repo for the daily, developer-side
+loop, and the ledger repo for the occasional, manager-side acts (D5).
+
+## 2. Surface Map
+
+### Commands
+
+```mermaid
+flowchart TD
+    iso["iso"] --> status["status ✔"]
+    iso --> check["check ✔"]
+    check --> strict["--strict ✔ — the gate"]
+    iso --> rules["rules ✔"]
+    iso --> trace["trace ID ✔"]
+    iso --> results["results REPORT ✔"]
+    iso --> impact["impact ID… ◻"]
+    iso --> init["init ◻"]
+    iso --> ledger["ledger-side verbs ◻"]
+    ledger --> import["import at a pin"]
+    ledger --> emit["emit tables"]
+    ledger --> event["record an event"]
+    ledger --> demo["the five assessment questions"]
+```
+
+| Touchpoint | What the user does with it | Status |
+|---|---|---|
+| `iso status` | Sees what was scanned — items and files per item type — then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]` | ✔ |
+| `iso check` | Lists every violation and gap in one pass, each with file, line and what to do next | ✔ |
+| `iso check --strict` | The gate: the same findings, and gaps fail | ✔ |
+| `iso rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation | ✔ |
+| `iso trace <ID>` | Walks one item backward to its origin and forward to its tests | ✔ |
+| `iso results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
+| `iso impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
+| `iso init` | Generates the trace configuration and the stanza in a product repo | ◻ |
+| Ledger-side verbs | Import a product repo at a pin; emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
+
+### The authoring surface
+
+An agent spends far more time *writing* to this surface than invoking it.
+
+| Touchpoint | What it is | Status |
+|---|---|---|
+| **Markers** | Item headings and link lines in repo memory; a docstring line in a module; the test framework's own tag on a test. Syntax: [Data Architecture § Marker syntax v0](data-architecture.md) | ✔ |
+| **The stanza** | A generated block of about ten lines in the product repo's agent guide: the repo is traced, the ID patterns, start with `status`, the gate command, frozen items change only through a change request, a marker states a fact, never type a date or a verdict | ✔ |
+| **The skill** | Shipped with the engine: the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `iso rules`** | ✔ |
+| **The trace configuration** | One file at the repo root: item types, link types, coverage rules, externals, baselines, change requests | ✔ |
+| **The trace lock's diff** | What a reviewer reads in a pull request when traceability changes (D1) | ◻ |
+
+### Surfaces that are not a command line
+
+| Touchpoint | What the user does with it | Status |
+|---|---|---|
+| Rendered Word drafts | A reviewer reads, edits prose and signs. Generated tables are read-only; a draft can never be mistaken for an issued revision | ◻ — the render machine exists in a predecessor; nothing here drives it yet |
+| Reconcile | A reviewer's prose edits come back to the source as a patch an agent proposes and a person reviews (D3) | ◻ |
+| The read-only trace view | During an assessment, one person drives a generated page and follows a thread from claim to evidence | ◻ |
+
+## 3. Entry & Onboarding
+
+**In a product repo** ◻ — `iso init` writes the trace configuration and the stanza; the skill
+arrives with the engine. The first command is `iso status`. Both experiments started this way
+by hand, and in both the agent learned what mattered from that first command:
+
+> "The block surfaced in the first command I ran. `iso status` prints `[frozen]` per item and
+> `change requests: … (0 declared)` on the same screen. I knew the work was gated before I had
+> opened a single source file."
+
+**For a reviewer** — nothing. The document arrives in the store they already use.
+
+**For an existing repo with no markers** ◻ — a curator pass proposes markers after the fact
+(option C in D5), reviewed like any other change. Its links are inferred, so it is an on-ramp,
+not a way of working.
+
+## 4. Key User Journeys
+
+### A greenfield slice ✔ (E1)
+
+```mermaid
+sequenceDiagram
+    participant D as Developer
+    participant A as Agent
+    participant T as iso
+    D->>A: the brief, and where the agreement is
+    A->>T: status
+    T-->>A: nothing declared yet — and what was scanned
+    A->>A: requirements, each citing its origin clause
+    A->>T: check
+    T-->>A: gaps — the work queue
+    A->>A: design elements → tests → code, check after each commit
+    A->>T: results report.xml
+    T-->>A: verdict per requirement
+    A->>T: check --strict
+    T-->>A: the gate is green
+    A-->>D: what was built — and where the agreement ran out
+```
+
+The gap list was the agent's work queue; it drained from 26 to none. Three times the
+agreement ran out, and each time the agent refused to invent an origin and raised an open
+question for the customer instead.
+
+### A change after a baseline ✔ (E3)
+
+```mermaid
+sequenceDiagram
+    participant D as Developer
+    participant A as Agent
+    participant T as iso
+    participant L as Ledger repo
+    D->>A: an ordinary request that touches frozen requirements
+    A->>T: status
+    T-->>A: [frozen] on every requirement · 0 change requests
+    A->>T: trace, per item
+    A-->>D: stopped before editing — the impact set, and what the agreement must say
+    D->>L: raises the change request, accepted, reserving the new ID
+    D->>A: go ahead
+    A->>A: requirements cite the change request → design → code → tests
+    A->>T: check --strict
+    T-->>A: citations verified both ways · suspects listed
+    A-->>D: built — and what was done about each suspect
+```
+
+Writing the impact analysis is what made the agent notice that the request as worded would
+not solve the problem behind it. A change-control step that improves the requirement is
+worth more than one that only delays it.
+
+### An assessment ◻
+
+The five questions of the PRD's success criteria, one command each: every work product with
+its version history · the baselined requirements, design, test cases and code · one change
+request end to end · one requirement forward to a passed test · a verification or validation
+record for every work product the plan marks for one. E3 already produced the third thread by
+hand; nothing assembles it yet.
+
+## 5. Interaction & State
+
+### What a check can come back with
+
+```mermaid
+stateDiagram-v2
+    [*] --> Scanned
+    Scanned --> Violations: anything wrong at any stage
+    Scanned --> Gaps: coverage not met yet
+    Scanned --> Clean
+    Violations --> [*]: exit 2
+    Gaps --> [*]: exit 0 authoring · exit 1 gate
+    Clean --> [*]: exit 0
+```
+
+| Exit | Meaning |
+|---|---|
+| `0` | No violations. While authoring, gaps may be listed |
+| `1` | The gate only: gaps remain |
+| `2` | Violations |
+| `3` | Usage or configuration error |
+
+The result line states the counts, the exit code and the mode, and **names the gate** — an
+agent that reads only the last line still learns which command a pipeline should call.
+
+### The findings contract
+
+Every finding is one line: **code · file:line · what is wrong · what to do next.**
+
+```
+V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declares no AGR-9 (it
+     declares AGR-1 … AGR-5). Fix: cite a real one, or tell the developer that nothing covers
+     this — never invent one.
+```
+
+- **Codes are stable and classed**: `V` violations, `G` gaps, `S` suspects. Gap codes belong
+  to the repo's own coverage rules; violation and suspect codes belong to the engine.
+- **All findings in one pass**, sorted, deterministic — never the first error and stop.
+- **Every violation ends with the next move**, and where the wrong move is tempting it says
+  so: *never invent one* · *do not edit the ledger yourself* · *stop and ask the developer*.
+- Kinds of finding and what each fails: [Data Architecture § Kinds of finding](data-architecture.md).
+
+### States that must never look alike
+
+| Looks like | But is | The surface must |
+|---|---|---|
+| "Nothing declared yet" | An item declared in a file that is not read for its type | Report it as a violation naming the right file pattern; show items *and files* scanned per type |
+| "External IDs are fine" | Their source could not be reached | Say **not verified**, in the header of every run |
+| "Two counts that disagree" | Test cases versus runs of them | Label every count |
+| "This requirement failed" | A test case that verifies several items failed | Mark the test case **shared**, with what else it verifies |
+| "No suspects" | The suspects were cleared by touching a file | Never let a suspect clear itself (D7) |
+
+## 6. Information Architecture / API Ergonomics
+
+**The verbs are the questions.** `status` — where am I; `rules` — what is expected; `check` —
+what is wrong; `trace` — what hangs off this; `results` — did it pass; `impact` — what would
+change. An agent asked for exactly one verb that was missing, and nothing else.
+
+**One binary, two repo kinds.** 💡 Whether ledger-side verbs sit beside the product-repo ones
+or under a group of their own is open — see *Decisions needed*.
+
+### Agent experience
+
+The agent is the first-class consumer of this surface, and what follows is evidence, not
+aspiration — each line is a defect found, or a behaviour observed, on the test bed.
+
+- **Steer by tool output first, prose second.** In both experiments the agent learned what
+  mattered from the first command it ran. The stanza is ten lines; the tool does the rest.
+- **No rule is hidden.** A rule that lives in code, or in prose that disagrees with the code,
+  is a defect. Three of E1's six defects were this one. Rules are data; `rules` prints them;
+  the skill points at the command.
+- **An empty result must not look like a misconfiguration.**
+- **Errors teach the next move**, and name the tempting wrong one.
+- **A signal must not clear itself.** A suspect that disappears when a file is touched is
+  worse than no suspect: it reports a review that did not happen.
+- **Output is economical and deterministic**: a header of a few lines, one line per finding,
+  sorted; the same input gives the same bytes.
+- **A refusal comes with a deliverable.** "Stop and ask" is paired with what to hand over —
+  the impact set, and what the agreement would have to say differently — so the gate is a
+  step, not a dead end.
+- **The tool is on the path.** The test bed invoked it by a relative path, which cost the
+  agent a directory change before every command.
+
+### What the surface cannot do, and says so
+
+Three rules bind an agent that no check can enforce; the skill states them, and review
+catches what it can. **A marker states a fact** — tag a test with a requirement only if the
+test would fail when the requirement is broken. **A requirement describes every
+configuration** — a new setting with a no-op default still changes the text. **When a
+requirement is gated, the work downstream of it is gated too.**
+
+## 7. Configuration & Customization
+
+- **The trace configuration** is the whole of it for a product repo: item types and their
+  file patterns, link types, coverage rules, externals, baselines, change requests. Shape and
+  reasoning: [Data Architecture § The trace configuration](data-architecture.md).
+- **The stanza is generated**, between markers, from the trace configuration. It is edited by
+  editing the configuration.
+- **Baselines are recognised, not imposed**: a project's own tag names are configuration (D6).
+- 💡 **Machine-readable output** — a `--json` form of `status`, `check` and `impact` — is not
+  designed. No agent has needed it yet: the line-oriented output was enough in both
+  experiments. It will be needed by the pull-request gate and by the ledger's import.
+
+## 8. Decisions needed
+
+Each is marked 💡 where it bites.
+
+| # | Decision | Where |
+|---|---|---|
+| 1 | 💡 **The command's name.** The test bed used `iso`. It is short and it is the standard body's name; a collision with other tooling is possible | here |
+| 2 | **One binary for both repo kinds, or ledger verbs under a group of their own** (`iso ledger import …`)? The product-repo loop must stay six verbs wide | §6 |
+| 3 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
+| 4 | **Machine-readable output**: which commands, and is the contract versioned? | §7 |
+| 5 | **May an explicit, recorded review clear a suspect before the next baseline?** It adds a verb and a record, and removes noise from long-lived branches | [D7](data-architecture.md) |
+| 6 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
