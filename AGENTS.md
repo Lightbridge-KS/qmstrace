@@ -2,7 +2,7 @@
 
 An engine that keeps the **state, traceability and audit evidence** of a software project's
 work products under ISO/IEC 29110, so an auditor's questions are answered by query instead
-of by assembly. **Phase: design — there is no engine code yet.** (`CLAUDE.md` is a symlink to
+of by assembly. **Phase: the first engine slice is being built** — see the slice tracker under `docs/progress/`. (`CLAUDE.md` is a symlink to
 this file.)
 
 ## Orientation — read in this order
@@ -16,6 +16,9 @@ this file.)
    each with the alternative that lost, and the product-repo half of the model
 5. [`docs/design/surface-architecture.md`](docs/design/surface-architecture.md) — the commands,
    the findings contract, the stanza and the skill, as their users meet them
+   · [`system-architecture.md`](docs/design/system-architecture.md) — who and what the tool touches
+   · [`docs/structure/codebase-blueprint.md`](docs/structure/codebase-blueprint.md) — **before writing
+   engine code**: the tree, the import matrix, where a change lands, what is deliberately absent
 6. [`docs/tests/`](docs/tests/) — the experiments: what was tested, how, and what was found;
    and the scenario catalogue the engine's tests are built from
 

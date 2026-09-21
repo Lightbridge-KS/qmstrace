@@ -11,7 +11,8 @@ read_when:
 **Parent:** [`overview-qmstrace.md`](overview-qmstrace.md) · **Scope:** [PRD § Slices](../req/qmstrace-prd.md) ·
 **Design:** [`data-architecture.md`](../design/data-architecture.md) ·
 [`surface-architecture.md`](../design/surface-architecture.md) ·
-**Fixtures:** [`scenario-catalogue.md`](../tests/scenario-catalogue.md)
+**Fixtures:** [`scenario-catalogue.md`](../tests/scenario-catalogue.md) ·
+**Structure:** [`codebase-blueprint.md`](../structure/codebase-blueprint.md)
 
 **Done when** the test bed runs on the engine instead of the stand-in, with the stand-in's
 verified scenarios as fixtures — at least one test per command. The stand-in's only
@@ -55,7 +56,9 @@ src/qmstrace/
   render/     functions returning str; no renderer interface until a second form exists
   workspace   Workspace.open(root).assessment() -> Assessment (violations, gaps, suspects,
               notices, frozen state, what was scanned). A command is: open → render → exit
-  cli         typer wiring only; handlers return int; one main() maps exceptions to codes
+  cli         typer wiring only; a handler returns an int and an @outcome decorator maps it —
+              and CouldNotJudge, and anything unexpected — to an exit code. Never imports click:
+              this Typer vendors it privately (verified)
   assets/     skill · stanza · init templates — shipped as package data
 ```
 
@@ -67,9 +70,11 @@ tree, a tree at a baseline tag, and a sibling.
 
 Each is a branch and a draft pull request, except M0.
 
-- [ ] **M0 · docs** — this tracker · the scenario catalogue · design docs amended for the
-      decisions above and for what the review found · `system-architecture.md` (C1–C2) ·
-      `docs/structure/` blueprint · the agent guide's Git rule
+- [x] **M0 · docs** — this tracker · the [scenario catalogue](../tests/scenario-catalogue.md) ·
+      design docs amended for the decisions above and for what the review found ·
+      [`system-architecture.md`](../design/system-architecture.md) (C1–C2, a first C3) ·
+      the [codebase blueprint](../structure/codebase-blueprint.md), whose framework check found
+      that this Typer no longer installs click · the agent guide's Git rule
 - [ ] **M1 · scaffold and gate** — `uv init --package`; typer; ruff, mypy, pytest with
       coverage; `justfile`; CI with named steps; `--version` from package metadata; **a wheel
       is built in CI and a placeholder asset read back from it** — data files missing from a
