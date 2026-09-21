@@ -61,7 +61,7 @@ flowchart TD
     cli --> rules["rules ✔"]
     cli --> thread["thread ID ✔"]
     cli --> results["results REPORT ✔"]
-    cli --> impact["impact ID… ◻"]
+    cli --> impact["impact ID… ✔"]
     cli --> init["init ◻"]
     cli --> ledger["ledger … — its own group"]
     ledger --> import["import NAME@PIN ✔ driver"]
@@ -78,10 +78,39 @@ flowchart TD
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation, each part labelled as the project's or the repo's; a rule this repo cannot meet, or that applies to nothing here, says so. *In the engine since M3* | ✔ |
 | `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
 | `qmstrace results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
-| `qmstrace impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
+| `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
+
+**M3b input handling — decided 2026-09-21.** If any starting ID passed to `impact` is not
+visible to the run, the whole request exits 2, with no partial impact listing and no
+copyable `Impacts:` line. The diagnostic names the unseen IDs, offers nearby matches and
+says which sources could not be read. An unseen ID is not presumed to be reserved by a
+change request; that verification arrives in M5a. **Rejected:** showing the known subset
+with an incomplete label and exit 2 — a reader could still copy it as the complete list.
+
+**M3b impact contract.** Starts and downstream items appear once in their respective sections;
+downstream groups follow schema item-type order, with IDs sorted within each group. Argument
+order and repetition do not change the bytes. Upstream origins come from the starts alone,
+using the external types in the configuration. An `Assumes` link carries impact forward,
+but establishes no ancestry backward. When an ordinary path also reaches an assumed item,
+the backward traversal uses the ordinary path and keeps the assumption as `also` — otherwise
+the order of discovery could hide a legitimate origin. This also applies to `thread`.
+
+The candidate `Impacts:` line is the sorted union of starts and downstream items whose types
+appear in any configured baseline's `covers`. It does not inspect tags or assert that an item
+is frozen, nor assert that every affected item needs editing. Upstream-only origins stay out
+of the candidate. Unknown types are explicitly omitted; an empty candidate gets a reason
+instead of a copyable empty line. **Rejected:** including all reached IDs irrespective of
+baseline coverage, which would turn contextual origins and review-only types into controlled
+changes. Actual edits remain a human decision.
+
+Like `thread`, a produced walk exits 0 even when it reports violations; `check` remains the
+gate. Notices, unavailable sources and refused links remain visible. Sibling nodes are not
+pinned, and their own links are not scanned. Output ends with labelled counts and *this repo
+only*. Reserved-ID verification and baseline resolution remain M5a work; project-wide
+traversal at pins belongs to the ledger.
 
 ### The authoring surface
 

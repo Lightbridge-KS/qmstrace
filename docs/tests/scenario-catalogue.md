@@ -137,6 +137,9 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
   link into it is noted as `also` — a test that verifies a requirement and its design element.
 - Forward, `thread` crosses an `Assumes` link and goes on; backward, it shows the assumed item and
   stops *(settled in M2b — otherwise `impact` would name unrelated clauses)*.
+- If an ordinary backward path also reaches an assumed item, its ancestry is followed even
+  when the assumption was discovered first. The ordinary path becomes the displayed parent;
+  the assumption remains as `also`. Both `thread` and `impact` retain the legitimate origin.
 - `thread` on a sibling's item says that what hangs off it *there* is not shown. Any ID the run
   can see can be threaded: an uncited sibling item, an uncited clause the agreement declares.
 - `thread` on an ID nothing here can see — could not judge, with the closest IDs; in a pipeline
@@ -146,7 +149,20 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - `impact` takes several IDs and returns their union, deduplicated: downstream grouped by item
   type, upstream origins included, and the `Impacts` line carrying only the item types a
   baseline covers. An ID reserved by a change request and not yet declared is reported as
-  such. The output says that it stops at the repo's edge.
+  such once change requests are read (M5a). The output says that it stops at the repo's edge.
+- If any starting ID is unseen, `impact` rejects the whole request with exit 2, even when
+  other starts are known. It lists the unseen IDs with nearby matches and unavailable-source
+  context; it emits neither a partial impact listing nor an `Impacts:` line. M3b never calls
+  an unseen ID reserved without reading a change request.
+- `impact` lists starts separately from downstream items; cycles, overlapping starts and
+  repeated or reordered arguments neither duplicate items nor change output bytes.
+- Its candidate includes starts and downstream items of configured baseline types only;
+  upstream origins are contextual. Empty candidates and omitted unknown types have explicit
+  reasons. No configured baseline is treated as evidence of a currently frozen item.
+- Origin types and prefixes come from configuration. Origins of unrelated downstream items
+  are not added; an origin supplied as a start is not displayed twice.
+- The informational command exits 0 with visible source notices and graph violations;
+  missing arguments or invalid `-C` usage exit 2. Each run assesses the workspace once.
 - `Assumes` is traversed and counts toward no coverage rule.
 
 ## Across repos

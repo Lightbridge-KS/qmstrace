@@ -60,7 +60,7 @@ src/qmstrace/
     graph.py             TraceGraph.build(config, extracted, Surroundings) -> (graph, findings);
                          node() and its Home; incoming/outgoing; forward/backward -> Closure —
                          each item once, nearest first, the link that reached it and any other
-                         (`also`); thread renders it, impact (M3) and suspects (M5b) will; closest()
+                         (`also`); thread and impact (M3b) render it; suspects (M5b) will; closest()
     judge.py             coverage (M3) · resolve_baselines · guard · suspects — pure functions
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned

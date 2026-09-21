@@ -11,7 +11,7 @@ ledger's import. An ID that matches this repo's own pattern is never given that 
 repo was read, so it is known not to exist.
 
 A walk over the graph is a `Closure`: `forward` follows what hangs off some items, `backward`
-what they derive from. `thread` renders one, and so will `impact` and the suspects — one
+what they derive from. `thread` and `impact` render it, and so will the suspects — one
 traversal, several renderers.
 """
 
@@ -63,8 +63,11 @@ class Direction(Enum):
 
 @dataclass(frozen=True, slots=True)
 class Step:
-    """One item a walk reached: how far from the start, the link that reached it first, and the
-    other links between it and the rest of the walk."""
+    """One reached item: its distance, displayed parent and other links in the walk.
+
+    The first link wins, except that ordinary backward ancestry takes precedence over an
+    assumption. Otherwise an early assumption could conceal an origin reached another way.
+    """
 
     node: Node
     distance: int
@@ -260,7 +263,6 @@ class TraceGraph:
             current = queue.popleft()
             if current in expanded:
                 continue
-            expanded.add(current)
             arrived = reached.get(current)
             if (
                 direction is Direction.BACKWARD
@@ -269,18 +271,31 @@ class TraceGraph:
                 and arrived[1].marker in self._dependencies
             ):
                 continue  # an assumed item ends a backward walk
+            expanded.add(current)
             for link in self._neighbours(current, direction):
                 other = link.src if direction is Direction.FORWARD else link.dst
                 if other in reached:
-                    if link is not reached[other][1]:
-                        reached[other][2].append(link)
+                    _, first, also = reached[other]
+                    if (
+                        direction is Direction.BACKWARD
+                        and first.marker in self._dependencies
+                        and link.marker not in self._dependencies
+                    ):
+                        # An assumption may reach this item first, but an ordinary path
+                        # still establishes ancestry. Show that path and resume the walk.
+                        reached[other] = (distance[current] + 1, link, [first, *also])
+                        if other not in starts:
+                            distance[other] = distance[current] + 1
+                        queue.append(other)
+                    elif link is not first:
+                        also.append(link)
                     continue
                 reached[other] = (distance[current] + 1, link, [])
                 distance.setdefault(other, distance[current] + 1)
                 queue.append(other)
         steps = {
             item_id: Step(self.nodes[item_id], d, via, tuple(also))
-            for item_id, (d, via, also) in reached.items()
+            for item_id, (d, via, also) in sorted(reached.items(), key=lambda entry: entry[1][0])
         }
         return Closure(direction, starts, steps)
 

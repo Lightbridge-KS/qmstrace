@@ -1,0 +1,18 @@
+impact — working-tree analysis, this repo only
+
+starting items:
+  REQ-SVC-01 — A call carries a key · requirement, in sibling service — not pinned · ../service/docs/req/service-srs.md:12
+  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+  sibling ancestry and downstream links there are not scanned
+
+downstream — grouped by item type:
+  test case (1):
+    tests/unit/test_api.py::test_the_service_refuses_a_call_without_a_key · test case, unit
+
+upstream origins — of the starting items:
+  no upstream origins reached here
+
+candidate for review — configured baseline types, not a claim of edits or frozen state:
+Impacts: REQ-SVC-01
+
+starts: 1 · downstream: 1 test case · upstream origins: 0 — this repo only

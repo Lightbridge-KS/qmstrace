@@ -140,6 +140,25 @@ def thread(
     return EXIT_OK
 
 
+@app.command(short_help="What changing several items affects, with a candidate Impacts line.")
+@outcome
+def impact(
+    ctx: typer.Context,
+    item_ids: Annotated[
+        list[str], typer.Argument(metavar="ID…", help="One or more item IDs visible to this run.")
+    ],
+    directory: Directory = None,
+) -> int:
+    """Show the combined downstream items and upstream origins of several starting items.
+
+    The Impacts line is a candidate for review, filtered by configured baseline types. It
+    stops at this repo's edge. Any unseen starting ID rejects the whole request.
+    """
+    assessment = Workspace.open(_directory(ctx, directory)).impact(item_ids)
+    typer.echo(text.impact(assessment, item_ids))
+    return EXIT_OK
+
+
 @app.command(short_help="What is wrong, and what is not done yet — the gate with --strict.")
 @outcome
 def check(

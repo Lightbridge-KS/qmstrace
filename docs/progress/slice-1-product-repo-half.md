@@ -120,7 +120,7 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       ledger's `trace.lock` exactly** — 177 items, 208 links, forward reach from 43 starts per
       repo (local: `_playground/2026-09-21_parity/`). The E3 row waits for M5a, where its
       baseline tags test something new
-- [ ] **M3 · judge it** *(built, awaiting review — branch `feat/m3-judge-it`)* — coverage gaps from the
+- [x] **M3 · judge it** *(merged — pull request 8, `ba2e0ca`)* — coverage gaps from the
       rules as data, `check` (`--strict`, `--quiet`), `rules`, the wording pass over the findings
       catalogue, the gap that says why a module with a stray `Implements:` is unlinked; `status`
       gains its gap count and its pointer to `check`. **The gate fails on every gap in slice 1**
@@ -128,11 +128,22 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       2026-09-21; the surface doc's decision #1). **Parity:** four edits into both the engine's
       copy and the stand-in's give the same gaps on the same items, but for the `Implements:`
       moved into a comment, which only the engine reports — the stand-in was wrong (local:
-      `_playground/2026-09-21_parity/`)
-- [ ] **M3b · impact** — `impact <ID>…`: the forward closure M2b built, `Assumes` included,
+      `_playground/2026-09-21_parity/`). The pull request's dry gate passed; the four new manual
+      pages were verified to return HTTP 200 in production on 2026-09-21
+- [ ] **M3b · impact** *(built, awaiting review — `codex/m3b-impact`)* — `impact <ID>…`: the forward closure M2b built, `Assumes` included,
       rendered for several IDs, grouped by item type, with the `Impacts` line; an ID a change
       request reserves is judged once change requests are read (M5a). Split from M3 on
-      2026-09-21
+      2026-09-21. Assesses once; rejects the whole request if any start is unseen; displays
+      starts, the downstream union and upstream origins; generates a candidate `Impacts:`
+      line from configured baseline types. CLI/help goldens and reference/how-to pages ship
+      together. Converging backward paths exposed an early assumption hiding ordinary
+      ancestry: fixed in the shared traversal, with regressions for `thread` and `impact`.
+      **Verified:** `just dry` — 375 tests, 99.33% coverage, formatting, lint, types, wheel and
+      strict manual build; built pages checked for expanded goldens. Existing E4/gaps parity
+      still matches. CR-001's two starts reach 18 downstream IDs matching the frozen lock;
+      adding its already-declared new ID explicitly reproduces its candidate line. A client
+      assumption propagates impact without changing gaps. Original test-bed repos remain
+      clean (local record: `_playground/2026-09-21_m3b-impact/`). No production deploy yet
 - [ ] **M4 · results** — the JUnit reader on defusedxml; `results`
 - [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
       test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,
@@ -167,8 +178,12 @@ eight-line header before every finding.
    moved away, *not verified* — and that survives `--quiet`.
 7. New behaviour: a lightweight baseline tag is reported as weaker evidence; a feature branch
    forked before a tag does not see it; a shallow clone is never reported as "nothing frozen".
-8. `impact` on the two changed requirements reproduces the change request's `Impacts` set plus
-   the agreement clause; one `Assumes` added in the client repo is traversed and raises no gap.
+8. `impact` on CR-001's two changed requirements (`REQ-BCN-05`, `REQ-BCN-06`) shows their
+   existing downstream items and upstream agreement clauses at a documented pin. The new
+   `REQ-BCN-11` is included when explicitly supplied at a pin where it is declared; before
+   declaration, recognizing its reservation belongs to M5a. The walk cannot infer a new
+   requirement or agreement clause. One `Assumes` added in the client repo is traversed and
+   raises no gap. CR-002 is the later classification change affecting all eleven requirements.
 9. Every command is run in both product repos; `init` in a scratch copy reproduces the
    committed stanza byte for byte; two consecutive runs of anything give identical bytes.
 
