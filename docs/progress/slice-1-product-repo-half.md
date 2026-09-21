@@ -109,7 +109,7 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       published. *Waits:* running in a pipeline (slice 2, the schema's copy) · markers (M6,
       beside the skill) · the chain (M2b, shown with `thread`). Frictions found: one `ux` issue
       (#4, `-C` only before the command); the others are owned by M3, M5a and slice 2
-- [ ] **M2b · follow a thread** *(built, awaiting review — branch `feat/m2b-follow-a-thread`)* —
+- [x] **M2b · follow a thread** *(merged — pull request 7, `9143a6e`)* —
       `thread <ID>`: backward to what an item derives from, forward to what hangs off it; each
       item once, nearest first, under the link that reaches it first. `Assumes` is followed
       forward and not backward. Every ID the run can see can be threaded — uncited sibling items
