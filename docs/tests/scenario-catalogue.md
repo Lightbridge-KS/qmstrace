@@ -122,7 +122,16 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 
 - `thread` prints the marker on each edge; an `Assumes` edge is labelled, and across repos
   carries "judged at import".
-- `thread` on a sibling's item says that what hangs off it *there* is not shown.
+- `thread` shows each item once, nearest first, under the link that reaches it first; a second
+  link into it is noted as `also` — a test that verifies a requirement and its design element.
+- Forward, `thread` crosses an `Assumes` link and goes on; backward, it shows the assumed item and
+  stops *(settled in M2b — otherwise `impact` would name unrelated clauses)*.
+- `thread` on a sibling's item says that what hangs off it *there* is not shown. Any ID the run
+  can see can be threaded: an uncited sibling item, an uncited clause the agreement declares.
+- `thread` on an ID nothing here can see — could not judge, with the closest IDs; in a pipeline
+  it says the sibling could not be read, never that the item does not exist.
+- The header of `thread` says what could not be read, and how many links were refused as
+  violations — an empty result never looks like a clean one.
 - `impact` takes several IDs and returns their union, deduplicated: downstream grouped by item
   type, upstream origins included, and the `Impacts` line carrying only the item types a
   baseline covers. An ID reserved by a change request and not yet declared is reported as

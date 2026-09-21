@@ -9,12 +9,17 @@ That last home is deliberate. In a pipeline only one repo is checked out, so a c
 sibling's item cannot be looked up there; it passes as *not verified here* and is judged at the
 ledger's import. An ID that matches this repo's own pattern is never given that benefit: this
 repo was read, so it is known not to exist.
+
+A walk over the graph is a `Closure`: `forward` follows what hangs off some items, `backward`
+what they derive from. `thread` renders one, and so will `impact` and the suspects — one
+traversal, several renderers.
 """
 
 from __future__ import annotations
 
+import difflib
 import re
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import Enum
@@ -35,27 +40,71 @@ class Home(Enum):
 
 @dataclass(frozen=True, slots=True)
 class Node:
-    """One end of a link. `item` is set for this repo's own items; `repo` names a sibling or
-    an external source."""
+    """One end of a link. `item` is set for this repo's own items only; `repo` names a sibling
+    or an external source. `title` and `where` are for display — `where` is a path as a reader
+    of this repo would write it."""
 
     id: str
     home: Home
     type: str | None
     item: Item | None = None
     repo: str | None = None
+    title: str | None = None
+    where: str | None = None
+
+
+class Direction(Enum):
+    """Which way a walk goes. The glossary's words: a forward trace is derived, a backward one
+    authored."""
+
+    FORWARD = "forward"  # what hangs off an item: the links that point at it
+    BACKWARD = "backward"  # what an item derives from: the links it declares
+
+
+@dataclass(frozen=True, slots=True)
+class Step:
+    """One item a walk reached: how far from the start, the link that reached it first, and the
+    other links between it and the rest of the walk."""
+
+    node: Node
+    distance: int
+    via: Link
+    also: tuple[Link, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class Closure:
+    """Everything a walk reached from its starts, nearest first — each item once.
+
+    A start is not a step unless another start, or a cycle, reaches it: an edited item below
+    another changed item is still listed, which the suspect rule needs.
+    """
+
+    direction: Direction
+    starts: tuple[str, ...]
+    steps: Mapping[str, Step]
+
+    def parent(self, step: Step) -> str:
+        """The item on the start's side of the link that reached `step`."""
+        return step.via.dst if self.direction is Direction.FORWARD else step.via.src
+
+    def children(self, item_id: str) -> list[Step]:
+        """The steps first reached from `item_id`, in the order they were reached."""
+        return [step for step in self.steps.values() if self.parent(step) == item_id]
 
 
 @dataclass(frozen=True, slots=True)
 class Surroundings:
     """What lies outside this repo, as this run could read it.
 
-    `siblings` maps each sibling that was read to its items (ID → item type).
+    `siblings` maps each sibling that was read to the items it declares with authored IDs, their
+    files already written as a reader of this repo would write them (`../service/…`).
     `every_sibling_read` is false when a sibling was not reachable, or when the project's other
     repos could not be located at all. `externals` maps an external source's name to the IDs it
     declares — or to `None` when the source could not be reached.
     """
 
-    siblings: Mapping[str, Mapping[str, str]] = field(default_factory=dict)
+    siblings: Mapping[str, Mapping[str, Item]] = field(default_factory=dict)
     every_sibling_read: bool = True
     externals: Mapping[str, frozenset[str] | None] = field(default_factory=dict)
 
@@ -68,6 +117,8 @@ class TraceGraph:
     links: tuple[Link, ...]
     _incoming: Mapping[str, tuple[Link, ...]]
     _outgoing: Mapping[str, tuple[Link, ...]]
+    _marker_order: tuple[str, ...] = ()
+    _dependencies: frozenset[str] = frozenset()  # markers that count toward no coverage
 
     @classmethod
     def build(
@@ -92,9 +143,9 @@ class TraceGraph:
         around = surroundings or Surroundings()
         found = list(extracted)
         foreign = {
-            item_id: (repo, item_type)
+            item_id: (repo, item.type)
             for repo, items in sorted(around.siblings.items())
-            for item_id, item_type in items.items()
+            for item_id, item in items.items()
         }
         wrong: list[Finding] = [f for part in found for f in part.findings]
 
@@ -117,12 +168,31 @@ class TraceGraph:
             for item in misplaced
         ]
 
-        nodes: dict[str, Node] = {i: Node(i, Home.LOCAL, it.type, it) for i, it in local.items()}
+        nodes: dict[str, Node] = {
+            i: Node(i, Home.LOCAL, it.type, it, title=it.title, where=f"{it.file}:{it.line}")
+            for i, it in local.items()
+        }
+        # Every ID the run can see is a node, cited or not — so it can be threaded. A sibling's
+        # item is never this repo's own: `item` stays unset, and `items()` never lists it.
+        for repo, items in sorted(around.siblings.items()):
+            for item_id, item in items.items():
+                where = f"{item.file}:{item.line}"
+                nodes.setdefault(
+                    item_id,
+                    Node(
+                        item_id, Home.SIBLING, item.type, repo=repo, title=item.title, where=where
+                    ),
+                )
+        for name, declared in sorted(around.externals.items()):
+            if declared is not None and name in config.externals:
+                item_type = config.externals[name].item_type
+                for item_id in sorted(declared):
+                    nodes.setdefault(item_id, Node(item_id, Home.EXTERNAL, item_type, repo=name))
         kept: list[Link] = []
         for link in (link for part in found for link in part.links):
             if link.src not in local:
                 continue  # its item was refused above, and reported there
-            target, refusal = _resolve(config, around, local, foreign, link)
+            target, refusal = _resolve(config, around, nodes, foreign, link)
             if refusal is not None:
                 wrong.append(refusal)
             elif target is not None:
@@ -139,6 +209,8 @@ class TraceGraph:
             tuple(kept),
             {k: tuple(v) for k, v in incoming.items()},
             {k: tuple(v) for k, v in outgoing.items()},
+            tuple(config.links),
+            frozenset(m for m, link in config.links.items() if not link.counts_for_coverage),
         )
         return graph, sorted(wrong, key=lambda f: (f.file, f.line, f.code, f.what))
 
@@ -162,26 +234,85 @@ class TraceGraph:
         """The cited IDs this run could not verify, sorted."""
         return sorted(n.id for n in self.nodes.values() if n.home is Home.UNVERIFIED)
 
+    def forward(self, item_ids: Iterable[str]) -> Closure:
+        """What hangs off the items, transitively — dependency links (`Assumes`) included."""
+        return self._walk(item_ids, Direction.FORWARD)
+
+    def backward(self, item_ids: Iterable[str]) -> Closure:
+        """What the items derive from, transitively. An item reached through a dependency link
+        is shown and not walked past: what an assumed item derives from is not what the
+        assuming item derives from."""
+        return self._walk(item_ids, Direction.BACKWARD)
+
+    def closest(self, item_id: str, count: int = 3) -> list[str]:
+        """The IDs nearest to one this graph does not know, for a next move — case ignored."""
+        folded = {known.casefold(): known for known in self.nodes}
+        near = difflib.get_close_matches(item_id.casefold(), sorted(folded), n=count)
+        return sorted(folded[match] for match in near)
+
+    def _walk(self, item_ids: Iterable[str], direction: Direction) -> Closure:
+        starts = tuple(sorted(set(item_ids)))
+        distance = dict.fromkeys(starts, 0)
+        reached: dict[str, tuple[int, Link, list[Link]]] = {}
+        expanded: set[str] = set()
+        queue = deque(starts)
+        while queue:
+            current = queue.popleft()
+            if current in expanded:
+                continue
+            expanded.add(current)
+            arrived = reached.get(current)
+            if (
+                direction is Direction.BACKWARD
+                and current not in starts
+                and arrived is not None
+                and arrived[1].marker in self._dependencies
+            ):
+                continue  # an assumed item ends a backward walk
+            for link in self._neighbours(current, direction):
+                other = link.src if direction is Direction.FORWARD else link.dst
+                if other in reached:
+                    if link is not reached[other][1]:
+                        reached[other][2].append(link)
+                    continue
+                reached[other] = (distance[current] + 1, link, [])
+                distance.setdefault(other, distance[current] + 1)
+                queue.append(other)
+        steps = {
+            item_id: Step(self.nodes[item_id], d, via, tuple(also))
+            for item_id, (d, via, also) in reached.items()
+        }
+        return Closure(direction, starts, steps)
+
+    def _neighbours(self, item_id: str, direction: Direction) -> list[Link]:
+        """An item's links in one direction, each once, in the schema's link order then by ID."""
+        links = self._incoming if direction is Direction.FORWARD else self._outgoing
+        unique = {(k.src, k.dst, k.marker): k for k in links.get(item_id, ())}.values()
+        order = {marker: index for index, marker in enumerate(self._marker_order)}
+        forward = direction is Direction.FORWARD
+
+        def rank(k: Link) -> tuple[int, str]:
+            return order.get(k.marker, len(order)), k.src if forward else k.dst
+
+        return sorted(unique, key=rank)
+
 
 def _resolve(
     config: TraceConfig,
     around: Surroundings,
-    local: Mapping[str, Item],
+    nodes: Mapping[str, Node],
     foreign: Mapping[str, tuple[str, str]],
     link: Link,
 ) -> tuple[Node | None, Finding | None]:
     """The node a link points at, or the finding that keeps the link out."""
     link_type = config.links[link.marker]
-    source_type = local[link.src].type
+    source_type = nodes[link.src].type or ""
     if source_type not in link_type.sources:
         return None, findings.wrong_carrier(link, source_type, link_type.sources)
 
     target: Node
-    if link.dst in local:
-        target = Node(link.dst, Home.LOCAL, local[link.dst].type, local[link.dst])
-    elif link.dst in foreign:
-        repo, item_type = foreign[link.dst]
-        target = Node(link.dst, Home.SIBLING, item_type, repo=repo)
+    if link.dst in nodes and nodes[link.dst].home in (Home.LOCAL, Home.SIBLING):
+        target = nodes[link.dst]
     elif external := next(
         (e for e in config.externals.values() if link.dst.startswith(e.prefix)), None
     ):
@@ -189,7 +320,9 @@ def _resolve(
         if declared is not None and link.dst not in declared:
             listing = sorted(declared, key=_numbered)
             return None, findings.undeclared_external(link, external.name, listing)
-        target = Node(link.dst, Home.EXTERNAL, external.item_type, repo=external.name)
+        target = nodes.get(link.dst) or Node(
+            link.dst, Home.EXTERNAL, external.item_type, repo=external.name
+        )
     else:
         own = _own_type(config, link.dst)
         if own is not None or around.every_sibling_read:

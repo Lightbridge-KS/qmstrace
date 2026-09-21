@@ -10,6 +10,7 @@ Options:
 
 Commands:
   status  Where am I: what was read, and one line per requirement.
+  thread  What one item derives from, and what hangs off it.
 
   Exit codes:
     0  no failing findings in this mode

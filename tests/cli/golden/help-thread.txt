@@ -1,0 +1,15 @@
+Usage: qmstrace thread [OPTIONS] {ID}
+
+  Walk one item backward to what it derives from, and forward to what hangs off
+  it.
+
+  Each item is shown once, nearest first, under the link that reaches it first.
+  It stops at this repo's edge.
+
+Arguments:
+  ID  A requirement, design element, test or clause ID.  [required]
+
+Options:
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

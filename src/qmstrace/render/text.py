@@ -13,6 +13,7 @@ from typing import Final
 
 from qmstrace.core.assessment import Assessment, ExternalState, SiblingState
 from qmstrace.core.config import SchemaForm, TraceConfig
+from qmstrace.core.graph import Closure, Direction, Home, Node, Step
 from qmstrace.core.model import Item
 
 # `status` lists one item type line by line, and reads two of its fields by name. A known
@@ -204,3 +205,137 @@ def _violations(assessment: Assessment) -> str:
 
 def _noun(count: int, one: str, many: str) -> str:
     return one if count == 1 else many
+
+
+# ── thread ──────────────────────────────────────────────────────────────────────────────────
+
+_SECTIONS: Final = {
+    Direction.BACKWARD: "backward — what it derives from:",
+    Direction.FORWARD: "forward — what hangs off it, nearest first:",
+}
+
+
+def thread(assessment: Assessment, item_id: str) -> str:
+    """One item, what it derives from, and what hangs off it — each item once, nearest first."""
+    graph = assessment.graph
+    start = graph.nodes[item_id]
+    walks = [graph.backward([item_id]), graph.forward([item_id])]
+    lines = [_heading(start), f"  {_what(start)}"]
+    lines += _problems(assessment)
+    for walk in walks:
+        lines += ["", _SECTIONS[walk.direction]]
+        lines += _tree(assessment, walk, item_id) or [f"  {_nothing(start, walk.direction)}"]
+    counted = " · ".join(f"{w.direction.value}: {_counts(assessment, w)}" for w in reversed(walks))
+    lines += ["", f"{counted} — this repo only"]
+    return "\n".join(lines)
+
+
+def _heading(node: Node) -> str:
+    return f"{node.id} — {node.title}" if node.title and node.title not in node.id else node.id
+
+
+def _what(node: Node) -> str:
+    """The type and home of an item, and where to read it."""
+    kind = node.type.replace("_", " ") if node.type else "an item of unknown type"
+    if node.home is Home.SIBLING:
+        kind += f", in sibling {node.repo} — not pinned"
+    elif node.home is Home.EXTERNAL:
+        kind += f", in the {node.repo}"
+    elif node.home is Home.UNVERIFIED:
+        return "not verified here — judged at the ledger's import"
+    if node.item is not None and node.item.level:
+        kind += f", {node.item.level}"
+    shown_elsewhere = node.where is None or node.where.startswith(node.id.split("::")[0])
+    return kind if shown_elsewhere else f"{kind} · {node.where}"
+
+
+def _problems(assessment: Assessment) -> list[str]:
+    """What this run could not read, and what it refused — only when there is any."""
+    lines = [_external(s) for s in assessment.externals if s.declared is None]
+    lines += [_sibling(s) for s in assessment.siblings if s.declares is None]
+    if not assessment.siblings_located:
+        lines.append("siblings: NOT LOCATED — the project's other repos cannot be found")
+    if assessment.violations:
+        count = len(assessment.violations)
+        lines.append(
+            f"{count} {_noun(count, 'violation', 'violations')} — the links they refuse are not "
+            "shown; `qmstrace status` counts them"
+        )
+    return [f"  {line}" for line in lines]
+
+
+def _tree(assessment: Assessment, walk: Closure, start: str) -> list[str]:
+    width = max((len(s.via.marker) for s in walk.steps.values()), default=0) + 2
+    lines: list[str] = []
+    shown = {start}
+
+    def descend(parent: str, depth: int) -> None:
+        for step in walk.children(parent):
+            item = step.node.id
+            if item in shown:  # a cycle back to the start
+                lines.append(f"{'  ' * depth}{step.via.marker:<{width}}{item} — the item itself")
+                continue
+            shown.add(item)
+            text = f"{'  ' * depth}{step.via.marker:<{width}}{_line(assessment, walk, step)}"
+            lines.append(text)
+            if not _ends_here(assessment, walk, step):
+                descend(item, depth + 1)
+
+    descend(start, 1)
+    return lines
+
+
+def _line(assessment: Assessment, walk: Closure, step: Step) -> str:
+    node = step.node
+    text = f"{_heading(node)} · {_what(node)}"
+    if _is_dependency(assessment, step):
+        text += (
+            " · assumes it — counts toward no coverage"
+            if walk.direction is Direction.FORWARD
+            else " · assumed — what it derives from is not followed"
+        )
+        if node.home is Home.SIBLING:
+            text += "; judged at the ledger's import"
+    for link in step.also:
+        other = link.dst if walk.direction is Direction.FORWARD else link.src
+        text += (
+            f" · also {link.marker} {other}"
+            if walk.direction is Direction.FORWARD
+            else f" · also {link.marker} from {other}"
+        )
+    return text
+
+
+def _is_dependency(assessment: Assessment, step: Step) -> bool:
+    link_type = assessment.config.links.get(step.via.marker)
+    return link_type is not None and not link_type.counts_for_coverage
+
+
+def _ends_here(assessment: Assessment, walk: Closure, step: Step) -> bool:
+    """A backward walk shows an assumed item and stops there."""
+    return walk.direction is Direction.BACKWARD and _is_dependency(assessment, step)
+
+
+def _nothing(start: Node, direction: Direction) -> str:
+    if direction is Direction.FORWARD:
+        return "nothing here hangs off it"
+    if start.home is Home.SIBLING:
+        return f"declared in sibling {start.repo} — what it derives from there is not shown"
+    if start.home is Home.EXTERNAL:
+        return f"declared in the {start.repo}, outside any product repo"
+    if start.home is Home.UNVERIFIED:
+        return "not verified here — judged at the ledger's import"
+    return "it derives from nothing here"
+
+
+def _counts(assessment: Assessment, walk: Closure) -> str:
+    counted = Counter(
+        (step.node.type or "unverified item").replace("_", " ")
+        for item_id, step in walk.steps.items()
+        if item_id not in walk.starts
+    )
+    if not counted:
+        return "nothing"
+    order = [t.replace("_", " ") for t in assessment.config.item_types]
+    ranked = sorted(counted, key=lambda t: (order.index(t) if t in order else len(order), t))
+    return ", ".join(f"{counted[t]} {t if counted[t] == 1 else t + 's'}" for t in ranked)

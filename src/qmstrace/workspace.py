@@ -15,7 +15,7 @@ import os
 import posixpath
 from collections import Counter
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Final
 
@@ -117,14 +117,40 @@ class Workspace:
             notices=tuple(notices),
         )
 
+    def thread(self, item_id: str) -> Assessment:
+        """The assessment, once `item_id` is known to be something this run can see.
+
+        Raises
+        ------
+        CouldNotJudge
+            For an ID nothing here declares or cites. Where a sibling could not be read, it says
+            so rather than claim the item does not exist.
+        """
+        assessment = self.assessment()
+        if assessment.graph.node(item_id) is not None:
+            return assessment
+        unread = [s.name for s in assessment.siblings if s.declares is None]
+        beyond = ""
+        if not assessment.siblings_located:
+            beyond = ", and the project's other repos could not be located"
+        elif unread:
+            beyond = f", and sibling {', '.join(unread)} could not be read"
+        near = assessment.graph.closest(item_id)
+        hint = f"the closest here: {', '.join(near)}; " if near else ""
+        raise CouldNotJudge(
+            f"{item_id} is not an item this run can see — nothing here declares or cites it"
+            f"{beyond}.",
+            f"Fix: check the ID — {hint}`qmstrace status` lists this repo's requirements.",
+        )
+
     def _siblings(
         self, ledger: Path | None
-    ) -> tuple[list[tuple[SiblingState, dict[str, str] | None]], bool, bool]:
+    ) -> tuple[list[tuple[SiblingState, dict[str, Item] | None]], bool, bool]:
         """Each sibling with its items (None when not read); whether the siblings could be
         located at all; whether this repo is among the project's repos."""
         if ledger is None:
             return [], not self.config.repos, False
-        found: list[tuple[SiblingState, dict[str, str] | None]] = []
+        found: list[tuple[SiblingState, dict[str, Item] | None]] = []
         listed = False
         for name, relative in sorted(self.config.repos.items()):
             path = ledger / relative
@@ -144,8 +170,13 @@ class Workspace:
                 continue
             authored = [t for t in config.item_types.values() if t.id_pattern is not None]
             scan = _scan(tree, config, authored, with_misplaced=False)
-            items = {i.id: i.type for part in scan.extracted for i in part.items}
-            counts = Counter(items.values())
+            # a sibling's files, as a reader of this repo would write them: ../service/docs/…
+            items = {
+                i.id: replace(i, file=posixpath.join(location, i.file))
+                for part in scan.extracted
+                for i in part.items
+            }
+            counts = Counter(item.type for item in items.values())
             declares = {t.name: counts[t.name] for t in authored if counts[t.name]}
             found.append((SiblingState(name, location, declares), items))
         return found, True, listed
