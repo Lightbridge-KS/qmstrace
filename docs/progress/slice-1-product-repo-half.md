@@ -34,7 +34,7 @@ regression was the one command not re-run after a rewrite; an agent found it in 
 | Working tree *(M2)* | Inside Git, what a commit could carry — tracked, or untracked and not ignored — so an ignored note is never read, and it is what a tree at a tag will hold. Outside Git, a walk the output labels as such |
 | Field values *(M2)* | Matched exactly, case included — the stand-in lower-cased them, a hidden rule |
 | Finding codes *(M2)* | A marker carried by the wrong kind of item joins V04; a sibling's item declared again joins V01. New: **V14** a link field that holds something other than IDs, **V15** a marker form the tool does not read |
-| `-C` *(M2)* | Before the verb, as with `git -C` |
+| `-C` *(M2, widened by #4)* | Before the verb, as with `git -C`, or after it — an agent composing a command line puts it either side. Both at once is a usage error |
 
 ## Module shape
 

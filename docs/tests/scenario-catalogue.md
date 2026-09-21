@@ -156,8 +156,8 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - A meta-test fails when a catalogue code has no fixture that emits it.
 - A missing argument, a bad option, an interrupt, a raised exception — each maps to its code.
 - `--quiet` prints findings only; notices about what could not be verified still appear.
-- The root is found by walking up to the configuration; `-C <path>`, before the verb as with
-  `git`, runs elsewhere.
+- The root is found by walking up to the configuration; `-C <path>` runs elsewhere — before the
+  verb, as with `git`, or after it; both at once is a usage error.
 - Two consecutive runs of any command give identical bytes.
 
 ## Setting up a repo

@@ -293,7 +293,8 @@ aspiration — each line is a defect found, or a behaviour observed, on the test
   step, not a dead end.
 - **The tool is on the path, and finds its root.** The test bed invoked it by a relative path,
   which cost the agent a directory change before every command. The engine walks up to the
-  trace configuration, and `-C <path>` — before the verb, as with `git -C` — runs it elsewhere.
+  trace configuration, and `-C <path>` — before the verb, as with `git -C`, or after it — runs it
+  elsewhere; given on both sides it is a usage error.
 - **The header stays short.** By the fourth experiment it had grown to eight lines before the
   first finding — "running `check` in a loop, that is most of the output". A quiet form that
   prints only findings is wanted; what was scanned belongs to `status`.

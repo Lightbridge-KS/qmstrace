@@ -51,6 +51,8 @@ def outcome[**P](handler: Callable[P, int]) -> Callable[P, None]:
         except CouldNotJudge as stopped:
             typer.echo(f"qmstrace: {stopped.what} {stopped.next_move}", err=True)
             code = EXIT_COULD_NOT_JUDGE
+        except typer.BadParameter:
+            raise  # a usage error: the framework prints it with the usage line, and exits 2
         except Exception as bug:  # noqa: BLE001 — the last line of defence, by design
             typer.echo(
                 f"qmstrace: internal error — {type(bug).__name__}: {bug}. "
@@ -63,6 +65,30 @@ def outcome[**P](handler: Callable[P, int]) -> Callable[P, None]:
     return run
 
 
+# `-C` is accepted on either side of the command: before it, as with `git -C`, or after it, as a
+# command's own option. Each product-repo command takes it; `_directory` reconciles the two.
+Directory = Annotated[
+    Path | None,
+    typer.Option(
+        "-C",
+        metavar="PATH",
+        help="Run as if qmstrace had been started in PATH, as with git -C. Before or after the "
+        "command.",
+    ),
+]
+
+
+def _directory(ctx: typer.Context, after: Path | None) -> Path:
+    """Where the command runs: `-C` from before the command or after it — never both."""
+    before: Path | None = ctx.obj
+    if before is not None and after is not None:
+        raise typer.BadParameter(
+            f"given twice — '{before}' before the command and '{after}' after it; give it once.",
+            param_hint="'-C'",
+        )
+    return after or before or Path(".")
+
+
 def _print_version(wanted: bool) -> None:
     if wanted:
         typer.echo(f"qmstrace {__version__}")
@@ -72,14 +98,7 @@ def _print_version(wanted: bool) -> None:
 @app.callback()
 def main(
     ctx: typer.Context,
-    directory: Annotated[
-        Path,
-        typer.Option(
-            "-C",
-            metavar="PATH",
-            help="Run as if qmstrace had been started in PATH, as with git -C.",
-        ),
-    ] = Path("."),
+    directory: Directory = None,
     version: Annotated[
         bool,
         typer.Option(
@@ -93,10 +112,10 @@ def main(
 
 @app.command(short_help="Where am I: what was read, and one line per requirement.")
 @outcome
-def status(ctx: typer.Context) -> int:
+def status(ctx: typer.Context, directory: Directory = None) -> int:
     """What was scanned, what lies around the repo, and one line per requirement.
 
     Not a check: it exits 0 whatever it counts.
     """
-    typer.echo(text.status(Workspace.open(ctx.obj).assessment()))
+    typer.echo(text.status(Workspace.open(_directory(ctx, directory)).assessment()))
     return EXIT_OK
