@@ -89,7 +89,7 @@ Each is a branch and a draft pull request, except M0.
       `core/config.py` and the annotated fixture project `tests/fixtures/mini/` (a ledger's
       trace schema, `service`, `client`, `solo`), parsed in full, including the parts unused
       until M5. The test bed's own configurations are rewritten in M7, when it switches over
-- [ ] **M2 · see the repo** *(built, awaiting review — branch `feat/m2-see-the-repo`)* — `status`, end to
+- [x] **M2 · see the repo** *(merged — pull request 3, `ce865fa`)* — `status`, end to
       end over the working tree: the glob matcher, `WorkingTree` (honours `.gitignore`), the
       three extractors, item digests including a test function's own source, the agreement and
       a sibling read for citations, the graph with the scanning findings — **link validation
