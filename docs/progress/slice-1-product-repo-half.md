@@ -75,7 +75,7 @@ Each is a branch and a draft pull request, except M0.
       [`system-architecture.md`](../design/system-architecture.md) (C1–C2, a first C3) ·
       the [codebase blueprint](../structure/codebase-blueprint.md), whose framework check found
       that this Typer no longer installs click · the agent guide's Git rule
-- [ ] **M1 · scaffold and gate** — `uv init --package`; typer; ruff, mypy, pytest with
+- [ ] **M1 · scaffold and gate** *(in review — branch `feat/m1-scaffold-and-gate`)* — `uv init --package`; typer; ruff, mypy, pytest with
       coverage; `justfile`; CI with named steps; `--version` from package metadata; **a wheel
       is built in CI and a placeholder asset read back from it** — data files missing from a
       wheel is a classic late surprise
