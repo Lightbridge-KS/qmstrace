@@ -567,7 +567,7 @@ with every run of whitespace — line breaks too — collapsed to one space, and
 | Kind | Meaning | Fails |
 |---|---|---|
 | **Violation** | Wrong at any stage: an unknown or malformed ID, a marker pointing at the wrong type of item, a missing required field, an item declared where it is not read, an external ID its source does not declare, a frozen item changed or added without an accepted change request that lists it, a frozen heading deleted | always |
-| **Gap** | A coverage rule not yet met. Expected in the middle of the work; the agent uses the list as its work queue | the gate only — and, in the engine, only from the rule's stage on |
+| **Gap** | A coverage rule not yet met. Expected in the middle of the work; the agent uses the list as its work queue | the gate only — and, in the engine, only from the rule's stage on. *Slice 1: every gap fails the gate; stages come with the ledger* |
 | **Suspect** | Downstream of an item that changed since the last baseline. Needs a fresh look, not necessarily an edit | never — it clears at the next baseline (D7) |
 
 Two coverage rules are known to pull the wrong way, and are open:

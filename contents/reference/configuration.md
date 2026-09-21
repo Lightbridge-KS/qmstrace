@@ -43,7 +43,5 @@ comments, what belongs in it and what does not.
 --8<-- "fixtures/mini/solo/qmstrace.toml"
 ```
 
-!!! note "Not built yet"
-
-    The comments point at `qmstrace rules`, which will print the rules in force and say which
-    part is the project's and which the repo's. It is not built yet.
+The comments point at [`qmstrace rules`](commands/rules.md), which prints the rules in force
+and says which part is the project's and which the repo's.

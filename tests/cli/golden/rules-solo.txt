@@ -1,0 +1,29 @@
+rules in force here — this repo's own schema, under [schema] in qmstrace.toml
+
+From this repo's own schema
+
+  link types — a field named after a marker is the link; every link is many-to-many
+    Origin    requirement → origin clause
+    verifies  test case → requirement
+
+  required fields
+    requirement: Origin
+
+  coverage rules — each unmet rule is a gap
+    G02  every requirement needs an incoming verifies — "no test verifies it yet."
+
+  external BRF-…: declared in docs/brief.md, in this repo — cited here, never declared here
+
+  baselines — not judged yet
+    release: tags matching ^v\d+\.\d+\.\d+$ freeze requirement (every subject)
+
+From this repo's qmstrace.toml
+
+  subjects: app (key APP)
+
+  declares
+    requirement  markdown  ^REQ-APP-\d{2}$         docs/req/*-srs.md
+    test case    pytest    ID: the test's node ID  tests/**/test_*.py
+
+No rule has a stage: in this version every gap fails the gate (qmstrace check --strict).
+Rules are judged on this repo's items; whether an item is covered across the project's repos is the ledger's question.

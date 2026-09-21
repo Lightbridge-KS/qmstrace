@@ -103,6 +103,11 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
     return Extracted(tuple(items), tuple(links), tuple(wrong), tuple(leads))
 
 
+def form(marker: str, target: str) -> str:
+    """How an item read by this extractor declares a link — for a gap's next move."""
+    return f"`{marker}: {target}` under its heading"
+
+
 def _lines(text: str) -> list[tuple[int, str]]:
     """Numbered lines, with a leading frontmatter block left out."""
     lines = list(enumerate(text.splitlines(), start=1))

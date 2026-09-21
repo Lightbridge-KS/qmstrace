@@ -61,11 +61,12 @@ src/qmstrace/
                          node() and its Home; incoming/outgoing; forward/backward -> Closure —
                          each item once, nearest first, the link that reached it and any other
                          (`also`); thread renders it, impact (M3) and suspects (M5b) will; closest()
-    judge.py             coverage · resolve_baselines · guard · suspects — pure functions
+    judge.py             coverage (M3) · resolve_baselines · guard · suspects — pure functions
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
   extract/               text in, items out — never a path, never a repo
-    base.py              IExtractor, the registry by name
+    base.py              IExtractor, the registry by name; FORMS — how each extractor's items
+                         write a link, for a gap's next move (M3)
     fields.py            the field line `Key: value` — shared by every extractor that reads fields
     markdown.py          headings, fields, fences, item text and its digest
     python_module.py     the module docstring's Implements line
@@ -165,7 +166,8 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 
 | Asked to… | The one file |
 |---|---|
-| reword a finding, or change its next move | `core/findings.py` |
+| reword a finding, or change its next move | `core/findings.py` — a gap's wording too; its code and text are the schema's |
+| change how a marker is written in a next move | the extractor's `form()` — `tests/unit/test_forms.py` round-trips it |
 | add a finding code | `core/findings.py`, the function in `core/judge.py` or `core/graph.py` that emits it, a fixture — `test_catalogue.py` fails until all three exist |
 | add a coverage rule | no code — the trace schema |
 | read a new marker form, or another test framework | one new file in `extract/`, registered by name |
@@ -221,6 +223,9 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | ★ An illegal link never enters the graph | `tests/unit/test_graph.py` — `build` returns it as a finding instead |
 | ★ A walk reaches each item once, nearest first; forward crosses a link that counts toward no coverage, backward stops at it | `tests/unit/test_graph.py` § walks |
 | ★ A sibling's item is a node but never this repo's own item | `tests/unit/test_graph.py`; the `status` goldens |
+| ★ Every marker form a gap suggests round-trips through the extractor that reads it | `tests/unit/test_forms.py` |
+| ★ Gaps are judged on this repo's items; `Assumes` counts toward none; a gap whose link was refused names the violation | `tests/unit/test_judge.py` |
+| ★ Every finding, violation or gap, ends with a next move | `tests/test_catalogue.py` |
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspects.py` |
 | A problem in the user's repo is a finding, never an exception | review; `extract/` has no `raise` outside parse failures it converts |

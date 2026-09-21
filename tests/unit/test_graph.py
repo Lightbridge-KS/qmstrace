@@ -133,7 +133,7 @@ def test_a_clean_repo_has_every_link_and_no_findings(service: TraceConfig) -> No
                 "## DSN-SVC-02 — Y\nSatisfies: REQ-SVC-02\n"
             },
             "V04",
-            "'Satisfies' may point at requirement, not at a design_element",
+            "'Satisfies' may point at requirement, not at a design element",
         ),
         (
             {
@@ -143,7 +143,7 @@ def test_a_clean_repo_has_every_link_and_no_findings(service: TraceConfig) -> No
                 ): '@pytest.mark.verifies("AGR-1")\ndef test_x():\n    pass\n'
             },
             "V04",
-            "not at a origin_clause",
+            "not at an origin clause",
         ),
         (
             {("requirement", "docs/req/service-srs.md"): SRS + "- Satisfies: REQ-SVC-01\n"},

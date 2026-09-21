@@ -58,7 +58,12 @@ class Assessment:
     scanned: tuple[Scanned, ...]
     graph: TraceGraph
     violations: tuple[Finding, ...]
+    gaps: tuple[Finding, ...]
     externals: tuple[ExternalState, ...]
     siblings: tuple[SiblingState, ...]
     siblings_located: bool
     notices: tuple[Notice, ...]
+
+    def fails(self, *, strict: bool) -> bool:
+        """Whether the check fails: on any violation, and — under the gate — on any gap too."""
+        return bool(self.violations) or (strict and bool(self.gaps))

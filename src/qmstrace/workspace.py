@@ -19,13 +19,13 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Final
 
-from qmstrace.core import findings
+from qmstrace.core import findings, judge
 from qmstrace.core.assessment import Assessment, ExternalState, Scanned, SiblingState
 from qmstrace.core.config import ExternalSource, ItemType, SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.model import Extracted, Finding, Item, Notice
-from qmstrace.extract.base import REGISTRY
+from qmstrace.extract.base import FORMS, REGISTRY
 from qmstrace.infra.globbing import matches
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 
@@ -86,6 +86,13 @@ class Workspace:
         graph, violations = TraceGraph.build(
             config, scan.extracted, around, misplaced=scan.misplaced
         )
+        forms = {
+            t.name: FORMS[t.extractor]
+            for t in config.item_types.values()
+            if t.declared_here and t.extractor is not None
+        }
+        strays = [stray for part in scan.extracted for stray in part.strays]
+        gaps = judge.coverage(config, graph, violations, strays, forms)
 
         notices: list[Notice] = []
         if located and config.repos and not listed:
@@ -111,6 +118,7 @@ class Workspace:
             scanned=scan.scanned,
             graph=graph,
             violations=tuple(violations),
+            gaps=tuple(gaps),
             externals=tuple(state for state, _ in externals),
             siblings=tuple(state for state, _ in siblings),
             siblings_located=located,

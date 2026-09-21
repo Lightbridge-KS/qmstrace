@@ -42,3 +42,13 @@ All notable changes to this project are recorded here. The format follows
   hangs off it — each item once, nearest first — for a requirement, a test, a clause or a
   sibling's item. An ID nothing here can see exits `2` with the closest IDs.
 - The user manual gains the `thread` reference and an explanation of the chain.
+- `qmstrace check`: every violation and every gap, one line each with its next move. Gaps are
+  judged from the project's coverage rules; they do not fail while authoring, and fail under
+  `--strict`, the gate. `--quiet` prints the findings, and what could not be verified, only.
+- `qmstrace rules`: what `check` holds a repo to — link types, required fields, coverage rules —
+  and whose each part is; a rule the repo cannot meet says so.
+- `status` counts gaps as well as violations. An `Implements:` written outside a module's
+  docstring is reported as the reason for the gap it leaves.
+- The user manual gains `check` and `rules`, a how-to for checking work before a commit, and an
+  explanation of the kinds of finding.
+- A coverage rule whose direction contradicts its link type is refused.

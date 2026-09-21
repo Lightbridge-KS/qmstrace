@@ -278,6 +278,7 @@ def test_a_rule_may_not_need_a_link_that_counts_toward_no_coverage() -> None:
         ('covers = ["requirement"]\n', 'covers = ["requirment"]\n', "not an item type"),
         ('subject = "*"\n', "", "does not say which subject"),
         (r"'^\s*[-*]\s+\*\*(AGR-\d+)\*\*'", r"'^AGR-\d+'", "exactly one group"),
+        ('needs = "incoming:Satisfies"', 'needs = "outgoing:Satisfies"', "could ever meet it"),
     ],
 )
 def test_a_schema_that_contradicts_itself_is_refused(old: str, new: str, expected: str) -> None:

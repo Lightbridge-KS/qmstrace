@@ -1,0 +1,7 @@
+external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
+sibling service: NOT REACHABLE at ../service
+not verified here: 1 citation of another repo's items (REQ-SVC-01) — judged at the ledger's import
+baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+G01  docs/req/client-srs.md:3  REQ-CLT-01: no design element satisfies it yet. Fix: this repo declares no design element — declare the type in qmstrace.toml and write it here, or REQ-CLT-01 is met in another repo of the project and judged at the ledger's import.
+G06  src/client/api.py:1  src/client/api.py: implements no design element — every component points back to one. Fix: this repo declares no design element for it to point at — write the design here and add `Implements: <design element ID>` in its docstring, or cite another repo's only if this item really serves it.
+result: 0 violations, 2 gaps in 4 items · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · NOT VERIFIED: the agreement, sibling service, 1 cited IDs · baselines: not judged yet

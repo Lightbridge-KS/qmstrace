@@ -646,6 +646,16 @@ def _cross_check(config: TraceConfig, schema_file: str) -> None:
                 "toward no coverage.",
                 "Fix: remove the rule — such a link carries suspicion and impact only.",
             )
+        end = link_type.targets if rule.direction == "incoming" else link_type.sources
+        if rule.item_type not in end:
+            raise CouldNotJudge(
+                f"{schema_file}: rule {rule.code} asks every {rule.item_type} for an "
+                f"{rule.direction} '{rule.marker}', but '{rule.marker}' goes from "
+                f"{' or '.join(link_type.sources)} to {' or '.join(link_type.targets)} — no "
+                f"{rule.item_type} could ever meet it.",
+                "Fix: turn the rule round (incoming ↔ outgoing), or name the item type the link "
+                "really reaches.",
+            )
         item_type = config.item_types[rule.item_type]
         for key, value in rule.where.items():
             allowed = item_type.values.get(key)

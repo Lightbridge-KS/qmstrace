@@ -18,4 +18,4 @@ verified by inspection — no recorded basis yet, listed apart:
 categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, portability, design-constraint, legal-regulatory
   (a prompt, not a gap — not every product needs one under every category)
 
-0 violations
+0 violations · 1 gap (G01 ×1) — qmstrace check lists them

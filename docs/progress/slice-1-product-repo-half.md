@@ -120,10 +120,19 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       ledger's `trace.lock` exactly** — 177 items, 208 links, forward reach from 43 starts per
       repo (local: `_playground/2026-09-21_parity/`). The E3 row waits for M5a, where its
       baseline tags test something new
-- [ ] **M3 · judge it** — coverage rules (gaps), the wording pass over the findings catalogue;
-      `check`, `--strict`, `--quiet`, `rules`; **`impact`** — the forward closure M2b built,
-      `Assumes` included, rendered for several IDs; pure graph features, no Git needed; the gap that says why a module with a stray `Implements:` is
-      unlinked; `status` gains its gap count and its pointer to `check`
+- [ ] **M3 · judge it** *(built, awaiting review — branch `feat/m3-judge-it`)* — coverage gaps from the
+      rules as data, `check` (`--strict`, `--quiet`), `rules`, the wording pass over the findings
+      catalogue, the gap that says why a module with a stray `Implements:` is unlinked; `status`
+      gains its gap count and its pointer to `check`. **The gate fails on every gap in slice 1**
+      — stage-aware gating waits for the ledger, where the project's stages live (decided
+      2026-09-21; the surface doc's decision #1). **Parity:** four edits into both the engine's
+      copy and the stand-in's give the same gaps on the same items, but for the `Implements:`
+      moved into a comment, which only the engine reports — the stand-in was wrong (local:
+      `_playground/2026-09-21_parity/`)
+- [ ] **M3b · impact** — `impact <ID>…`: the forward closure M2b built, `Assumes` included,
+      rendered for several IDs, grouped by item type, with the `Impacts` line; an ID a change
+      request reserves is judged once change requests are read (M5a). Split from M3 on
+      2026-09-21
 - [ ] **M4 · results** — the JUnit reader on defusedxml; `results`
 - [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
       test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,
@@ -188,5 +197,7 @@ output, and every catalogue code has a fixture that emits it.
   script), and `GitTree` moves to M5a.
 
 - `Status: withdrawn` needs semantics: a withdrawn item should stop raising coverage gaps.
+  **Moved to M5a** — withdrawing is an act under change control; until then a withdrawn item
+  still raises its gaps.
 - A test function's digest uses `ast`; its dump format changed in Python 3.13. Harmless while
   both sides are computed at run time — a format question once slice 2 writes the lock.

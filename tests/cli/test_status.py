@@ -111,7 +111,9 @@ def test_violations_are_counted_by_code_and_status_still_exits_0(project: Path) 
     notes.write_text("### REQ-SVC-05 — Stray\n\n### REQ-SVC-06 — Stray\n", encoding="utf-8")
     code, output = status(project / "service")
     assert code == 0
-    assert output.rstrip().endswith("2 violations (V07 \N{MULTIPLICATION SIGN}2)")
+    last = output.rstrip().splitlines()[-1]
+    assert last.startswith("2 violations (V07 \N{MULTIPLICATION SIGN}2) · 1 gap")
+    assert last.endswith("qmstrace check lists them")
 
 
 # ── 5. the wrong kind of repo ──────────────────────────────────────────────────────────────

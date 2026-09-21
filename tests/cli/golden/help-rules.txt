@@ -1,0 +1,10 @@
+Usage: qmstrace rules [OPTIONS]
+
+  Print the rules in force: the project's trace schema and this repo's own part.
+
+  Read from the configuration alone — nothing is scanned.
+
+Options:
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

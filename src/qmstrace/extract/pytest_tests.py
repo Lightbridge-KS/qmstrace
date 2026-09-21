@@ -53,6 +53,11 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
     return Extracted(tuple(reading.items), tuple(reading.links), tuple(reading.wrong))
 
 
+def form(marker: str, target: str) -> str:
+    """How a test declares a link — for a gap's next move."""
+    return f'`@pytest.mark.{marker}("{target}")` on the test'
+
+
 def _visit(
     reading: _Reading, body: list[ast.stmt], scope: str, inherited: tuple[Link, ...]
 ) -> None:

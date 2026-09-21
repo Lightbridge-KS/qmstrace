@@ -8,4 +8,4 @@ baselines: 1 configured (release) — not judged: this version of qmstrace does 
 
   REQ-APP-01  origin BRF-1  test cases 1 (unit 1)  — A greeting
 
-0 violations
+0 violations · 0 gaps
