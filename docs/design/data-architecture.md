@@ -1,5 +1,5 @@
 ---
-summary: Data architecture of qmstrace. Settled — decisions D1–D9 with their rejected alternatives; the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, citation across repos, item text, baselines, change-request citation, the kinds of finding); and the ledger's import at a pin with the trace lock, v0. Not yet written — work-product states, events, evidence pointers, the ledger layout, the profile's format.
+summary: Data architecture of qmstrace. Settled — decisions D1–D10 with their rejected alternatives; the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, citation across repos, item text, baselines, change-request citation, the kinds of finding); and the ledger's import at a pin with the trace lock, v0. Not yet written — work-product states, events, evidence pointers, the ledger layout, the profile's format.
 read_when:
   - deciding how trace data, work-product state or evidence is stored or moves
   - about to reopen one of the settled decisions below
@@ -211,8 +211,12 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
   implementation compared test cases by file; experiment E3 showed that adding one test to a
   file silently cleared the suspects on every test beside it. **Revised:** a suspect is
   tracked against the item itself, never clears by being touched, and clears at the next
-  baseline, whose verification record lists the suspects that were re-checked. 💡 Open:
-  whether an explicit, recorded review of one item may clear it earlier.
+  baseline, whose verification record lists the suspects that were re-checked.
+  **Decided since: an explicit, recorded review may also clear one suspect earlier** — to be
+  added after the first slices. It writes *reviewed against this text, by whom* into the trace
+  lock, so the lock's diff is the evidence; an agent may propose it, and the pull request's
+  approval is what makes it count — otherwise it is a rubber stamp. Without it, the list on a
+  long-lived branch becomes noise that is ignored.
 - **Refinements from E3:** a change to a link field such as `Origin` counts as a change to
   the item's text; a `Change:` line is permanent, since a generated revision history is built
   from it; a change request reserves the ID of any item it adds; and when a requirement is
@@ -265,25 +269,56 @@ the **one** it is there to secure.
 - **Rejected — the name `Quality`.** Two of the ten values — the constraints and the legal
   ones — are not quality characteristics.
 
-### D9 — The project's trace schema lives in the ledger; a product repo names it and keeps what is local *(provisional)*
+### D9 — The project's trace schema is authored in the ledger; each product repo carries a generated, verified copy
 
 Two product repos of one project must agree on link types, coverage rules, required fields
 and their values, where the agreement and the change requests are, and which repos belong to
-the project. That is one file in the ledger repo. A product repo's own trace configuration
-names that file and adds only what is local: the item types it declares, their ID patterns,
-the files to scan, its baselines. `rules` prints what is in force and says which file each
-part comes from.
+the project. That is one file, authored in the ledger repo. **Each product repo carries a
+generated copy of it**, between markers in its own trace configuration, beside what is local:
+the item types it declares, their ID patterns, the files to scan, its baselines. The copy
+carries a digest; the ledger's import refuses a repo whose copy does not match the schema at
+the pin. `rules` prints what is in force and says which part is the project's and which is
+the repo's.
 
-- **Tried in the fourth experiment, with no friction**: the agent never needed to change a
-  rule, and the precedent was already there — a product repo already depended on the ledger
-  for origins and change requests.
-- **Rejected — the full schema duplicated in each product repo.** Two copies of the rules
-  drift, and nothing says which is right.
-- 💡 **Still open — a generated, verified copy in each product repo** instead of a path to the
-  ledger. Under D9 as tried, a product repo checked out on its own cannot be checked at all;
-  a generated copy, with the ledger verifying at import that it matches, would allow it, at
-  the cost of a generated block to keep current. The choice turns on whether product repos
-  are ever worked on without the ledger beside them.
+- **Why a copy and not a path:** the pull-request gate runs in the product repo's own
+  pipeline, where the ledger is not checked out — and a product repo cloned on its own could
+  otherwise not be checked at all. It is the pattern already used for vendored skills: a copy
+  that is generated, never edited, and audited for skew.
+- **Cost accepted:** a generated block to keep current, and a window in which a repo runs on
+  an older schema until it is synchronised — visible, because the import names the mismatch.
+- **Rejected — a path from the product repo to the ledger's file.** One source and no
+  machinery, and it is what the fourth experiment ran on, with no friction — but only because
+  both repos sat side by side. *Kept for a test bed.*
+- **Rejected — the full schema written by hand in each product repo.** Two hand-kept copies
+  of the rules drift, and nothing says which is right.
+- **Not yet tried.** The experiment exercised the path form.
+
+### D10 — `Assumes`: a dependency link that counts toward no coverage rule
+
+```markdown
+## DSN-BAG-02 — Gateway client
+Satisfies: REQ-BAG-04, REQ-BAG-05
+Assumes: DSN-BCN-06
+```
+
+An item **assumes** something another item provides — usually in another repo: that
+re-registering is harmless, that an unknown agent gets a 404, that the other side owns a
+pattern this side declines to check. In the fourth experiment the agent had a sibling's ID in
+mind three times and wrote a comment, because no marker fitted.
+
+- **It counts toward no coverage rule.** Its whole job is to carry **suspicion and the impact
+  set across a boundary** that they otherwise stop at: a change request against the assumed
+  item makes the assuming item suspect, and lists it in the impact set. Without it a change
+  request's "downstream" section is written by hand — a hand-kept matrix by another name.
+- **It points at a requirement or a design element**, in this repo or a sibling; from a design
+  element or a requirement.
+- **Across repos it is judged at the ledger's import, against the pin** — never against a
+  colleague's uncommitted working tree.
+- **Rejected — the name `Depends-on`.** It would attract every import and every call. `Assumes`
+  limits itself: it is written only when a change *there* could break something *here*.
+- **Rejected — leaving it in prose.** The knowledge exists at the moment the code is written
+  and is lost to every later change request.
+- **Not yet tried.**
 
 ## The product-repo half (v0)
 
@@ -370,7 +405,8 @@ source = "<where they are declared>"
   output — never silently accepted. An invented origin threaded through a trace is the most
   expensive error this system can let through, and the cheapest to catch.
 - A requirement's classification is one `Category` from the profile's list (D8).
-- **Where it lives across repos:** the shared part sits in the ledger, the local part here (D9).
+- **Where it lives across repos:** the shared part is authored in the ledger and copied here,
+  generated and verified; the local part is written here (D9).
 
 ### Across repos (v0)
 
@@ -391,15 +427,12 @@ Exercised once, with two product repos — see the fourth experiment.
   gateway's requirement, redden a requirement in a repo whose code is fine — or, tagged only
   with the client's, redden the client's for a gateway fault. `verifies` across repos is
   allowed; it is not the natural cross-repo link.
-- 💡 **The link agents reach for across repos is a dependency, and the model does not have
-  one.** A client design element *assumes* something of the gateway: that re-registering is
+- **The link agents reach for across repos is a dependency — now `Assumes` (D10).** A client design element *assumes* something of the gateway: that re-registering is
   harmless, that an unknown agent gets a 404, that the gateway owns the client-ID pattern — the
   last "a negative delegation, which `Satisfies` gets backwards". Three times the agent had a
   sibling's ID in mind and wrote a comment because no marker fitted. Such a link would count
   toward **no coverage rule**; its job is to carry suspicion and the impact set across the
-  repo boundary, which today stop at the repo's edge. It would be checked at import against
-  the pin, not against a colleague's uncommitted working tree. Open: adopt it, and under what
-  name — `Assumes` or `Depends-on`.
+  repo boundary, which today stop at the repo's edge.
 
 ### Item text
 

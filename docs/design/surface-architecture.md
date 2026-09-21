@@ -63,8 +63,8 @@ flowchart TD
     cli --> results["results REPORT ✔"]
     cli --> impact["impact ID… ◻"]
     cli --> init["init ◻"]
-    cli --> ledger["ledger-side verbs ◻"]
-    ledger --> import["import at a pin"]
+    cli --> ledger["ledger … — its own group"]
+    ledger --> import["import NAME@PIN ✔ driver"]
     ledger --> emit["emit tables"]
     ledger --> event["record an event"]
     ledger --> demo["the five assessment questions"]
@@ -80,8 +80,8 @@ flowchart TD
 | `qmstrace results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
 | `qmstrace impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
-| `qmstrace import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
-| Other ledger-side verbs | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
+| `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
+| `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
 
 ### The authoring surface
 
@@ -91,7 +91,7 @@ An agent spends far more time *writing* to this surface than invoking it.
 |---|---|---|
 | **Markers** | Item headings and link lines in repo memory; a docstring line in a module; the test framework's own tag on a test. Syntax: [Data Architecture § Marker syntax v0](data-architecture.md) | ✔ |
 | **The stanza** | A generated block of about ten lines in the product repo's agent guide: the repo is traced, the ID patterns, start with `status`, the gate command, frozen items change only through a change request, a marker states a fact, never type a date or a verdict | ✔ |
-| **The skill** | Shipped with the engine: the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `qmstrace rules`** | ✔ |
+| **The skill** | Shipped with the engine: the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `qmstrace rules`.** Its ban on typed facts covers traced documents and test results; a tracker may cite a commit hash, as a pointer and never as evidence | ✔ |
 | **The trace configuration** | One file at the repo root: item types, link types, coverage rules, externals, baselines, change requests | ✔ |
 | **The trace lock's diff** | What a reviewer reads in a pull request when traceability changes (D1) | ◻ |
 
@@ -258,8 +258,10 @@ standard is data (PRD goal 6).
 what is wrong; `thread` — what hangs off this; `results` — did it pass; `impact` — what would
 change. An agent asked for exactly one verb that was missing, and nothing else.
 
-**One binary, two repo kinds.** 💡 Whether ledger-side verbs sit beside the product-repo ones
-or under a group of their own is open — see *Decisions needed*.
+**One binary; the ledger's verbs sit under a group of their own** — `qmstrace ledger import …`,
+never beside `check`. The product-repo loop stays six verbs wide, and an agent reading the
+help in a product repo does not see verbs it must not use. A verb run in the wrong kind of
+repo says so and names the right place.
 
 ### Agent experience
 
@@ -310,9 +312,11 @@ requirement is gated, the work downstream of it is gated too.**
 - **The stanza is generated**, between markers, from the trace configuration. It is edited by
   editing the configuration.
 - **Baselines are recognised, not imposed**: a project's own tag names are configuration (D6).
-- 💡 **Machine-readable output** — a `--json` form of `status`, `check` and `impact` — is not
-  designed. No agent has needed it yet: the line-oriented output was enough in both
-  experiments. It will be needed by the pull-request gate and by the ledger's import.
+- **Machine-readable output comes later, and findings are structured from the first line of
+  code.** No agent has needed a `--json` form — line output was enough in every experiment —
+  but the pull-request gate and the trace browser will. So a finding is data inside the
+  engine — code, file, line, item, what is wrong, the next move — and the line an agent reads
+  is one renderer of it. Which commands get the form, and its versioning, are decided then.
 
 ## 8. Decisions needed
 
@@ -320,9 +324,6 @@ Each is marked 💡 where it bites.
 
 | # | Decision | Where |
 |---|---|---|
-| 1 | **One binary for both repo kinds, or ledger verbs under a group of their own** (`qmstrace ledger import …`)? The product-repo loop must stay six verbs wide | §6 |
-| 2 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
-| 3 | **Machine-readable output**: which commands, and is the contract versioned? | §7 |
-| 4 | **May an explicit, recorded review clear a suspect before the next baseline?** It adds a verb and a record, and removes noise from long-lived branches | [D7](data-architecture.md) |
-| 5 | **A quiet form of `check`**, and how much of the header survives in the default form | §6 |
-| 6 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
+| 1 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
+| 2 | **A quiet form of `check`**, and how much of the header survives in the default form | §6 |
+| 3 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |

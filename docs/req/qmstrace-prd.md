@@ -118,15 +118,16 @@ qmstrace is the shared kernel under all three.
 | Record an event with a pinned evidence pointer | Including a document's issue; generalises today's per-document Git tag |
 | Status — one compact view of states, coverage, gaps and suspects | The agent's and the human's entry point |
 
-💡 Work-product state and events are listed as P0 but scheduled as the second slice. If the
-first slice should stay purely traceability, they still belong here — state tracking is one
-of the three reasons the project exists — but the call on ordering is open.
+Work-product state and events are P0 and arrive in the third slice. The order stands; because
+the event and evidence-pointer shape is one of the things that are expensive to change, it is
+worked through in parallel with the first slice, which does not depend on it.
 
 ### P1 — makes it hold up under change
 
 | Capability | Notes |
 |---|---|
-| Suspect detection by content hash | Tracked against the item, never cleared by being touched; also rendered documents against their source |
+| `Assumes` — a dependency link | Counts toward no coverage rule; carries suspicion and the impact set across repos; judged at import against the pin (D10) |
+| Suspect detection by content hash | Tracked against the item, never cleared by being touched; cleared by the next baseline or by an explicit, recorded review; also rendered documents against their source |
 | The five-step assessment demo, one command per step | See *Success criteria* |
 | Collector for the Git host | Pull requests, reviews, tags, releases, issues — with the host's own timestamps |
 | Drift check on a Word document | IDs and generated tables compared with the ledger at the document's pin |
@@ -202,11 +203,6 @@ as its plan declares; nothing there changes mid-assessment.
 - **Where is a requirement's text canonical?** *Answered and validated* — in the product repo's
   repo memory, with the formal bilingual specification a projection of it (D5). What stays
   open: how a stored translation is reviewed and when it becomes suspect.
-- **Where does the trace schema live** when a project spans several product repos?
-  *Provisionally* in the ledger, named by each product repo (D9); open is whether a product
-  repo gets a generated, verified copy so that it can be checked on its own.
-- **The cross-repo link agents reach for is a dependency**, and the model has none. Adopt it,
-  and under what name?
 - **An inspection or an analysis needs a recorded basis**; today `Verify-by: inspection` closes
   a gap with nothing behind it.
 - **Derived IDs are not immutable.** A component's ID is its path and a test case's ID is its

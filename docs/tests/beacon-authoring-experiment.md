@@ -307,9 +307,8 @@ to say so, and the tool no way to know.
 
 → *Suspects are tracked against the item — a test function's own source, not its file. A
 suspect never clears by being touched. It clears at the next baseline, whose verification
-record lists the suspects that were re-checked.* 💡 Whether an explicit, recorded review of
-one item should also clear it before the next baseline is open — it adds an act and a record,
-and removes noise from long-lived branches.
+record lists the suspects that were re-checked.* Decided since: an explicit, recorded review may
+also clear one suspect earlier — it removes noise from long-lived branches (D7).
 
 #### Findings for the design
 

@@ -138,8 +138,14 @@ _Avoid_: state
 
 **Link**:
 A typed, directed relationship from one item to another — verifies, satisfies, implements,
-refines. It is declared at the downstream end: the test names the requirement it verifies.
+assumes. It is declared at the downstream end: the test names the requirement it verifies.
 _Avoid_: edge, relation, reference, trace (as a noun)
+
+**Assumes**:
+The link saying that an item relies on something another item provides, often in another
+repo. It counts toward no coverage rule; it carries suspicion and the impact set across the
+boundary.
+_Avoid_: depends-on, uses, requires
 
 **Marker**:
 An item or link declaration written in the place where the item itself is authored — a

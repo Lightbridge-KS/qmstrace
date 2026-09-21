@@ -21,7 +21,7 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       sources → strict intermediate data → formal targets — [PRD](../req/qmstrace-prd.md) § As-is story
 - [x] Glossary, 52 terms across four clusters — [`CONTEXT.md`](../../CONTEXT.md)
 - [x] PRD draft v0.1 — [`docs/req/qmstrace-prd.md`](../req/qmstrace-prd.md)
-- [x] Decisions D1–D9 with the alternatives that lost —
+- [x] Decisions D1–D10 with the alternatives that lost —
       [`data-architecture.md`](../design/data-architecture.md) § Settled decisions
 - [x] Spike: composite foreign keys can police link rules in the in-memory database —
       [`data-architecture.md`](../design/data-architecture.md) § Verified notes
@@ -57,6 +57,14 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       boundary — rightly: the links available were false, or true and misplaced. The link it
       wanted is a dependency, which the model lacks. Its own mutation pass found a marker that
       could not fail. Test-bed tag `e4-end`; findings in both design docs
+- [x] **Nine open decisions put to the developer; seven settled** — `Assumes` adopted as a
+      dependency link that counts toward no coverage rule (**D10**); each product repo carries a
+      generated, verified copy of the project's trace schema (**D9**, decided); an explicit,
+      recorded review may clear a suspect before the next baseline, added later (D7); the slice
+      order stands, with the ledger half worked through in parallel; the ledger's verbs sit
+      under a group of their own; machine-readable output comes later, findings structured
+      from the start; **a tracker may cite commit hashes** — as pointers, never as evidence —
+      and the skill's ban on typed facts covers traced documents and test results only
 
 ## Now
 
@@ -89,22 +97,15 @@ Nothing in flight. The design docs now hold everything the two experiments settl
 
 Attached to scheduled work; standalone ones live in the PRD. `rg 💡` lists every marker.
 
-- 💡 **Adopt a dependency link across repos — and under what name, `Assumes` or `Depends-on`?**
-  It counts toward no coverage rule; it carries suspicion and the impact set across the repo
-  boundary, and is checked at import against the pin. (`data-architecture.md` § Across repos)
-- 💡 **A path to the ledger, or a generated, verified copy of the schema in each product repo?**
-  (D9) It turns on whether a product repo is ever worked on without the ledger beside it.
-- 💡 **May an explicit, recorded review clear a suspect before the next baseline?** (D7)
-- 💡 **Commit hashes in a tracker.** Three reports now, and three sources that disagree: the
-  skill forbids typed facts, the test bed's first tracker is full of hashes, and the
-  developer's own conventions ask for them. One wrong hash was found in E1. A ruling is needed
-  — it is a convention beyond this repo.
+- 💡 **Two glossary namings await a word**: *Profile* versus *Trace Schema*, and *Assessor*
+  versus *Auditor* (`CONTEXT.md`).
+- **A lint that every commit hash cited in a tracker exists** — agreed; a repo-hygiene check
+  rather than an engine feature. One wrong hash was typed by an agent in E1.
 - **`Verify-by: inspection` is a free pass** until an inspection has a recorded basis.
 - **"Every design element needs a test" can push a decorative tag.**
 - **Derived IDs are not immutable** — a module's path, a test function's name. Not exercised.
 - **A cross-repo open question has no home**: whether an agent re-registers after the gateway
   forgets it sits in two trackers as two half-questions. It belongs to the project.
-- Older markers still open: `CONTEXT.md` (two), the PRD (one), `surface-architecture.md` (two).
 
 ## Confirmed contracts
 
