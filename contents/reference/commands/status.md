@@ -45,7 +45,7 @@ In a pipeline, where only this repo is checked out:
 | `baselines:` | the baselines the project configures; judging them is not built yet |
 | one line per requirement | its category, what it points back at, what hangs off it — design elements, test cases by level — and its title |
 | `verified by …` | requirements verified by inspection or analysis, listed apart: nothing records their basis yet |
-| last line | violations, counted by code — see [Findings](../findings.md). Listing each one is the job of `qmstrace check`, which is not built yet |
+| last line | violations and gaps, each counted by code — see [Findings](../findings.md). [`qmstrace check`](check.md) lists every one, with its next move |
 
 ## Exit code
 

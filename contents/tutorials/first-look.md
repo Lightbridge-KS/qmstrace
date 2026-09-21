@@ -75,7 +75,17 @@ you would leave it out: qmstrace walks up to the nearest `qmstrace.toml`.
    apart, because nothing records the inspection yet.
 9. **`categories with no requirement here`** — a prompt, not a failure: has each quality been
    considered?
-10. **`0 violations`** — nothing is wrong in this repo's trace data.
+10. **The last line** — nothing is wrong in this repo's trace data, and one coverage rule is not
+    met yet: `REQ-SVC-03` has no design element. A gap is work left to do, not an error.
+
+## Check it
+
+``` sh
+uv run qmstrace -C tests/fixtures/mini/service check
+```
+
+`check` lists that gap with its next move — what to write, and where. How to work through such a
+list: [Check your work before you commit](../how-to/check-your-work.md).
 
 ## Next
 

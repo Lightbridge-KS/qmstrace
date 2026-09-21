@@ -67,11 +67,22 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 
 ## Coverage
 
-- Rules come from data; `where` narrows a rule by a field's value.
+- Rules come from data; `where` narrows a rule by a field's value — exactly, as V05 spells it; an
+  item missing the field gets V05 and no gap.
 - No hidden exemption: a rule without `where` applies to every item of its type.
-- A withdrawn item raises no coverage gap *(semantics to be settled — see the slice tracker)*.
-- Gaps are listed and the run does not fail while authoring; under the gate it fails.
+- A withdrawn item raises no coverage gap *(semantics settled in M5a, with change control; until
+  then a withdrawn item still raises its gaps)*.
+- Gaps are listed and the run does not fail while authoring; under the gate it fails — every gap,
+  in slice 1.
+- Rules are judged on this repo's items; a link to an item not verified here counts; `Assumes`
+  counts toward no rule.
+- A gap whose link was refused by a violation says to fix that violation first — never to add a
+  second line. A gap on a module with an `Implements:` outside its docstring names that line.
+- A rule no item type this repo scans can meet is still a gap, and says so; `rules` marks it.
 - `rules` prints what is in force and says which part is the project's and which the repo's.
+- A rule whose direction contradicts its link type is a configuration error.
+- *Recorded for later:* a marker line in Markdown above the first heading, or under a heading
+  with no ID, is dropped silently — the Markdown counterpart of the stray `Implements:`.
 
 ## Results
 

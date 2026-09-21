@@ -32,7 +32,18 @@ CODES: Final = {
 
 
 def _either(names: Iterable[str]) -> str:
-    return " or ".join(names)
+    return " or ".join(_words(name) for name in names)
+
+
+def _words(name: str) -> str:
+    """An item type as a reader writes it: `design_element` → design element."""
+    return name.replace("_", " ")
+
+
+def _a(name: str) -> str:
+    """With its article: an origin clause, a requirement."""
+    words = _words(name)
+    return f"{'an' if words[:1] in set('aeiou') else 'a'} {words}"
 
 
 def declared_twice(item: Item, first: Item) -> Finding:
@@ -64,7 +75,7 @@ def malformed_id(token: str, item_type: str, pattern: str, file: str, line: int)
         "V02",
         file,
         line,
-        f"{token} does not match this repo's ID pattern for a {item_type} ({pattern}).",
+        f"{token} does not match this repo's ID pattern for {_a(item_type)} ({pattern}).",
         f"Fix: write the ID as [items.{item_type}] id_pattern says in qmstrace.toml — or, if "
         "this heading is prose, do not start it with an ID.",
         token,
@@ -85,6 +96,8 @@ def no_such_item(link: Link, *, home: str | None, siblings_read: bool) -> Findin
         f"{link.src} → {link.marker} → {link.dst}: no such item {where}.",
         f"Fix: {hint}.",
         link.src,
+        link.marker,
+        link.dst,
     )
 
 
@@ -94,10 +107,12 @@ def wrong_target(link: Link, target_type: str, allowed: Iterable[str]) -> Findin
         link.file,
         link.line,
         f"{link.src} → {link.marker} → {link.dst}: '{link.marker}' may point at "
-        f"{_either(allowed)}, not at a {target_type}.",
+        f"{_either(allowed)}, not at {_a(target_type)}.",
         "Fix: point it at the right kind of item, or use the marker that fits — the trace "
         "schema's [links] lists them.",
         link.src,
+        link.marker,
+        link.dst,
     )
 
 
@@ -106,10 +121,12 @@ def wrong_carrier(link: Link, source_type: str, allowed: Iterable[str]) -> Findi
         "V04",
         link.file,
         link.line,
-        f"{link.src} carries '{link.marker}', which a {source_type} may not carry — "
+        f"{link.src} carries '{link.marker}', which {_a(source_type)} may not carry — "
         f"'{link.marker}' is carried by {_either(allowed)}.",
         "Fix: move the line to the kind of item that carries it, or remove it.",
         link.src,
+        link.marker,
+        link.dst,
     )
 
 
@@ -156,9 +173,9 @@ def not_scanned_here(
         "V07",
         file,
         line,
-        f"{token} is declared here, but this file is not scanned for a {item_type} — so the "
+        f"{token} is declared here, but this file is not scanned for {_a(item_type)} — so the "
         "tool cannot see it.",
-        f"Fix: a {item_type} is read from {', '.join(files)}; move it there.",
+        f"Fix: {_a(item_type)} is read from {', '.join(files)}; move it there.",
         token,
     )
 
@@ -193,6 +210,8 @@ def undeclared_external(link: Link, source: str, declared: Iterable[str]) -> Fin
         f"declares {listing}).",
         "Fix: cite a real one, or tell the developer that nothing covers this — never invent one.",
         link.src,
+        link.marker,
+        link.dst,
     )
 
 
@@ -203,9 +222,10 @@ def not_an_id(item_id: str, marker: str, token: str, file: str, line: int) -> Fi
         file,
         line,
         f"{item_id} → {marker}: {said}, so it links nothing.",
-        f"Fix: a '{marker}' line holds IDs only, comma-separated. If nothing real fits, remove "
+        f"Fix: the '{marker}' line holds IDs only, comma-separated. If nothing real fits, remove "
         "the line and tell the developer what is missing — never invent an ID.",
         item_id,
+        marker,
     )
 
 
@@ -217,4 +237,50 @@ def unread_marker(file: str, line: int, marker: str, form: str) -> Finding:
         f"a '{marker}' marker {form} — this tool does not read that form, so it links nothing.",
         f'Fix: write @pytest.mark.{marker}("ID", …) with literal IDs, directly on a test '
         "function or on its test class.",
+        marker=marker,
+    )
+
+
+# ── gaps — their codes and texts are the project's rules; the next move is built here ───────
+
+GAP_HEADING: Final = (
+    "gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on them"
+)
+
+
+def unmet_rule(code: str, item: Item, text: str, fix: str) -> Finding:
+    """A coverage rule not met yet — `code` and `text` come from the project's trace schema."""
+    return Finding(code, item.file, item.line, f"{item.id}: {text}", f"Fix: {fix}", item.id)
+
+
+def fix_refused(violation: Finding) -> str:
+    return (
+        f"first fix {violation.code} at {violation.file}:{violation.line} — it refuses the link "
+        "this rule needs. Do not add a second line."
+    )
+
+
+def fix_stray(marker: str, file: str, line: int) -> str:
+    return (
+        f"the '{marker}:' line at {file}:{line} is outside the module docstring, so it is not "
+        "read — move it into the docstring."
+    )
+
+
+def fix_none_here(kinds: str, subject: str) -> str:
+    return (
+        f"this repo declares no {kinds} — declare the type in qmstrace.toml and write it here, "
+        f"or {subject} is met in another repo of the project and judged at the ledger's import."
+    )
+
+
+def fix_write(form: str, fact: str, on: str | None = None) -> str:
+    where = f"on the {on}, write" if on else "write"
+    return f"{where} {form} — only if it is true: the link states that {fact}."
+
+
+def fix_no_target(kinds: str, form: str) -> str:
+    return (
+        f"this repo declares no {kinds} for it to point at — write the design here and add "
+        f"{form}, or cite another repo's only if this item really serves it."
     )

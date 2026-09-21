@@ -84,6 +84,17 @@ class Lead:
 
 
 @dataclass(frozen=True, slots=True)
+class Stray:
+    """A marker written where it is not read — an `Implements:` in a comment, say. It links
+    nothing; a gap it leaves open can say why."""
+
+    marker: str
+    targets: tuple[str, ...]
+    file: str
+    line: int
+
+
+@dataclass(frozen=True, slots=True)
 class Finding:
     """Something wrong in the user's repo: where, what, and the next move.
 
@@ -96,6 +107,8 @@ class Finding:
     what: str
     next_move: str
     item: str | None = None
+    marker: str | None = None  # the link a violation refused, if it concerns one
+    target: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,3 +126,4 @@ class Extracted:
     links: tuple[Link, ...] = ()
     findings: tuple[Finding, ...] = ()
     leads: tuple[Lead, ...] = ()
+    strays: tuple[Stray, ...] = ()

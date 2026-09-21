@@ -6,6 +6,7 @@ The stand-in's only regression was the one command nobody re-ran after a rewrite
 2. Every code in the findings catalogue has a scenario that emits it — and every scenario's code
    is in the catalogue. A code nothing emits is dead text; a finding with no catalogue entry is
    wording that lives outside the one place it may.
+3. Every finding — violation or gap — ends with a next move.
 """
 
 from collections.abc import Callable
@@ -84,3 +85,17 @@ def test_each_scenario_emits_its_code(service: TraceConfig, code: str) -> None:
 def test_every_finding_says_what_to_do_next(service: TraceConfig, code: str) -> None:
     for finding in SCENARIOS[code](service):
         assert finding.what and finding.next_move.startswith("Fix:"), finding
+
+
+def test_every_gap_says_what_to_do_next(project: Path) -> None:
+    """A gap's code and text are the project's; its next move is the engine's, and never missing."""
+    from qmstrace.workspace import Workspace
+
+    gaps = [
+        g
+        for repo in ("service", "client")
+        for g in Workspace.open(project / repo).assessment().gaps
+    ]
+    assert gaps, "the fixture project should leave some rule unmet"
+    for gap in gaps:
+        assert gap.code.startswith("G") and gap.next_move.startswith("Fix:"), gap

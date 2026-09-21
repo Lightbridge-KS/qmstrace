@@ -1,0 +1,4 @@
+read: 1 requirement, 1 test case
+  baselines: 1 configured (release) — not judged: this version of qmstrace does not read baselines yet
+
+result: 0 violations, 0 gaps in 2 items · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · baselines: not judged yet

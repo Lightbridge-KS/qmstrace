@@ -8,7 +8,7 @@ in the text is a finding in what it returns; an extractor never raises for the u
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Final, Protocol
 
 from qmstrace.core.config import ItemType, TraceConfig
@@ -28,4 +28,12 @@ REGISTRY: Final[Mapping[str, IExtractor]] = {
     "markdown": markdown.extract,
     "python-module": python_module.extract,
     "pytest": pytest_tests.extract,
+}
+
+# How each extractor's items declare a link — `form(marker, target)`, for a gap's next move. The
+# syntax lives with the extractor that reads it, and a test round-trips every form.
+FORMS: Final[Mapping[str, Callable[[str, str], str]]] = {
+    "markdown": markdown.form,
+    "python-module": python_module.form,
+    "pytest": pytest_tests.form,
 }

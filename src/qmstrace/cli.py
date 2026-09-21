@@ -138,3 +138,37 @@ def thread(
     assessment = Workspace.open(_directory(ctx, directory)).thread(item_id)
     typer.echo(text.thread(assessment, item_id))
     return EXIT_OK
+
+
+@app.command(short_help="What is wrong, and what is not done yet — the gate with --strict.")
+@outcome
+def check(
+    ctx: typer.Context,
+    strict: Annotated[
+        bool, typer.Option("--strict", help="The gate: gaps fail too, not only violations.")
+    ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option("--quiet", help="Findings only — what could not be verified still shows."),
+    ] = False,
+    directory: Directory = None,
+) -> int:
+    """List every violation and every gap, each with its next move.
+
+    While authoring, gaps do not fail: they are the work not done yet. Under --strict — the gate
+    a pull request passes — they do. Violations always fail.
+    """
+    assessment = Workspace.open(_directory(ctx, directory)).assessment()
+    typer.echo(text.check(assessment, strict=strict, quiet=quiet))
+    return EXIT_FAILED if assessment.fails(strict=strict) else EXIT_OK
+
+
+@app.command(short_help="What check holds this repo to, and whose each rule is.")
+@outcome
+def rules(ctx: typer.Context, directory: Directory = None) -> int:
+    """Print the rules in force: the project's trace schema and this repo's own part.
+
+    Read from the configuration alone — nothing is scanned.
+    """
+    typer.echo(text.rules(Workspace.open(_directory(ctx, directory)).config))
+    return EXIT_OK

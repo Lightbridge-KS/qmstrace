@@ -11,6 +11,8 @@ Options:
 Commands:
   status  Where am I: what was read, and one line per requirement.
   thread  What one item derives from, and what hangs off it.
+  check   What is wrong, and what is not done yet — the gate with --strict.
+  rules   What check holds this repo to, and whose each rule is.
 
   Exit codes:
     0  no failing findings in this mode

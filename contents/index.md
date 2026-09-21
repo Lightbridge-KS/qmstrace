@@ -5,7 +5,7 @@
     qmstrace keeps the traceability of a software project — from the agreement, through
     requirements and design, to code and tests — in the repositories where that work is already
     done, so that an auditor's questions are answered by a query instead of by assembly. It is a
-    command-line tool. It is early: one command, `qmstrace status`, works today.
+    command-line tool. It is early: it reads a repo, follows its threads, and checks it today.
 
 ## What it does
 
@@ -36,6 +36,6 @@ goal, reference states facts, explanation gives the reasons. Every page opens wi
 
 ## Where it stands
 
-Built: `qmstrace status`. The other commands — following one requirement to its tests, checking
-a repo, reading test results, guarding baselines, setting a repo up — arrive one at a time, and
+Built: `qmstrace status`, `thread`, `check` and `rules`. The other commands — the impact of a
+change, reading test results, guarding baselines, setting a repo up — arrive one at a time, and
 this manual grows with them.

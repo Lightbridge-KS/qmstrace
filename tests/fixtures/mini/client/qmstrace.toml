@@ -1,6 +1,10 @@
 # The second product repo of project MINI — it cites the service's items by ID and declares
 # its own under its own subject. It has no design documents, so it declares no design elements:
 # the project knows the type; this repo simply does not scan for it.
+#
+# Knowingly incomplete: the project's rules ask every requirement for a design element (G01)
+# and every module for one it implements (G06), so `qmstrace check --strict` fails here until
+# the repo declares design elements. `qmstrace rules` marks those rules as unmeetable here.
 
 version = 1
 ledger  = "../ledger"

@@ -1,0 +1,43 @@
+rules in force here — the project's trace schema, read from ../ledger/qmstrace.schema.toml, and this repo's qmstrace.toml
+
+From the project's trace schema
+
+  link types — a field named after a marker is the link; every link is many-to-many
+    Origin      requirement → origin clause
+    Satisfies   design element → requirement
+    Implements  component → design element
+    verifies    test case → requirement, design element
+    Assumes     requirement, design element → requirement, design element · counts toward no coverage
+
+  required fields
+    requirement: Category ∈ {functional-suitability, performance-efficiency, compatibility, usability, reliability, maintainability, portability, security, design-constraint, legal-regulatory} · Origin · Verify-by ∈ {test, inspection, analysis}
+
+  coverage rules — each unmet rule is a gap
+    G01  every requirement needs an incoming Satisfies — "no design element satisfies it yet."
+    G02  every requirement where Verify-by = test needs an incoming verifies — "no test verifies it yet." · not for Verify-by = inspection, analysis
+    G03  every design element needs an incoming Implements — "no component implements it yet."
+    G04  every design element needs an incoming verifies — "no test verifies it yet."
+    G05  every design element needs its own Satisfies — "satisfies no requirement — every design element points back to one."
+    G06  every component needs its own Implements — "implements no design element — every component points back to one."
+    G07  every test case needs its own verifies — "verifies nothing."
+
+  external AGR-…: declared in agreement.md, in the ledger — cited here, never declared here
+
+  change requests CR-…: in change-requests/, licensing a change when accepted — not judged yet
+
+  baselines — not judged yet
+    requirements: tags matching ^baseline/(?P<subject>[a-z0-9-]+)/requirements/(?P<n>\d+)$ freeze requirement (the subject named in the tag)
+    product: tags matching ^v\d+\.\d+\.\d+$ freeze requirement, design element (every subject)
+
+From this repo's qmstrace.toml
+
+  subjects: service (key SVC)
+
+  declares
+    requirement     markdown       ^REQ-SVC-\d{2}$         docs/req/*-srs.md
+    design element  markdown       ^DSN-SVC-\d{2}$         docs/design/*.md
+    component       python-module  ID: the module's path   src/**/*.py · ignores **/__init__.py
+    test case       pytest         ID: the test's node ID  tests/**/test_*.py
+
+No rule has a stage: in this version every gap fails the gate (qmstrace check --strict).
+Rules are judged on this repo's items; whether an item is covered across the project's repos is the ledger's question.

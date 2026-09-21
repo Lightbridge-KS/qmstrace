@@ -15,4 +15,4 @@ baselines: 2 configured (requirements, product) — not judged: this version of 
 categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, reliability, maintainability, portability, design-constraint, legal-regulatory
   (a prompt, not a gap — not every product needs one under every category)
 
-0 violations
+0 violations · 2 gaps (G01 ×1, G06 ×1) — qmstrace check lists them

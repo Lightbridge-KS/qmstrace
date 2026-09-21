@@ -4,7 +4,8 @@
 
     A finding is one thing wrong or unfinished in a repo, on one line: a code, where it is, what
     is wrong, and what to do next. A code's first letter is its kind. This version reports
-    violations — `V` codes — and every one of them is in the table below.
+    violations — the `V` codes below, which are qmstrace's own — and gaps, whose `G` codes are
+    the project's, printed by `qmstrace rules`.
 
 ## The shape of a finding
 
@@ -22,7 +23,7 @@ Every finding carries the same four parts, and the last one is never left out:
 | Letter | Kind | What it fails | In this version |
 |---|---|---|---|
 | `V` | violation | always — the trace data is wrong at any stage | reported |
-| `G` | gap | only the gate — a coverage rule not met yet; its codes come from the project's trace schema | not built yet |
+| `G` | gap | only the gate — a coverage rule not met yet; its codes come from the project's trace schema | reported |
 | `S` | suspect | never — downstream of something that changed since a baseline | not built yet |
 
 ## The catalogue
@@ -31,5 +32,7 @@ Every finding carries the same four parts, and the last one is never left out:
 
 `V10` to `V13` are held for the baseline checks, which are not built yet.
 
-`qmstrace status` counts violations by code on its last line. Listing each one, with its place
-and next move, is the job of `qmstrace check`, which is not built yet either.
+`qmstrace status` counts violations and gaps by code on its last line;
+[`qmstrace check`](commands/check.md) lists each one, with its place and next move. A gap's code
+and words come from the project's rule — see [`qmstrace rules`](commands/rules.md) — and its next
+move from qmstrace: the form of the marker to write, or the violation to fix first.
