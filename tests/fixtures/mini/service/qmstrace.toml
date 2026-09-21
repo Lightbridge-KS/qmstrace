@@ -1,0 +1,34 @@
+# This product repo's TRACE CONFIGURATION — what is local to it. The project's trace schema
+# (link types, coverage rules, required fields, the agreement, change requests, baselines) is
+# the project's, not this repo's: `qmstrace rules` prints what is in force and whose it is.
+#
+# What does NOT belong here: rules. If a rule seems wrong, tell the project side.
+
+version = 1
+ledger  = "../ledger"               # optional: where the agreement and the change requests
+                                    # are. Without it they are reported as NOT VERIFIED.
+
+[schema]                            # form 1 — by path (repos side by side, a test bed)
+path = "../ledger/qmstrace.schema.toml"
+
+[subjects.service]                  # a named body of requirements; a baseline freezes a subject
+key = "SVC"                         # the key inside its item IDs
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-SVC-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]
+extractor  = "markdown"
+id_pattern = '^DSN-SVC-\d{2}$'
+files      = ["docs/design/*.md"]
+
+[items.component]                   # ID = the module's path
+extractor = "python-module"
+files     = ["src/**/*.py"]
+ignore    = ["**/__init__.py"]
+
+[items.test_case]                   # ID = the test function's node id
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]

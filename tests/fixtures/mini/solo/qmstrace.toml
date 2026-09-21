@@ -1,0 +1,48 @@
+# A repo on its own — no ledger, no sibling. The trace schema is the repo's own: it sits under
+# [schema] with no digest, and is edited here like any other file. This is what adopting
+# qmstrace in one existing repo looks like.
+
+version = 1
+
+[schema]
+version = 1
+project = "SOLO"
+
+[schema.item_types.requirement]
+required = ["Origin"]
+
+[schema.item_types.test_case]
+levels = ["unit"]
+
+[schema.links]
+Origin   = { from = ["requirement"], to = ["origin_clause"] }
+verifies = { from = ["test_case"],   to = ["requirement"] }
+
+[[schema.rules]]
+code  = "G02"
+item  = "requirement"
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[schema.externals.brief]
+item_type   = "origin_clause"
+prefix      = "BRF-"
+source      = "docs/brief.md"
+declared_as = '^\s*[-*]\s+\*\*(BRF-\d+)\*\*'
+
+[schema.baselines.release]
+tag     = '^v\d+\.\d+\.\d+$'
+covers  = ["requirement"]
+subject = "*"
+
+[subjects.app]
+key = "APP"
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-APP-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.test_case]
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]
