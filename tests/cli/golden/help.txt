@@ -1,0 +1,19 @@
+Usage: qmstrace [OPTIONS] COMMAND [ARGS]...
+
+  The trace layer under a quality-management system.
+
+Options:
+  -C PATH    Run as if qmstrace had been started in PATH, as with git -C.
+             [default: .]
+  --version  Print the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  status  Where am I: what was read, and one line per requirement.
+
+  Exit codes:
+    0  no failing findings in this mode
+    1  the check failed — violations, or gaps under the gate; the result line says which
+    2  could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
+       an unreadable report, a shallow clone where baselines are configured
+    3  internal error — a fault in qmstrace, not in the repo

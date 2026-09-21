@@ -27,3 +27,5 @@ jobs:
         run: |
           uv build --wheel --quiet
           uv run python -c "import glob, zipfile; names = zipfile.ZipFile(glob.glob('dist/*.whl')[0]).namelist(); assert 'qmstrace/assets/README.md' in names, names"
+      - name: Manual
+        run: uv run --isolated --locked --only-group docs zensical build --clean

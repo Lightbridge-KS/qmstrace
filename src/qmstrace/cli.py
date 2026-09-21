@@ -1,15 +1,10 @@
 """qmstrace — command line. Wiring only: options in, an exit code out.
 
-Exit codes
-    0   no failing findings in this mode
-    1   the check failed — violations, or gaps under the gate; the result line says which
-    2   could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
-        an unreadable report, a shallow clone where baselines are configured
-    3   internal error
-
-The framework already exits 2 on a usage error, so this taxonomy never fights it. This module
-never imports click: the framework vendors it privately. A handler returns an int; `outcome`
-turns that — and `CouldNotJudge`, and anything unexpected — into the exit code.
+The exit codes are written once, in `EXIT_CODES` below, and `--help` prints them: a pipeline and
+an agent branch on them. The framework already exits 2 on a usage error, so this taxonomy never
+fights it. This module never imports click: the framework vendors it privately. A handler
+returns an int; `outcome` turns that — and `CouldNotJudge`, and anything unexpected — into the
+exit code.
 """
 
 from __future__ import annotations
@@ -28,11 +23,21 @@ from qmstrace.workspace import Workspace
 
 EXIT_OK, EXIT_FAILED, EXIT_COULD_NOT_JUDGE, EXIT_INTERNAL = 0, 1, 2, 3
 
+# Printed at the foot of `--help`, kept as written: the leading \b stops the framework reflowing it.
+EXIT_CODES = """\b
+Exit codes:
+  0  no failing findings in this mode
+  1  the check failed — violations, or gaps under the gate; the result line says which
+  2  could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
+     an unreadable report, a shallow clone where baselines are configured
+  3  internal error — a fault in qmstrace, not in the repo"""
+
 app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
     rich_markup_mode=None,
     help="The trace layer under a quality-management system.",
+    epilog=EXIT_CODES,
 )
 
 
@@ -86,9 +91,12 @@ def main(
     ctx.obj = directory
 
 
-@app.command()
+@app.command(short_help="Where am I: what was read, and one line per requirement.")
 @outcome
 def status(ctx: typer.Context) -> int:
-    """What was scanned, what lies around the repo, and one line per requirement."""
+    """What was scanned, what lies around the repo, and one line per requirement.
+
+    Not a check: it exits 0 whatever it counts.
+    """
     typer.echo(text.status(Workspace.open(ctx.obj).assessment()))
     return EXIT_OK

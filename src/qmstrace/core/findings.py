@@ -13,6 +13,9 @@ from typing import Final
 
 from qmstrace.core.model import Finding, Item, Link
 
+# A code's first letter is its kind, and says what it fails (data architecture § Kinds of finding).
+KINDS: Final = {"V": "violation", "G": "gap", "S": "suspect"}
+
 CODES: Final = {
     "V01": "an ID declared twice — in this repo, or already in a sibling",
     "V02": "an ID of this repo's kind that does not match its pattern",

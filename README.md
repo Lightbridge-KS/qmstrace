@@ -13,6 +13,9 @@ points at evidence that stays in its home system.
 > **Status: the first engine slice is being built.** The design is settled and recorded; the
 > package does not yet do useful work. See [`docs/progress/`](docs/progress/).
 
+**Using qmstrace?** The user manual is at <https://qmstrace.netlify.app/>. What follows is for
+working *on* qmstrace.
+
 ## Where to read
 
 | To understand… | Read |
@@ -32,7 +35,8 @@ fetched by uv.
 
 ```sh
 just sync     # install the project and its tools
-just dry      # the dry gate: format, lint, types, tests, and the wheel's package data
+just dry      # the dry gate: format, lint, types, tests, the wheel's package data, the manual
+just manual   # the user manual (contents/), served with live reload
 just          # list every recipe
 ```
 

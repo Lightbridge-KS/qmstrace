@@ -45,6 +45,31 @@ def embed() -> Callable[..., str]:
 
 
 @pytest.fixture(scope="session")
+def commands() -> list[str]:
+    """Every registered command, by the name a user types — groups included."""
+    from typer.main import get_command
+
+    from qmstrace.cli import app
+
+    group = get_command(app)
+    return sorted(getattr(group, "commands", {}))
+
+
+@pytest.fixture(scope="session")
+def golden() -> Callable[[Path, str], None]:
+    """Compare text with a committed golden file. `QMSTRACE_REGOLD=1` rewrites the file instead —
+    read the diff before committing it."""
+
+    def check(path: Path, text: str) -> None:
+        if os.environ.get("QMSTRACE_REGOLD"):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        assert text == path.read_text(encoding="utf-8"), f"{path.name} differs from its golden"
+
+    return check
+
+
+@pytest.fixture(scope="session")
 def service() -> TraceConfig:
     """The `service` repo's configuration, merged with the project's trace schema."""
     return TraceConfig.parse(

@@ -31,5 +31,13 @@ wheel:
     uv build --wheel --quiet
     uv run python -c "import glob, zipfile; names = zipfile.ZipFile(glob.glob('dist/*.whl')[0]).namelist(); assert 'qmstrace/assets/README.md' in names, names; print('wheel carries the package data')"
 
+# the user manual, served with live reload at http://localhost:8000
+manual:
+    uv run --isolated --locked --only-group docs zensical serve
+
+# build the user manual strictly — a broken link, anchor or included file fails it
+manual-build:
+    uv run --isolated --locked --only-group docs zensical build --clean
+
 # the dry gate — everything a pull request must pass; hermetic, no network
-dry: lint types test wheel
+dry: lint types test wheel manual-build

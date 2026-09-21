@@ -12,7 +12,6 @@ Regenerate a golden after an intended change: `QMSTRACE_REGOLD=1 uv run pytest t
 read the diff before committing it.
 """
 
-import os
 from collections.abc import Callable
 from pathlib import Path
 
@@ -22,6 +21,7 @@ from typer.testing import CliRunner
 from qmstrace.cli import app
 
 GOLDEN = Path(__file__).parent / "golden"
+Golden = Callable[[Path, str], None]
 runner = CliRunner()
 
 
@@ -30,33 +30,25 @@ def status(root: Path) -> tuple[int, str]:
     return result.exit_code, result.output
 
 
-def matches_golden(name: str, output: str) -> None:
-    golden = GOLDEN / f"{name}.txt"
-    if os.environ.get("QMSTRACE_REGOLD"):
-        golden.parent.mkdir(exist_ok=True)
-        golden.write_text(output, encoding="utf-8")
-    assert output == golden.read_text(encoding="utf-8")
-
-
 # ── 1. goldens ─────────────────────────────────────────────────────────────────────────────
 
 
-def test_status_with_everything_beside_the_repo(project: Path) -> None:
+def test_status_with_everything_beside_the_repo(project: Path, golden: Golden) -> None:
     code, output = status(project / "service")
     assert code == 0
-    matches_golden("status-service", output)
+    golden(GOLDEN / "status-service.txt", output)
 
 
-def test_status_as_a_pipeline_sees_it(alone: Callable[[str], Path]) -> None:
+def test_status_as_a_pipeline_sees_it(alone: Callable[[str], Path], golden: Golden) -> None:
     code, output = status(alone("client"))
     assert code == 0
-    matches_golden("status-client-in-a-pipeline", output)
+    golden(GOLDEN / "status-client-in-a-pipeline.txt", output)
 
 
-def test_status_in_a_repo_on_its_own(project: Path) -> None:
+def test_status_in_a_repo_on_its_own(project: Path, golden: Golden) -> None:
     code, output = status(project / "solo")
     assert code == 0
-    matches_golden("status-solo", output)
+    golden(GOLDEN / "status-solo.txt", output)
 
 
 def test_what_cannot_be_found_or_read_is_said_in_the_header(

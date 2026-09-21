@@ -102,6 +102,7 @@ An agent spends far more time *writing* to this surface than invoking it.
 | Rendered Word drafts | A reviewer reads, edits prose and signs. Generated tables are read-only; a draft can never be mistaken for an issued revision | ◻ — the render machine exists in a predecessor; nothing here drives it yet |
 | Reconcile | A reviewer's prose edits come back to the source as a patch an agent proposes and a person reviews (D3) | ◻ |
 | The read-only trace view | During an audit, one person drives a generated page and follows a thread from claim to evidence | ◻ |
+| **The user manual** | A developer-manager, or anyone adopting qmstrace, learns it — tutorials, how-to guides, reference, explanation — at <https://qmstrace.netlify.app/>. Written with the code, one slice at a time, and a probe of it: a page that must warn about a caveat is a design finding. Its reference includes goldens, never retyped output. Agents are steered by tool output and the skill instead | ✔ foundation (M2c) |
 
 ## 3. Entry & Onboarding
 

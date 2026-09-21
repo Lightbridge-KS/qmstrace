@@ -88,8 +88,16 @@ tests/
                          pipeline checks it out) · make_repo · git_env (a scrubbed environment)
   test_architecture.py   the import matrix, enforced
   test_catalogue.py      every command has a golden; every code has a fixture that emits it
+  test_manual.py         the user manual: a page per command, a TL;DR per page, every page in
+                         nav, includes only from tests/; the findings-table golden
+  cli/golden/            command output and help — the goldens the manual includes
+  manual/findings.md     the findings table, rendered from core/findings.py
   test_skill_parity.py   every marker example in the skill parses; every code has catalogue text
 ```
+
+Beside the package: `contents/` — the user manual, built by Zensical from `zensical.toml` and
+published by Netlify from `netlify.toml` ([writing it](../dev/writing-the-manual.md)). It imports
+nothing from the package: it includes files that tests own.
 
 💡 `workspace.py` and `cli.py` sit at the package's top level, outside the four packages: they
 are the only modules allowed to know all of them.
@@ -162,8 +170,8 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | change what counts as an item's text | `extract/markdown.py` — and D-series in the design doc, because it moves every digest |
 | change how a baseline is chosen | `core/judge.py` `resolve_baselines` |
 | change what Git is asked | `infra/git.py` |
-| change a command's output | `render/text.py` and its golden file |
-| add a command | `cli.py` (wiring), `render/text.py`, a golden — `test_catalogue.py` fails without the golden |
+| change a command's output | `render/text.py` and its golden file — then `rg <golden> contents/` for the prose that frames it |
+| add a command | `cli.py` (wiring, and a `short_help` that fits the command list), `render/text.py`, goldens for its output and its help, a page in `contents/reference/commands/` — `test_catalogue.py`, `test_help.py` and `test_manual.py` fail without them |
 | change a configuration key | `core/config.py`, both test-bed configurations, the `init` template |
 | change what the agent is told | `assets/skill/SKILL.md` or `assets/stanza.md` — `test_skill_parity.py` guards the examples |
 
@@ -197,6 +205,9 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | ★ `core` imports only `core` and the standard library; nothing imports `click` | `test_architecture.py` |
 | ★ Every registered command has a golden output | `test_catalogue.py` |
 | ★ Every finding code has catalogue text and a fixture that emits it | `test_catalogue.py` |
+| ★ Every command has a help golden and a reference page in the user manual | `tests/cli/test_help.py`, `test_manual.py` |
+| ★ Every manual page opens with a TL;DR and is in the navigation | `test_manual.py` |
+| ★ The manual includes only goldens and fixtures under `tests/`, and a missing one fails the build | `test_manual.py`; `pymdownx.snippets` `check_paths`; `just manual-build` (strict) |
 | ★ Every marker example in the shipped skill parses with the real extractors | `test_skill_parity.py` |
 | ★ Two runs of any command on the same tree give identical bytes | `tests/cli/` |
 | ★ Exit codes: a usage error 2, `CouldNotJudge` 2, a raised exception 3, never a bare traceback | `tests/cli/test_exit_codes.py` |

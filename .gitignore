@@ -12,6 +12,9 @@ _examples/
 # Third-party course slides (training-use-only) — kept locally as reference, never published
 docs/references/tracability/DEPA-Slides/
 
+# The user manual's build output (zensical build)
+site/
+
 # Python
 .venv/
 dist/
