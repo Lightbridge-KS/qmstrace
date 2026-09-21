@@ -36,3 +36,5 @@ All notable changes to this project are recorded here. The format follows
   tests own, so they cannot drift from what the tool prints.
 - `qmstrace --help` ends with the exit codes, and `status` has a summary that fits the command
   list.
+- `-C <path>` is accepted after the command as well as before it; given on both sides, it is a
+  usage error.

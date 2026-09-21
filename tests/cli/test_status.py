@@ -4,7 +4,8 @@ The load-bearing claims, each pinned by a test:
 
 1. Its output is a golden file: with everything beside the repo, and as a pipeline sees it.
 2. Two runs give the same bytes, and no absolute path of this machine leaks into them.
-3. The root is found from a folder inside the repo, and `-C` runs it elsewhere.
+3. The root is found from a folder inside the repo, and `-C` runs it elsewhere — given before the
+   command, as with `git -C`, or after it; given on both sides it is a usage error.
 4. `status` is not a check: violations are counted by code, and it still exits 0.
 5. In a ledger repo it cannot judge — exit 2, with where to run instead.
 
@@ -86,6 +87,20 @@ def test_the_root_is_found_from_inside_the_repo(
     result = runner.invoke(app, ["status"])
     assert result.exit_code == 0
     assert result.output == status(project / "service")[1]
+
+
+def test_c_after_the_command_is_the_same_as_before_it(project: Path) -> None:
+    after = runner.invoke(app, ["status", "-C", str(project / "client")])
+    assert after.exit_code == 0
+    assert after.output == status(project / "client")[1]
+
+
+def test_c_on_both_sides_is_a_usage_error(project: Path) -> None:
+    result = runner.invoke(
+        app, ["-C", str(project / "client"), "status", "-C", str(project / "service")]
+    )
+    assert result.exit_code == 2
+    assert "given twice" in result.output and "give it once" in result.output
 
 
 # ── 4. not a check ─────────────────────────────────────────────────────────────────────────

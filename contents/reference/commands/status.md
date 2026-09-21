@@ -13,10 +13,11 @@
 ```
 
 Run it anywhere inside a product repo: qmstrace walks up to the nearest `qmstrace.toml`. To run
-it on another repo, put `-C` **before** the command, as with `git -C`:
+it on another repo, give `-C` — before the command, as with `git -C`, or after it:
 
 ``` sh
 qmstrace -C ../client status
+qmstrace status -C ../client
 ```
 
 ## Output

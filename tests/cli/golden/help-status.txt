@@ -5,4 +5,6 @@ Usage: qmstrace status [OPTIONS]
   Not a check: it exits 0 whatever it counts.
 
 Options:
-  --help  Show this message and exit.
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

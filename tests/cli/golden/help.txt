@@ -3,8 +3,8 @@ Usage: qmstrace [OPTIONS] COMMAND [ARGS]...
   The trace layer under a quality-management system.
 
 Options:
-  -C PATH    Run as if qmstrace had been started in PATH, as with git -C.
-             [default: .]
+  -C PATH    Run as if qmstrace had been started in PATH, as with git -C. Before
+             or after the command.
   --version  Print the version and exit.
   --help     Show this message and exit.
 
