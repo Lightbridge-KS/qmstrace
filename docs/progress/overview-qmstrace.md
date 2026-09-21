@@ -78,7 +78,7 @@ hash — as a pointer, never as evidence (see *Done*).
       decisions and acceptance checks in [`slice-1-product-repo-half.md`](slice-1-product-repo-half.md).
       The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md).
       M0, M1 (scaffold and dry gate) and M2a (the configuration) have landed; **M2 — `status`
-      end to end — is next**
+      end to end — is built** on its branch, awaiting review
 
 ## Next
 

@@ -74,7 +74,9 @@ products, states, conformance requirements) is likewise data.
   The same guarantee is kept another way — the graph is built so that **an illegal link never
   enters it** — and the database earns its place where the union of several repos is queried
   and tables are emitted. Until a profile has a file of its own, a requirement's `Category`
-  values are read from the trace schema.
+  values are read from the trace schema, and the schema does not name its profile: the key was
+  read and carried unused, and was dropped in M2 — adding it back with the profile's file breaks
+  no configuration, keeping a key with no meaning would have been a promise nobody keeps.
 
 ### D5 — Author where the work happens; formalise in the ledger repo
 
@@ -472,29 +474,37 @@ hidden in the tool**, and the skill shipped with it never restates a rule — it
 command that prints them. Three of the six defects found in the first experiment were one
 defect: a rule that lived in code, or in prose that disagreed with the code.
 
-```toml
-[items.requirement]            # one block per item type
-id_pattern = '^REQ-<KEY>-\d{2}$'
-files      = ["docs/req/*-srs.md"]
-required   = ["Category", "Origin", "Verify-by"]
-fields     = { "Verify-by" = ["test", "inspection", "analysis"] }   # Category's values come from the profile (D8)
+The shape is settled in D9, and its annotated reference is the fixture project
+`tests/fixtures/mini/`. In outline — the project's part, then the repo's:
 
-[links]                        # marker = who may carry it, what it may point at
+```toml
+# the trace schema (the project's)
+[item_types.requirement]                 # what the project requires of a type
+required = ["Category", "Origin", "Verify-by"]
+[item_types.requirement.values]
+"Verify-by" = ["test", "inspection", "analysis"]   # a value is spelled exactly, case included
+
+[links]                                  # marker = who may carry it, what it may point at
 Satisfies = { from = ["design_element"], to = ["requirement"] }
 
-[[rules]]                      # coverage rules are data; an unmet rule is a gap
+[[rules]]                                # coverage rules are data; an unmet rule is a gap
 code  = "G02"
 item  = "requirement"
-where = { "Verify-by" = "test" }          # optional: narrows the rule by a field's value
+where = { "Verify-by" = "test" }         # optional: narrows the rule by a field's value
 needs = "incoming:verifies"
 text  = "no test verifies it yet."
 
-[external.agreement]           # IDs declared outside this repo: cited here, never declared here
-prefix = "AGR-"
-source = "<where they are declared>"
+[externals.agreement]                    # IDs declared outside any product repo
+item_type   = "origin_clause"
+prefix      = "AGR-"
+source      = "agreement.md"             # relative to the ledger
+declared_as = '^\s*[-*]\s+\*\*(AGR-\d+)\*\*'
 
-[baselines.<scope>]            # D6
-[change_requests]              # D7
+# the trace configuration (the repo's)
+[items.requirement]                      # one block per item type this repo declares
+extractor  = "markdown"                  # markdown needs an ID pattern; python-module and
+id_pattern = '^REQ-SVC-\d{2}$'           #   pytest derive their IDs and refuse one
+files      = ["docs/req/*-srs.md"]
 ```
 
 - **External IDs resolve or are announced as unverified.** A cited ID its source does not
@@ -513,6 +523,10 @@ Exercised once, with two product repos — see the fourth experiment.
   subject; another repo cites it by ID exactly like a local item, and a sibling's requirement
   re-declared locally is a violation that says whose it is.
 - **Locally, a sibling is read from its working tree and the output says so** — "not pinned".
+  **Where a sibling cannot be read** — in a pipeline only one repo is checked out — a citation
+  of an ID that is not this repo's own enters the graph as *not verified here*, is named in the
+  header, and is judged at the ledger's import. An ID matching this repo's own pattern gets no
+  such benefit: this repo was read, so it is known not to exist (decided while planning M2).
   Only the ledger's import reads at a pin.
 - **The thread between two repos runs through the origin.** Requirements are product-scoped —
   "The gateway shall…" — so a client's design element cannot satisfy a gateway requirement,

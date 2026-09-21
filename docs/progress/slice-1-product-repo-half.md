@@ -27,10 +27,14 @@ regression was the one command not re-run after a rewrite; an agent found it in 
 | DuckDB | **Slice 2**, with the ledger. Slice 1 judges rules-as-data in Python — what three experiments validated. Amends D4 |
 | Git flow | **GitHub Flow**: a branch and a draft pull request per milestone, a dry gate in CI. Docs-only changes may still go to `main` |
 | Exit codes | **`0`** no failing findings in this mode · **`1`** the check failed — violations, or gaps under `--strict`; the result line says which · **`2`** could not judge — usage, configuration, wrong kind of repo, unknown ID, unreadable report · **`3`** internal error. Click already owns 1 and 2; this never fights it |
-| Unverifiable citation | In a pipeline without the ledger, a fresh change-request citation or an origin **passes with a notice that survives `--quiet`**; it is verified for real at the ledger's import |
+| Unverifiable citation | In a pipeline without the ledger, a fresh change-request citation or an origin **passes with a notice that survives `--quiet`**; it is verified for real at the ledger's import. **The same holds for a sibling's item** when that sibling cannot be read: a link to an ID that is not this repo's own is *not verified here*. `V03` stays for an ID matching this repo's own pattern, and whenever every listed sibling was read (decided while planning M2) |
 | Suspects | **Transitive, grouped by distance** — the first hop listed, the rest counted. `impact` and suspects are two renderers of one traversal |
 | Python | **3.13+** — one glob matcher from the standard library for every tree. The tool runs in its own environment; product repos are not constrained |
 | Layout, types | `src/` layout from `uv init --package`; **mypy**, strict on `core/` |
+| Working tree *(M2)* | Inside Git, what a commit could carry — tracked, or untracked and not ignored — so an ignored note is never read, and it is what a tree at a tag will hold. Outside Git, a walk the output labels as such |
+| Field values *(M2)* | Matched exactly, case included — the stand-in lower-cased them, a hidden rule |
+| Finding codes *(M2)* | A marker carried by the wrong kind of item joins V04; a sibling's item declared again joins V01. New: **V14** a link field that holds something other than IDs, **V15** a marker form the tool does not read |
+| `-C` *(M2)* | Before the verb, as with `git -C` |
 
 ## Module shape
 
@@ -39,11 +43,13 @@ Revised by the review — the first draft would have re-grown the stand-in's `Re
 ```
 src/qmstrace/
   core/       pure, no IO
-    model        Item, Link, Finding, ItemText (digest with an algorithm tag) — frozen dataclasses
+    model        Item, Link, Lead, Finding, Notice, Extracted — frozen dataclasses; text_digest
+                 (the digest carries its algorithm)
     config       TraceConfig.parse(local_text, schema_text | None) — validates, merges, and
                  records where each key came from (the project's or the repo's)
     graph        TraceGraph.build(...) -> (graph, findings): an illegal link never enters it.
-                 node(id) knows its home: local, sibling, external. downstream/upstream return a
+                 node(id) knows its home: local, sibling, external, not verified here.
+                 downstream/upstream (M2b) return a
                  Closure that keeps the edge that reached each node
     judge        pure functions: coverage · resolve_baselines · guard · suspects
     findings     the catalogue — each code once: what is wrong, the next move
@@ -83,18 +89,25 @@ Each is a branch and a draft pull request, except M0.
       `core/config.py` and the annotated fixture project `tests/fixtures/mini/` (a ledger's
       trace schema, `service`, `client`, `solo`), parsed in full, including the parts unused
       until M5. The test bed's own configurations are rewritten in M7, when it switches over
-- [ ] **M2 · see the repo** — `status`, end to end over the working tree: the glob matcher,
-      `WorkingTree`, the three extractors, item digests including a test function's own
-      source, the agreement and a sibling read for citations, the graph with the scanning
-      findings, `Workspace` with root discovery and `-C`. Fixtures: the catalogue's *Scanning*
-      and *Configuration*; `tests/fixtures/mini/` filled out
+- [ ] **M2 · see the repo** *(built, awaiting review — branch `feat/m2-see-the-repo`)* — `status`, end to
+      end over the working tree: the glob matcher, `WorkingTree` (honours `.gitignore`), the
+      three extractors, item digests including a test function's own source, the agreement and
+      a sibling read for citations, the graph with the scanning findings — **link validation
+      and required fields land here**, since the graph cannot be built without deciding which
+      links are legal — `Workspace` with root discovery and `-C`. Fixtures: the catalogue's
+      *Scanning*, *What the stand-in passed silently*, *Across repos* and *Configuration*;
+      `tests/fixtures/mini/` filled out. The schema's `profile` key is dropped. **Checked against
+      the stand-in** on the test bed at HEAD, with new-shape configurations laid over clones:
+      every count and every requirement line the same in both repos (local notes:
+      `_playground/2026-09-21_m2-status-vs-standin/`)
 - [ ] **M2b · follow a thread** — `thread`. A local parity script — stand-in versus engine on
       the test bed's tags, with a list of expected differences — runs from here on. It lays the
       new-shape configurations over temporary copies of each tag; the test bed is untouched
       until M7
-- [ ] **M3 · judge it** — link validation, required fields, coverage rules, the findings
-      catalogue, the text renderer; `check`, `--strict`, `--quiet`, `rules`; **`impact` and
-      `Assumes`** — pure graph features, no Git needed
+- [ ] **M3 · judge it** — coverage rules (gaps), the wording pass over the findings catalogue;
+      `check`, `--strict`, `--quiet`, `rules`; **`impact` and `Assumes` traversal** — pure graph
+      features, no Git needed; the gap that says why a module with a stray `Implements:` is
+      unlinked; `status` gains its gap count and its pointer to `check`
 - [ ] **M4 · results** — the JUnit reader on defusedxml; `results`
 - [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
       test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,

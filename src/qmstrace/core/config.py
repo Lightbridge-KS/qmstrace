@@ -27,6 +27,12 @@ from typing import Final, cast
 from qmstrace.core.errors import CouldNotJudge
 
 SUPPORTED_VERSION: Final = 1
+
+# The extractors this qmstrace ships, and whether each reads IDs someone wrote — so an ID
+# pattern is required — or derives them from a path or a test function, so one is refused.
+# `extract/` registers exactly these names; a test keeps the two in step.
+EXTRACTORS: Final[Mapping[str, bool]] = {"markdown": True, "python-module": False, "pytest": False}
+
 _REGEX_META: Final = set("\\()[].*+?{|$")
 _FIX_UNKNOWN: Final = (
     "Fix: correct or remove the key — an unknown key is an error because a mistyped one "
@@ -99,6 +105,11 @@ class ExternalSource:
     source: str
     declared_as: re.Pattern[str]
 
+    def declared_in(self, text: str) -> frozenset[str]:
+        """The IDs the source's text declares — one per line that `declared_as` matches."""
+        found = (self.declared_as.search(line) for line in text.splitlines())
+        return frozenset(match.group(1) for match in found if match)
+
 
 @dataclass(frozen=True, slots=True)
 class ChangeRequests:
@@ -136,7 +147,6 @@ class TraceConfig:
     """Everything in force in one product repo: the project's schema and the repo's own part."""
 
     project: str
-    profile: str | None
     ledger: str | None
     schema_form: SchemaForm
     schema_path: str | None
@@ -233,7 +243,6 @@ class TraceConfig:
         _version(schema)
         config = cls(
             project=schema.text("project"),
-            profile=schema.opt_text("profile"),
             ledger=ledger,
             schema_form=form,
             schema_path=path,
@@ -462,7 +471,7 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
         files: tuple[str, ...] = ()
         ignore: tuple[str, ...] = ()
         if here is not None:
-            extractor = here.text("extractor")
+            extractor = _extractor(here, name)
             pattern = here.pattern("id_pattern")
             prefix = here.opt_text("id_prefix")
             files, ignore = here.texts("files"), here.texts("ignore")
@@ -470,6 +479,18 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
                 raise CouldNotJudge(
                     f"{here.file}: [items.{name}] names no files to scan.",
                     'Fix: add files = ["…"] — one or more glob patterns.',
+                )
+            if EXTRACTORS[extractor] and pattern is None:
+                raise CouldNotJudge(
+                    f"{here.file}: [items.{name}] is read by '{extractor}', which reads IDs "
+                    "someone wrote, but gives no id_pattern.",
+                    "Fix: add id_pattern = '^…$' — what an ID of this type looks like.",
+                )
+            if not EXTRACTORS[extractor] and (pattern is not None or prefix is not None):
+                raise CouldNotJudge(
+                    f"{here.file}: [items.{name}] is read by '{extractor}', which derives each "
+                    "ID from where the item is — an ID pattern would never be applied.",
+                    "Fix: remove id_pattern and id_prefix from this table.",
                 )
             if pattern is not None and prefix is None:
                 prefix = _literal_prefix(pattern.pattern)
@@ -484,6 +505,17 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
             name, required, values, levels, extractor, pattern, prefix, files, ignore
         )
     return found
+
+
+def _extractor(here: _Table, name: str) -> str:
+    extractor = here.text("extractor")
+    if extractor not in EXTRACTORS:
+        raise CouldNotJudge(
+            f"{here.file}: [items.{name}] names the extractor '{extractor}', which this "
+            f"qmstrace does not have (it has: {', '.join(EXTRACTORS)}).",
+            "Fix: use one of those.",
+        )
+    return extractor
 
 
 def _links(schema: _Table) -> dict[str, LinkType]:

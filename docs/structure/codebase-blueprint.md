@@ -50,25 +50,31 @@ Verified by running code where it says so.
 src/qmstrace/
   __init__.py            the version, read from package metadata — nothing else
   cli.py                 Typer wiring only: options, the @outcome decorator, exit codes. No logic
-  workspace.py           Workspace.open(root).assessment() — the one place that sequences a run
+  workspace.py           Workspace.open(start).assessment() — the one place that sequences a run:
+                         finds the root, reads the configuration, holds the one scan function
   core/                  pure — no file, no Git, no framework
     errors.py            CouldNotJudge — the one way a run says it could not judge; carries the next move
-    model.py             Item, Link, ItemText, Finding, Notice — frozen dataclasses
+    model.py             Item, Link, Lead, Finding, Notice, Extracted — frozen dataclasses;
+                         ID_TOKEN, what reads as an ID at all; text_digest — item text, digested
     config.py            TraceConfig.parse(local_text, schema_text) — validate, merge, provenance
-    graph.py             TraceGraph.build(...) -> (graph, findings); node(); downstream/upstream -> Closure
+    graph.py             TraceGraph.build(config, extracted, Surroundings) -> (graph, findings);
+                         node() and its Home; incoming/outgoing · downstream/upstream -> Closure (M2b)
     judge.py             coverage · resolve_baselines · guard · suspects — pure functions
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
   extract/               text in, items out — never a path, never a repo
-    base.py              IExtractor, Extracted, the registry by name
+    base.py              IExtractor, the registry by name
+    fields.py            the field line `Key: value` — shared by every extractor that reads fields
     markdown.py          headings, fields, fences, item text and its digest
     python_module.py     the module docstring's Implements line
     pytest_tests.py      test functions, the verifies marker, a function's own digest
     junit.py             the report reader — shares the test-ID convention with pytest_tests
   infra/                 everything that touches the world
-    tree.py              ISourceTree · WorkingTree · GitTree — files(), read(), label
-    git.py               IGit · GitCli — state, reachable tags, files and text at a revision
-    externals.py         the agreement, the change-request register, sibling repos
+    tree.py              ISourceTree · WorkingTree — files(), read(), label · GitTree (M5a)
+    git.py               the one subprocess helper, run where it asks, redirects scrubbed ·
+                         working_files() · IGit, GitCli — reachable tags, files at a revision (M5a)
+    externals.py         the change-request register (M5a). The agreement and the siblings need
+                         no module: they are read as WorkingTrees
     globbing.py          the one matcher, for every tree
   render/
     text.py              status, findings, rules, thread, impact, results — functions -> str
@@ -78,7 +84,8 @@ tests/
   integration/           real Git in tmp_path, a scrubbed environment, session-scoped templates
   cli/                   CliRunner against golden text files
   fixtures/mini/         the hand-made miniature project, plain files
-  conftest.py            RepoBuilder, WorkspaceBuilder
+  conftest.py            project (the fixture project as real Git repos) · alone (one repo as a
+                         pipeline checks it out) · make_repo · git_env (a scrubbed environment)
   test_architecture.py   the import matrix, enforced
   test_catalogue.py      every command has a golden; every code has a fixture that emits it
   test_skill_parity.py   every marker example in the skill parses; every code has catalogue text
@@ -123,8 +130,10 @@ sequenceDiagram
     H->>H: render.text(...) → print · return 0 or 1
 ```
 
-`CouldNotJudge` may be raised by `config`, `tree` or `git`, and nowhere else; `@outcome` turns
-it into exit `2` with its next move.
+`CouldNotJudge` may be raised by `config`, `tree` or `git`, and by `workspace` while it finds the
+repo and reads its configuration — nowhere else; `@outcome` turns it into exit `2` with its next
+move. A sibling that cannot be judged is not this repo's failure: `workspace` turns it into what
+the header says about that sibling.
 
 ## 6. The import matrix
 
@@ -174,6 +183,10 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 - **No pydantic, no rich.** Dataclasses and plain text; the tool installs with Typer and
   `defusedxml`.
 - **No use of the framework's private modules.** Typer's vendored click is not ours to import.
+- **No second item type named in `status`.** It lists `requirement` items and reads `Category`
+  and `Verify-by` by name — a known hard-coding in `render/text.py`, since every trace schema so
+  far uses those names. Everything else it prints comes from the configuration. Revisit when a
+  second schema does not.
 
 ## 9. Invariants
 
@@ -187,9 +200,12 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | ★ Every marker example in the shipped skill parses with the real extractors | `test_skill_parity.py` |
 | ★ Two runs of any command on the same tree give identical bytes | `tests/cli/` |
 | ★ Exit codes: a usage error 2, `CouldNotJudge` 2, a raised exception 3, never a bare traceback | `tests/cli/test_exit_codes.py` |
-| ★ An extractor takes text and never opens a file | `test_architecture.py` — `extract` imports neither `pathlib.Path.open` paths nor `infra` |
+| ★ An extractor takes text and never opens a file | `test_architecture.py` — nothing in `extract` imports a file-system module or calls `open`, `read_text` and their kin |
+| ★ Every import is absolute, so the matrix cannot be walked around | `test_architecture.py`; ruff `TID252` |
+| ★ The working tree is what a commit could carry — an ignored file is never read | `tests/integration/test_tree.py` |
 | ★ The wheel contains the skill and the templates | CI, M1 |
 | ★ An illegal link never enters the graph | `tests/unit/test_graph.py` — `build` returns it as a finding instead |
+| ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspects.py` |
 | A problem in the user's repo is a finding, never an exception | review; `extract/` has no `raise` outside parse failures it converts |
 | `cli.py` holds no logic | review; its handlers are open → render → return |

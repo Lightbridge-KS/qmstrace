@@ -9,7 +9,6 @@
 
 version = 1
 project = "MINI"
-profile = "iso29110-basic"          # the standard's catalogue this project follows
 
 [repos]                             # the product repos of this project
 service = "../service"

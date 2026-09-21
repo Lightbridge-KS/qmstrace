@@ -2,9 +2,12 @@
 
 The load-bearing claims, each pinned by a test:
 
-1. Each package imports only what `docs/structure/codebase-blueprint.md` § 6 allows.
+1. Each package imports only what `docs/structure/codebase-blueprint.md` § 6 allows — and
+   every import is absolute, so the check above cannot be walked around.
 2. Nothing imports `click`: the framework vendors it privately, and it is not installed.
 3. A subpackage's `__init__.py` holds no code — no barrel re-exports.
+4. An extractor takes text and never touches the file system: the same extractor reads the
+   working tree, a tree at a baseline tag and a sibling.
 """
 
 import ast
@@ -56,6 +59,16 @@ def test_a_module_imports_only_what_its_layer_may(path: Path) -> None:
         )
 
 
+def test_every_import_is_absolute() -> None:
+    relative = [
+        f"{path.relative_to(SRC)}:{node.lineno}"
+        for path in SRC.rglob("*.py")
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+        if isinstance(node, ast.ImportFrom) and node.level
+    ]
+    assert not relative, f"relative imports hide a layer from the matrix: {relative}"
+
+
 def test_nothing_imports_click() -> None:
     offenders = [str(p.relative_to(SRC)) for p in SRC.rglob("*.py") if "click" in _imports(p)]
     assert not offenders, (
@@ -66,3 +79,27 @@ def test_nothing_imports_click() -> None:
 def test_a_subpackage_init_holds_no_code() -> None:
     for init in SRC.glob("*/__init__.py"):
         assert not init.read_text(encoding="utf-8").strip(), f"{init.relative_to(SRC)} is not empty"
+
+
+# what reaching the file system looks like, in the source of an extractor
+_FILE_SYSTEM_MODULES = {"os", "io", "pathlib", "shutil", "subprocess", "glob", "tempfile"}
+_FILE_SYSTEM_CALLS = {"open", "read_text", "read_bytes", "write_text", "write_bytes", "iterdir"}
+
+
+def test_an_extractor_never_touches_the_file_system() -> None:
+    for path in sorted((SRC / "extract").rglob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Import):
+                names = {alias.name.split(".")[0] for alias in node.names}
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                names = {node.module.split(".")[0]}
+            elif isinstance(node, ast.Name | ast.Attribute):
+                names = {node.id if isinstance(node, ast.Name) else node.attr}
+                names &= _FILE_SYSTEM_CALLS
+            else:
+                continue
+            reached = names & (_FILE_SYSTEM_MODULES | _FILE_SYSTEM_CALLS)
+            assert not reached, (
+                f"{path.relative_to(SRC)}:{node.lineno} reaches the file system ({reached}); "
+                "an extractor takes text — the tree reads files"
+            )
