@@ -52,6 +52,7 @@ src/qmstrace/
   cli.py                 Typer wiring only: options, the @outcome decorator, exit codes. No logic
   workspace.py           Workspace.open(root).assessment() — the one place that sequences a run
   core/                  pure — no file, no Git, no framework
+    errors.py            CouldNotJudge — the one way a run says it could not judge; carries the next move
     model.py             Item, Link, ItemText, Finding, Notice — frozen dataclasses
     config.py            TraceConfig.parse(local_text, schema_text) — validate, merge, provenance
     graph.py             TraceGraph.build(...) -> (graph, findings); node(); downstream/upstream -> Closure

@@ -11,3 +11,13 @@ _examples/
 
 # Third-party course slides (training-use-only) — kept locally as reference, never published
 docs/references/tracability/DEPA-Slides/
+
+# Python
+.venv/
+dist/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
