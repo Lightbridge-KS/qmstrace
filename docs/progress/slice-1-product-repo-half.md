@@ -102,7 +102,7 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       the stand-in** on the test bed at HEAD, with new-shape configurations laid over clones:
       every count and every requirement line the same in both repos (local notes:
       `_playground/2026-09-21_m2-status-vs-standin/`)
-- [ ] **M2c · the user manual's foundation** *(built, awaiting review — branch `feat/m2c-user-manual`)* —
+- [x] **M2c · the user manual's foundation** *(merged — pull request 5, `e7cbb05`; live at <https://qmstrace.netlify.app/>)* —
       Zensical, source in `contents/`, published on Netlify. Reference is never restated: a page
       frames goldens, help output and fixture files that tests own. Seven pages for what M2
       built. Netlify is imported only after this merges, so that nothing unbuilt is ever

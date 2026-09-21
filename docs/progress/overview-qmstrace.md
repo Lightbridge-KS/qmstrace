@@ -77,8 +77,9 @@ hash — as a pointer, never as evidence (see *Done*).
 - [ ] **Engine slice 1 — the product-repo half.** Planned, reviewed and approved; milestones,
       decisions and acceptance checks in [`slice-1-product-repo-half.md`](slice-1-product-repo-half.md).
       The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md).
-      M0, M1 (scaffold and dry gate), M2a (the configuration) and M2 (`status`, end to end)
-      have landed; **M2b — `thread` and the local parity script — is next**
+      M0, M1 (scaffold and dry gate), M2a (the configuration), M2 (`status`, end to end) and
+      M2c (the user manual, live at <https://qmstrace.netlify.app/>) have landed; **M2b —
+      `thread` and the local parity script — is next**, with its manual pages
 
 ## Next
 
