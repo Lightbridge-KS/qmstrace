@@ -373,7 +373,8 @@ tag = '^v\d+\.\d+\.\d+$'   subject = "*"      # a scope names its subject: in th
 
 - **Three forms, not two.** The third — the schema's content under `[schema]` with no digest —
   is a repo that has no ledger: what adopting the tool in one existing repo looks like. A path
-  together with a digest or content is an error.
+  together with a digest or content is an error. *Rejected — a path with a digest as a pin on
+  the ledger's file:* a fourth form, for a job the ledger's import already does at a pin.
 - **A copy edited by hand is refused**, by a self-check that needs no ledger: the digest is
   taken over the schema's *content*, independent of key order, comments and layout, so the
   same function serves the ledger's file and a repo's copy of it.

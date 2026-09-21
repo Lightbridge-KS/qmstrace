@@ -79,18 +79,26 @@ Each is a branch and a draft pull request, except M0.
       coverage; `justfile`; CI with named steps; `--version` from package metadata; **a wheel
       is built in CI and a placeholder asset read back from it** — data files missing from a
       wheel is a classic late surprise
-- [ ] **M2a · the configuration, by example** *(in review — branch `feat/m2a-configuration-by-example`)* — both test-bed configurations rewritten in the
-      new shape and parsed in full, including the parts unused until M5. A later change of
-      shape would churn every fixture
-- [ ] **M2 · see the repo** — trees (working, at a revision, with a contract test), the three
-      extractors, item digests including a test function's own source, the graph; `status`,
-      `thread`. A local parity script — stand-in versus engine on the test bed's tags, with a
-      list of expected differences — runs from here on
+- [x] **M2a · the configuration, by example** *(merged — pull request 2, `eba3e37`)* —
+      `core/config.py` and the annotated fixture project `tests/fixtures/mini/` (a ledger's
+      trace schema, `service`, `client`, `solo`), parsed in full, including the parts unused
+      until M5. The test bed's own configurations are rewritten in M7, when it switches over
+- [ ] **M2 · see the repo** — `status`, end to end over the working tree: the glob matcher,
+      `WorkingTree`, the three extractors, item digests including a test function's own
+      source, the agreement and a sibling read for citations, the graph with the scanning
+      findings, `Workspace` with root discovery and `-C`. Fixtures: the catalogue's *Scanning*
+      and *Configuration*; `tests/fixtures/mini/` filled out
+- [ ] **M2b · follow a thread** — `thread`. A local parity script — stand-in versus engine on
+      the test bed's tags, with a list of expected differences — runs from here on. It lays the
+      new-shape configurations over temporary copies of each tag; the test bed is untouched
+      until M7
 - [ ] **M3 · judge it** — link validation, required fields, coverage rules, the findings
       catalogue, the text renderer; `check`, `--strict`, `--quiet`, `rules`; **`impact` and
       `Assumes`** — pure graph features, no Git needed
 - [ ] **M4 · results** — the JUnit reader on defusedxml; `results`
-- [ ] **M5a · baselines and change** — Git, baseline resolution, the guard, change requests
+- [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
+      test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,
+      the guard, change requests
 - [ ] **M5b · suspects** — item-level, transitive, never cleared by a touch
 - [ ] **M6 · setting up a repo** — `init` (trace configuration, stanza between markers, the
       test framework's marker registered, idempotent); the skill as package data with the
@@ -143,6 +151,12 @@ output, and every catalogue code has a fixture that emits it.
 
 - *Settled in M2a:* an ID's literal start is derived from its pattern; `id_prefix` is given only
   when the pattern starts with no literal text.
+- *Settled after M2a:* `[schema]` with a path **and** a digest stays an error — three forms, not
+  four; pinning the project's schema is the ledger's import's job (D9). The schema's unused
+  `profile` key is **dropped** until a profile has a file of its own — adding it back breaks no
+  file, removing it later would. Lands in M2, with D4/D8's note.
+- *Settled after M2a:* M2 is cut in two vertical steps (`status`, then `thread` with the parity
+  script), and `GitTree` moves to M5a.
 
 - `Status: withdrawn` needs semantics: a withdrawn item should stop raising coverage gaps.
 - A test function's digest uses `ast`; its dump format changed in Python 3.13. Harmless while

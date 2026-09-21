@@ -8,12 +8,13 @@ read_when:
 
 # qmstrace — progress
 
-**Phase: design, before any engine code.** The authoring workflow is being proven on a test
-bed with a throwaway stand-in for the engine; findings graduate into the design docs. This
-tracker points; it does not restate. Terms follow [`CONTEXT.md`](../../CONTEXT.md).
+**Phase: engine slice 1 is being built.** The design is settled and recorded; the authoring
+workflow was proven first on a test bed with a throwaway stand-in, whose scenarios now seed
+the engine's tests. This tracker points; it does not restate. Terms follow
+[`CONTEXT.md`](../../CONTEXT.md).
 
-Landed work is cited by document and by test-bed tag, not by commit hash — nothing in this
-repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed contracts*).
+Design work is cited by document and by test-bed tag. Engine milestones may cite a commit
+hash — as a pointer, never as evidence (see *Done*).
 
 ## Done
 
@@ -75,7 +76,9 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
 
 - [ ] **Engine slice 1 — the product-repo half.** Planned, reviewed and approved; milestones,
       decisions and acceptance checks in [`slice-1-product-repo-half.md`](slice-1-product-repo-half.md).
-      The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md)
+      The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md).
+      M0, M1 (scaffold and dry gate) and M2a (the configuration) have landed; **M2 — `status`
+      end to end — is next**
 
 ## Next
 
