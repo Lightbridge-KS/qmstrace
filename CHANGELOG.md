@@ -30,3 +30,9 @@ All notable changes to this project are recorded here. The format follows
   be parsed, an origin the agreement does not declare, a link field that holds no ID.
 - A citation of another repo's item that cannot be checked here — as in a pipeline with one repo
   checked out — passes as *not verified here* instead of failing.
+- The user manual, built with Zensical from `contents/` and published on Netlify: a first-look
+  tutorial, reference pages for `status`, findings, exit codes and configuration, and an
+  explanation of what lies around a repo. Reference pages include the goldens and fixtures the
+  tests own, so they cannot drift from what the tool prints.
+- `qmstrace --help` ends with the exit codes, and `status` has a summary that fits the command
+  list.

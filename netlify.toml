@@ -1,0 +1,13 @@
+# The user manual, built by Netlify from this repository: source in contents/, configuration in
+# zensical.toml. Only the `docs` dependency group is installed, in an isolated environment — the
+# project itself is not, so the build never imports qmstrace.
+
+[build]
+  command = "pip install 'uv>=0.11,<0.12' && uv run --isolated --locked --only-group docs zensical build --clean"
+  publish = "site"
+  # Build only when something the manual reads has changed (exit 0 skips the build). A first
+  # build, where there is no earlier commit to compare with, always runs.
+  ignore = "[ \"$CACHED_COMMIT_REF\" != \"$COMMIT_REF\" ] && git diff --quiet \"$CACHED_COMMIT_REF\" \"$COMMIT_REF\" -- contents/ zensical.toml netlify.toml tests/cli/golden/ tests/manual/ tests/fixtures/mini/ uv.lock"
+
+[build.environment]
+  PYTHON_VERSION = "3.13"

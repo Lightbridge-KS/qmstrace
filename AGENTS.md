@@ -50,6 +50,10 @@ qmstrace      (this repo: the tool — it holds no project data)
   facts. `_examples/` and `_playground/` are local and gitignored — never commit from them.
 - **Attention markers.** 💡 marks the few spots that need the developer's judgement;
   `rg 💡` is the review checklist. Budget them.
+- **A milestone ships its manual pages.** The user manual (`contents/`, published) grows with
+  the code, and a page that must warn about a caveat is a design finding — how, in
+  [`docs/dev/writing-the-manual.md`](docs/dev/writing-the-manual.md). What the tool prints is
+  included from a golden, never retyped.
 
 ## Experiments
 
@@ -79,5 +83,6 @@ before reopening any of these.
 
 Conventional Commits. **GitHub Flow from the first engine slice on**: a branch and a draft
 pull request per milestone, with the dry gate green — format, lint, types, tests. A reviewed
-pull request is what this product calls a verification record. **Docs-only changes may still
-go straight to `main`.** Commit only when asked. The remote is a private repository.
+pull request is what this product calls a verification record. **Docs-only changes to
+`docs/` may still go straight to `main`** — never `contents/`: the manual is published, so it
+goes through a pull request. Commit only when asked. The remote is a private repository.

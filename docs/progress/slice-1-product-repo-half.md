@@ -74,7 +74,9 @@ tree, a tree at a baseline tag, and a sibling.
 
 ## Milestones
 
-Each is a branch and a draft pull request, except M0.
+Each is a branch and a draft pull request, except M0. **From M2c on, each ships its pages of
+the user manual** (`contents/`, Diátaxis) — a page that has to warn about a caveat is a design
+finding, filed as a `ux` issue unless a milestone already owns the gap.
 
 - [x] **M0 · docs** — this tracker · the [scenario catalogue](../tests/scenario-catalogue.md) ·
       design docs amended for the decisions above and for what the review found ·
@@ -100,6 +102,13 @@ Each is a branch and a draft pull request, except M0.
       the stand-in** on the test bed at HEAD, with new-shape configurations laid over clones:
       every count and every requirement line the same in both repos (local notes:
       `_playground/2026-09-21_m2-status-vs-standin/`)
+- [ ] **M2c · the user manual's foundation** *(built, awaiting review — branch `feat/m2c-user-manual`)* —
+      Zensical, source in `contents/`, published on Netlify. Reference is never restated: a page
+      frames goldens, help output and fixture files that tests own. Seven pages for what M2
+      built. Netlify is imported only after this merges, so that nothing unbuilt is ever
+      published. *Waits:* running in a pipeline (slice 2, the schema's copy) · markers (M6,
+      beside the skill) · the chain (M2b, shown with `thread`). Frictions found: one `ux` issue
+      (#4, `-C` only before the command); the others are owned by M3, M5a and slice 2
 - [ ] **M2b · follow a thread** — `thread`. A local parity script — stand-in versus engine on
       the test bed's tags, with a list of expected differences — runs from here on. It lays the
       new-shape configurations over temporary copies of each tag; the test bed is untouched

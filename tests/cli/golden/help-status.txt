@@ -1,0 +1,8 @@
+Usage: qmstrace status [OPTIONS]
+
+  What was scanned, what lies around the repo, and one line per requirement.
+
+  Not a check: it exits 0 whatever it counts.
+
+Options:
+  --help  Show this message and exit.

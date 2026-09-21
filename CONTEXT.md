@@ -302,6 +302,12 @@ _Avoid_: QMS repo, docs repo
 qmstrace itself — the tool. It holds no project data.
 _Avoid_: platform, system
 
+**User Manual**:
+qmstrace's own documentation for the people who use it — tutorials, how-to guides, reference and
+explanation — written in `contents/` and published. Not repo memory, which is internal, and not a
+controlled document.
+_Avoid_: docs (that is repo memory), documentation site, help
+
 **Stanza**:
 The short generated block in a product repo's agent guide saying that the repo is traced and
 what that asks of an agent working there.

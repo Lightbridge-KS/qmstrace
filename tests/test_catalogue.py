@@ -13,7 +13,6 @@ from pathlib import Path
 
 import pytest
 
-from qmstrace.cli import app
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.findings import CODES
 from qmstrace.core.graph import Surroundings, TraceGraph
@@ -24,10 +23,9 @@ from qmstrace.infra.globbing import matches
 GOLDEN = Path(__file__).parent / "cli" / "golden"
 
 
-def test_every_command_has_a_golden() -> None:
-    names = [c.name or (c.callback.__name__ if c.callback else "") for c in app.registered_commands]
-    assert names, "no command is registered"
-    missing = [name for name in names if not list(GOLDEN.glob(f"{name}-*.txt"))]
+def test_every_command_has_a_golden(commands: list[str]) -> None:
+    assert commands, "no command is registered"
+    missing = [name for name in commands if not list(GOLDEN.glob(f"{name}-*.txt"))]
     assert not missing, f"commands with no golden output in {GOLDEN}: {missing}"
 
 
