@@ -243,6 +243,70 @@ def _heading(node: Node) -> str:
     return f"{node.id} — {node.title}" if node.title and node.title not in node.id else node.id
 
 
+def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
+    """The combined impact of several starts, and a candidate change-request line."""
+    graph = assessment.graph
+    starts = set(item_ids)
+    forward = graph.forward(starts)
+    backward = graph.backward(starts)
+    downstream = set(forward.steps) - starts
+    external_types = {source.item_type for source in assessment.config.externals.values()}
+    origins = {
+        item_id
+        for item_id, step in backward.steps.items()
+        if item_id not in starts
+        and step.node.type in external_types
+        and not _is_dependency(assessment, step)
+    }
+    lines = ["impact — working-tree analysis, this repo only", "", "starting items:"]
+    lines += [f"  {_heading(graph.nodes[i])} · {_what(graph.nodes[i])}" for i in sorted(starts)]
+    lines += _problems(assessment)
+    lines += [f"  {notice.text}" for notice in assessment.notices]
+    if any(graph.nodes[i].home is Home.SIBLING for i in starts):
+        lines.append("  sibling ancestry and downstream links there are not scanned")
+
+    lines += ["", "downstream — grouped by item type:"]
+    order = list(assessment.config.item_types)
+    groups = {graph.nodes[i].type or "unverified item" for i in downstream}
+    for kind in sorted(groups, key=lambda t: (order.index(t) if t in order else len(order), t)):
+        members = sorted(
+            i for i in downstream if (graph.nodes[i].type or "unverified item") == kind
+        )
+        lines.append(f"  {kind.replace('_', ' ')} ({len(members)}):")
+        lines += [f"    {_line(assessment, forward, forward.steps[i])}" for i in members]
+    if not downstream:
+        lines.append("  nothing here hangs off the starting items")
+
+    lines += ["", "upstream origins — of the starting items:"]
+    lines += [f"  {_heading(graph.nodes[i])} · {_what(graph.nodes[i])}" for i in sorted(origins)]
+    if not origins:
+        lines.append("  no upstream origins reached here")
+
+    covered = {
+        kind for baseline in assessment.config.baselines.values() for kind in baseline.covers
+    }
+    candidates = sorted(i for i in starts | downstream if graph.nodes[i].type in covered)
+    unknown = sorted(i for i in starts | downstream if graph.nodes[i].type is None)
+    lines += [
+        "",
+        "candidate for review — configured baseline types, not a claim of edits or frozen state:",
+    ]
+    if unknown:
+        lines.append(f"  unknown type, omitted from the candidate: {', '.join(unknown)}")
+    if candidates:
+        lines.append(f"Impacts: {', '.join(candidates)}")
+    elif not covered:
+        lines.append("  no candidate line — no baseline item types are configured")
+    else:
+        lines.append("  no candidate line — no items with a known type covered by a baseline")
+    lines += [
+        "",
+        f"starts: {len(starts)} · downstream: {_counts(assessment, forward)} · "
+        f"upstream origins: {len(origins)} — this repo only",
+    ]
+    return "\n".join(lines)
+
+
 def _what(node: Node) -> str:
     """The type and home of an item, and where to read it."""
     kind = node.type.replace("_", " ") if node.type else "an item of unknown type"

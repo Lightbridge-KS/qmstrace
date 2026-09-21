@@ -11,6 +11,7 @@ Options:
 Commands:
   status  Where am I: what was read, and one line per requirement.
   thread  What one item derives from, and what hangs off it.
+  impact  What changing several items affects, with a candidate Impacts line.
   check   What is wrong, and what is not done yet — the gate with --strict.
   rules   What check holds this repo to, and whose each rule is.
 

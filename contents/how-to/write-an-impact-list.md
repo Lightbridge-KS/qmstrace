@@ -1,0 +1,40 @@
+# Write an impact list
+
+!!! abstract "TL;DR"
+
+    Before editing several traced items, run `qmstrace impact ID…` with their IDs. Review the
+    downstream work, origins and source limitations, then use the candidate line to prepare
+    the change request. Keep proposed new items explicit; a graph walk cannot invent them.
+
+1. Identify the existing items the request would change. In the miniature service, for example:
+
+    ``` sh
+    qmstrace -C service impact REQ-SVC-01 REQ-SVC-02
+    ```
+
+2. Read the source notices before using the list. If a starting ID is unseen, correct it or
+   make its source available and rerun. The whole request stops until every start is visible.
+   Checking whether a change request reserves an undeclared ID is **not built yet**; it arrives
+   with the baseline guard.
+
+3. Review the combined output:
+
+    ``` text
+    --8<-- "cli/golden/impact-multiple.txt"
+    ```
+
+4. Inspect the downstream designs, components and tests to decide which need edits and which
+   need review only. Inspect the listed origins to decide whether the proposed change also
+   requires a change to the agreement. The command's boundary is this repo; obtain the other
+   repos' analyses for a change that spans them.
+
+5. Use the candidate `Impacts:` line as the starting point for the change request's list.
+   Review it against the proposed edits; record review-only work in the impact analysis.
+   Explicitly name proposed new items and any new agreement clause. The traversal cannot
+   infer future content, and printing this line does not approve the change request.
+
+6. Follow the project's change-request acceptance process before editing frozen work. After
+   the accepted edits, run [check](../reference/commands/check.md) and review the changed
+   trace links.
+
+For the filtering rules and exit codes, see [impact](../reference/commands/impact.md).

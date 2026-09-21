@@ -137,6 +137,30 @@ class Workspace:
         assessment = self.assessment()
         if assessment.graph.node(item_id) is not None:
             return assessment
+        raise self._unseen(assessment, item_id)
+
+    def impact(self, item_ids: Iterable[str]) -> Assessment:
+        """Assess once; refuse the whole request if any starting item is unseen."""
+        starts = sorted(set(item_ids))
+        if not starts:
+            raise CouldNotJudge("No starting IDs supplied.", "Fix: pass at least one item ID.")
+        assessment = self.assessment()
+        missing = [
+            self._unseen(assessment, item_id)
+            for item_id in starts
+            if assessment.graph.node(item_id) is None
+        ]
+        if missing:
+            details = "\n".join(f"{problem.what} {problem.next_move}" for problem in missing)
+            raise CouldNotJudge(
+                details,
+                "No impact list was produced. Change-request reservations are not read yet; "
+                "an unseen ID is not presumed reserved.",
+            )
+        return assessment
+
+    def _unseen(self, assessment: Assessment, item_id: str) -> CouldNotJudge:
+        """An unseen start, with the same source limits and next move in every walk."""
         unread = [s.name for s in assessment.siblings if s.declares is None]
         beyond = ""
         if not assessment.siblings_located:
@@ -145,7 +169,7 @@ class Workspace:
             beyond = f", and sibling {', '.join(unread)} could not be read"
         near = assessment.graph.closest(item_id)
         hint = f"the closest here: {', '.join(near)}; " if near else ""
-        raise CouldNotJudge(
+        return CouldNotJudge(
             f"{item_id} is not an item this run can see — nothing here declares or cites it"
             f"{beyond}.",
             f"Fix: check the ID — {hint}`qmstrace status` lists this repo's requirements.",

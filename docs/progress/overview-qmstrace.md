@@ -78,8 +78,11 @@ hash — as a pointer, never as evidence (see *Done*).
       decisions and acceptance checks in [`slice-1-product-repo-half.md`](slice-1-product-repo-half.md).
       The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md).
       M0, M1 (scaffold and dry gate), M2a (the configuration), M2 (`status`, end to end), M2c
-      (the user manual, live at <https://qmstrace.netlify.app/>) and M2b (`thread`, the parity
-      script) have landed; **M3 — `check`, `rules`, `impact`, coverage gaps — is next**
+      (the user manual, live at <https://qmstrace.netlify.app/>), M2b (`thread`, the parity
+      script) and M3 (`check`, `rules`, coverage gaps; pull request 8, `ba2e0ca`) have landed.
+      **M3b — `impact` — is built and verified, awaiting review** on `codex/m3b-impact`;
+      M4 (`results`) follows its merge.
+      The four M3 manual pages were verified to return HTTP 200 on 2026-09-21.
 
 ## Next
 

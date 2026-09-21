@@ -1,0 +1,29 @@
+impact — working-tree analysis, this repo only
+
+starting items:
+  REQ-SVC-01 — A call carries a key · requirement · docs/req/service-srs.md:12
+  REQ-SVC-02 — Records survive a restart · requirement · docs/req/service-srs.md:21
+  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+
+downstream — grouped by item type:
+  design element (2):
+    DSN-SVC-01 — Key check · design element · docs/design/service-design.md:8
+    DSN-SVC-02 — Record store · design element · docs/design/service-design.md:13 · also Assumes DSN-SVC-01
+  component (2):
+    src/service/keys.py · component
+    src/service/store.py · component
+  test case (4):
+    tests/integration/test_store.py::test_a_record_survives_a_restart · test case, integration · also verifies DSN-SVC-02
+    tests/integration/test_store.py::test_a_restart_loses_no_accepted_record · test case, integration
+    tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler · test case, unit
+    tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused · test case, unit
+
+upstream origins — of the starting items:
+  AGR-1 · origin clause, in the agreement
+  AGR-2 · origin clause, in the agreement
+  AGR-3 · origin clause, in the agreement
+
+candidate for review — configured baseline types, not a claim of edits or frozen state:
+Impacts: DSN-SVC-01, DSN-SVC-02, REQ-SVC-01, REQ-SVC-02
+
+starts: 2 · downstream: 2 design elements, 2 components, 4 test cases · upstream origins: 3 — this repo only

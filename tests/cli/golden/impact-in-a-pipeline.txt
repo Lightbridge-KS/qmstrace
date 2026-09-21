@@ -1,0 +1,20 @@
+impact — working-tree analysis, this repo only
+
+starting items:
+  REQ-SVC-01 · not verified here — judged at the ledger's import
+  external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
+  sibling service: NOT REACHABLE at ../service
+  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+
+downstream — grouped by item type:
+  test case (1):
+    tests/unit/test_api.py::test_the_service_refuses_a_call_without_a_key · test case, unit
+
+upstream origins — of the starting items:
+  no upstream origins reached here
+
+candidate for review — configured baseline types, not a claim of edits or frozen state:
+  unknown type, omitted from the candidate: REQ-SVC-01
+  no candidate line — no items with a known type covered by a baseline
+
+starts: 1 · downstream: 1 test case · upstream origins: 0 — this repo only

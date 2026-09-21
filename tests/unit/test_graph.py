@@ -374,6 +374,29 @@ def test_backward_from_a_test_reaches_its_clauses(service: TraceConfig) -> None:
     ]
 
 
+@pytest.mark.parametrize("starts", [[TEST], ["DSN-SVC-02", TEST]])
+def test_ordinary_ancestry_survives_an_earlier_assumption(
+    service: TraceConfig, starts: list[str]
+) -> None:
+    design = DESIGN.replace("Assumes: DSN-SVC-01", "Assumes: REQ-SVC-01")
+    design += "\n## DSN-SVC-03 — Another design\nSatisfies: REQ-SVC-01\n"
+    tests = TESTS.replace('"REQ-SVC-01", "DSN-SVC-01"', '"DSN-SVC-02", "DSN-SVC-03"')
+    graph, wrong = build(
+        service,
+        {
+            ("design_element", "docs/design/service-design.md"): design,
+            ("test_case", "tests/unit/test_keys.py"): tests,
+        },
+    )
+    assert not wrong
+    walk = graph.backward(starts)
+    assert "AGR-1" in walk.steps
+    assert walk.steps["REQ-SVC-01"].via.marker == "Satisfies"
+    assert any(link.marker == "Assumes" for link in walk.steps["REQ-SVC-01"].also)
+    distances = [step.distance for step in walk.steps.values()]
+    assert distances == sorted(distances)
+
+
 def test_a_start_reached_from_another_start_is_still_a_step(service: TraceConfig) -> None:
     graph, _ = build(service)
     walk = graph.forward(["DSN-SVC-01", "REQ-SVC-01"])

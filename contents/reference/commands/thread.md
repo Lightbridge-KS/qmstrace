@@ -49,6 +49,10 @@ The same item in a pipeline, where the sibling and the ledger are not checked ou
 --8<-- "cli/golden/thread-in-a-pipeline.txt"
 ```
 
+When an assumption and an ordinary ancestry path reach the same item backward, the ordinary
+path is used so its origins remain visible; the assumption is retained as `also`. To combine
+several starting items into a change-request candidate, use [impact](impact.md).
+
 ## Reading a line
 
 | Part | Example | What it says |
