@@ -75,11 +75,11 @@ Each is a branch and a draft pull request, except M0.
       [`system-architecture.md`](../design/system-architecture.md) (C1–C2, a first C3) ·
       the [codebase blueprint](../structure/codebase-blueprint.md), whose framework check found
       that this Typer no longer installs click · the agent guide's Git rule
-- [ ] **M1 · scaffold and gate** *(in review — branch `feat/m1-scaffold-and-gate`)* — `uv init --package`; typer; ruff, mypy, pytest with
+- [x] **M1 · scaffold and gate** *(merged — pull request 1)* — `uv init --package`; typer; ruff, mypy, pytest with
       coverage; `justfile`; CI with named steps; `--version` from package metadata; **a wheel
       is built in CI and a placeholder asset read back from it** — data files missing from a
       wheel is a classic late surprise
-- [ ] **M2a · the configuration, by example** — both test-bed configurations rewritten in the
+- [ ] **M2a · the configuration, by example** *(in review — branch `feat/m2a-configuration-by-example`)* — both test-bed configurations rewritten in the
       new shape and parsed in full, including the parts unused until M5. A later change of
       shape would churn every fixture
 - [ ] **M2 · see the repo** — trees (working, at a revision, with a contract test), the three
@@ -141,7 +141,9 @@ output, and every catalogue code has a fixture that emits it.
 
 ## Open questions
 
+- *Settled in M2a:* an ID's literal start is derived from its pattern; `id_prefix` is given only
+  when the pattern starts with no literal text.
+
 - `Status: withdrawn` needs semantics: a withdrawn item should stop raising coverage gaps.
-- `id_prefix` in a configuration — keep it, or derive it from the ID pattern.
 - A test function's digest uses `ast`; its dump format changed in Python 3.13. Harmless while
   both sides are computed at run time — a format question once slice 2 writes the lock.

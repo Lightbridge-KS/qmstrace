@@ -1,0 +1,25 @@
+# The second product repo of project MINI — it cites the service's items by ID and declares
+# its own under its own subject. It has no design documents, so it declares no design elements:
+# the project knows the type; this repo simply does not scan for it.
+
+version = 1
+ledger  = "../ledger"
+
+[schema]
+path = "../ledger/qmstrace.schema.toml"
+
+[subjects.client]
+key = "CLT"
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-CLT-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.component]
+extractor = "python-module"
+files     = ["src/**/*.py"]
+
+[items.test_case]
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]

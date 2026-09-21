@@ -335,29 +335,52 @@ the repo's.
   of the rules drift, and nothing says which is right.
 - **Not yet tried.** The experiment exercised the path form.
 
-The shape, settled while planning the engine — it lands in every product repo, so it is
-expensive to change:
+The shape — settled by writing the examples first and the parser second, because it lands in
+every product repo and is expensive to change. **The annotated reference is the engine's own
+fixture project**: `tests/fixtures/mini/` holds a ledger's trace schema, two product repos'
+trace configurations and a repo on its own, and the tests parse all of them.
 
 ```toml
+# a product repo's trace configuration — qmstrace.toml
 version = 1                                   # an unknown key anywhere is a configuration error:
 ledger  = "../the-ledger"                     # a mistyped `requird` would be a hidden rule
                                               # `ledger` is optional — without it, external sources
 [subjects.gateway]                            # are reported as not verified
 key = "BCN"                                   # the subject, named where an agent can see it
 
-[schema]                                      # form 1 — a path (a test bed, repos side by side)
-path = "../the-ledger/qmstrace.schema.toml"
-
-[schema]                                      # form 2 — the generated, verified copy
-digest = "sha256:…"                           # the ledger's import refuses a mismatch
-[schema.links] …   [[schema.rules]] …         # its own namespace: TOML refuses a table declared twice
+[schema]                                      # the project's trace schema, in one of three forms:
+path = "../the-ledger/qmstrace.schema.toml"   #  1. by path — repos side by side, a test bed
+# digest = "sha256:…" + the schema's content  #  2. a generated, verified copy — checked here
+# the schema's content, with no digest        #  3. the repo's own — a repo with no ledger
 
 [items.requirement]
 extractor  = "markdown"                       # named here — never inferred from the type's name
-id_pattern = '^REQ-BCN-\d{2}$'
+id_pattern = '^REQ-BCN-\d{2}$'                # the ID's literal start is derived from it
 files      = ["docs/req/*-srs.md"]
 ```
 
+```toml
+# the project's trace schema — qmstrace.schema.toml, in the ledger
+[item_types.requirement]                      # what the project requires of a type…
+required = ["Category", "Origin", "Verify-by"]
+[links]
+Assumes = { from = […], to = […], coverage = false }   # …a link says whether it counts toward coverage
+[externals.agreement]                         # items declared outside any product repo
+item_type = "origin_clause"
+[baselines.product]
+tag = '^v\d+\.\d+\.\d+$'   subject = "*"      # a scope names its subject: in the tag, or "*"
+```
+
+- **Three forms, not two.** The third — the schema's content under `[schema]` with no digest —
+  is a repo that has no ledger: what adopting the tool in one existing repo looks like. A path
+  together with a digest or content is an error.
+- **A copy edited by hand is refused**, by a self-check that needs no ledger: the digest is
+  taken over the schema's *content*, independent of key order, comments and layout, so the
+  same function serves the ledger's file and a repo's copy of it.
+- **Whether a link counts toward coverage is the link's own property** (`coverage = false`),
+  not a name the engine knows: a rule that needs such a link is a configuration error (D10).
+- An item type the project knows and a repo does not declare is *known, not scanned there* — a
+  client with no design documents declares no design elements.
 - The copy lives under **its own namespace** — both files declare `[items.requirement]`, and a
   TOML parser rejects a table declared twice. Verified.
 - A copy makes the ledger-relative paths to the agreement and the change requests

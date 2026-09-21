@@ -14,3 +14,7 @@ All notable changes to this project are recorded here. The format follows
 - The dry gate (`just dry`) and a pipeline that runs it: format, lint, types, tests with a
   coverage floor, and a check that the built wheel carries the package data.
 - A test that enforces the import matrix between the package's layers.
+- The trace configuration and the trace schema, parsed and validated from text: three forms of
+  the schema (by path, a generated and verified copy, the repo's own), an error for any unknown
+  key, and refusals that say what is wrong and the next move. The annotated reference examples
+  are the fixture project under `tests/fixtures/mini/`.
