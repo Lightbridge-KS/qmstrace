@@ -211,9 +211,16 @@ analysis has to name.
 _Avoid_: blast radius, dependencies, affected files
 
 **Forward Trace / Backward Trace**:
-Walking from an origin toward test results, or from a result back to the origin. Backward
-links are authored; the forward trace is derived from them.
+Walking from any item toward what hangs off it — as far as the test results — or back from it
+to what it derives from, as far as the origin. Backward links are authored; the forward trace
+is derived from them.
 _Avoid_: upstream/downstream trace
+
+**Thread**:
+One item followed both ways — backward to what it derives from, forward to what hangs off it —
+each item shown once, nearest first. What `qmstrace thread` prints; *follow a thread from claim
+to evidence*.
+_Avoid_: trace (as a noun), path, lineage
 
 **Test Case**:
 The planned, baselined description of a test and what it verifies.

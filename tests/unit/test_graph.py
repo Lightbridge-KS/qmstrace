@@ -11,13 +11,16 @@ The load-bearing claims, each pinned by a test:
    spelled exactly; an item where its type is not read is V07.
 4. A citation this run cannot verify — a sibling not read — passes as *not verified here*;
    an ID matching this repo's own pattern never does.
+5. A walk reaches each item once, nearest first, under the link that reaches it first; a second
+   link is kept as `also`. Forward follows an assumption; backward stops at it. A start reached
+   from another start is still a step; a cycle ends; a link written twice is walked once.
 """
 
 import pytest
 
 from qmstrace.core.config import TraceConfig
-from qmstrace.core.graph import Home, Surroundings, TraceGraph
-from qmstrace.core.model import Extracted, Finding
+from qmstrace.core.graph import Closure, Home, Surroundings, TraceGraph
+from qmstrace.core.model import Extracted, Finding, Item
 from qmstrace.extract.base import REGISTRY
 
 SRS = """\
@@ -77,6 +80,16 @@ def build(
     surroundings: Surroundings = AGREEMENT,
 ) -> tuple[TraceGraph, list[Finding]]:
     return TraceGraph.build(config, extracted(config, CLEAN | (changes or {})), surroundings)
+
+
+def sibling(*item_ids: str) -> dict[str, Item]:
+    """A sibling's requirements, as the workspace hands them over: files already re-homed."""
+    return {
+        i: Item(
+            i, "requirement", "../client/docs/req/client-srs.md", 3, f"Title of {i}", "sha256:0"
+        )
+        for i in item_ids
+    }
 
 
 def codes(found: list[Finding]) -> list[str]:
@@ -256,9 +269,7 @@ CITES_CLIENT = {
 
 
 def test_a_siblings_item_is_cited_like_a_local_one(service: TraceConfig) -> None:
-    around = Surroundings(
-        siblings={"client": {"REQ-CLT-01": "requirement"}}, externals=AGREEMENT.externals
-    )
+    around = Surroundings(siblings={"client": sibling("REQ-CLT-01")}, externals=AGREEMENT.externals)
     graph, found = build(service, CITES_CLIENT, around)
     assert found == []
     node = graph.node("REQ-CLT-01")
@@ -267,7 +278,7 @@ def test_a_siblings_item_is_cited_like_a_local_one(service: TraceConfig) -> None
 
 def test_a_siblings_item_declared_again_here_is_v01(service: TraceConfig) -> None:
     around = Surroundings(
-        siblings={"client": {"REQ-SVC-02": "requirement", "REQ-CLT-01": "requirement"}},
+        siblings={"client": sibling("REQ-SVC-02", "REQ-CLT-01")},
         externals=AGREEMENT.externals,
     )
     text = SRS + "\n### REQ-CLT-01 — Copied from the client\n"
@@ -303,3 +314,121 @@ def test_findings_come_back_sorted(service: TraceConfig) -> None:
     broken = SRS.replace("- Category: reliability\n", "").replace("AGR-1", "AGR-9")
     _, found = build(service, {("requirement", "docs/req/service-srs.md"): broken})
     assert [(f.line, f.code) for f in found] == [(4, "V09"), (7, "V05")]
+
+
+# ── 5. walks: forward, backward — the closure thread, impact and suspects all render ───────
+
+TEST = "tests/unit/test_keys.py::test_a_call_without_a_key_is_refused"
+
+
+def reached(closure: Closure) -> list[tuple[str, int, str, str]]:
+    return [
+        (item_id, step.distance, step.via.marker, closure.parent(step))
+        for item_id, step in closure.steps.items()
+    ]
+
+
+def test_forward_reaches_each_item_once_nearest_first(service: TraceConfig) -> None:
+    graph, _ = build(service)
+    walk = graph.forward(["REQ-SVC-01"])
+    assert reached(walk) == [
+        ("DSN-SVC-01", 1, "Satisfies", "REQ-SVC-01"),
+        (TEST, 1, "verifies", "REQ-SVC-01"),
+        ("src/service/keys.py", 2, "Implements", "DSN-SVC-01"),
+        ("DSN-SVC-02", 2, "Assumes", "DSN-SVC-01"),
+    ]
+    assert [s.node.id for s in walk.children("REQ-SVC-01")] == ["DSN-SVC-01", TEST]
+
+
+def test_a_second_link_into_an_item_is_kept_as_also(service: TraceConfig) -> None:
+    """The diamond: a test that verifies a requirement and its design element."""
+    graph, _ = build(service)
+    step = graph.forward(["REQ-SVC-01"]).steps[TEST]
+    assert [(k.marker, k.dst) for k in step.also] == [("verifies", "DSN-SVC-01")]
+
+
+def test_forward_follows_an_assumption_and_goes_on(service: TraceConfig) -> None:
+    graph, _ = build(service)
+    walk = graph.forward(["DSN-SVC-01"])
+    assert walk.steps["DSN-SVC-02"].via.marker == "Assumes"
+
+
+def test_backward_stops_at_an_assumed_item(service: TraceConfig) -> None:
+    graph, _ = build(service)
+    walk = graph.backward(["DSN-SVC-02"])
+    assert reached(walk) == [
+        ("REQ-SVC-02", 1, "Satisfies", "DSN-SVC-02"),
+        ("DSN-SVC-01", 1, "Assumes", "DSN-SVC-02"),
+        ("AGR-2", 2, "Origin", "REQ-SVC-02"),
+        ("AGR-3", 2, "Origin", "REQ-SVC-02"),
+    ]
+    assert "REQ-SVC-01" not in walk.steps and "AGR-1" not in walk.steps
+
+
+def test_backward_from_a_test_reaches_its_clauses(service: TraceConfig) -> None:
+    graph, _ = build(service)
+    walk = graph.backward([TEST])
+    assert walk.steps["AGR-1"].distance == 2
+    assert [(k.marker, k.src) for k in walk.steps["REQ-SVC-01"].also] == [
+        ("Satisfies", "DSN-SVC-01")
+    ]
+
+
+def test_a_start_reached_from_another_start_is_still_a_step(service: TraceConfig) -> None:
+    graph, _ = build(service)
+    walk = graph.forward(["DSN-SVC-01", "REQ-SVC-01"])
+    assert walk.starts == ("DSN-SVC-01", "REQ-SVC-01")
+    assert walk.steps["DSN-SVC-01"].distance == 1  # below another changed item: still listed
+
+
+def test_a_cycle_ends(service: TraceConfig) -> None:
+    both_ways = DESIGN.replace(
+        "Satisfies: REQ-SVC-01\n", "Satisfies: REQ-SVC-01\nAssumes: DSN-SVC-02\n"
+    )
+    graph, _ = build(service, {("design_element", "docs/design/service-design.md"): both_ways})
+    walk = graph.forward(["DSN-SVC-01"])
+    assert walk.steps["DSN-SVC-01"].distance == 2  # back to the start, once
+    assert len(walk.steps) == len(set(walk.steps))
+
+
+def test_a_link_written_twice_is_walked_once(service: TraceConfig) -> None:
+    twice = SRS.replace("- Origin: AGR-1", "- Origin: AGR-1, AGR-1")
+    graph, _ = build(service, {("requirement", "docs/req/service-srs.md"): twice})
+    step = graph.backward(["REQ-SVC-01"]).steps["AGR-1"]
+    assert step.also == ()
+
+
+def test_a_walk_is_the_same_twice(service: TraceConfig) -> None:
+    graph, _ = build(service)
+    assert graph.forward(["AGR-1"]) == graph.forward(["AGR-1"])
+    assert [s.node.id for s in graph.forward(["AGR-1"]).steps.values()][:1] == ["REQ-SVC-01"]
+
+
+@pytest.mark.parametrize(
+    ("asked", "wanted"), [("REQ-SVC-1", "REQ-SVC-01"), ("req-svc-01", "REQ-SVC-01")]
+)
+def test_the_closest_ids_are_offered_sorted(service: TraceConfig, asked: str, wanted: str) -> None:
+    graph, _ = build(service)
+    offered = graph.closest(asked)
+    assert wanted in offered and offered == sorted(offered)
+    assert graph.closest("ZZZ") == []
+
+
+def test_a_siblings_item_is_a_node_even_uncited_and_never_this_repos_own(
+    service: TraceConfig,
+) -> None:
+    around = Surroundings(siblings={"client": sibling("REQ-CLT-09")}, externals=AGREEMENT.externals)
+    graph, found = build(service, surroundings=around)
+    node = graph.node("REQ-CLT-09")
+    assert found == [] and node is not None
+    assert (node.home, node.item, node.title) == (Home.SIBLING, None, "Title of REQ-CLT-09")
+    assert node.where == "../client/docs/req/client-srs.md:3"
+    assert "REQ-CLT-09" not in [i.id for i in graph.items()]
+
+
+def test_a_declared_clause_is_a_node_even_uncited(service: TraceConfig) -> None:
+    around = Surroundings(externals={"agreement": frozenset({"AGR-1", "AGR-2", "AGR-3", "AGR-7"})})
+    graph, _ = build(service, surroundings=around)
+    node = graph.node("AGR-7")
+    assert node is not None and node.home is Home.EXTERNAL
+    assert graph.forward(["AGR-7"]).steps == {}

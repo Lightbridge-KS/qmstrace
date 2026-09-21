@@ -49,8 +49,8 @@ src/qmstrace/
                  records where each key came from (the project's or the repo's)
     graph        TraceGraph.build(...) -> (graph, findings): an illegal link never enters it.
                  node(id) knows its home: local, sibling, external, not verified here.
-                 downstream/upstream (M2b) return a
-                 Closure that keeps the edge that reached each node
+                 forward/backward (M2b) return a Closure that keeps, for each item, the link
+                 that reached it first and its distance — thread, impact and suspects render it
     judge        pure functions: coverage · resolve_baselines · guard · suspects
     findings     the catalogue — each code once: what is wrong, the next move
   extract/    IExtractor.extract(path, text, spec) — takes TEXT; chosen by configuration, never
@@ -109,13 +109,20 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       published. *Waits:* running in a pipeline (slice 2, the schema's copy) · markers (M6,
       beside the skill) · the chain (M2b, shown with `thread`). Frictions found: one `ux` issue
       (#4, `-C` only before the command); the others are owned by M3, M5a and slice 2
-- [ ] **M2b · follow a thread** — `thread`. A local parity script — stand-in versus engine on
-      the test bed's tags, with a list of expected differences — runs from here on. It lays the
-      new-shape configurations over temporary copies of each tag; the test bed is untouched
-      until M7
+- [ ] **M2b · follow a thread** *(built, awaiting review — branch `feat/m2b-follow-a-thread`)* —
+      `thread <ID>`: backward to what an item derives from, forward to what hangs off it; each
+      item once, nearest first, under the link that reaches it first. `Assumes` is followed
+      forward and not backward. Every ID the run can see can be threaded — uncited sibling items
+      and declared clauses too — while `Node.item` stays this repo's own. An unknown ID is *could
+      not judge*, with the closest IDs. Manual: the `thread` reference and the chain explained.
+      A local parity script — the engine against the stand-in on the test bed, graphs not text —
+      runs from here on; the test bed is untouched until M7. **First run: the E4 row matches the
+      ledger's `trace.lock` exactly** — 177 items, 208 links, forward reach from 43 starts per
+      repo (local: `_playground/2026-09-21_parity/`). The E3 row waits for M5a, where its
+      baseline tags test something new
 - [ ] **M3 · judge it** — coverage rules (gaps), the wording pass over the findings catalogue;
-      `check`, `--strict`, `--quiet`, `rules`; **`impact` and `Assumes` traversal** — pure graph
-      features, no Git needed; the gap that says why a module with a stray `Implements:` is
+      `check`, `--strict`, `--quiet`, `rules`; **`impact`** — the forward closure M2b built,
+      `Assumes` included, rendered for several IDs; pure graph features, no Git needed; the gap that says why a module with a stray `Implements:` is
       unlinked; `status` gains its gap count and its pointer to `check`
 - [ ] **M4 · results** — the JUnit reader on defusedxml; `results`
 - [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract

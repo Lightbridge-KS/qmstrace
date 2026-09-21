@@ -38,3 +38,7 @@ All notable changes to this project are recorded here. The format follows
   list.
 - `-C <path>` is accepted after the command as well as before it; given on both sides, it is a
   usage error.
+- `qmstrace thread <ID>`: one item followed backward to what it derives from and forward to what
+  hangs off it — each item once, nearest first — for a requirement, a test, a clause or a
+  sibling's item. An ID nothing here can see exits `2` with the closest IDs.
+- The user manual gains the `thread` reference and an explanation of the chain.

@@ -58,7 +58,9 @@ src/qmstrace/
                          ID_TOKEN, what reads as an ID at all; text_digest — item text, digested
     config.py            TraceConfig.parse(local_text, schema_text) — validate, merge, provenance
     graph.py             TraceGraph.build(config, extracted, Surroundings) -> (graph, findings);
-                         node() and its Home; incoming/outgoing · downstream/upstream -> Closure (M2b)
+                         node() and its Home; incoming/outgoing; forward/backward -> Closure —
+                         each item once, nearest first, the link that reached it and any other
+                         (`also`); thread renders it, impact (M3) and suspects (M5b) will; closest()
     judge.py             coverage · resolve_baselines · guard · suspects — pure functions
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
@@ -171,6 +173,7 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | change how a baseline is chosen | `core/judge.py` `resolve_baselines` |
 | change what Git is asked | `infra/git.py` |
 | change a command's output | `render/text.py` and its golden file — then `rg <golden> contents/` for the prose that frames it |
+| change which items a walk reaches, or in what order | `core/graph.py` `_walk` — `thread`, `impact` and suspects all render it; `tests/unit/test_graph.py` § walks pins the rules |
 | add a command | `cli.py` (wiring, and a `short_help` that fits the command list), `render/text.py`, goldens for its output and its help, a page in `contents/reference/commands/` — `test_catalogue.py`, `test_help.py` and `test_manual.py` fail without them |
 | change a configuration key | `core/config.py`, both test-bed configurations, the `init` template |
 | change what the agent is told | `assets/skill/SKILL.md` or `assets/stanza.md` — `test_skill_parity.py` guards the examples |
@@ -216,6 +219,8 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | ★ The working tree is what a commit could carry — an ignored file is never read | `tests/integration/test_tree.py` |
 | ★ The wheel contains the skill and the templates | CI, M1 |
 | ★ An illegal link never enters the graph | `tests/unit/test_graph.py` — `build` returns it as a finding instead |
+| ★ A walk reaches each item once, nearest first; forward crosses a link that counts toward no coverage, backward stops at it | `tests/unit/test_graph.py` § walks |
+| ★ A sibling's item is a node but never this repo's own item | `tests/unit/test_graph.py`; the `status` goldens |
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspects.py` |
 | A problem in the user's repo is a finding, never an exception | review; `extract/` has no `raise` outside parse failures it converts |

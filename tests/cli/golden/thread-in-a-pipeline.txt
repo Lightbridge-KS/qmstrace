@@ -1,0 +1,12 @@
+REQ-SVC-01
+  not verified here — judged at the ledger's import
+  external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
+  sibling service: NOT REACHABLE at ../service
+
+backward — what it derives from:
+  not verified here — judged at the ledger's import
+
+forward — what hangs off it, nearest first:
+  verifies  tests/unit/test_api.py::test_the_service_refuses_a_call_without_a_key · test case, unit
+
+forward: 1 test case · backward: nothing — this repo only

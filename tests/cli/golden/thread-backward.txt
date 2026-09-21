@@ -1,0 +1,14 @@
+tests/integration/test_store.py::test_a_record_survives_a_restart
+  test case, integration
+
+backward — what it derives from:
+  verifies  DSN-SVC-02 — Record store · design element · docs/design/service-design.md:13
+    Assumes   DSN-SVC-01 — Key check · design element · docs/design/service-design.md:8 · assumed — what it derives from is not followed
+  verifies  REQ-SVC-02 — Records survive a restart · requirement · docs/req/service-srs.md:21 · also Satisfies from DSN-SVC-02
+    Origin    AGR-2 · origin clause, in the agreement
+    Origin    AGR-3 · origin clause, in the agreement
+
+forward — what hangs off it, nearest first:
+  nothing here hangs off it
+
+forward: nothing · backward: 1 requirement, 2 design elements, 2 origin clauses — this repo only

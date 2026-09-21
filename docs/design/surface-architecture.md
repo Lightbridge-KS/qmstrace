@@ -76,7 +76,7 @@ flowchart TD
 | `qmstrace check` | Lists every violation and gap in one pass, each with file, line and what to do next | ✔ |
 | `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation | ✔ |
-| `qmstrace thread <ID>` | Walks one item backward to its origin and forward to its tests | ✔ |
+| `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
 | `qmstrace results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
 | `qmstrace impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |

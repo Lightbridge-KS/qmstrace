@@ -21,11 +21,13 @@ nav = [
   ] },
   { "Reference" = [
     { "qmstrace status" = "reference/commands/status.md" },
+    { "qmstrace thread" = "reference/commands/thread.md" },
     { "Findings" = "reference/findings.md" },
     { "Exit codes" = "reference/exit-codes.md" },
     { "Configuration" = "reference/configuration.md" },
   ] },
   { "Explanation" = [
+    { "The chain" = "explanation/the-chain.md" },
     { "Around the repo" = "explanation/around-the-repo.md" },
   ] },
 ]

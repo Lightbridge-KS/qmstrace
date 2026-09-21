@@ -119,3 +119,22 @@ def status(ctx: typer.Context, directory: Directory = None) -> int:
     """
     typer.echo(text.status(Workspace.open(_directory(ctx, directory)).assessment()))
     return EXIT_OK
+
+
+@app.command(short_help="What one item derives from, and what hangs off it.")
+@outcome
+def thread(
+    ctx: typer.Context,
+    item_id: Annotated[
+        str, typer.Argument(metavar="ID", help="A requirement, design element, test or clause ID.")
+    ],
+    directory: Directory = None,
+) -> int:
+    """Walk one item backward to what it derives from, and forward to what hangs off it.
+
+    Each item is shown once, nearest first, under the link that reaches it first. It stops at
+    this repo's edge.
+    """
+    assessment = Workspace.open(_directory(ctx, directory)).thread(item_id)
+    typer.echo(text.thread(assessment, item_id))
+    return EXIT_OK
