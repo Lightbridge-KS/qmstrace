@@ -68,6 +68,13 @@ products, states, conformance requirements) is likewise data.
 - **Enforcement is recovered by compiling the trace schema** — see the verified note below.
   Because the database is built in memory on every run and never committed, the engine can
   generate a schema as strict as a hand-written one.
+- **Amended while planning the first engine slice: the database arrives with the ledger, not
+  before.** A product repo's graph is a few hundred items; three experiments validated
+  coverage rules as *data* judged in plain Python, and `check` runs fifteen times a session.
+  The same guarantee is kept another way — the graph is built so that **an illegal link never
+  enters it** — and the database earns its place where the union of several repos is queried
+  and tables are emitted. Until a profile has a file of its own, a requirement's `Category`
+  values are read from the trace schema.
 
 ### D5 — Author where the work happens; formalise in the ledger repo
 
@@ -166,6 +173,27 @@ covers  = ["requirement", "design_element", "component", "test_case"]
   issue of a controlled document rendered from them is an event in the ledger repo.
 - The agent learns that an item is frozen from tool output, never from a field in the document.
 
+Made precise while planning the engine — each of these was a hole in the first
+implementation:
+
+- **The latest baseline of a scope is the topologically latest reachable tag that matches**,
+  never the one with the newest date. A pattern need not carry a number: a release tag has
+  none.
+- **One governing baseline per item.** Where two scopes cover the same item — a requirements
+  baseline and a later release — the later reachable one governs, and a finding is reported
+  once.
+- **The guard judges document-declared items.** After a product baseline a code change
+  carries its change request by convention (D7), so "frozen text changed" is asked of
+  requirements and design elements, not of modules and tests.
+- **A tree at a tag is read with the configuration at that tag** — file patterns move.
+- **A release cut before the repo was traced freezes nothing**: a subject that did not exist
+  at a baseline is not judged against it. Without this rule, adopting the tool in a repo with
+  old release tags would make every item "new since" and demand a change request for each.
+- **"Nothing is frozen" is only ever said when it is true.** A shallow clone, tags that were
+  not fetched, a directory that is not a repository: with baselines configured, each means
+  the guard *could not judge* — and a pipeline's default checkout is shallow, with no tags.
+  Reporting "none yet" there would switch the guard off while the gate passes.
+
 How the standard's baselines fall onto a release-branch workflow, none of it new work:
 
 | The standard's baseline | What the project already cuts |
@@ -200,11 +228,25 @@ change request must exist, be accepted, and list the item among the items it imp
 makes the standard's impact-analysis field verifiable. An item added after a baseline needs
 a citation too; a frozen item's heading may not disappear — it is withdrawn, not deleted.
 
+- **Only a fresh citation counts.** An item that already cites a change request and is
+  edited again needs a *new* citation: what licenses a change is a citation that was not there
+  at the governing baseline. A permanent `Change:` line does not license later edits.
+- **Where the register cannot be reached** — a pipeline with no ledger beside it — a fresh
+  citation passes *with a notice that survives the quiet form*, and is verified for real at
+  the ledger's import. Failing instead would force every product repo's pipeline to check out
+  the ledger, which is what D9 exists to avoid. For later: the generated copy of the schema
+  could carry an index of accepted change requests and agreement clauses.
 - **Rejected as the checked mechanism — a commit trailer** (`Change-Request: CR-001`).
   Git-native and it covers code, but it is easy to forget, a squash merge can drop it, and it
   attributes by file rather than by item. *Kept as the convention for code changes.*
 - **Deferred — the pull-request or issue link** read by a Git-host collector. Not checkable
   offline, and it needs the host.
+- **The suspect rule, in full.** Downstream of a changed frozen item, **transitively** —
+  *suspect* means downstream of changed content, and the impact set must reach as far — and
+  grouped by distance, the first hop listed and the rest counted. An item that existed at the
+  baseline and is unchanged is suspect; one that existed and was edited is *still listed*,
+  worded as edited, because an edit is not a review; one that is new since the baseline is
+  not a suspect. `impact` and suspects are two renderers of one traversal.
 - **Suspects need no syntax of their own — but they must not clear themselves.** An item is
   suspect when it sits downstream of an item that changed since the last baseline. The first
   form of this rule also let a suspect clear when it was *touched*, and the first
@@ -292,6 +334,37 @@ the repo's.
 - **Rejected — the full schema written by hand in each product repo.** Two hand-kept copies
   of the rules drift, and nothing says which is right.
 - **Not yet tried.** The experiment exercised the path form.
+
+The shape, settled while planning the engine — it lands in every product repo, so it is
+expensive to change:
+
+```toml
+version = 1                                   # an unknown key anywhere is a configuration error:
+ledger  = "../the-ledger"                     # a mistyped `requird` would be a hidden rule
+                                              # `ledger` is optional — without it, external sources
+[subjects.gateway]                            # are reported as not verified
+key = "BCN"                                   # the subject, named where an agent can see it
+
+[schema]                                      # form 1 — a path (a test bed, repos side by side)
+path = "../the-ledger/qmstrace.schema.toml"
+
+[schema]                                      # form 2 — the generated, verified copy
+digest = "sha256:…"                           # the ledger's import refuses a mismatch
+[schema.links] …   [[schema.rules]] …         # its own namespace: TOML refuses a table declared twice
+
+[items.requirement]
+extractor  = "markdown"                       # named here — never inferred from the type's name
+id_pattern = '^REQ-BCN-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+```
+
+- The copy lives under **its own namespace** — both files declare `[items.requirement]`, and a
+  TOML parser rejects a table declared twice. Verified.
+- A copy makes the ledger-relative paths to the agreement and the change requests
+  unresolvable, hence the local **`ledger`** pointer.
+- A coverage rule may not need `Assumes` (D10) — a configuration error.
+- One glob matcher serves every tree; the stand-in's two disagreed about `src/**/*.py`.
+  Verified. It needs Python 3.13.
 
 ### D10 — `Assumes`: a dependency link that counts toward no coverage rule
 
@@ -445,6 +518,8 @@ with every run of whitespace — line breaks too — collapsed to one space, and
 - Rewording is a change. So is a changed link field: an origin that gains a clause changes what
   the requirement derives from.
 - Citing a change request is not a change, which is why that one line is excluded.
+- Text is read as UTF-8 and normalised (NFC) before digesting; a digest carries its algorithm
+  — `sha256:…` — because it becomes a format the day the ledger writes it into the lock.
 - **A field-only change is still a change, and it is noisy**: moving eleven requirements from
   one classification field to another made 24 downstream items suspect though no behaviour
   changed. The next baseline cleared them, as D7 says; in between, the list was all noise.

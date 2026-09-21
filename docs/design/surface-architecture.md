@@ -191,17 +191,23 @@ stateDiagram-v2
     Scanned --> Violations: anything wrong at any stage
     Scanned --> Gaps: coverage not met yet
     Scanned --> Clean
-    Violations --> [*]: exit 2
+    Violations --> [*]: exit 1
     Gaps --> [*]: exit 0 authoring · exit 1 gate
     Clean --> [*]: exit 0
 ```
 
 | Exit | Meaning |
 |---|---|
-| `0` | No violations. While authoring, gaps may be listed |
-| `1` | The gate only: gaps remain |
-| `2` | Violations |
-| `3` | Usage or configuration error |
+| `0` | No failing findings in this mode. While authoring, gaps may be listed |
+| `1` | **The check failed** — violations, or gaps under the gate. The result line says which |
+| `2` | **Could not judge** — usage, configuration, the wrong kind of repo, an unknown ID, an unreadable report, a shallow clone where baselines are configured |
+| `3` | Internal error |
+
+The command-line framework already exits `1` on an abort and `2` on a usage error, so this
+taxonomy never fights it — and it is the convention of the linters a pipeline already runs. The
+first form kept gaps and violations on separate codes and put usage on `3`; a mistyped option
+would then have read as violations. A pipeline needs pass or fail; the split between gaps and
+violations is what the gate flag already encodes, and the result line carries it.
 
 The result line states the counts, the exit code and the mode, and **names the gate** — an
 agent that reads only the last line still learns which command a pipeline should call.
@@ -233,6 +239,8 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 | "This requirement failed" | A test case that verifies several items failed | Mark the test case **shared**, with what else it verifies |
 | "No suspects" | The suspects were cleared by touching a file | Never let a suspect clear itself (D7) |
 | "An empty project" | A pin older than the repo's trace configuration | Refuse the import and say why |
+| "Nothing is frozen" | A shallow clone, unfetched tags, or not a repository at all | Say so, and exit *could not judge* when baselines are configured — a pipeline's default checkout is shallow, with no tags |
+| "Verified" | The ledger is not beside the repo | *Not verified* in the result line, surviving the quiet form; the citation is verified at the ledger's import |
 | "Covered" | `Verify-by: inspection`, with nothing recorded anywhere | List such items apart, until an inspection has a recorded basis |
 
 ## 6. Information Architecture / API Ergonomics
@@ -282,8 +290,9 @@ aspiration — each line is a defect found, or a behaviour observed, on the test
 - **A refusal comes with a deliverable.** "Stop and ask" is paired with what to hand over —
   the impact set, and what the agreement would have to say differently — so the gate is a
   step, not a dead end.
-- **The tool is on the path.** The test bed invoked it by a relative path, which cost the
-  agent a directory change before every command.
+- **The tool is on the path, and finds its root.** The test bed invoked it by a relative path,
+  which cost the agent a directory change before every command. The engine walks up to the
+  trace configuration, and `-C <path>` runs it elsewhere.
 - **The header stays short.** By the fourth experiment it had grown to eight lines before the
   first finding — "running `check` in a loop, that is most of the output". A quiet form that
   prints only findings is wanted; what was scanned belongs to `status`.

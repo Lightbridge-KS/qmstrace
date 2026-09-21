@@ -16,7 +16,8 @@ this file.)
    each with the alternative that lost, and the product-repo half of the model
 5. [`docs/design/surface-architecture.md`](docs/design/surface-architecture.md) — the commands,
    the findings contract, the stanza and the skill, as their users meet them
-6. [`docs/tests/`](docs/tests/) — the experiments: what was tested, how, and what was found
+6. [`docs/tests/`](docs/tests/) — the experiments: what was tested, how, and what was found;
+   and the scenario catalogue the engine's tests are built from
 
 ## The shape, in one picture
 
@@ -73,6 +74,7 @@ before reopening any of these.
 
 ## Git
 
-Conventional Commits. **Early phase: commit and push straight to `main`** — no branch, no pull
-request — until the first engine slice is planned; revisit this line then. Commit only when
-asked. The remote is a private repository.
+Conventional Commits. **GitHub Flow from the first engine slice on**: a branch and a draft
+pull request per milestone, with the dry gate green — format, lint, types, tests. A reviewed
+pull request is what this product calls a verification record. **Docs-only changes may still
+go straight to `main`.** Commit only when asked. The remote is a private repository.

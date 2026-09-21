@@ -73,14 +73,12 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
 
 ## Now
 
-Nothing in flight. The design docs now hold everything the two experiments settled.
+- [ ] **Engine slice 1 — the product-repo half.** Planned, reviewed and approved; milestones,
+      decisions and acceptance checks in [`slice-1-product-repo-half.md`](slice-1-product-repo-half.md).
+      The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md)
 
 ## Next
 
-- [ ] **Plan the first engine slice** (plan mode): the product-repo half as a real package,
-      with the stand-in's scenarios as fixtures, one per command — the fourth experiment's
-      regression is the argument. Write `system-architecture.md` (C1–C2) and `docs/structure/`
-      as part of it; revisit the agent guide's straight-to-main rule then
 - [ ] **Grilling session** on the ledger half: the event shape, work-product states for
       non-document evidence forms, how a signature on a Word copy becomes an event — and, new
       from E4, the recorded basis of an inspection, which is a verification record
