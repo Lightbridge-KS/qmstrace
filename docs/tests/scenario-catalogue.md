@@ -23,13 +23,15 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | Scenario | Expected |
 |---|---|
 | The same ID declared twice | V01, naming the first declaration |
-| An ID with the right prefix that fails the pattern | V02 |
+| A test function defined twice in one file — pytest runs only the second | V01 |
+| An ID with this type's prefix, or its stem, that fails the pattern — `REQ-SVC-1`, `REQ-SCV-01` | V02 |
 | A link to an ID that exists nowhere | V03 — "declare it here" only if the ID matches *this* repo's pattern; otherwise "it may belong to another repo" |
 | A marker pointing at the wrong type of item | V04, naming the types it may point at |
-| A required field missing; a field value outside its list | V05, listing the allowed values |
+| A marker carried by the wrong type of item — `Satisfies:` under a requirement | V04, naming who may carry it |
+| A required field missing; a field value outside its list — spelled exactly, case included | V05, listing the allowed values |
 | A test outside a level folder, including `tests/test_x.py` at the top | V06 |
 | An item declared in a file that is not scanned for its type | V07, naming the file pattern that would have caught it |
-| A test file that cannot be parsed | V08 |
+| A test file or a module that cannot be parsed; a file that is not UTF-8 | V08 — never a crash |
 | An origin its source does not declare | V09, listing the real ones, in numeric order |
 | A heading inside a code fence | ignored |
 | Fields written with bold keys; a document with frontmatter | parsed; tolerated |
@@ -40,11 +42,11 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 
 | Scenario | Expected |
 |---|---|
-| `- Origin: TBD` — a required link field with no ID in it | a violation: the field is present and links nothing |
-| A marker under the wrong kind of item — `Satisfies:` under a requirement | a violation naming who may carry it; the stand-in dropped it as an unknown field |
-| `Implements:` outside the module docstring | not a marker; and if that leaves the module unlinked, the gap says why |
-| `verifies` with a non-literal argument, or through `pytestmark` | reported — a marker form the extractor does not read must never silently yield no link |
-| A module with a syntax error | reported, as a test file is |
+| `- Origin: TBD` — a required link field with no ID in it; `AGR-1, AGR-X` — one part not an ID | V14, naming the part; the rest of the line still links |
+| A marker under the wrong kind of item — `Satisfies:` under a requirement | V04, naming who may carry it; the stand-in dropped it as an unknown field |
+| `Implements:` outside the module docstring | not a marker (M2); if that leaves the module unlinked, the gap says why (M3) |
+| `verifies` with a non-literal argument, through `pytestmark`, inside `pytest.param(marks=…)`, with no IDs, as a bare decorator, under another name, on something pytest does not collect | V15 — every `mark.<link marker>` in a test module is either read or reported |
+| A module with a syntax error | V08, as a test file is |
 | An ignore pattern that hides a file with logic in it | `status` shows ignored-file counts per item type |
 | A configuration key that is not known | a configuration error — a mistyped `requird` is a hidden rule |
 | A coverage rule that needs `Assumes` | a configuration error (D10) |
@@ -54,6 +56,7 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | Looks like | But is | Expected |
 |---|---|---|
 | Nothing declared yet | An item in a file that is not read | V07, and items *and files* scanned per type in the summary |
+| An item declared in the repo | A note the repo ignores — a gitignored `_playground/` quoting a heading | never read: the working tree is what a commit could carry |
 | External IDs are fine | Their source could not be reached | *not verified*, in the result line; survives `--quiet` |
 | Nothing is frozen | A shallow clone, unfetched tags, or not a Git repository | said plainly, and the run **could not judge** when baselines are configured — a pipeline's default checkout is shallow and has no tags |
 | Two counts that disagree | Test cases versus runs | every count labelled |
@@ -129,9 +132,13 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 ## Across repos
 
 - A sibling's item cited from a design element or a test — accepted, and *not pinned* is said.
-- A sibling's requirement re-declared locally — "belongs to sibling … cite it, a requirement
-  has one home".
-- The sibling unreachable — *not reachable*, and a citation of its item reads as unknown.
+- A sibling's requirement re-declared locally — V01, "already declared in sibling … cite it; a
+  requirement has one home".
+- The sibling unreachable, its configuration unreadable, or the siblings not locatable at all (no
+  ledger beside the repo) — said in the header. A citation of an ID that is not this repo's own
+  then passes as *not verified here*, judged at the ledger's import; an ID matching this repo's
+  own pattern is V03 regardless *(decided while planning M2 — a pipeline checks out one repo)*.
+- A sibling's own findings are not reported, and its own siblings are never read.
 
 ## Configuration
 
@@ -140,6 +147,8 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - No configuration — could not judge.
 - A local pointer to the ledger absent — every external source *not verified*.
 - A verb run in the wrong kind of repo says so and names the right place.
+- An extractor the engine does not have; `markdown` with no ID pattern; a type whose IDs are
+  derived given one — a configuration error.
 
 ## Command line
 
@@ -147,7 +156,8 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - A meta-test fails when a catalogue code has no fixture that emits it.
 - A missing argument, a bad option, an interrupt, a raised exception — each maps to its code.
 - `--quiet` prints findings only; notices about what could not be verified still appear.
-- The root is found by walking up to the configuration; `-C <path>` runs elsewhere.
+- The root is found by walking up to the configuration; `-C <path>`, before the verb as with
+  `git`, runs elsewhere.
 - Two consecutive runs of any command give identical bytes.
 
 ## Setting up a repo

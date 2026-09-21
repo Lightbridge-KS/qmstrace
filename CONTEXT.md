@@ -177,6 +177,18 @@ _Avoid_: trace schema (that is the project's), settings
 A statement of which links an item type must have, and from which stage onward.
 _Avoid_: check, constraint
 
+**Finding**:
+What a run reports as wrong or unfinished in the user's repo — a violation, a gap or a suspect
+— as one line: a code, where, what is wrong, and the next move. Always data, never a crash; a
+run that cannot judge at all says so instead, and judges nothing.
+_Avoid_: error, issue, warning
+
+**Notice**:
+What a run could not verify or did not pin — an external source out of reach, a sibling read
+from its working tree, a citation judged only at the ledger's import. It fails nothing, and no
+form of output may hide it.
+_Avoid_: warning, info, log line
+
 **Gap**:
 A coverage rule not yet satisfied. Before the rule's stage it is a progress signal; from that
 stage on it is a finding.
@@ -265,6 +277,12 @@ _Avoid_: repo, product
 A repository holding a software product's code, tests and repo memory. It outlives many
 projects and carries markers, nothing more.
 _Avoid_: project repo, source repo
+
+**Sibling**:
+Another product repo of the same project, seen from one of them: listed in the trace schema,
+and read from its working tree — not pinned — so that its items can be cited by ID. Only the
+ledger's import reads it at a pin.
+_Avoid_: dependency, neighbour, peer
 
 **Repo Memory**:
 A product repo's casual, agent-first `docs/` tree — requirements, design, decisions,

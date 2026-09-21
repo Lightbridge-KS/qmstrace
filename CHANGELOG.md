@@ -16,5 +16,17 @@ All notable changes to this project are recorded here. The format follows
 - A test that enforces the import matrix between the package's layers.
 - The trace configuration and the trace schema, parsed and validated from text: three forms of
   the schema (by path, a generated and verified copy, the repo's own), an error for any unknown
-  key, and refusals that say what is wrong and the next move. The annotated reference examples
-  are the fixture project under `tests/fixtures/mini/`.
+  key, an extractor the tool does not have, or an ID pattern where the extractor derives IDs —
+  and refusals that say what is wrong and the next move. The annotated reference examples are
+  the fixture project under `tests/fixtures/mini/`.
+- `qmstrace status`: what was scanned per item type, what lies around the repo (the agreement,
+  the project's other repos) and whether it was verified, and one line per requirement. It
+  runs from any folder inside a product repo, or elsewhere with `qmstrace -C <path>`.
+- Items and links read from Markdown headings and fields, from a module's docstring, and from
+  pytest's own markers — each marker form the tool does not read is reported, never skipped.
+- Violations found while reading a repo, each with the next move: an ID declared twice or
+  malformed, a link to nothing or to the wrong kind of item, a missing or misspelled field, a
+  test outside a level folder, an item in a file its type is not read from, a file that cannot
+  be parsed, an origin the agreement does not declare, a link field that holds no ID.
+- A citation of another repo's item that cannot be checked here — as in a pipeline with one repo
+  checked out — passes as *not verified here* instead of failing.

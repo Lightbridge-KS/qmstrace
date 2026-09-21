@@ -72,7 +72,7 @@ flowchart TD
 
 | Touchpoint | What the user does with it | Status |
 |---|---|---|
-| `qmstrace status` | Sees what was scanned — items and files per item type — then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]` | ✔ |
+| `qmstrace status` | Sees what was scanned — items and files per item type, and the files each type ignores — what lies around the repo and whether it was verified, then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]`. Requirements verified by inspection or analysis are listed apart. Not a check: it exits 0 whatever it counts. *In the engine since M2; its golden is `tests/cli/golden/`* | ✔ |
 | `qmstrace check` | Lists every violation and gap in one pass, each with file, line and what to do next | ✔ |
 | `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation | ✔ |
@@ -292,7 +292,7 @@ aspiration — each line is a defect found, or a behaviour observed, on the test
   step, not a dead end.
 - **The tool is on the path, and finds its root.** The test bed invoked it by a relative path,
   which cost the agent a directory change before every command. The engine walks up to the
-  trace configuration, and `-C <path>` runs it elsewhere.
+  trace configuration, and `-C <path>` — before the verb, as with `git -C` — runs it elsewhere.
 - **The header stays short.** By the fourth experiment it had grown to eight lines before the
   first finding — "running `check` in a loop, that is most of the output". A quiet form that
   prints only findings is wanted; what was scanned belongs to `status`.

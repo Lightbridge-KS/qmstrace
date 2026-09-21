@@ -16,12 +16,15 @@ from __future__ import annotations
 
 import functools
 from collections.abc import Callable
+from pathlib import Path
 from typing import Annotated
 
 import typer
 
 from qmstrace import __version__
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.render import text
+from qmstrace.workspace import Workspace
 
 EXIT_OK, EXIT_FAILED, EXIT_COULD_NOT_JUDGE, EXIT_INTERNAL = 0, 1, 2, 3
 
@@ -63,6 +66,15 @@ def _print_version(wanted: bool) -> None:
 
 @app.callback()
 def main(
+    ctx: typer.Context,
+    directory: Annotated[
+        Path,
+        typer.Option(
+            "-C",
+            metavar="PATH",
+            help="Run as if qmstrace had been started in PATH, as with git -C.",
+        ),
+    ] = Path("."),
     version: Annotated[
         bool,
         typer.Option(
@@ -71,3 +83,12 @@ def main(
     ] = False,
 ) -> None:
     """The trace layer under a quality-management system."""
+    ctx.obj = directory
+
+
+@app.command()
+@outcome
+def status(ctx: typer.Context) -> int:
+    """What was scanned, what lies around the repo, and one line per requirement."""
+    typer.echo(text.status(Workspace.open(ctx.obj).assessment()))
+    return EXIT_OK

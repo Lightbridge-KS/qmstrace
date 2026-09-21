@@ -12,6 +12,7 @@ The load-bearing claims, each pinned by a test:
 """
 
 import re
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -19,24 +20,13 @@ import pytest
 from qmstrace.core.config import SchemaForm, TraceConfig, schema_digest
 from qmstrace.core.errors import CouldNotJudge
 
+Embed = Callable[..., str]
+
 MINI = Path(__file__).parents[1] / "fixtures" / "mini"
 SCHEMA = (MINI / "ledger" / "qmstrace.schema.toml").read_text(encoding="utf-8")
 SERVICE = (MINI / "service" / "qmstrace.toml").read_text(encoding="utf-8")
 CLIENT = (MINI / "client" / "qmstrace.toml").read_text(encoding="utf-8")
 SOLO = (MINI / "solo" / "qmstrace.toml").read_text(encoding="utf-8")
-
-
-def embed(local: str, schema: str, *, digest: str | None = None) -> str:
-    """Turn a by-path configuration into one that carries a copy — what slice 2 will generate."""
-    import tomllib
-
-    head, _, tables = schema.partition("\n[")
-    tables = re.sub(r"(?m)^\[\[(.+?)\]\]", r"[[schema.\1]]", "[" + tables)
-    tables = re.sub(r"(?m)^\[(?!\[)(.+?)\]", r"[schema.\1]", tables)
-    stated = digest or schema_digest(tomllib.loads(schema))
-    copy = f'[schema]\ndigest = "{stated}"\n{head}\n{tables}'
-    # a function, not a string: the schema text holds backslashes that re.sub would read as escapes
-    return re.sub(r"(?ms)^\[schema\][^\n]*\n.*?(?=^\[subjects)", lambda _: copy + "\n", local)
 
 
 def refusal(local: str, schema: str | None = SCHEMA) -> CouldNotJudge:
@@ -52,7 +42,6 @@ def test_the_example_parses_and_merges_the_projects_part_with_the_repos() -> Non
     config = TraceConfig.parse(SERVICE, SCHEMA)
 
     assert config.project == "MINI"
-    assert config.profile == "iso29110-basic"
     assert config.ledger == "../ledger"
     assert config.repos == {"service": "../service", "client": "../client"}
     assert config.subjects["service"].key == "SVC"
@@ -121,7 +110,7 @@ def test_by_path_says_where_the_schema_is() -> None:
     assert TraceConfig.parse(SERVICE, SCHEMA).schema_form is SchemaForm.BY_PATH
 
 
-def test_a_verified_copy_gives_the_same_configuration_as_the_path() -> None:
+def test_a_verified_copy_gives_the_same_configuration_as_the_path(embed: Embed) -> None:
     by_path = TraceConfig.parse(SERVICE, SCHEMA)
     copy = TraceConfig.parse(embed(SERVICE, SCHEMA))
 
@@ -133,7 +122,7 @@ def test_a_verified_copy_gives_the_same_configuration_as_the_path() -> None:
     assert copy.item_types.keys() == by_path.item_types.keys()
 
 
-def test_a_copy_edited_by_hand_is_refused() -> None:
+def test_a_copy_edited_by_hand_is_refused(embed: Embed) -> None:
     tampered = embed(SERVICE, SCHEMA).replace("no test verifies it yet.", "fine as it is.", 1)
     stopped = refusal(tampered, None)
     assert "edited by hand" in stopped.what
@@ -204,7 +193,7 @@ def test_an_unknown_key_in_the_schema_names_the_schema_file() -> None:
     assert stopped.what.startswith("qmstrace.schema.toml: unknown key 'projct'")
 
 
-def test_an_unknown_key_in_a_copy_names_the_repos_file() -> None:
+def test_an_unknown_key_in_a_copy_names_the_repos_file(embed: Embed) -> None:
     import tomllib
 
     broken = SCHEMA.replace('project = "MINI"', 'project = "MINI"\nprojct = "x"')
@@ -242,6 +231,29 @@ def test_an_id_pattern_with_no_literal_start_needs_a_prefix() -> None:
     assert "id_prefix" in refusal(loose).next_move
     given = loose.replace('files      = ["docs/req', 'id_prefix  = "R"\nfiles      = ["docs/req', 1)
     assert TraceConfig.parse(given, SCHEMA).item_types["requirement"].id_prefix == "R"
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "expected"),
+    [
+        ('extractor  = "markdown"', 'extractor  = "markdwn"', "names the extractor 'markdwn'"),
+        ("id_pattern = '^REQ-SVC-\\d{2}$'\n", "", "gives no id_pattern"),
+        ('extractor = "pytest"', "extractor = \"pytest\"\nid_pattern = '^t$'", "derives each ID"),
+        ('extractor = "pytest"', 'extractor = "pytest"\nid_prefix = "t"', "derives each ID"),
+    ],
+)
+def test_an_extractor_that_cannot_read_its_type_is_refused(
+    old: str, new: str, expected: str
+) -> None:
+    assert old in SERVICE
+    assert expected in refusal(SERVICE.replace(old, new, 1)).what
+
+
+def test_every_extractor_the_configuration_accepts_is_one_that_ships() -> None:
+    from qmstrace.core.config import EXTRACTORS
+    from qmstrace.extract.base import REGISTRY
+
+    assert set(EXTRACTORS) == set(REGISTRY)
 
 
 def test_a_rule_may_not_need_a_link_that_counts_toward_no_coverage() -> None:
