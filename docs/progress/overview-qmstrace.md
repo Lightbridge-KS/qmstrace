@@ -65,6 +65,11 @@ repo is committed yet, and a typed hash is a fact nobody checks (see *Confirmed 
       under a group of their own; machine-readable output comes later, findings structured
       from the start; **a tracker may cite commit hashes** — as pointers, never as evidence —
       and the skill's ban on typed facts covers traced documents and test results only
+- [x] **Two namings settled.** *Profile* is the standard's catalogue, *trace schema* the
+      project's declaration, *trace configuration* a product repo's own file — three levels,
+      three owners. *Auditor* replaces *assessor*: it covers internal and certification audits
+      alike, matches the team's usage, and sits with *audit evidence*; the 29110 scheme's own
+      word is kept as a note
 
 ## Now
 
@@ -79,7 +84,7 @@ Nothing in flight. The design docs now hold everything the two experiments settl
 - [ ] **Grilling session** on the ledger half: the event shape, work-product states for
       non-document evidence forms, how a signature on a Word copy becomes an event — and, new
       from E4, the recorded basis of an inspection, which is a verification record
-- [ ] **E5 — the five-step assessment demo** against the bed, once the engine has a ledger
+- [ ] **E5 — the five-step audit demo** against the bed, once the engine has a ledger
 - [ ] A real session launched by a person in a test-bed repo, to confirm what the spawned
       teammates showed
 
@@ -87,8 +92,8 @@ Nothing in flight. The design docs now hold everything the two experiments settl
 
 - **E2 — option C as a comparison.** Not needed to choose; kept as the on-ramp scenario for an
   existing repo with no markers.
-- **The real pilot.** The documentation repo for the live assessment stays as its plan
-  declares; nothing changes there mid-assessment.
+- **The real pilot.** The documentation repo for the live certification audit stays as its plan
+  declares; nothing changes there mid-audit.
 - **Collectors, the conformance view, the trace browser, a second profile** — PRD P1/P2.
 - **`VISION.md`.** Not earned yet. Candidate invariants are accumulating under *Confirmed
   contracts*; propose it once they have survived an engine slice.
@@ -97,8 +102,6 @@ Nothing in flight. The design docs now hold everything the two experiments settl
 
 Attached to scheduled work; standalone ones live in the PRD. `rg 💡` lists every marker.
 
-- 💡 **Two glossary namings await a word**: *Profile* versus *Trace Schema*, and *Assessor*
-  versus *Auditor* (`CONTEXT.md`).
 - **A lint that every commit hash cited in a tracker exists** — agreed; a repo-hygiene check
   rather than an engine feature. One wrong hash was typed by an agent in E1.
 - **`Verify-by: inspection` is a free pass** until an inspection has a recorded basis.

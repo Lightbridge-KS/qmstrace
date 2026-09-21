@@ -119,7 +119,7 @@ revisited:
 - **C — Casual first, curate later.** No markers in the development loop; a curator pass —
   agent plus gate — extracts requirements and links afterwards. For: no ceremony at all while
   building. Against: links are inferred after the fact, and their timestamps show traceability
-  created late, where assessors expect it updated at each stage; it abandons D1. **Kept as the
+  created late, where auditors expect it updated at each stage; it abandons D1. **Kept as the
   on-ramp** for an existing repo that has no markers yet.
 
 **Validated on the beacon test bed** — a greenfield slice (E1) and a change after a baseline
@@ -256,7 +256,7 @@ the **one** it is there to secure.
   subject has no requirement — a prompt, never a gap, because the standard says a
   specification *may* have them.
 - The generated specification groups requirements by category in the standard's order, so an
-  assessor maps it one to one.
+  auditor maps it one to one.
 
 - **Rejected — `Kind: functional | non-functional`**, the first form. Binary, ambiguous for a
   security *behaviour*, and in the first stand-in it silently changed what coverage meant. It
@@ -273,8 +273,8 @@ the **one** it is there to secure.
 
 Two product repos of one project must agree on link types, coverage rules, required fields
 and their values, where the agreement and the change requests are, and which repos belong to
-the project. That is one file, authored in the ledger repo. **Each product repo carries a
-generated copy of it**, between markers in its own trace configuration, beside what is local:
+the project. That is the project's **trace schema** — one file, `qmstrace.schema.toml`, authored in the ledger repo. **Each product repo carries a
+generated copy of it**, between markers in its own **trace configuration** (`qmstrace.toml`), beside what is local:
 the item types it declares, their ID patterns, the files to scan, its baselines. The copy
 carries a digest; the ledger's import refuses a repo whose copy does not match the schema at
 the pin. `rules` prints what is in force and says which part is the project's and which is

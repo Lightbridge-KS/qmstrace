@@ -108,7 +108,7 @@ Fixed before the first run.
 | E2 | Same brief under option C (no markers in the loop; a curator pass adds them afterwards) — the comparison | not needed — E1 did not leave the choice open; kept as the on-ramp scenario for an existing repo |
 | E3 | Change after a baseline: an ordinary request that would change frozen requirements, with no change request raised — does the agent stop and ask, and what does it hand over | **done — 2026-09-20**; the baseline held; suspects are broken as designed |
 | E4 | A second product repo joins: the field agent, the other half of the gateway. Requirements with one home cited across repos; the project's trace schema shared from the ledger; import of both repos at a pin | **done — 2026-09-21**; one home held, the import works; the cross-repo link agents want is a different one |
-| E5 | The five-step assessment demo against the bed | planned |
+| E5 | The five-step audit demo against the bed | planned |
 
 ## Results
 
@@ -201,7 +201,7 @@ rules living inside the tool — so the fix was structural:
   element is verified, and let the level be information.*
 - **D-c — One test tagged with two requirements couples their verdicts.** Breaking "offline
   past the interval" also reported "the interval is configured" as failed. Honest, but a
-  wrong verdict against the wrong requirement is what an assessor would read. → *The results
+  wrong verdict against the wrong requirement is what an auditor would read. → *The results
   view marks a shared test as shared; the skill prefers one requirement per test below the
   system level.*
 - **D-d — Many-to-many is normal and must be said out loud.** One requirement was satisfied by
@@ -372,7 +372,7 @@ several repos at a pin**, which writes the trace lock (D1).
   subject, `REQ-BAG-NN` and `DSN-BAG-NN`. The gateway is installed as a development
   dependency, so a test can run the client against the real gateway application in-process.
   Gateway and ledger are read-only from there.
-- **The project's trace schema moved into the ledger** (`qmstrace.project.toml`): link types,
+- **The project's trace schema moved into the ledger** (then `qmstrace.project.toml`, since renamed `qmstrace.schema.toml`): link types,
   coverage rules, required fields and their values, the agreement, change requests, the list
   of product repos. Each product repo's own file names it and keeps what is local — the item
   types it declares, their ID patterns, the files to scan, its baselines. *This is the option

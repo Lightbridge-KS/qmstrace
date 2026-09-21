@@ -17,7 +17,7 @@ Terms follow [`CONTEXT.md`](../../CONTEXT.md).
 ## Problem
 
 A very small team running ISO/IEC 29110 with coding agents already produces the facts an
-assessor asks for. They are scattered across five places: the repo memory of product repos,
+auditor asks for. They are scattered across five places: the repo memory of product repos,
 test code and test runs, the Git host's issues, pull requests and tags, the tracker, and
 signed Word documents in the document store. Three things that should connect them do not
 exist as data:
@@ -42,7 +42,7 @@ state transitions still fails.
 | **Developer-manager** with a coding agent (primary) | product repos, the ledger repo, a terminal | Author traceability once, where the knowledge arises; see what is missing; never retype a matrix |
 | **The coding agent** (first-class) | the same, through a command line | A self-describing surface, compact output, findings that say what to do next, stable exit codes |
 | **Reviewers and approvers** — analyst, quality representative, consultant, internal customer | Word and the document store only | Read, edit and sign documents without installing or learning anything |
-| **Assessor** (read-only) | whatever is put on the screen | Follow a thread from claim to evidence in minutes |
+| **Auditor** (read-only) | whatever is put on the screen | Follow a thread from claim to evidence in minutes |
 | *Later:* the wider development team | their own product repos | The same, without the first user's help |
 
 ## As-is story
@@ -59,7 +59,7 @@ A consultant edits the project plan in Word in the document store; the edits are
 into the source by hand. A document is issued and signed; nothing in the repository knows,
 and the next render can overwrite the staged copy with something that looks newer.
 
-When an assessor asks to trace one requirement forward to a passed test, the answer is
+When an auditor asks to trace one requirement forward to a passed test, the answer is
 assembled by hand across three repositories and a drive.
 
 Three earlier efforts each solved one part:
@@ -74,8 +74,8 @@ qmstrace is the shared kernel under all three.
 
 ## Goals
 
-1. **One ledger per project answers the assessor's questions by query.** The acceptance test
-   is the five-step assessment demo under *Success criteria*.
+1. **One ledger per project answers the auditor's questions by query.** The acceptance test
+   is the five-step audit demo under *Success criteria*.
 2. **Traceability is authored once, where the knowledge arises, and never retyped.**
 3. **Every transition and every test result is an event** with collected facts and a pinned
    evidence pointer.
@@ -93,7 +93,7 @@ qmstrace is the shared kernel under all three.
 - A platform — web application, database server, multi-tenant service — until a team need is
   demonstrated. A static, generated read-only view is in scope; a service is not.
 - Retro-documentation. No back-dating, and no dated record created before its event.
-- Passing the current pilot assessment. A flat table passes it. The engine pays off at the
+- Passing the current pilot's certification audit. A flat table passes it. The engine pays off at the
   first change request and the second project.
 - Anything that touches patient data.
 
@@ -111,7 +111,7 @@ qmstrace is the shared kernel under all three.
 | Baseline guard | Recognise the tags a project already cuts as baselines; a frozen item changes, and an item is added, only with a cited change request that is accepted and lists it |
 | Impact set of a change | Several items at once, deduplicated, as the line a change request needs — the one verb an agent asked for that did not exist |
 | Set up a product repo | Generate the trace configuration and the stanza; ship the skill with the engine |
-| Trace one item forward and backward | The assessor's fourth question |
+| Trace one item forward and backward | The auditor's fourth question |
 | Record test results from a test-run report | Appended per run, tied to a commit; never typed |
 | Emit tables as data for the existing render machine | Replaces the hand-typed traceability matrix; the engine knows nothing about Word |
 | Work-product register — work product → evidence form → state | Replaces the prose checklist |
@@ -128,12 +128,12 @@ worked through in parallel with the first slice, which does not depend on it.
 |---|---|
 | `Assumes` — a dependency link | Counts toward no coverage rule; carries suspicion and the impact set across repos; judged at import against the pin (D10) |
 | Suspect detection by content hash | Tracked against the item, never cleared by being touched; cleared by the next baseline or by an explicit, recorded review; also rendered documents against their source |
-| The five-step assessment demo, one command per step | See *Success criteria* |
+| The five-step audit demo, one command per step | See *Success criteria* |
 | Collector for the Git host | Pull requests, reviews, tags, releases, issues — with the host's own timestamps |
 | Drift check on a Word document | IDs and generated tables compared with the ledger at the document's pin |
 | Reconcile helper | Word copy → comparable text → a diff the agent can turn into a patch |
 | Conformance view | Each normative requirement of the profile → the evidence that answers it |
-| Static read-only trace browser | Generated; for the person driving the screen during an assessment |
+| Static read-only trace browser | Generated; for the person driving the screen during an audit |
 | A second trace schema | The legacy product's ID families, to prove nothing is hard-coded |
 
 ### P2 — later
@@ -159,8 +159,8 @@ Incremental, each end to end, each leaving something in use.
 3. **Work-product register and events** — the register is generated; a document's issue and
    a baseline are events with pinned evidence pointers.
 
-Then P1, ordered by what the first real project needs. The live pilot under assessment stays
-as its plan declares; nothing there changes mid-assessment.
+Then P1, ordered by what the first real project needs. The live pilot under certification audit stays
+as its plan declares; nothing there changes mid-audit.
 
 ## Constraints
 
@@ -181,7 +181,7 @@ as its plan declares; nothing there changes mid-assessment.
 
 ## Success criteria
 
-1. **The five-step assessment demo runs on the pilot, one command per step:**
+1. **The five-step audit demo runs on the pilot, one command per step:**
    list every work product with its version history · point to the baselined requirements,
    design, test cases and code · follow one change request end to end · trace one requirement
    forward to a passed test · show a verification or validation record for every work product
@@ -212,7 +212,7 @@ as its plan declares; nothing there changes mid-assessment.
 - How does a transition that happens outside any repository — a signature on a Word copy —
   become an event without anyone typing a fact?
 - Which states does a work product with a non-document evidence form actually pass through?
-- The reviewer's and the assessor's surfaces are decisions on paper; none has met a reviewer.
+- The reviewer's and the auditor's surfaces are decisions on paper; none has met a reviewer.
 
 ## Related
 

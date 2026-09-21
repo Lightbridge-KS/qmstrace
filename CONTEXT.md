@@ -9,7 +9,7 @@ read_when:
 # qmstrace
 
 Keeps the state, traceability and audit evidence of a software project's work products, so
-that an assessor's questions are answered by query instead of by assembly. Three vocabularies
+that an auditor's questions are answered by query instead of by assembly. Three vocabularies
 meet here — the standard's, the organisation's document control, and the engine's own — and
 this glossary says which word wins.
 
@@ -19,11 +19,8 @@ this glossary says which word wins.
 
 **Profile**:
 A named catalogue taken from a standard: its work products, their applicable states, and the
-conformance requirements an assessment checks. ISO/IEC 29110 Basic is the first.
+conformance requirements an audit checks. ISO/IEC 29110 Basic is the first.
 _Avoid_: standard (the document, not the catalogue), template
-💡 Earlier discussion used "profile" for the per-project declaration — that is now **Trace
-Schema**. "Profile" keeps the meaning the standard and the assessors already give it.
-
 **Work Product**:
 A kind of output the profile requires of a project, defined by required content and
 applicable states — never by file format.
@@ -52,7 +49,7 @@ _Avoid_: status (belongs to items), stage (belongs to the project)
 
 **Transition**:
 A work product's move from one state to another. The transition, not the file, is what an
-assessor asks to see evidence of.
+auditor asks to see evidence of.
 _Avoid_: update, promotion
 
 **Verification** (ทวนสอบ):
@@ -99,11 +96,12 @@ The hat the profile assigns to an act — project manager, analyst, designer, pr
 customer. One person may wear several; an act is recorded against a role, not only a name.
 _Avoid_: title, position
 
-**Assessor**:
-The external party who examines a project's evidence for certification.
-_Avoid_: auditor (an audit is the organisation's own internal quality check)
-💡 The team says "auditor" in conversation. The Thai scheme separates ผู้ประเมิน (assessor)
-from the internal audit; this glossary follows the scheme.
+**Auditor**:
+The party who examines a project's evidence against a standard — in an *internal audit*, the
+organisation's own quality check, or in a *certification audit*, by an external body. Under
+ISO/IEC 29110's scheme the certification auditor is formally an *assessor* (ผู้ประเมิน)
+conducting an assessment; the standard's own text uses both words.
+_Avoid_: assessor (except when quoting that scheme), inspector, reviewer
 
 ### The trace graph
 
@@ -164,9 +162,16 @@ derived from it, never authored.
 _Avoid_: kind, type, quality, non-functional (as a category of its own)
 
 **Trace Schema**:
-One project's declaration of its item types, ID patterns, allowed link types, and coverage
-rules.
-_Avoid_: profile, config, metamodel
+One project's declaration: the profile it follows, its product repos, its link types and
+coverage rules, and where its agreement and change requests live. Authored once, in the
+ledger repo, by the project side.
+_Avoid_: profile (that is the standard's catalogue), config, metamodel
+
+**Trace Configuration**:
+One product repo's own file: a generated, verified copy of the project's trace schema, plus
+what is local to the repo — the item types it declares, their ID patterns, the files to scan,
+its baselines.
+_Avoid_: trace schema (that is the project's), settings
 
 **Coverage Rule**:
 A statement of which links an item type must have, and from which stage onward.
@@ -234,7 +239,7 @@ document revision.
 _Avoid_: version, snapshot
 
 **Admissible**:
-Evidence an assessor will accept: it carries the content the profile lists, lives in a
+Evidence an auditor will accept: it carries the content the profile lists, lives in a
 system with a log, is versioned and baselined if it is a configuration item, and sits behind
 access control.
 _Avoid_: valid, compliant

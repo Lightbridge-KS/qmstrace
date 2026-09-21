@@ -1,7 +1,7 @@
 # qmstrace — Agent Guide
 
 An engine that keeps the **state, traceability and audit evidence** of a software project's
-work products under ISO/IEC 29110, so an assessor's questions are answered by query instead
+work products under ISO/IEC 29110, so an auditor's questions are answered by query instead
 of by assembly. **Phase: design — there is no engine code yet.** (`CLAUDE.md` is a symlink to
 this file.)
 

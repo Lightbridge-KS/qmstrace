@@ -1,9 +1,9 @@
 ---
-summary: The surface of qmstrace as its users meet it — the command line a coding agent and a developer drive in a product repo (validated by two experiments), the authoring surface of markers, stanza and skill, the findings contract and exit codes, and the still-unvalidated surfaces for reviewers working in Word and for an assessor.
+summary: The surface of qmstrace as its users meet it — the command line a coding agent and a developer drive in a product repo (validated by two experiments), the authoring surface of markers, stanza and skill, the findings contract and exit codes, and the still-unvalidated surfaces for reviewers working in Word and for an auditor.
 read_when:
   - adding, renaming or changing a command, a flag, a finding code, or the wording of a finding
   - changing the stanza or the skill an agent in a traced repo reads
-  - designing anything a reviewer in Word or an assessor will see
+  - designing anything a reviewer in Word or an auditor will see
   - deciding whether a behaviour belongs in tool output or in prose guidance
 ---
 
@@ -31,9 +31,9 @@ qmstrace check --strict         # the gate: no violations, no gaps
 
 ## 1. Overview
 
-qmstrace answers an assessor's questions by query. Its users never meet a database or a web
+qmstrace answers an auditor's questions by query. Its users never meet a database or a web
 application: they meet **a command line in the repository they are already working in**,
-**documents in the word processor they already use**, and, for an assessment, **a page
+**documents in the word processor they already use**, and, for an audit, **a page
 someone else drives**.
 
 **Surface type: hybrid.** The PRD names four users, and each has a different surface:
@@ -43,7 +43,7 @@ someone else drives**.
 | The coding agent in a product repo — first-class | the command line; the stanza, the skill, the markers | ✔ validated |
 | The developer-manager | the same command line; the pull-request diff | ✔ command line · ◻ diff of the trace lock |
 | Reviewers and approvers | rendered Word drafts, in the document store. **They install nothing** | ◻ planned |
-| The assessor | a generated, read-only view, driven by someone else | ◻ planned |
+| The auditor | a generated, read-only view, driven by someone else | ◻ planned |
 
 The engine is a tool **installed into** a product repo or a ledger repo; it holds no project
 data. There are two launch sites, one per hat: the product repo for the daily, developer-side
@@ -67,7 +67,7 @@ flowchart TD
     ledger --> import["import NAME@PIN ✔ driver"]
     ledger --> emit["emit tables"]
     ledger --> event["record an event"]
-    ledger --> demo["the five assessment questions"]
+    ledger --> demo["the five audit questions"]
 ```
 
 | Touchpoint | What the user does with it | Status |
@@ -81,7 +81,7 @@ flowchart TD
 | `qmstrace impact <ID>…` | Gets the impact set of several items at once, deduplicated, and the `Impacts` line a change request needs. The one verb an agent asked for that did not exist | ◻ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
-| `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five assessment questions, one command each | ◻ |
+| `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
 ### The authoring surface
 
@@ -101,7 +101,7 @@ An agent spends far more time *writing* to this surface than invoking it.
 |---|---|---|
 | Rendered Word drafts | A reviewer reads, edits prose and signs. Generated tables are read-only; a draft can never be mistaken for an issued revision | ◻ — the render machine exists in a predecessor; nothing here drives it yet |
 | Reconcile | A reviewer's prose edits come back to the source as a patch an agent proposes and a person reviews (D3) | ◻ |
-| The read-only trace view | During an assessment, one person drives a generated page and follows a thread from claim to evidence | ◻ |
+| The read-only trace view | During an audit, one person drives a generated page and follows a thread from claim to evidence | ◻ |
 
 ## 3. Entry & Onboarding
 
@@ -173,7 +173,7 @@ Writing the impact analysis is what made the agent notice that the request as wo
 not solve the problem behind it. A change-control step that improves the requirement is
 worth more than one that only delays it.
 
-### An assessment ◻
+### An audit ◻
 
 The five questions of the PRD's success criteria, one command each: every work product with
 its version history · the baselined requirements, design, test cases and code · one change
@@ -326,4 +326,4 @@ Each is marked 💡 where it bites.
 |---|---|---|
 | 1 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger | §5 |
 | 2 | **A quiet form of `check`**, and how much of the header survives in the default form | §6 |
-| 3 | **The reviewer's and the assessor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
+| 3 | **The reviewer's and the auditor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
