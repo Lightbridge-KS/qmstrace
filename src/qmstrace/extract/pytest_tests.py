@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Link, text_digest
+from qmstrace.core.results import Identity
 
 _Owner = ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
 
@@ -56,6 +57,13 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
 def form(marker: str, target: str) -> str:
     """How a test declares a link — for a gap's next move."""
     return f'`@pytest.mark.{marker}("{target}")` on the test'
+
+
+def report_identity(test_id: str) -> Identity:
+    """The classname/name emitted by default pytest JUnit for one scanned node ID."""
+    path, *owners, name = test_id.split("::")
+    module = path.removesuffix(".py").replace("/", ".")
+    return ".".join([module, *owners]), name
 
 
 def _visit(

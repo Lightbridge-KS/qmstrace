@@ -1,0 +1,16 @@
+Usage: qmstrace results [OPTIONS] {REPORT}
+
+  Match a report to scanned tests and their explicit verifies links.
+
+  Informational: failing tests and partial matches still exit 0. Unmatched
+  entries are listed; a report with no matches exits 2. Relative report paths
+  start at -C or the current directory, not the discovered repo root. The
+  report's commit is not verified.
+
+Arguments:
+  REPORT  A pytest JUnit XML report.  [required]
+
+Options:
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

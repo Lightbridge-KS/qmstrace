@@ -181,6 +181,7 @@ classDiagram
     class Workspace {
         +open(root)
         +assessment() Assessment
+        +results(report_path) Results
     }
     ISourceTree <|-- WorkingTree
     ISourceTree <|-- GitTree
@@ -194,7 +195,7 @@ classDiagram
   the extractor (three now, another test framework later), Git (a real one; a scrubbed
   environment in tests). No repository pattern, no composition root — the Modular tier.
 - **Judgement is pure functions**, not a class: `coverage`, `resolve_baselines`, `guard`,
-  `suspects`. None touches Git or a file.
+  `suspects`, and the results matcher/aggregator. None touches Git or a file.
 - **`Closure`** keeps the edge that reached each node, so `thread`, `impact` and suspects are
   three renderers of one traversal.
 - **Value objects are frozen dataclasses.** A finding is data — code, file, line, item, what
@@ -223,6 +224,17 @@ sequenceDiagram
     W-->>C: Assessment
     C-->>A: findings — what is wrong, the next move · exit 0, 1 or 2
 ```
+
+### One pytest report against the working tree — M4
+
+The CLI resolves `REPORT` from the effective invocation directory. `Workspace.results`
+reads it explicitly, even outside the Git-filtered tree, and passes bytes to the pure safe
+JUnit reader. It builds one assessment, derives default report identities through the pytest
+extractor's convention, then calls `core.results.summarize`. The returned frozen view contains
+matched runs, unmatched identities and direct-link verdicts; the text renderer makes no
+aggregation decisions. Sibling node fields retain inspection/analysis methods, but only local
+tests contribute. No result is written back and no report commit is verified. Usable partial
+or failed results exit 0; unusable reports and zero matches exit 2.
 
 ### A project judged as a whole ◻ (slice 2; run once by hand in the fourth experiment)
 

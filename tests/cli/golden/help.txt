@@ -9,14 +9,15 @@ Options:
   --help     Show this message and exit.
 
 Commands:
-  status  Where am I: what was read, and one line per requirement.
-  thread  What one item derives from, and what hangs off it.
-  impact  What changing several items affects, with a candidate Impacts line.
-  check   What is wrong, and what is not done yet — the gate with --strict.
-  rules   What check holds this repo to, and whose each rule is.
+  status   Where am I: what was read, and one line per requirement.
+  thread   What one item derives from, and what hangs off it.
+  impact   What changing several items affects, with a candidate Impacts line.
+  results  Test verdicts per requirement, from a pytest JUnit report.
+  check    What is wrong, and what is not done yet — the gate with --strict.
+  rules    What check holds this repo to, and whose each rule is.
 
   Exit codes:
-    0  no failing findings in this mode
+    0  completed — informational views may include failures
     1  the check failed — violations, or gaps under the gate; the result line says which
     2  could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
        an unreadable report, a shallow clone where baselines are configured

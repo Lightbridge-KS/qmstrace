@@ -1,0 +1,56 @@
+# Generate and interpret a pytest report
+
+!!! abstract "TL;DR"
+
+    Run pytest with `--junitxml=report.xml`, then run `qmstrace results report.xml` in the same
+    directory. Read missing and unmatched results as limits of the report. Use pytest's exit
+    code for test success; qmstrace's results command is informational.
+
+## Generate the report
+
+From the product repository root, run the project's pytest suite with its usual environment:
+
+``` sh
+uv run pytest --junitxml=report.xml
+```
+
+Keep pytest's normal JUnit names; do not add `--junit-prefix`. Both pytest XML families are
+supported. The report may be Git-ignored; an explicit report path is still read.
+
+## Read the results, including after pytest fails
+
+Run this as a separate command so a failing pytest exit code does not skip it:
+
+``` sh
+qmstrace results report.xml
+```
+
+For another directory, use `qmstrace -C path/to/product results report.xml`. The report path
+is relative to that directory. Repository discovery does not move the report path.
+
+The miniature service illustrates a partial report with failed and missing results:
+
+``` text
+--8<-- "cli/golden/results-partial.txt"
+```
+
+## Follow up on incomplete evidence
+
+1. Check the matched test-case and run counts. A parameterized function counts as one test
+   case and can contribute several runs. Repeated XML entries are combined, not counted as
+   retry attempts.
+2. Inspect `fail` and `skip` details. Shared tests name other affected items. A test linked
+   only to a design element does not supply a requirement verdict.
+3. For `no-result`, run the missing test or explain why this report selected only part of
+   the suite. For `untested`, add the intended direct test link or review the requirement's
+   verification method. A few reported parameter variants do not establish a complete set.
+4. Resolve unmatched entries by checking report provenance, scan patterns and default pytest
+   names. Zero matched tests is an error; a partly matched report still shows recognized results.
+5. Review inspection and analysis requirements through their own verification process. Linked
+   test results do not approve them.
+
+The output always states that the report's commit is **not verified**. Generate a fresh report
+from the intended working tree and retain the run's provenance through the project's evidence
+process. This command interprets one file; it does not certify freshness or store results.
+
+For complete matching, aggregation and exit semantics, see [results reference](../reference/commands/results.md).

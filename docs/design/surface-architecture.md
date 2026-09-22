@@ -77,7 +77,7 @@ flowchart TD
 | `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation, each part labelled as the project's or the repo's; a rule this repo cannot meet, or that applies to nothing here, says so. *In the engine since M3* | ✔ |
 | `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
-| `qmstrace results <report>` | Gets the verdict per requirement from a test-run report, with counts labelled and shared test cases marked | ✔ |
+| `qmstrace results <report>` | Matches one pytest JUnit report to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
@@ -111,6 +111,46 @@ gate. Notices, unavailable sources and refused links remain visible. Sibling nod
 pinned, and their own links are not scanned. Output ends with labelled counts and *this repo
 only*. Reserved-ID verification and baseline resolution remain M5a work; project-wide
 traversal at pins belongs to the ledger.
+
+### Results contract — M4
+
+`results REPORT` reads one explicitly supplied file, including an ignored file. Relative
+paths resolve from the effective invocation directory (`-C` on either side of the command),
+before repository discovery. **Rejected:** resolving from the discovered root, which could
+silently read a different report when invoked from a subdirectory.
+
+Default pytest JUnit `xunit1` and `xunit2` are supported. Matching is exact on `classname`
+and the unparameterized function name derived from scanned pytest node IDs; class methods
+retain their class ancestry. Parameter suffixes start at the first `[`, so bracketed parameter
+IDs remain distinct runs. Ambiguous, missing and unmatched identities are listed, never guessed.
+The XML reader accepts `testsuite` / `testsuites`, nested suites and namespaces; it forbids
+DTDs, entities and external references. Unreadable, malformed, unsupported and empty reports
+are usage/report errors.
+
+Counts distinguish XML entries, distinct full-identity runs, matched runs, matched test cases,
+scanned test cases and unmatched run identities. Duplicate full identities combine by worst
+verdict, with an explicit duplicate count, not an inferred retry history. Test-case verdicts
+are `fail > skip > pass`; XML errors count as failures. Xfail/xpass follow their XML outcome.
+A linked test missing from the report is `no-result`. Requirement verdicts combine direct
+linked tests as `fail > no-result > skip > pass`; no linked tests means `untested`. A partial
+parameter set does not prove all possible variants ran.
+
+Only direct `verifies` links contribute. No verdict flows through a design element. Links are
+deduplicated before counting, shared tests name other targets, and global counts count each
+case once even when requirement rows overlap. Sibling requirements verified by local tests
+are labelled with their owner and unpinned source; their declared verification method is
+retained. Untyped citations stay outside requirement verdicts. Inspection/analysis requirements
+are separate; linked test outcomes neither change the method nor establish approval.
+
+**Decided 2026-09-21:** a produced view exits 0 whenever at least one test matches, including
+failed tests and partial matches. Every unmatched entry remains visible. Zero matches exits 2
+with diagnostics and no requirement verdicts. Internal faults exit 3. **Rejected:** failing
+on a nonpassing test (pytest already owns that gate), or rejecting partial reports (which
+would discard recognized evidence). No gate, quiet or JSON option is added.
+
+Every view preserves unread-source notices and graph violations, states that it matches the
+current working tree, labels the report commit **NOT VERIFIED**, and ends with counts and
+exit code. M4 does not persist results, combine reports, verify freshness or reconstruct retries.
 
 ### The authoring surface
 
@@ -228,7 +268,7 @@ stateDiagram-v2
 
 | Exit | Meaning |
 |---|---|
-| `0` | No failing findings in this mode. While authoring, gaps may be listed |
+| `0` | Command completed. Informational views may contain failures; a check has no failing findings in this mode |
 | `1` | **The check failed** — violations, or gaps under the gate. The result line says which |
 | `2` | **Could not judge** — usage, configuration, the wrong kind of repo, an unknown ID, an unreadable report, a shallow clone where baselines are configured |
 | `3` | Internal error |

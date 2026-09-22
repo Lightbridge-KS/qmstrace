@@ -19,13 +19,16 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Final
 
-from qmstrace.core import findings, judge
+from qmstrace.core import findings, judge, results
 from qmstrace.core.assessment import Assessment, ExternalState, Scanned, SiblingState
 from qmstrace.core.config import ExternalSource, ItemType, SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.model import Extracted, Finding, Item, Notice
+from qmstrace.core.results import Results
+from qmstrace.extract import junit
 from qmstrace.extract.base import FORMS, REGISTRY
+from qmstrace.extract.pytest_tests import report_identity
 from qmstrace.infra.globbing import matches
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 
@@ -158,6 +161,43 @@ class Workspace:
                 "an unseen ID is not presumed reserved.",
             )
         return assessment
+
+    def results(self, report_path: Path) -> Results:
+        """Match an explicitly selected report against one assessment of the working tree.
+
+        The caller resolves relative report paths from the invocation directory, before repo
+        discovery. Reports can be ignored or outside the repo; they are never scanned as items.
+        """
+        label = _shown(self.root, report_path)
+        try:
+            payload = report_path.read_bytes()
+        except OSError as error:
+            raise CouldNotJudge(
+                f"Cannot read report {label} ({error.strerror}).",
+                "Fix: check the path, or generate it with pytest --junitxml=report.xml.",
+            ) from None
+        report = junit.read(payload)
+        if report.problem:
+            raise CouldNotJudge(
+                f"{label}: {report.problem}.",
+                "Fix: supply a pytest JUnit report generated with --junitxml=report.xml.",
+            )
+        assessment = self.assessment()
+        identities = {
+            item.id: report_identity(item.id)
+            for item in assessment.graph.items()
+            if self.config.item_types[item.type].extractor == "pytest"
+        }
+        view = results.summarize(assessment, report, identities, label)
+        if not view.matched_cases:
+            unmatched = "\n".join(f"  {run.run.identity!r}: {run.reason}" for run in view.unmatched)
+            raise CouldNotJudge(
+                f"{label}: no report entries match the {view.scanned_cases} scanned pytest test "
+                f"cases.\n{unmatched}",
+                "Fix: use a report for this repo and its scanned tests, with default pytest "
+                "JUnit class names (no --junit-prefix). No requirement verdicts were produced.",
+            )
+        return view
 
     def _unseen(self, assessment: Assessment, item_id: str) -> CouldNotJudge:
         """An unseen start, with the same source limits and next move in every walk."""

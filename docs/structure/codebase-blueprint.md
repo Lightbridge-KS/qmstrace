@@ -51,7 +51,8 @@ src/qmstrace/
   __init__.py            the version, read from package metadata — nothing else
   cli.py                 Typer wiring only: options, the @outcome decorator, exit codes. No logic
   workspace.py           Workspace.open(start).assessment() — the one place that sequences a run:
-                         finds the root, reads the configuration, holds the one scan function
+                         finds the root, reads the configuration, holds the one scan function;
+                         results(report_path) reads the explicit report and assesses once
   core/                  pure — no file, no Git, no framework
     errors.py            CouldNotJudge — the one way a run says it could not judge; carries the next move
     model.py             Item, Link, Lead, Finding, Notice, Extracted — frozen dataclasses;
@@ -62,6 +63,8 @@ src/qmstrace/
                          each item once, nearest first, the link that reached it and any other
                          (`also`); thread and impact (M3b) render it; suspects (M5b) will; closest()
     judge.py             coverage (M3) · resolve_baselines · guard · suspects — pure functions
+    results.py           frozen report/result values; pure exact matching, run deduplication and
+                         direct-verifies verdict aggregation (M4)
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
   extract/               text in, items out — never a path, never a repo
@@ -70,8 +73,8 @@ src/qmstrace/
     fields.py            the field line `Key: value` — shared by every extractor that reads fields
     markdown.py          headings, fields, fences, item text and its digest
     python_module.py     the module docstring's Implements line
-    pytest_tests.py      test functions, the verifies marker, a function's own digest
-    junit.py             the report reader — shares the test-ID convention with pytest_tests
+    pytest_tests.py      test functions, verifies markers, own digest; report_identity(node_id)
+    junit.py             bytes -> Report entries or parse diagnostic; safe defusedxml, no files
   infra/                 everything that touches the world
     tree.py              ISourceTree · WorkingTree — files(), read(), label · GitTree (M5a)
     git.py               the one subprocess helper, run where it asks, redirects scrubbed ·
@@ -161,6 +164,16 @@ Rows may import columns. Enforced by `tests/test_architecture.py`, which walks e
 | **cli** | ✔ | — | — | ✔ | ✔ | — | ✔ | ✔ |
 
 `extract` also imports `defusedxml`, in `junit.py` only. Nothing imports `click`.
+
+M4's report boundary is not an item extractor and is not registered in `IExtractor`.
+`Workspace.results` reads explicitly supplied bytes (outside the Git-filtered tree), converts
+parse diagnostics and zero matches to `CouldNotJudge`, obtains identities from
+`pytest_tests.report_identity`, then calls `core.results.summarize`. The CLI resolves the
+report path before opening the workspace. Matching and aggregation stay in core; the renderer
+only presents frozen values. Graph nodes retain authored fields for sibling verification
+methods without making sibling nodes local items. No pytest runtime import is needed.
+`types-defusedxml` is a development dependency for strict mypy; runtime dependencies are unchanged.
+
 
 ## 7. Where a change lands
 

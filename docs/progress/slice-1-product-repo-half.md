@@ -130,7 +130,7 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       moved into a comment, which only the engine reports — the stand-in was wrong (local:
       `_playground/2026-09-21_parity/`). The pull request's dry gate passed; the four new manual
       pages were verified to return HTTP 200 in production on 2026-09-21
-- [ ] **M3b · impact** *(built, awaiting review — `codex/m3b-impact`)* — `impact <ID>…`: the forward closure M2b built, `Assumes` included,
+- [x] **M3b · impact** *(merged — pull request 9, `23c80a5`)* — `impact <ID>…`: the forward closure M2b built, `Assumes` included,
       rendered for several IDs, grouped by item type, with the `Impacts` line; an ID a change
       request reserves is judged once change requests are read (M5a). Split from M3 on
       2026-09-21. Assesses once; rejects the whole request if any start is unseen; displays
@@ -143,8 +143,30 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       still matches. CR-001's two starts reach 18 downstream IDs matching the frozen lock;
       adding its already-declared new ID explicitly reproduces its candidate line. A client
       assumption propagates impact without changing gaps. Original test-bed repos remain
-      clean (local record: `_playground/2026-09-21_m3b-impact/`). No production deploy yet
-- [ ] **M4 · results** — the JUnit reader on defusedxml; `results`
+      clean (local record: `_playground/2026-09-21_m3b-impact/`). GitHub's dry gate and the
+      deploy preview passed. Both manual pages were verified in production on 2026-09-21:
+      HTTP 200 with the expected impact output examples
+- [ ] **M4 · results** *(built — awaiting PR review on `codex/m4-results`)* —
+      safe JUnit reader; exact pytest identity matching; pure run deduplication and direct
+      `verifies` aggregation. Usable reports exit 0 even with failures or partial matches;
+      zero matches exits 2. Missing results, shared tests, sibling ownership and unknown
+      targets stay explicit; inspection/analysis methods survive sibling reads. The report
+      commit is always unverified. Source/graph notices are preserved. Relative paths use the
+      effective invocation directory, including ignored reports and `-C` on either side.
+      CLI/help goldens, reference and how-to pages ship together; accepted contract and
+      ownership notes are in the surface design, scenario catalogue and blueprint.
+      **Verified 2026-09-22:** `just dry` — 419 tests, 99.35% coverage, formatting, lint,
+      strict types, wheel and strict manual build. Real pytest reports cover both XML families,
+      nested methods, bracketed parameters, xfail/xpass and body-failure/teardown-error duplicates.
+      Built pages contain every included golden; existing golden changes are limited to root
+      help (new command and clarified informational exit 0). E1 gateway at `e1-end` (`cee4ed7`),
+      ledger at `cc19a6b`, using new-format overlays retaining E1's `Kind`: 0 violations,
+      0 gaps, 10 passing requirements, **62 cases / 78 runs**. All seven documented mutations
+      flip their targeted requirement to `fail`, with pinned source restored between runs.
+      Repeated E1 CLI runs are byte-identical. Existing E4 graph/gaps parity still matches
+      (177 items, 208 links, 43 starts per repo; the documented stand-in gap defect remains).
+      Original repositories are unchanged; clone source is restored. Local evidence:
+      `_playground/2026-09-21_m4-results/`.
 - [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
       test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,
       the guard, change requests
