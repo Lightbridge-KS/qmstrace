@@ -200,6 +200,8 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       PR 11's first CI run exposed Git-version differences in UTC tag-date spelling
       (`Z` versus `+00:00`). Dates now use one ISO representation while retaining non-UTC
       offsets; regressions cover both UTC spellings, non-UTC dates and lightweight tags.
+      CI passed on `c8682a0`. Preview inspection then found literal code fences in the
+      numbered how-to; its golden examples now sit outside the list as code blocks.
 - [ ] **M5b · suspects** — item-level, transitive, never cleared by a touch
 - [ ] **M6 · setting up a repo** — `init` (trace configuration, stanza between markers, the
       test framework's marker registered, idempotent); the skill as package data with the

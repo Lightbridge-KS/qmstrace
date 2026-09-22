@@ -23,24 +23,24 @@
    set `Status: withdrawn`. An old citation already present at the baseline cannot authorize
    another change.
 
-   Without a fresh citation, the guard reports:
-
-    ``` text
-    --8<-- "cli/golden/check-baseline-unauthorized.txt"
-    ```
-
-   With the accepted request listing the changed item:
-
-    ``` text
-    --8<-- "cli/golden/check-baseline-authorized.txt"
-    ```
-
 5. Run `qmstrace check --strict`. Address violations and coverage gaps. An unavailable ledger
    leaves request acceptance unverified even if the command succeeds; arrange verification
    against the register through the project workflow.
 
 6. Review affected designs, code and tests, and run relevant tests. M5a's guard does not yet
    list downstream suspects. A successful gate is not evidence that those reviews occurred.
+
+Without a fresh citation, the guard reports:
+
+``` text
+--8<-- "cli/golden/check-baseline-unauthorized.txt"
+```
+
+With the accepted request listing the changed item:
+
+``` text
+--8<-- "cli/golden/check-baseline-authorized.txt"
+```
 
 For finding definitions and exact comparison rules, see [Baselines and change
 control](../reference/baselines.md).
