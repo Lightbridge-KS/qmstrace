@@ -79,10 +79,14 @@ hash — as a pointer, never as evidence (see *Done*).
       The fixtures come from [`docs/tests/scenario-catalogue.md`](../tests/scenario-catalogue.md).
       M0, M1 (scaffold and dry gate), M2a (the configuration), M2 (`status`, end to end), M2c
       (the user manual, live at <https://qmstrace.netlify.app/>), M2b (`thread`, the parity
-      script) and M3 (`check`, `rules`, coverage gaps; pull request 8, `ba2e0ca`) have landed.
-      **M3b — `impact` — is built and verified, awaiting review** on `codex/m3b-impact`;
-      M4 (`results`) follows its merge.
+      script), M3 (`check`, `rules`, coverage gaps; pull request 8, `ba2e0ca`) and M3b
+      (`impact`; pull request 9, `23c80a5`) have landed. **M4 — `results` — is built and locally verified**,
+      on `codex/m4-results`, awaiting PR review. Its 419-test dry gate, manual build,
+      E1 counts and seven mutations pass; verification detail is in the slice tracker.
+      M5a (baselines and change) follows M4 review.
       The four M3 manual pages were verified to return HTTP 200 on 2026-09-21.
+      Both M3b manual pages were also verified in production, including their expected output
+      examples, on 2026-09-21.
 
 ## Next
 

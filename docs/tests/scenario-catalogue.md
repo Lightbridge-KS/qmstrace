@@ -86,11 +86,35 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 
 ## Results
 
-- Runs versus test cases; the worst verdict wins; untested requirements listed.
-- A requirement declared in a sibling repo and verified here.
-- **The regression:** `results` on any repo that has `verifies` links.
-- Report cases that match no scanned test are reported, not dropped; a report whose class
-  names match nothing says so instead of printing "no result" for everything.
+- One explicit pytest report, `xunit1` or `xunit2`, with `testsuite` / `testsuites`, nested suites
+  and namespaces. Safe parsing refuses DTDs, entities and external references; malformed,
+  unreadable, unsupported and empty reports exit 2 with a next move.
+- Exact classname/unparameterized-name matching from scanned node IDs, including nested class
+  methods, parameters with brackets, and identity collisions. Missing or ambiguous identities
+  are unmatched; no fuzzy matching. Real pytest-generated reports verify both XML families.
+- XML entries, distinct full-identity runs, matched/scanned test cases and unmatched run
+  identities are labelled separately. Full-identity duplicates combine by worst verdict and
+  are counted explicitly; body failure plus teardown error is one run, not inferred retries.
+- Test-case precedence `fail > skip > pass`; errors fail, xfail/xpass use their XML outcome.
+  Requirement precedence `fail > no-result > skip > pass`; an absent linked test is `no-result`,
+  no linked tests is `untested`. Partial parameter variants do not prove a complete run set.
+- Direct `verifies` only: a design-only test contributes no requirement verdict. Duplicate links
+  do not inflate counts. A shared test names its other targets; global counts count it once.
+- Local requirements and locally verified sibling requirements are shown. Sibling ownership,
+  unpinned source and declared inspection/analysis methods survive. Unknown-type citations
+  stay separate from requirement verdicts; unavailable sources and refused links remain visible.
+- Inspection/analysis requirements are separate, including their linked test results without
+  claiming verification or approval. Nonpassing details include identities and outcome messages.
+- Informational exit 0 for recognized results, including failed tests and partial matches;
+  unmatched entries listed. Zero matches exits 2 with no verdicts. Internal faults exit 3.
+- Report paths resolve from the effective invocation directory before repo discovery: ignored
+  reports, outside files, invocation from subdirectories and `-C` on either side are tested.
+- One assessment per usable report; deterministic ordering regardless of XML entry order.
+  CLI/help goldens cover partial results, sibling targets and the unavailable-sibling view.
+- E1 at `e1-end`, with a schema overlay retaining `Kind`: 62 cases / 78 runs; all seven
+  documented mutations flip their targeted requirement to `fail` in restored clones.
+- Every view states current-working-tree matching and report commit NOT VERIFIED. No persistence,
+  combined reports, freshness claim or retry history.
 
 ## The baseline guard — the nine, and what D6 adds
 

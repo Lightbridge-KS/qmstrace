@@ -1,0 +1,13 @@
+report: report.xml
+  1 XML entries · 1 reported runs (distinct full identities)
+  matched: 1 runs of 1 test cases · scanned: 2 test cases · unmatched: 0 run identities
+  matched against the current working tree — report commit NOT VERIFIED
+  a partial parameter set does not prove every possible variant ran
+  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+
+requirements — direct verifies links only:
+  REQ-CLT-01  no-result 1 test cases · 0 runs — The client sends its key on every call · requirement · docs/req/client-srs.md:3
+    no-result tests/unit/test_api.py::test_every_call_carries_the_key · 0 runs
+  REQ-SVC-01  pass      1 test cases · 1 runs — A call carries a key · requirement, in sibling service — not pinned · ../service/docs/req/service-srs.md:12
+
+result: 1 matched test cases · 1 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

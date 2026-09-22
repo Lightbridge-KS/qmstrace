@@ -42,7 +42,8 @@ class Home(Enum):
 class Node:
     """One end of a link. `item` is set for this repo's own items only; `repo` names a sibling
     or an external source. `title` and `where` are for display — `where` is a path as a reader
-    of this repo would write it."""
+    of this repo would write it. `fields` retains authored metadata for local and sibling
+    nodes, including verification methods, without treating sibling items as local ones."""
 
     id: str
     home: Home
@@ -51,6 +52,7 @@ class Node:
     repo: str | None = None
     title: str | None = None
     where: str | None = None
+    fields: Mapping[str, str] = field(default_factory=dict)
 
 
 class Direction(Enum):
@@ -172,7 +174,15 @@ class TraceGraph:
         ]
 
         nodes: dict[str, Node] = {
-            i: Node(i, Home.LOCAL, it.type, it, title=it.title, where=f"{it.file}:{it.line}")
+            i: Node(
+                i,
+                Home.LOCAL,
+                it.type,
+                it,
+                title=it.title,
+                where=f"{it.file}:{it.line}",
+                fields=it.fields,
+            )
             for i, it in local.items()
         }
         # Every ID the run can see is a node, cited or not — so it can be threaded. A sibling's
@@ -183,7 +193,13 @@ class TraceGraph:
                 nodes.setdefault(
                     item_id,
                     Node(
-                        item_id, Home.SIBLING, item.type, repo=repo, title=item.title, where=where
+                        item_id,
+                        Home.SIBLING,
+                        item.type,
+                        repo=repo,
+                        title=item.title,
+                        where=where,
+                        fields=item.fields,
                     ),
                 )
         for name, declared in sorted(around.externals.items()):

@@ -26,7 +26,7 @@ EXIT_OK, EXIT_FAILED, EXIT_COULD_NOT_JUDGE, EXIT_INTERNAL = 0, 1, 2, 3
 # Printed at the foot of `--help`, kept as written: the leading \b stops the framework reflowing it.
 EXIT_CODES = """\b
 Exit codes:
-  0  no failing findings in this mode
+  0  completed — informational views may include failures
   1  the check failed — violations, or gaps under the gate; the result line says which
   2  could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
      an unreadable report, a shallow clone where baselines are configured
@@ -156,6 +156,26 @@ def impact(
     """
     assessment = Workspace.open(_directory(ctx, directory)).impact(item_ids)
     typer.echo(text.impact(assessment, item_ids))
+    return EXIT_OK
+
+
+@app.command(short_help="Test verdicts per requirement, from a pytest JUnit report.")
+@outcome
+def results(
+    ctx: typer.Context,
+    report: Annotated[Path, typer.Argument(metavar="REPORT", help="A pytest JUnit XML report.")],
+    directory: Directory = None,
+) -> int:
+    """Match a report to scanned tests and their explicit verifies links.
+
+    Informational: failing tests and partial matches still exit 0. Unmatched entries are
+    listed; a report with no matches exits 2. Relative report paths start at -C or the current
+    directory, not the discovered repo root. The report's commit is not verified.
+    """
+    start = _directory(ctx, directory)
+    report_path = (start / report).resolve()
+    view = Workspace.open(start).results(report_path)
+    typer.echo(text.results(view))
     return EXIT_OK
 
 

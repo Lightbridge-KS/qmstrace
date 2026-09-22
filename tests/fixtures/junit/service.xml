@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest">
+  <testcase classname="tests.unit.test_keys" name="test_a_call_without_a_valid_key_is_refused[empty]"/>
+  <testcase classname="tests.unit.test_keys" name="test_a_call_without_a_valid_key_is_refused[wrong[bracket]]"/>
+  <testcase classname="tests.unit.test_keys.TestTheKeyCheck" name="test_it_runs_before_any_handler"><skipped message="handler fixture unavailable"/></testcase>
+  <testcase classname="tests.integration.test_store" name="test_a_record_survives_a_restart"><failure message="record missing after restart"/></testcase>
+  <testcase classname="tests.integration.test_store" name="test_a_record_survives_a_restart"><error message="teardown could not close store"/></testcase>
+  <testcase classname="tests.removed.test_old" name="test_old"/>
+</testsuite></testsuites>
