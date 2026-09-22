@@ -31,6 +31,7 @@ in the tool. The standard is data too: ISO/IEC 29110 comes first.
 | see it work, in five minutes | [A first look](tutorials/first-look.md) |
 | prepare a change request's impact analysis | [Write an impact list](how-to/write-an-impact-list.md) |
 | interpret a pytest report against requirements | [Read test results](how-to/read-test-results.md) |
+| change or retire a frozen item | [Change a frozen item](how-to/change-a-frozen-item.md) |
 | look up a command, a finding, an exit code or a configuration key | [Reference](reference/commands/status.md) |
 | understand what *not pinned* and *not verified here* mean | [Around the repo](explanation/around-the-repo.md) |
 
@@ -39,6 +40,6 @@ goal, reference states facts, explanation gives the reasons. Every page opens wi
 
 ## Where it stands
 
-Built: `qmstrace status`, `thread`, `impact`, `results`, `check` and `rules`. The other commands —
-guarding baselines, setting a repo up — arrive one at a time, and
-this manual grows with them.
+Built: `qmstrace status`, `thread`, `impact`, `results`, `check` and `rules`, including baseline
+and change-request checks. Downstream suspects and repository setup follow; this manual grows
+with them.

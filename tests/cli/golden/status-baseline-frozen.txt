@@ -1,0 +1,25 @@
+schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml
+scanned (working tree, not pinned):
+  requirement       3 items in  1 file   docs/req/*-srs.md
+  design_element    2 items in  1 file   docs/design/*.md
+  component         2 items in  2 files  src/**/*.py · 1 file ignored by **/__init__.py
+  test_case         4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one test case
+links: 14
+external AGR-*: verified against ../ledger/agreement.md (3 declared)
+sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID
+baseline requirements (service): baseline/service/requirements/1 @ 12b71d858be9
+  baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
+controlled document items: 3 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+change requests: ../ledger/change-requests (0 readable; 0 malformed) — current working tree, not pinned
+
+  REQ-SVC-01 [frozen; baseline/service/requirements/1]  security         origin AGR-1         design elements 1  test cases 1 (unit 1)         — A call carries a key
+  REQ-SVC-02 [frozen; baseline/service/requirements/1]  reliability      origin AGR-2, AGR-3  design elements 1  test cases 2 (integration 2)  — Records survive a restart
+
+verified by inspection — no recorded basis yet, listed apart:
+  REQ-SVC-03 [frozen; baseline/service/requirements/1]  maintainability  origin AGR-3         design elements 0  test cases 0                  — The record format is written down
+
+categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, portability, design-constraint, legal-regulatory
+  (a prompt, not a gap — not every product needs one under every category)
+
+0 violations · 1 gap (G01 ×1) — qmstrace check lists them

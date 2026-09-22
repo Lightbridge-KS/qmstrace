@@ -118,8 +118,8 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       A local parity script — the engine against the stand-in on the test bed, graphs not text —
       runs from here on; the test bed is untouched until M7. **First run: the E4 row matches the
       ledger's `trace.lock` exactly** — 177 items, 208 links, forward reach from 43 starts per
-      repo (local: `_playground/2026-09-21_parity/`). The E3 row waits for M5a, where its
-      baseline tags test something new
+      repo (local: `_playground/2026-09-21_parity/`). The E3 row was deferred to M5a,
+      where its baseline tags test something new; the mapped replay is recorded below
 - [x] **M3 · judge it** *(merged — pull request 8, `ba2e0ca`)* — coverage gaps from the
       rules as data, `check` (`--strict`, `--quiet`), `rules`, the wording pass over the findings
       catalogue, the gap that says why a module with a stray `Implements:` is unlinked; `status`
@@ -146,7 +146,7 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       clean (local record: `_playground/2026-09-21_m3b-impact/`). GitHub's dry gate and the
       deploy preview passed. Both manual pages were verified in production on 2026-09-21:
       HTTP 200 with the expected impact output examples
-- [ ] **M4 · results** *(built — awaiting PR review on `codex/m4-results`)* —
+- [x] **M4 · results** *(merged — pull request 10, `1a4869d`)* —
       safe JUnit reader; exact pytest identity matching; pure run deduplication and direct
       `verifies` aggregation. Usable reports exit 0 even with failures or partial matches;
       zero matches exits 2. Missing results, shared tests, sibling ownership and unknown
@@ -166,10 +166,37 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       Repeated E1 CLI runs are byte-identical. Existing E4 graph/gaps parity still matches
       (177 items, 208 links, 43 starts per repo; the documented stand-in gap defect remains).
       Original repositories are unchanged; clone source is restored. Local evidence:
-      `_playground/2026-09-21_m4-results/`.
+      `_playground/2026-09-21_m4-results/`. GitHub's dry gate and deploy preview passed.
+      Both manual pages were verified in production on 2026-09-22 with their provenance
+      warning and expected command content
 - [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
       test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,
-      the guard, change requests
+      the guard, change requests.
+      **Implemented — 2026-09-22**, on `codex/m5a-baselines-change`;
+      pull-request review remains. Historical configuration and schemas are read
+      from the tagged tree; external historical schemas cannot be substituted. Reachable
+      baselines are ordered by ancestry, with incomparable governing tags rejected. Offline
+      runs reject known incomplete history and explicitly leave remote-tag completeness
+      unverified. The guard handles fresh citations, additions, changes and removals;
+      withdrawn endpoints remain visible but do not count toward coverage. Historical
+      identities survive current pattern/type changes. V10–V13, request reservations for
+      unseen impact starts, structured evidence and quiet-safe notices are implemented.
+      **Verified:** `just dry` — 488 tests, 99.29% coverage, formatting, lint, strict types,
+      wheel and strict manual build. Git/tree contracts cover immutable reads, nested roots,
+      Unicode/BOMs and environment redirection; fixtures cover ancestry, scopes, historical
+      schemas, request parsing, withdrawal and command exits. Golden diffs inspected;
+      deterministic output tests pass. Ten built manual pages checked for expanded golden
+      content; both new baseline/change-control pages visually inspected, including schema
+      migration and offline evidence limits. E3 replay in disposable clones preserves traced
+      bytes at all three documented pins, recording original-to-overlay commit mappings:
+      **10 frozen · 2 changed · 1 new · 0 removed**, all nine guard scenarios (addition and
+      removal checked separately), and 11 unchanged frozen items at the second baseline.
+      Existing E4 graph/gap parity matches (177 items, 208 links, 43 starts per repo; the
+      documented stand-in gap defect remains). E1 results parity retains **62 cases / 78
+      runs** and all seven mutations flip their targeted requirement to `fail`. Original
+      test-bed repositories are unchanged. Local evidence and mappings:
+      `_playground/2026-09-22_m5a-baselines/`. M5b's suspect assertions remain separate;
+      published manual deployment has not been verified for this milestone.
 - [ ] **M5b · suspects** — item-level, transitive, never cleared by a touch
 - [ ] **M6 · setting up a repo** — `init` (trace configuration, stanza between markers, the
       test framework's marker registered, idempotent); the skill as package data with the
@@ -233,8 +260,8 @@ output, and every catalogue code has a fixture that emits it.
 - *Settled after M2a:* M2 is cut in two vertical steps (`status`, then `thread` with the parity
   script), and `GitTree` moves to M5a.
 
-- `Status: withdrawn` needs semantics: a withdrawn item should stop raising coverage gaps.
-  **Moved to M5a** — withdrawing is an act under change control; until then a withdrawn item
-  still raises its gaps.
+- *Settled in M5a:* withdrawn items and their incident links do not count toward coverage;
+  withdrawal/reactivation remains controlled text change. Validation, traversal and result
+  evidence are retained. Standing contract: data architecture D7.
 - A test function's digest uses `ast`; its dump format changed in Python 3.13. Harmless while
   both sides are computed at run time — a format question once slice 2 writes the lock.

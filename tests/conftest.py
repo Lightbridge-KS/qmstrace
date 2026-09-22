@@ -92,6 +92,8 @@ def git_env(monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFa
         "GIT_AUTHOR_EMAIL": "fixture@example.invalid",
         "GIT_COMMITTER_NAME": "Fixture",
         "GIT_COMMITTER_EMAIL": "fixture@example.invalid",
+        "GIT_AUTHOR_DATE": "2026-01-01T00:00:00+00:00",
+        "GIT_COMMITTER_DATE": "2026-01-01T00:00:00+00:00",
     }.items():
         monkeypatch.setenv(key, value)
 

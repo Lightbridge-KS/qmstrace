@@ -16,6 +16,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Final
 
+from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Lead, Link, text_digest
 from qmstrace.extract.fields import FIELD, link_line
@@ -41,7 +42,7 @@ class _Open:
 def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> Extracted:
     """Read one Markdown file for items of one type."""
     pattern = item_type.id_pattern
-    known = set(config.links) | item_type.fields | {CHANGE}
+    known = set(config.links) | item_type.fields | {CHANGE, "Status"}
     items: list[Item] = []
     links: list[Link] = []
     wrong: list[Finding] = []
@@ -91,6 +92,13 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             continue
         value = found.group(2)
         if key == CHANGE:
+            tokens = [s.strip() for s in value.split(",")]
+            prefix = config.change_requests.prefix if config.change_requests else None
+            for token in tokens:
+                if not ID_TOKEN.fullmatch(token) or (prefix and not token.startswith(prefix)):
+                    wrong.append(findings.not_an_id(current.id, CHANGE, token, path, number))
+            if key in current.fields:
+                wrong.append(findings.cannot_parse(path, number, "duplicate Change field"))
             current.fields.setdefault(key, value)
             continue  # citing a change request is not a change
         current.body.append(raw)

@@ -42,12 +42,18 @@ In a pipeline, where only this repo is checked out:
 | `external …` | whether IDs cited from outside any product repo, such as agreement clauses, were checked, and against which file |
 | `sibling …` | each of the project's other repos: read from its working tree (*not pinned*), or not reachable |
 | `not verified here:` | citations of another repo's items that this run could not check; they are judged when the ledger imports the project |
-| `baselines:` | the baselines the project configures; judging them is not built yet |
+| `baseline …` / `baselines:` | governing local tags, annotation evidence and limits; see [Baselines](../baselines.md) |
+| `controlled document items:` | frozen, changed, new, removed and withdrawn counts; changed/removed are subsets of frozen |
+| `change requests:` | the register's availability, readable requests and malformed files |
 | one line per requirement | its category, what it points back at, what hangs off it — design elements, test cases by level — and its title |
 | `verified by …` | requirements verified by inspection or analysis, listed apart: nothing records their basis yet |
 | last line | violations and gaps, each counted by code — see [Findings](../findings.md). [`qmstrace check`](check.md) lists every one, with its next move |
 
 ## Exit code
+
+Frozen requirements carry their governing tag and comparison state; withdrawn requirements
+are labelled explicitly. [Change a frozen item](../../how-to/change-a-frozen-item.md) describes
+the authoring workflow.
 
 `0`, whatever it counts — or `2` when it cannot judge at all, such as in a folder with no
 `qmstrace.toml` above it. See [Exit codes](../exit-codes.md).

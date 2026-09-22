@@ -33,6 +33,7 @@ def status(assessment: Assessment) -> str:
     lines.append(f"links: {len(assessment.graph.links)}")
     lines += [_external(state) for state in assessment.externals]
     lines += _siblings(assessment)
+    lines += _baselines(assessment)
     lines += [notice.text for notice in assessment.notices]
     lines += _listing(assessment)
     lines += ["", _violations(assessment)]
@@ -142,6 +143,12 @@ def _row(config: TraceConfig, assessment: Assessment, item: Item, markers: list[
     """One requirement's cells: ID, category, what it points at, what hangs off it, title."""
     graph = assessment.graph
     row = [item.id]
+    controlled = next((c for c in assessment.baseline_state.comparisons if c.id == item.id), None)
+    if controlled:
+        changes = f": {', '.join(controlled.fresh)}" if controlled.fresh else ""
+        row[0] += f" [{controlled.state}{changes}; {controlled.baseline.label}]"
+    if item.fields.get("Status") == "withdrawn":
+        row[0] += " [withdrawn]"
     if CATEGORY in config.item_types[LISTED].fields:
         row.append(item.fields.get(CATEGORY, "?"))
     for marker in markers:
@@ -311,6 +318,8 @@ def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
 def _what(node: Node) -> str:
     """The type and home of an item, and where to read it."""
     kind = node.type.replace("_", " ") if node.type else "an item of unknown type"
+    if node.fields.get("Status") == "withdrawn":
+        kind += ", withdrawn — excluded from coverage"
     if node.home is Home.SIBLING:
         kind += f", in sibling {node.repo} — not pinned"
     elif node.home is Home.EXTERNAL:
@@ -593,10 +602,10 @@ def _outside_block(config: TraceConfig) -> list[str]:
         lines += [
             "",
             f"  change requests {cr.prefix}…: in {cr.source}/, licensing a change when "
-            f"{cr.accepted} — not judged yet",
+            f"{cr.accepted} and listing the item in Impacts; each edit needs a fresh citation",
         ]
     if config.baselines:
-        lines += ["", "  baselines — not judged yet"]
+        lines += ["", "  baselines — reachable local tags; document changes are guarded"]
         for scope in config.baselines.values():
             subject = {"*": "every subject", None: "the subject named in the tag"}.get(
                 scope.subject, scope.subject
@@ -705,7 +714,33 @@ def _notices(assessment: Assessment) -> list[str]:
             f"not verified here: {count} {_noun(count, 'citation', 'citations')} of another "
             f"repo's items ({', '.join(unverified)}) — judged at the ledger's import"
         )
-    return lines + [notice.text for notice in assessment.notices]
+    return lines + _baselines(assessment) + [notice.text for notice in assessment.notices]
+
+
+def _baselines(assessment: Assessment) -> list[str]:
+    lines = []
+    for baseline in assessment.baseline_state.baselines:
+        lines.append(
+            f"baseline {baseline.scope} ({baseline.subject}): {baseline.label} "
+            f"@ {baseline.snapshot.commit[:12]}"
+        )
+        for tag in baseline.tags:
+            if tag.annotated:
+                lines.append(f"  {tag.name}: annotated; tagger {tag.tagger}; date {tag.date}")
+    if assessment.config.baselines:
+        lines.append(_change_counts(assessment))
+    return lines
+
+
+def _change_counts(assessment: Assessment) -> str:
+    comparisons = assessment.baseline_state.comparisons
+    frozen = sum(c.before is not None for c in comparisons)
+    states = Counter(c.state for c in comparisons)
+    withdrawn = sum(i.fields.get("Status") == "withdrawn" for i in assessment.graph.items())
+    return (
+        f"controlled document items: {frozen} frozen · {states['changed']} changed · "
+        f"{states['new']} new · {states['removed']} removed · {withdrawn} withdrawn"
+    )
 
 
 def _read(assessment: Assessment) -> str:
@@ -745,5 +780,10 @@ def _result(assessment: Assessment, *, strict: bool) -> str:
     if unseen:
         parts.append(f"NOT VERIFIED: {', '.join(unseen)}")
     if assessment.config.baselines:
-        parts.append("baselines: not judged yet")
+        parts += [_change_counts(assessment), "remote-tag completeness NOT VERIFIED"]
+    has_citations = any(i.fields.get("Change") for i in assessment.graph.items())
+    if (
+        assessment.config.change_requests or has_citations
+    ) and not assessment.baseline_state.register.available:
+        parts.append("change requests NOT VERIFIED")
     return " · ".join(parts)

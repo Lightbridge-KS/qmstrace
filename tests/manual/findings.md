@@ -9,5 +9,9 @@
 | V07 | violation | an item declared in a file that is not scanned for its type |
 | V08 | violation | a file that cannot be read or parsed |
 | V09 | violation | an external ID its source does not declare |
+| V10 | violation | a controlled item changed or added without a fresh change-request citation |
+| V11 | violation | a cited change request does not exist, is malformed, or is not accepted |
+| V12 | violation | a cited change request does not list the item under Impacts |
+| V13 | violation | a frozen item's heading was removed |
 | V14 | violation | a link field that holds something other than IDs |
 | V15 | violation | a verifies marker in a form this tool does not read |

@@ -1,0 +1,7 @@
+baseline requirements (service): baseline/service/requirements/1 @ 12b71d858be9
+  baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
+controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
+G01  docs/req/service-srs.md:29  REQ-SVC-03: no design element satisfies it yet. Fix: on the design element, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.
+result: 0 violations, 1 gap in 11 items · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED

@@ -3,7 +3,9 @@ report: report.xml
   matched: 1 runs of 1 test cases · scanned: 2 test cases · unmatched: 0 run identities
   matched against the current working tree — report commit NOT VERIFIED
   a partial parameter set does not prove every possible variant ran
-  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
 requirements — direct verifies links only:
   REQ-CLT-01  no-result 1 test cases · 0 runs — The client sends its key on every call · requirement · docs/req/client-srs.md:3

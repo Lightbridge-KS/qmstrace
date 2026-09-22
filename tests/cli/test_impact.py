@@ -172,7 +172,7 @@ def test_unknown_starts_reject_the_whole_request(project: Path) -> None:
     assert "the closest here:" in output
     assert "No impact list was produced" in output
     assert "starting items:" not in output and "Impacts:" not in output
-    assert "not presumed reserved" in output
+    assert "reservation does not establish its type or links" in output
 
 
 def test_unseen_sibling_reports_source_limits(alone: Callable[[str], Path]) -> None:
@@ -195,7 +195,7 @@ def test_violations_and_notices_remain_visible(project: Path) -> None:
     code, output = impact(project / "service", "REQ-SVC-01")
     assert code == 0 and "1 violation" in output
     assert "links they refuse are not shown" in output
-    assert "baselines:" in output and "not judged" in output
+    assert "baselines:" in output and "remote-tag completeness NOT VERIFIED" in output
 
 
 def test_directory_and_missing_arguments(project: Path) -> None:

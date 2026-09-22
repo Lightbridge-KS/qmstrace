@@ -23,6 +23,7 @@ nav = [
     { "Check your work" = "how-to/check-your-work.md" },
     { "Write an impact list" = "how-to/write-an-impact-list.md" },
     { "Read test results" = "how-to/read-test-results.md" },
+    { "Change a frozen item" = "how-to/change-a-frozen-item.md" },
   ] },
   { "Reference" = [
     { "qmstrace status" = "reference/commands/status.md" },
@@ -34,6 +35,7 @@ nav = [
     { "Findings" = "reference/findings.md" },
     { "Exit codes" = "reference/exit-codes.md" },
     { "Configuration" = "reference/configuration.md" },
+    { "Baselines and change control" = "reference/baselines.md" },
   ] },
   { "Explanation" = [
     { "The chain" = "explanation/the-chain.md" },

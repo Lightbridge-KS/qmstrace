@@ -25,7 +25,7 @@ Verified by running code where it says so.
 | F4 | **D9's copy × ledger-relative paths.** With the schema copied, the paths to the agreement and the change requests no longer resolve | An optional local `ledger` pointer; without it, external sources are *not verified* |
 | F5 | **D6's subject scope × the configurations.** A baseline freezes a subject; no configuration named one | `[subjects.<name>] key = …`; the stanza names the subject |
 | F6 | **PRD success criterion 4 × dispatch by type name.** "A second trace schema needs no engine change" — the stand-in parsed an item type as tests only if it was literally called `test_case` | The extractor is named per item type in the configuration |
-| F7 | **D6 "reachable from `HEAD`" × a pipeline's default checkout** — shallow, no tags. The guard would be off while the gate passes | With baselines configured, a shallow clone, unfetched tags or a non-repository is *could not judge* |
+| F7 | **D6 "reachable from `HEAD`" × a pipeline's default checkout** — shallow, no tags. The guard would be off while the gate passes | With baselines configured, known incomplete history is *could not judge*. M5a states the offline limit: remote-tag completeness cannot be inferred from local refs |
 | F8 | **D7 "never clears by being touched" × the stand-in**, which tracked test cases by file and cleared a suspect when its item was edited | Item-level digests for every item type; the suspect rule written out in D7 |
 | F9 | **The stand-in's two glob matchers × each other** — they disagree on `src/**/*.py` *(verified)* | One matcher from the standard library, for every tree. Python 3.13 |
 | F10 | **D4's in-memory database × a check that runs fifteen times a session** over a few hundred items | The database arrives with the ledger. The guarantee is kept by construction: an illegal link never enters the graph. D4 amended |
@@ -63,6 +63,8 @@ src/qmstrace/
                          each item once, nearest first, the link that reached it and any other
                          (`also`); thread and impact (M3b) render it; suspects (M5b) will; closest()
     judge.py             coverage (M3) · resolve_baselines · guard · suspects — pure functions
+    baselines.py         frozen tag evidence, historical snapshots, request register and item
+                         comparisons (M5a); no IO or selection logic
     results.py           frozen report/result values; pure exact matching, run deduplication and
                          direct-verifies verdict aggregation (M4)
     findings.py          the catalogue: each code once — what is wrong, the next move
@@ -75,11 +77,13 @@ src/qmstrace/
     python_module.py     the module docstring's Implements line
     pytest_tests.py      test functions, verifies markers, own digest; report_identity(node_id)
     junit.py             bytes -> Report entries or parse diagnostic; safe defusedxml, no files
+    change_requests.py   request text preamble -> metadata or diagnostic; no IO, no approval
+                         inferred from examples or prose
   infra/                 everything that touches the world
     tree.py              ISourceTree · WorkingTree — files(), read(), label · GitTree (M5a)
     git.py               the one subprocess helper, run where it asks, redirects scrubbed ·
                          working_files() · IGit, GitCli — reachable tags, files at a revision (M5a)
-    externals.py         the change-request register (M5a). The agreement and the siblings need
+    externals.py         raw change-request directory reads (M5a). The agreement and siblings need
                          no module: they are read as WorkingTrees
     globbing.py          the one matcher, for every tree
   render/
@@ -144,7 +148,8 @@ sequenceDiagram
     H->>H: render.text(...) → print · return 0 or 1
 ```
 
-`CouldNotJudge` may be raised by `config`, `tree` or `git`, and by `workspace` while it finds the
+`CouldNotJudge` may be raised by `config`, `tree` or `git`, by pure baseline resolution when
+ancestry or subject ownership is ambiguous, and by `workspace` while it finds the
 repo and reads its configuration — nowhere else; `@outcome` turns it into exit `2` with its next
 move. A sibling that cannot be judged is not this repo's failure: `workspace` turns it into what
 the header says about that sibling.
@@ -173,6 +178,16 @@ report path before opening the workspace. Matching and aggregation stay in core;
 only presents frozen values. Graph nodes retain authored fields for sibling verification
 methods without making sibling nodes local items. No pytest runtime import is needed.
 `types-defusedxml` is a development dependency for strict mypy; runtime dependencies are unchanged.
+
+M5a adds optional `git=` injection to `Workspace.open`, a domain-shaped `IGit` implemented by
+`GitCli`, and `GitTree`. Reads resolve to immutable commits; Git redirects are scrubbed and
+lazy object fetching is disabled. The workspace first selects scope candidates from ancestry,
+then caches selected historical snapshots by commit and reuses the scanner. Historical scans
+never recurse into sibling assessments or baseline resolution. The historical configuration
+and any referenced schema must come from that Git tree; the current ledger is not a fallback.
+`Assessment.baseline_state` contains tags, comparisons and request availability. Rendering
+derives labelled counts from those comparisons; judgment remains in `core/judge.py`.
+M5a adds no configuration keys or dependencies. Suspect traversal remains M5b.
 
 
 ## 7. Where a change lands

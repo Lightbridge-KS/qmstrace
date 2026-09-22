@@ -14,8 +14,8 @@
 
 2. Read the source notices before using the list. If a starting ID is unseen, correct it or
    make its source available and rerun. The whole request stops until every start is visible.
-   Checking whether a change request reserves an undeclared ID is **not built yet**; it arrives
-   with the baseline guard.
+   A readable accepted request can confirm a reservation; the command still needs a declared
+   item before it can traverse its links or include it in a candidate line.
 
 3. Review the combined output:
 

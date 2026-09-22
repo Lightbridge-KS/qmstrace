@@ -4,7 +4,9 @@ scanned (working tree, not pinned):
   test_case      1 item  in  1 file   tests/**/test_*.py · test functions: a parametrised function is one test case
 links: 2
 external BRF-*: verified against docs/brief.md (2 declared)
-baselines: 1 configured (release) — not judged: this version of qmstrace does not read baselines yet
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines: no matching reachable local tag — nothing frozen locally
 
   REQ-APP-01  origin BRF-1  test cases 1 (unit 1)  — A greeting
 

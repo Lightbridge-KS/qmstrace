@@ -30,7 +30,7 @@ Every finding carries the same four parts, and the last one is never left out:
 
 --8<-- "manual/findings.md"
 
-`V10` to `V13` are held for the baseline checks, which are not built yet.
+`V10` to `V13` are emitted by the [baseline guard](baselines.md).
 
 `qmstrace status` counts violations and gaps by code on its last line;
 [`qmstrace check`](commands/check.md) lists each one, with its place and next move. A gap's code

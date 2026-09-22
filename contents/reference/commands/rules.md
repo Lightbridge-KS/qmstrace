@@ -47,6 +47,10 @@ and the words its gap uses. Then, only where it applies:
 No rule is hidden in the tool, and no rule is restated anywhere else: this command is where to
 read them. A rule is changed in the project's trace schema, not here.
 
+Configured baseline scopes and change-request requirements are listed too. `rules` describes
+the policy; `status` and `check` assess its evidence. See [baselines and change control](../baselines.md)
+for ancestry selection, fresh citations and offline evidence limits.
+
 ## Exit code
 
 `0`, or `2` when the configuration cannot be read.

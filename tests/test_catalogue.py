@@ -14,9 +14,11 @@ from pathlib import Path
 
 import pytest
 
+from qmstrace.core.baselines import Baseline, ChangeRequest, Register, Snapshot, Tag
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.findings import CODES
 from qmstrace.core.graph import Surroundings, TraceGraph
+from qmstrace.core.judge import guard
 from qmstrace.core.model import Finding, Item
 from qmstrace.extract.base import REGISTRY
 from qmstrace.infra.globbing import matches
@@ -66,9 +68,38 @@ SCENARIOS: dict[str, Scenario] = {
     ),
     "V08": lambda c: found(c, {TESTS: "def test_x(:\n"}),
     "V09": lambda c: found(c, {SRS: REQ.replace("AGR-1", "AGR-9")}),
+    **{
+        code: (lambda c, code=code: guard_scenario(c, code))
+        for code in ("V10", "V11", "V12", "V13")
+    },
     "V14": lambda c: found(c, {SRS: REQ.replace("AGR-1", "TBD")}),
     "V15": lambda c: found(c, {TESTS: 'pytestmark = pytest.mark.verifies("REQ-SVC-01")\n'}),
 }
+
+
+def guard_scenario(config: TraceConfig, code: str) -> list[Finding]:
+    before = REGISTRY["markdown"](SRS, REQ, config.item_types["requirement"], config).items
+    after_text = REQ + "Reworded.\n" + ("- Change: CR-001\n" if code != "V10" else "")
+    after = REGISTRY["markdown"](SRS, after_text, config.item_types["requirement"], config).items
+    baseline = Baseline(
+        "requirements",
+        "service",
+        ("requirement",),
+        (Tag("baseline/service/requirements/1", "abc", False),),
+        Snapshot("abc", config, before),
+    )
+    register = Register(
+        available=True,
+        accepted="accepted",
+        requests=(
+            (ChangeRequest("CR-001", "CR-001.md", "accepted", frozenset({"REQ-SVC-02"})),)
+            if code == "V12"
+            else ()
+        ),
+    )
+    return list(
+        guard(config, () if code == "V13" else after, (baseline,), frozenset(), register)[1]
+    )
 
 
 def test_every_catalogue_code_has_a_scenario_and_every_scenario_a_code() -> None:

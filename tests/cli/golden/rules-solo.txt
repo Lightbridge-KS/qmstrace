@@ -14,7 +14,7 @@ From this repo's own schema
 
   external BRF-…: declared in docs/brief.md, in this repo — cited here, never declared here
 
-  baselines — not judged yet
+  baselines — reachable local tags; document changes are guarded
     release: tags matching ^v\d+\.\d+\.\d+$ freeze requirement (every subject)
 
 From this repo's qmstrace.toml

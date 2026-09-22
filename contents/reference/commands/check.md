@@ -26,7 +26,7 @@ The same kind of repo under the gate, with one rule not met yet:
 --8<-- "cli/golden/check-strict.txt"
 ```
 
-A repo with one of every violation, and the gaps they leave behind:
+A repo with scanning violations, and the gaps they leave behind:
 
 ``` text
 --8<-- "cli/golden/check-every-finding.txt"
@@ -54,6 +54,11 @@ and its `Fix:` then says to fix that violation first — never to add a second l
 not fail while you work: [Kinds of finding](../../explanation/kinds-of-finding.md).
 
 ## Exit code
+
+The [baseline guard](../baselines.md) adds V10–V13 for unauthorized changes and removals.
+It can also prevent judgment with exit `2`, including ambiguous baseline ancestry or a
+historical schema outside the tagged tree. See [Change a frozen
+item](../../how-to/change-a-frozen-item.md) for tested output.
 
 | Mode | `0` | `1` |
 |---|---|---|

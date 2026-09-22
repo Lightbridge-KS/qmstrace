@@ -23,9 +23,9 @@ From the project's trace schema
 
   external AGR-…: declared in agreement.md, in the ledger — cited here, never declared here
 
-  change requests CR-…: in change-requests/, licensing a change when accepted — not judged yet
+  change requests CR-…: in change-requests/, licensing a change when accepted and listing the item in Impacts; each edit needs a fresh citation
 
-  baselines — not judged yet
+  baselines — reachable local tags; document changes are guarded
     requirements: tags matching ^baseline/(?P<subject>[a-z0-9-]+)/requirements/(?P<n>\d+)$ freeze requirement (the subject named in the tag)
     product: tags matching ^v\d+\.\d+\.\d+$ freeze requirement, design element (every subject)
 

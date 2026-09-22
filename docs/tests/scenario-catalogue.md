@@ -58,7 +58,7 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | Nothing declared yet | An item in a file that is not read | V07, and items *and files* scanned per type in the summary |
 | An item declared in the repo | A note the repo ignores — a gitignored `_playground/` quoting a heading | never read: the working tree is what a commit could carry |
 | External IDs are fine | Their source could not be reached | *not verified*, in the result line; survives `--quiet` |
-| Nothing is frozen | A shallow clone, unfetched tags, or not a Git repository | said plainly, and the run **could not judge** when baselines are configured — a pipeline's default checkout is shallow and has no tags |
+| Nothing is frozen | Shallow history, explicit tag exclusions, unavailable objects or not a Git repository | **could not judge** with baselines configured; otherwise judge reachable local tags and always leave remote-tag completeness unverified |
 | Two counts that disagree | Test cases versus runs | every count labelled |
 | This requirement failed | A test case that verifies several items failed | marked *shared*, with what else it verifies |
 | No suspects | A file was touched | a suspect never clears itself |
@@ -70,8 +70,9 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - Rules come from data; `where` narrows a rule by a field's value — exactly, as V05 spells it; an
   item missing the field gets V05 and no gap.
 - No hidden exemption: a rule without `where` applies to every item of its type.
-- A withdrawn item raises no coverage gap *(semantics settled in M5a, with change control; until
-  then a withdrawn item still raises its gaps)*.
+- A withdrawn item raises no coverage gap, and links with a withdrawn endpoint do not satisfy
+  active items' coverage. Validation, traversal and test results remain visible. Withdrawal
+  and reactivation of frozen text require a fresh citation (M5a).
 - Gaps are listed and the run does not fail while authoring; under the gate it fails — every gap,
   in slice 1.
 - Rules are judged on this repo's items; a link to an item not verified here counts; `Assumes`
@@ -141,6 +142,21 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | The repo's configuration moved between the tag and `HEAD` | the tree at the tag is read with the configuration at the tag |
 | The change-request register unreachable | a fresh citation passes with a notice; verified at the ledger's import |
 | Detached `HEAD` | works |
+| Two governing commits are incomparable after a merge | exit 2, competing tags named |
+| Several tags identify one commit | equivalent evidence, one comparison per item |
+| New tag has an older date or lower number | ancestry still selects it |
+| External schema path at a historical tag | exit 2; never read today's external schema |
+| Embedded schema or schema file within the same Git tree | read at the historical commit |
+| Traced directory inside a larger repo; linked worktree | same relative paths and comparisons |
+| Historical source/configuration is malformed | exit 2, not an empty snapshot |
+| Current item type, scope, pattern or subject declaration changes | historical identities are retained |
+| New subject after a product release | not frozen by that release |
+| Unknown or ambiguous subject key | exit 2; no ownership guess |
+| Several fresh citations, one invalid | each offered citation checked; invalid one fails |
+| Readable empty register; missing request; malformed request; unavailable register | distinct states; only unavailable register permits an unverified fresh citation |
+| Request approval in a fence or prose section | never grants approval |
+| Duplicate request metadata; wrong filename ID; malformed Impacts | malformed, never treated as unavailable |
+| Repeated CLI invocations and both placements of `-C` | identical deterministic bytes |
 
 ## Suspects
 
@@ -173,7 +189,8 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - `impact` takes several IDs and returns their union, deduplicated: downstream grouped by item
   type, upstream origins included, and the `Impacts` line carrying only the item types a
   baseline covers. An ID reserved by a change request and not yet declared is reported as
-  such once change requests are read (M5a). The output says that it stops at the repo's edge.
+  such from readable accepted requests (M5a), but still rejects the whole request until every
+  start is declared. The output says that it stops at the repo's edge.
 - If any starting ID is unseen, `impact` rejects the whole request with exit 2, even when
   other starts are known. It lists the unseen IDs with nearby matches and unavailable-source
   context; it emits neither a partial impact listing nor an `Impacts:` line. M3b never calls

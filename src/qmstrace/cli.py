@@ -115,7 +115,8 @@ def main(
 def status(ctx: typer.Context, directory: Directory = None) -> int:
     """What was scanned, what lies around the repo, and one line per requirement.
 
-    Not a check: it exits 0 whatever it counts.
+    Includes governing baselines and change-request evidence. Not a check: it exits 0
+    whatever it counts, or 2 when the evidence cannot be judged.
     """
     typer.echo(text.status(Workspace.open(_directory(ctx, directory)).assessment()))
     return EXIT_OK
