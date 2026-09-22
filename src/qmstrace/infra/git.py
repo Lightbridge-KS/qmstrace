@@ -11,6 +11,7 @@ import os
 import posixpath
 import subprocess
 from collections.abc import Iterable
+from datetime import datetime
 from pathlib import Path
 from typing import Final, Never, Protocol
 
@@ -114,6 +115,8 @@ class GitCli:
         found: list[Tag] = []
         for line in raw.decode("utf-8").splitlines():
             name, kind, tagger, date = line.split("\0")
+            # Git versions differ on UTC's ISO spelling (Z versus +00:00).
+            date = datetime.fromisoformat(date).isoformat() if date else ""
             commit = self._run("rev-parse", "--verify", f"refs/tags/{name}^{{commit}}")
             found.append(
                 Tag(name, commit.decode().strip(), kind == "tag", tagger or None, date or None)

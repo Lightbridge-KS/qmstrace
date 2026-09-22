@@ -181,7 +181,7 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       withdrawn endpoints remain visible but do not count toward coverage. Historical
       identities survive current pattern/type changes. V10–V13, request reservations for
       unseen impact starts, structured evidence and quiet-safe notices are implemented.
-      **Verified:** `just dry` — 488 tests, 99.29% coverage, formatting, lint, strict types,
+      **Verified:** `just dry` — 492 tests, 99.29% coverage, formatting, lint, strict types,
       wheel and strict manual build. Git/tree contracts cover immutable reads, nested roots,
       Unicode/BOMs and environment redirection; fixtures cover ancestry, scopes, historical
       schemas, request parsing, withdrawal and command exits. Golden diffs inspected;
@@ -197,6 +197,9 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       test-bed repositories are unchanged. Local evidence and mappings:
       `_playground/2026-09-22_m5a-baselines/`. M5b's suspect assertions remain separate;
       published manual deployment has not been verified for this milestone.
+      PR 11's first CI run exposed Git-version differences in UTC tag-date spelling
+      (`Z` versus `+00:00`). Dates now use one ISO representation while retaining non-UTC
+      offsets; regressions cover both UTC spellings, non-UTC dates and lightweight tags.
 - [ ] **M5b · suspects** — item-level, transitive, never cleared by a touch
 - [ ] **M6 · setting up a repo** — `init` (trace configuration, stanza between markers, the
       test framework's marker registered, idempotent); the skill as package data with the

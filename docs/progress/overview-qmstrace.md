@@ -82,7 +82,7 @@ hash — as a pointer, never as evidence (see *Done*).
       script), M3 (`check`, `rules`, coverage gaps; pull request 8, `ba2e0ca`), M3b
       (`impact`; pull request 9, `23c80a5`) and M4 (`results`; pull request 10, `1a4869d`)
       have landed. **M5a — baselines and change — is implemented** on
-      `codex/m5a-baselines-change`, awaiting pull-request review. Its 488-test dry
+      `codex/m5a-baselines-change`, awaiting review in pull request 11. Its 492-test dry
       gate, mapped E3 baseline replay, graph/gap parity and results mutations passed;
       verification detail is in the slice tracker. M5b's downstream suspects are the next build.
       The four M3 manual pages were verified to return HTTP 200 on 2026-09-21.
