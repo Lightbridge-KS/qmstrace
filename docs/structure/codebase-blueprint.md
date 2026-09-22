@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — Codebase Blueprint (slice 1)
 
-> Inputs: [Product Requirements](../req/qmstrace-prd.md) · [Data Architecture](../design/data-architecture.md) · [Surface Architecture](../design/surface-architecture.md) · [System Architecture](../design/system-architecture.md) · [Slice 1 tracker](../progress/slice-1-product-repo-half.md) · [Scenario catalogue](../tests/scenario-catalogue.md) · the framework as installed: Typer 0.27.2, `uv_build`, Python 3.13 · Date: 2026-09-21
+> Inputs: [Product Requirements](../req/qmstrace-prd.md) · [Data Architecture](../design/data-architecture.md) · [Surface Architecture](../design/surface-architecture.md) · [System Architecture](../design/system-architecture.md) · [Progress tracker](../progress/overview-qmstrace.md) · [Scenario catalogue](../tests/scenario-catalogue.md) · the framework as installed: Typer 0.27.2, `uv_build`, Python 3.13 · Date: 2026-09-21
 
 The design docs are this document's input, and it has standing to amend them. **The findings
 are the value**; the tree and the types are the forcing function that produced them.
@@ -61,10 +61,10 @@ src/qmstrace/
     graph.py             TraceGraph.build(config, extracted, Surroundings) -> (graph, findings);
                          node() and its Home; incoming/outgoing; forward/backward -> Closure —
                          each item once, nearest first, the link that reached it and any other
-                         (`also`); thread and impact (M3b) render it; suspects (M5b) will; closest()
+                         (`also`); thread, impact and suspects render it; closest()
     judge.py             coverage (M3) · resolve_baselines · guard · suspects — pure functions
     baselines.py         frozen tag evidence, historical snapshots, request register and item
-                         comparisons (M5a); no IO or selection logic
+                         comparisons (M5a), suspect values and per-root reasons (M5b); no IO
     results.py           frozen report/result values; pure exact matching, run deduplication and
                          direct-verifies verdict aggregation (M4)
     findings.py          the catalogue: each code once — what is wrong, the next move
@@ -187,10 +187,17 @@ never recurse into sibling assessments or baseline resolution. The historical co
 and any referenced schema must come from that Git tree; the current ledger is not a fallback.
 `Assessment.baseline_state` contains tags, comparisons and request availability. Rendering
 derives labelled counts from those comparisons; judgment remains in `core/judge.py`.
-M5a adds no configuration keys or dependencies. Suspect traversal remains M5b.
+M5a and M5b add no configuration keys or dependencies. Suspect traversal reuses these snapshots.
 
 
 ## 7. Where a change lands
+
+M5b's frozen `Suspect` and `SuspectReason` values live alongside baseline comparisons in
+`core/baselines.py`; snapshots retain their validated local graph. `core/judge.py` computes
+per-root reach and digest comparisons without IO. Workspace scans a tagged tree once per
+commit and never completes it from current external files. Assessment carries the complete
+suspect list; renderers format status summaries and the catalogue's S01 text without
+deciding eligibility. The check failure predicate remains violations plus strict gaps.
 
 | Asked to… | The one file |
 |---|---|
@@ -255,7 +262,7 @@ M5a adds no configuration keys or dependencies. Suspect traversal remains M5b.
 | ★ Gaps are judged on this repo's items; `Assumes` counts toward none; a gap whose link was refused names the violation | `tests/unit/test_judge.py` |
 | ★ Every finding, violation or gap, ends with a next move | `tests/test_catalogue.py` |
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
-| ★ A suspect survives a touched file | `tests/integration/test_suspects.py` |
+| ★ A suspect survives a touched file | `tests/integration/test_suspect_assessment.py` |
 | A problem in the user's repo is a finding, never an exception | review; `extract/` has no `raise` outside parse failures it converts |
 | `cli.py` holds no logic | review; its handlers are open → render → return |
 

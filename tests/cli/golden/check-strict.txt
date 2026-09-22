@@ -7,4 +7,4 @@ read: 3 requirements, 2 design elements, 2 components, 4 test cases
 gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on them:
   G01  docs/req/service-srs.md:28  REQ-SVC-03: no design element satisfies it yet. Fix: on the design element, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.
 
-result: 0 violations, 1 gap in 11 items · exit 1 · gate: gaps fail · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED
+result: 0 violations, 1 gap in 11 items · 0 suspects (informational) · exit 1 · gate: gaps fail · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED

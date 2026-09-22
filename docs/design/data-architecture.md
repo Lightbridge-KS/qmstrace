@@ -270,9 +270,10 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
   attributes by file rather than by item. *Kept as the convention for code changes.*
 - **Deferred — the pull-request or issue link** read by a Git-host collector. Not checkable
   offline, and it needs the host.
-- **The suspect rule, in full.** Downstream of a changed frozen item, **transitively** —
+- **The suspect rule, in full.** Downstream of a changed or removed frozen item, **transitively** —
   *suspect* means downstream of changed content, and the impact set must reach as far — and
-  grouped by distance, the first hop listed and the rest counted. An item that existed at the
+  grouped by distance: status lists the first hop and counts the rest; check lists every
+  suspect. An item that existed at the
   baseline and is unchanged is suspect; one that existed and was edited is *still listed*,
   worded as edited, because an edit is not a review; one that is new since the baseline is
   not a suspect. `impact` and suspects are two renderers of one traversal.
@@ -282,12 +283,31 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
   implementation compared test cases by file; experiment E3 showed that adding one test to a
   file silently cleared the suspects on every test beside it. **Revised:** a suspect is
   tracked against the item itself, never clears by being touched, and clears at the next
-  baseline, whose verification record lists the suspects that were re-checked.
+  applicable upstream baseline. The project's verification record lists the suspects that
+  were re-checked; the engine does not verify that review occurred.
   **Decided since: an explicit, recorded review may also clear one suspect earlier** — to be
   added after the first slices. It writes *reviewed against this text, by whom* into the trace
   lock, so the lock's diff is the evidence; an agent may propose it, and the pull request's
   approval is what makes it count — otherwise it is a rubber stamp. Without it, the list on a
   long-lived branch becomes noise that is ignored.
+- **M5b — two graph versions, one upstream reference.** Each changed or removed frozen
+  document item starts a chain, independently of citation validity. Walk its governing
+  snapshot's graph and the current graph separately, including dependencies, then union the
+  reached local identities. Never splice edges from different versions into a path.
+  **Rejected:** current links only — deleting a link would erase a historical review
+  obligation; mixed-version paths — they can assert a dependency that never existed.
+- **Eligibility and evidence are per root.** A dependant must exist in that root's snapshot
+  and locally today. New intermediate items are traversed but not labelled; absent
+  dependants are omitted. Keep every root, tag, per-version shortest distance and whether
+  the dependant's own digest changed. Deduplicate the item count, not its reasons. A cycle
+  alone does not make its own root suspect; another changed root can make it suspect.
+  **Rejected:** clearing a chain at a newer downstream-only baseline — it does not replace
+  the upstream item's governing snapshot. Removed roots retain surviving dependants beside
+  V13; withdrawn items retain review obligations and labels despite their coverage exemption.
+- **Historical graphs stop at the repository edge.** Validate local links using the tagged
+  schema; malformed local graph evidence prevents judgment. Historical sibling/external
+  citations are unverified boundary nodes, never filled from today's filesystem. This is
+  local change analysis, not project-wide traversal at pins.
 - **Refinements from E3:** a change to a link field such as `Origin` counts as a change to
   the item's text; a `Change:` line is permanent, since a generated revision history is built
   from it; a change request reserves the ID of any item it adds; and when a requirement is
@@ -586,8 +606,11 @@ with every run of whitespace — line breaks too — collapsed to one space, and
 - Text is read as UTF-8 and normalised (NFC) before digesting; a digest carries its algorithm
   — `sha256:…` — because it becomes a format the day the ledger writes it into the lock.
 - **A field-only change is still a change, and it is noisy**: moving eleven requirements from
-  one classification field to another made 24 downstream items suspect though no behaviour
-  changed. The next baseline cleared them, as D7 says; in between, the list was all noise.
+  one classification field to another produced 24 stand-in findings though no behaviour
+  changed. M5b's mapped replay finds 79 unique existing dependants: 8 designs, 9 components
+  and 62 tests. The reproduced stand-in count is 20 unique items across 24 direct-link
+  findings; it omits transitive reach and edited items. The next applicable baseline clears
+  the engine's chains too. These are review obligations, not assertions of changed behavior.
 
 ### Kinds of finding
 

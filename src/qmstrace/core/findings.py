@@ -9,7 +9,10 @@ that emit each code.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Final
+from typing import TYPE_CHECKING, Final
+
+if TYPE_CHECKING:
+    from qmstrace.core.baselines import Suspect
 
 from qmstrace.core.model import Finding, Item, Link
 
@@ -32,7 +35,39 @@ CODES: Final = {
     "V13": "a frozen item's heading was removed",
     "V14": "a link field that holds something other than IDs",
     "V15": "a verifies marker in a form this tool does not read",
+    "S01": "an existing local item downstream of changed or removed frozen content needs review",
 }
+
+
+def suspect(value: Suspect) -> Finding:
+    """One review obligation with every root and graph version retained."""
+    details = []
+    for reason in value.reasons:
+        old, current = reason.historical_distance, reason.current_distance
+        reach = (
+            f"both versions: baseline distance {old}, current distance {current}"
+            if old is not None and current is not None
+            else f"historical-only: distance {old}"
+            if old is not None
+            else f"current-only: distance {current}"
+        )
+        state = "edited — still needs review" if reason.edited else "unchanged — needs review"
+        withdrawn = ", withdrawn" if reason.root_withdrawn else ""
+        details.append(
+            f"{reason.root} ({reason.root_state}{withdrawn}) since {reason.baseline.label}: "
+            f"{reach}; {state}"
+        )
+    item = value.item
+    withdrawn = " [withdrawn]" if item.fields.get("Status") == "withdrawn" else ""
+    return Finding(
+        "S01",
+        item.file,
+        item.line,
+        f"{item.id}{withdrawn} — " + " | ".join(details) + ".",
+        "Review: check this item against the upstream change and test evidence; "
+        "editing or passing tests does not record review.",
+        item.id,
+    )
 
 
 def _either(names: Iterable[str]) -> str:

@@ -166,8 +166,23 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - Existed at the baseline and unchanged → suspect. Existed and edited → still listed, worded
   differently. New since the baseline → not a suspect.
 - Appending a comment to a file, or adding a test to it, clears nothing.
-- A new baseline clears them all.
+- A new applicable upstream baseline clears its chains.
 - *Recorded, not fixed:* a field-only change makes everything downstream suspect.
+- Baseline and current paths are walked independently; historical-only and current-only
+  reach both count, but a path composed only by mixing versions does not.
+- Removed roots retain surviving historical dependants beside V13; missing dependants are
+  omitted. New intermediate nodes are traversed without becoming suspects themselves.
+- Every reason uses its upstream snapshot; a downstream-only baseline cannot clear it.
+  Per-root edited state and per-version shortest distances survive merged item counts.
+- Overlapping roots, same-commit aliases, cycles and converging paths produce one S01 per
+  local dependant, with all reasons. A self-cycle alone never makes its root suspect.
+- Withdrawn roots/dependants remain labelled and traversed. Reactivation does not clear review.
+- Historical local graph errors name the tag and finding with exit 2. Boundary citations
+  remain unverified; today's sibling or external files cannot validate a historical graph.
+- Status lists distance one and counts farther distances; check/quiet list every S01.
+  Suspects alone never fail strict mode. Repeated runs and both placements of `-C` match bytes.
+- Restoring/touching the E3 system-test file or adding an unrelated test preserves existing
+  suspect IDs. The field-only change is measured by item identity, not the stand-in's file heuristic.
 
 ## Thread and impact
 

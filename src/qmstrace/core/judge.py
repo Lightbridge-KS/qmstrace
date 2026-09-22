@@ -17,7 +17,15 @@ from collections.abc import Callable, Iterable, Mapping
 from typing import Never
 
 from qmstrace.core import findings
-from qmstrace.core.baselines import Baseline, Comparison, Register, Snapshot, Tag
+from qmstrace.core.baselines import (
+    Baseline,
+    Comparison,
+    Register,
+    Snapshot,
+    Suspect,
+    SuspectReason,
+    Tag,
+)
 from qmstrace.core.config import CoverageRule, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import TraceGraph
@@ -206,6 +214,47 @@ def _citations(item: Item | None) -> set[str]:
     return {
         s.strip() for s in item.fields.get("Change", "").split(",") if ID_TOKEN.fullmatch(s.strip())
     }
+
+
+def suspects(graph: TraceGraph, comparisons: Iterable[Comparison]) -> tuple[Suspect, ...]:
+    """Existing local dependants reached independently in each root's two graph versions.
+
+    A reason always uses its upstream root's governing snapshot. A new dependant is
+    traversed but not reported; a different root may have an older snapshot, so existence
+    and edited state are evaluated per reason, never globally.
+    """
+    current = {item.id: item for item in graph.items()}
+    reasons: dict[str, list[SuspectReason]] = {}
+    for comparison in sorted(comparisons, key=lambda c: (c.id, c.baseline.snapshot.commit)):
+        if comparison.state not in {"changed", "removed"}:
+            continue
+        snapshot = comparison.baseline.snapshot
+        assert snapshot.graph is not None, "suspect judgment requires a validated snapshot graph"
+        old = {item.id: item for item in snapshot.graph.items()}
+        historical = snapshot.graph.forward([comparison.id]).steps
+        present = graph.forward([comparison.id]).steps if comparison.id in current else {}
+        root = comparison.after or comparison.before
+        assert root is not None
+        for item_id in sorted((historical.keys() | present.keys()) & old.keys() & current.keys()):
+            if item_id == comparison.id:
+                continue  # a cycle cannot make its own root suspect
+            reasons.setdefault(item_id, []).append(
+                SuspectReason(
+                    comparison.id,
+                    comparison.baseline,
+                    comparison.state,
+                    root.fields.get("Status") == "withdrawn",
+                    current[item_id].digest != old[item_id].digest,
+                    historical[item_id].distance if item_id in historical else None,
+                    present[item_id].distance if item_id in present else None,
+                )
+            )
+    return tuple(
+        sorted(
+            (Suspect(current[item_id], tuple(found)) for item_id, found in reasons.items()),
+            key=lambda suspect: (suspect.distance, suspect.item.id),
+        )
+    )
 
 
 def _subject(item: Item, config: TraceConfig) -> str:

@@ -9,7 +9,7 @@ read_when:
 # qmstrace — System & OOP Architecture
 
 > Source: the PRD, decisions D1–D10, the surface architecture, the slice-1 tracker and four experiments on a test bed · Date: 2026-09-21 · Mode: Design · Type: Application (a command-line tool)
-> See also: [Data Architecture](data-architecture.md) · [Surface Architecture](surface-architecture.md) · [Product Requirements](../req/qmstrace-prd.md) · [Slice 1 tracker](../progress/slice-1-product-repo-half.md)
+> See also: [Data Architecture](data-architecture.md) · [Surface Architecture](surface-architecture.md) · [Product Requirements](../req/qmstrace-prd.md) · [Progress tracker](../progress/overview-qmstrace.md)
 
 Terms follow [`CONTEXT.md`](../../CONTEXT.md). **✔** marks what an experiment exercised,
 **◻** what is planned.
@@ -261,6 +261,13 @@ sequenceDiagram
 
 ## 7. Extension Points
 
+M5b extends the existing assessment: workspace builds and caches each historical local graph
+under its tagged schema, without reading external historical dependencies. Pure suspect
+judgment combines independent walks from that graph and the current graph, retaining each
+root's snapshot and per-version distances. Structured suspects live in the assessment;
+renderers format the compact status view and complete check findings. Suspects do not enter
+the failure predicate or persist review state.
+
 Configuration before code: **item types, ID patterns, link types and coverage rules are data**
 in the trace schema, and a **profile** is data too — a second standard needs no engine
 change (PRD goal 6). In code, the one planned extension is **an extractor** — another test
@@ -278,7 +285,7 @@ and none is planned until two extractors exist outside this repo.
 
 None new here. The gate's stage-awareness remains ledger work; quiet output and withdrawal
 are settled in [Surface Architecture](surface-architecture.md) and D7. The persisted format
-of a test function's digest remains in the [slice tracker](../progress/slice-1-product-repo-half.md);
+of a test function's digest remains in the [progress tracker](../progress/overview-qmstrace.md);
 the ledger half — events,
 work-product states, the signature loop — in [Data Architecture § Not yet
 written](data-architecture.md).

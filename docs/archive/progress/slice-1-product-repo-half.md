@@ -1,18 +1,19 @@
 ---
-summary: Tracker for engine slice 1 — the product-repo half of qmstrace as a real, tested package that replaces the throwaway stand-in. Milestones M0–M8, the decisions taken while planning, what a second-opinion review changed, the acceptance checks for "the test bed runs on the engine", and what is parked.
+summary: Archived slice-1 tracker through M5a — original planning decisions, module sketch and detailed milestone verification. Superseded by the single active progress tracker.
 read_when:
-  - working on any milestone of slice 1, or deciding what comes next in it
-  - about to write engine code — read the decisions and the module shape first
-  - checking whether the slice is done
+  - retrieving detailed milestone history or original slice-1 planning rationale
 ---
+
+> Archived on 2026-09-22 after M5a merged. Historical detail only; the single active
+> tracker is [qmstrace progress](../../progress/overview-qmstrace.md).
 
 # Slice 1 — the product-repo half as an engine
 
-**Parent:** [`overview-qmstrace.md`](overview-qmstrace.md) · **Scope:** [PRD § Slices](../req/qmstrace-prd.md) ·
-**Design:** [`data-architecture.md`](../design/data-architecture.md) ·
-[`surface-architecture.md`](../design/surface-architecture.md) ·
-**Fixtures:** [`scenario-catalogue.md`](../tests/scenario-catalogue.md) ·
-**Structure:** [`codebase-blueprint.md`](../structure/codebase-blueprint.md)
+**Parent:** [`overview-qmstrace.md`](overview-qmstrace.md) · **Scope:** [PRD § Slices](../../req/qmstrace-prd.md) ·
+**Design:** [`data-architecture.md`](../../design/data-architecture.md) ·
+[`surface-architecture.md`](../../design/surface-architecture.md) ·
+**Fixtures:** [`scenario-catalogue.md`](../../tests/scenario-catalogue.md) ·
+**Structure:** [`codebase-blueprint.md`](../../structure/codebase-blueprint.md)
 
 **Done when** the test bed runs on the engine instead of the stand-in, with the stand-in's
 verified scenarios as fixtures — at least one test per command. The stand-in's only
@@ -78,10 +79,10 @@ Each is a branch and a draft pull request, except M0. **From M2c on, each ships 
 the user manual** (`contents/`, Diátaxis) — a page that has to warn about a caveat is a design
 finding, filed as a `ux` issue unless a milestone already owns the gap.
 
-- [x] **M0 · docs** — this tracker · the [scenario catalogue](../tests/scenario-catalogue.md) ·
+- [x] **M0 · docs** — this tracker · the [scenario catalogue](../../tests/scenario-catalogue.md) ·
       design docs amended for the decisions above and for what the review found ·
-      [`system-architecture.md`](../design/system-architecture.md) (C1–C2, a first C3) ·
-      the [codebase blueprint](../structure/codebase-blueprint.md), whose framework check found
+      [`system-architecture.md`](../../design/system-architecture.md) (C1–C2, a first C3) ·
+      the [codebase blueprint](../../structure/codebase-blueprint.md), whose framework check found
       that this Typer no longer installs click · the agent guide's Git rule
 - [x] **M1 · scaffold and gate** *(merged — pull request 1)* — `uv init --package`; typer; ruff, mypy, pytest with
       coverage; `justfile`; CI with named steps; `--version` from package metadata; **a wheel
@@ -169,11 +170,10 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       `_playground/2026-09-21_m4-results/`. GitHub's dry gate and deploy preview passed.
       Both manual pages were verified in production on 2026-09-22 with their provenance
       warning and expected command content
-- [ ] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
+- [x] **M5a · baselines and change** — Git, the tree at a revision (`GitTree`, with a contract
       test against `WorkingTree` — moved here from M2, its first consumer), baseline resolution,
       the guard, change requests.
-      **Implemented — 2026-09-22**, on `codex/m5a-baselines-change`;
-      pull-request review remains. Historical configuration and schemas are read
+      **Merged — pull request 11, `724ec02`, 2026-09-22**. Historical configuration and schemas are read
       from the tagged tree; external historical schemas cannot be substituted. Reachable
       baselines are ordered by ancestry, with incomparable governing tags rejected. Offline
       runs reject known incomplete history and explicitly leave remote-tag completeness
@@ -200,8 +200,8 @@ finding, filed as a `ux` issue unless a milestone already owns the gap.
       PR 11's first CI run exposed Git-version differences in UTC tag-date spelling
       (`Z` versus `+00:00`). Dates now use one ISO representation while retaining non-UTC
       offsets; regressions cover both UTC spellings, non-UTC dates and lightweight tags.
-      CI passed on `c8682a0`. Preview inspection then found literal code fences in the
-      numbered how-to; its golden examples now sit outside the list as code blocks.
+      CI and the deploy preview passed on final PR head `d814996`; the deployed how-to
+      was checked for both complete golden code blocks after correcting list formatting.
 - [ ] **M5b · suspects** — item-level, transitive, never cleared by a touch
 - [ ] **M6 · setting up a repo** — `init` (trace configuration, stanza between markers, the
       test framework's marker registered, idempotent); the skill as package data with the

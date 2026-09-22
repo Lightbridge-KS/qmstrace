@@ -13,7 +13,10 @@
 |---|---|---|---|
 | violation | `V…` | the trace data is wrong: an ID that exists nowhere, a link to the wrong kind of item, a missing field, an item where its type is not read | always |
 | gap | `G…` | a coverage rule not met yet: a requirement with no design, a design element with no test | the gate only — `qmstrace check --strict` |
-| suspect | `S…` | downstream of an item that changed since a baseline: it needs a fresh look, not necessarily an edit | never — the next baseline clears it *(not built yet)* |
+| suspect | `S01` | an existing local item downstream of changed or deleted frozen text: it needs a fresh look, not necessarily an edit | never — an applicable upstream baseline including the change clears its chain |
+
+The [suspect reference](../reference/suspects.md) explains how historical and current
+dependencies contribute. Edited and withdrawn items can still need review.
 
 ## Why a gap does not fail while you work
 

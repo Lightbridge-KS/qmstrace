@@ -89,5 +89,5 @@ identity, links, validation findings, traversal and test-result evidence remain 
 Withdrawal does not turn a test result into approval. No special coverage exemption is inferred
 from another status value.
 
-Downstream suspects are not implemented in M5a. A passing change guard establishes neither
+See [Downstream suspects](suspects.md) for the review list. A passing change guard establishes neither
 that downstream work was reviewed nor that an unverified request was accepted.

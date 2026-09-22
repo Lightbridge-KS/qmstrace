@@ -18,4 +18,6 @@ change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fres
 categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, reliability, maintainability, portability, design-constraint, legal-regulatory
   (a prompt, not a gap — not every product needs one under every category)
 
+suspects: 0 — informational; this repo only
+
 0 violations · 2 gaps (G01 ×1, G06 ×1) — qmstrace check lists them
