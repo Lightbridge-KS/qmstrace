@@ -63,6 +63,31 @@ class WorkingTree:
         return git.working_files(self.root)
 
 
+class GitTree:
+    """An immutable revision, using the same paths and decoding as WorkingTree."""
+
+    def __init__(self, source: git.IGit, rev: str) -> None:
+        self.source = source
+        self.rev = rev
+        self._texts: dict[str, str] = {}
+
+    @property
+    def label(self) -> str:
+        return f"Git tree {self.rev}"
+
+    def files(self) -> tuple[str, ...]:
+        return self._files
+
+    def read(self, path: str) -> str:
+        if path not in self._texts:
+            self._texts[path] = self.source.read_files(self.rev, (path,))[path].decode("utf-8-sig")
+        return self._texts[path]
+
+    @cached_property
+    def _files(self) -> tuple[str, ...]:
+        return self.source.list_files(self.rev)
+
+
 def _walk(root: Path) -> list[str]:
     found: list[str] = []
     for folder, subfolders, names in os.walk(root):

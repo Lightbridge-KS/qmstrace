@@ -7,8 +7,9 @@ computed on the way out; the renderer only arranges it.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from qmstrace.core.baselines import BaselineState
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import TraceGraph
 from qmstrace.core.model import Finding, Notice
@@ -63,6 +64,7 @@ class Assessment:
     siblings: tuple[SiblingState, ...]
     siblings_located: bool
     notices: tuple[Notice, ...]
+    baseline_state: BaselineState = field(default_factory=BaselineState)
 
     def fails(self, *, strict: bool) -> bool:
         """Whether the check fails: on any violation, and — under the gate — on any gap too."""

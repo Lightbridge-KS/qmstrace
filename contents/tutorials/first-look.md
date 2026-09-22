@@ -68,7 +68,8 @@ you would leave it out: qmstrace walks up to the nearest `qmstrace.toml`.
    agreement: it declares three.
 5. **`sibling client`** — the project's other product repo, read from beside this one so that
    its items can be cited by ID. *Not pinned*: it is whatever is checked out there right now.
-6. **`baselines:`** — the project declares two kinds of baseline. Judging them is not built yet.
+6. **`baselines:`** — the project declares two kinds of baseline. This fixture has no matching
+   reachable local tag; the output states that limit and does not claim remote completeness.
 7. **One line per requirement** — its category, the clause it comes from, and what hangs off
    it: design elements, and test cases by level.
 8. **`verified by inspection`** — `REQ-SVC-03` has no test to show, by design. It is listed

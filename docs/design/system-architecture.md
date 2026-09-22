@@ -148,6 +148,13 @@ flowchart TD
 `core` imports nothing from `infra` or `extract`. A command is *open → render → exit*; the
 assessment is computed once and every renderer reads it.
 
+M5a reads reachable local Git tags and immutable trees without checkout changes or network
+fetching. The workspace resolves and scans historical configuration, then passes frozen values
+to the pure baseline/change guard. `infra/externals` reads request files;
+`extract/change_requests` parses their metadata. Historical schemas are pinned to the same
+Git tree, while the request register is explicitly read from its current working tree.
+The output distinguishes those evidence boundaries and never claims remote-tag completeness.
+
 ## 5. OOP & Class Architecture
 
 A sketch — the object model is the blueprint's job (`docs/structure/`).
@@ -269,9 +276,9 @@ and none is planned until two extractors exist outside this repo.
 
 ## 9. Decisions needed
 
-None new here. Open ones live where they bite: the gate's stage-awareness and the quiet form
-in [Surface Architecture § Decisions needed](surface-architecture.md); withdrawn items, ID
-prefixes and the digest of a test function in the
-[slice tracker](../progress/slice-1-product-repo-half.md); the ledger half — events,
+None new here. The gate's stage-awareness remains ledger work; quiet output and withdrawal
+are settled in [Surface Architecture](surface-architecture.md) and D7. The persisted format
+of a test function's digest remains in the [slice tracker](../progress/slice-1-product-repo-half.md);
+the ledger half — events,
 work-product states, the signature loop — in [Data Architecture § Not yet
 written](data-architecture.md).

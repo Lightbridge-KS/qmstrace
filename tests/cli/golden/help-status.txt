@@ -2,7 +2,8 @@ Usage: qmstrace status [OPTIONS]
 
   What was scanned, what lies around the repo, and one line per requirement.
 
-  Not a check: it exits 0 whatever it counts.
+  Includes governing baselines and change-request evidence. Not a check: it
+  exits 0 whatever it counts, or 2 when the evidence cannot be judged.
 
 Options:
   -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before

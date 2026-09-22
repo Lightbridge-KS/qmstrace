@@ -3,7 +3,9 @@ report: report.xml
   matched: 4 runs of 3 test cases · scanned: 4 test cases · unmatched: 1 run identities
   matched against the current working tree — report commit NOT VERIFIED
   a partial parameter set does not prove every possible variant ran
-  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
   1 duplicate XML entries combined by full identity; retry attempts are not inferred
 
 requirements — direct verifies links only:

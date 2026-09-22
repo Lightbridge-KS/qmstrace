@@ -1,0 +1,14 @@
+read: 3 requirements, 2 design elements, 2 components, 4 test cases
+  baseline requirements (service): baseline/service/requirements/1 @ 12b71d858be9
+    baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
+  controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+violations — wrong at any stage; each fails the check:
+  V10  docs/req/service-srs.md:12  REQ-SVC-01 is changed since baseline/service/requirements/1, but cites no fresh change request. Fix: restore the item, or stop and ask for an accepted change request listing it; add its ID to Change. An old citation does not authorize another edit.
+
+gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on them:
+  G01  docs/req/service-srs.md:28  REQ-SVC-03: no design element satisfies it yet. Fix: on the design element, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.
+
+result: 1 violation, 1 gap in 11 items · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

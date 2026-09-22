@@ -1,0 +1,1 @@
+qmstrace: Baselines cannot be judged in a shallow repository. Fix: obtain full history and tags, then run again; qmstrace never fetches.

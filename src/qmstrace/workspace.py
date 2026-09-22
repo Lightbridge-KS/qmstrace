@@ -21,16 +21,19 @@ from typing import Final
 
 from qmstrace.core import findings, judge, results
 from qmstrace.core.assessment import Assessment, ExternalState, Scanned, SiblingState
+from qmstrace.core.baselines import BaselineState, Register, Snapshot
 from qmstrace.core.config import ExternalSource, ItemType, SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.model import Extracted, Finding, Item, Notice
+from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Notice
 from qmstrace.core.results import Results
-from qmstrace.extract import junit
+from qmstrace.extract import change_requests, junit
 from qmstrace.extract.base import FORMS, REGISTRY
 from qmstrace.extract.pytest_tests import report_identity
+from qmstrace.infra.externals import request_files
+from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.globbing import matches
-from qmstrace.infra.tree import ISourceTree, WorkingTree
+from qmstrace.infra.tree import GitTree, ISourceTree, WorkingTree
 
 CONFIG_FILE: Final = "qmstrace.toml"
 SCHEMA_FILE: Final = "qmstrace.schema.toml"
@@ -56,9 +59,12 @@ class Workspace:
     tree: ISourceTree
     config: TraceConfig
     trees: TreeFactory
+    git: IGit | None = None
 
     @classmethod
-    def open(cls, start: Path, *, trees: TreeFactory = WorkingTree) -> Workspace:
+    def open(
+        cls, start: Path, *, trees: TreeFactory = WorkingTree, git: IGit | None = None
+    ) -> Workspace:
         """Find the product repo at or above `start`, and read its trace configuration.
 
         Raises
@@ -69,7 +75,7 @@ class Workspace:
         """
         root = _find_root(start)
         tree = trees(root)
-        return cls(root, tree, _configuration(root, tree), trees)
+        return cls(root, tree, _configuration(root, tree), trees, git)
 
     def assessment(self) -> Assessment:
         """Scan, read what lies around the repo, build the graph — once."""
@@ -96,6 +102,10 @@ class Workspace:
         }
         strays = [stray for part in scan.extracted for stray in part.strays]
         gaps = judge.coverage(config, graph, violations, strays, forms)
+        register = _register(self.root, ledger, config)
+        baseline_state, guard_findings = self._baselines(graph, register)
+        violations += [*register.findings, *guard_findings]
+        violations.sort(key=lambda f: (f.file, f.line, f.code, f.what))
 
         notices: list[Notice] = []
         if located and config.repos and not listed:
@@ -107,13 +117,48 @@ class Workspace:
                 )
             )
         if config.baselines:
-            names = ", ".join(config.baselines)
             notices.append(
                 Notice(
-                    f"baselines: {len(config.baselines)} configured ({names}) — not judged: this "
-                    "version of qmstrace does not read baselines yet"
+                    "baselines: judged from reachable local tags — remote-tag completeness "
+                    "NOT VERIFIED; qmstrace never fetches"
                 )
             )
+            if not baseline_state.baselines:
+                notices.append(
+                    Notice("baselines: no matching reachable local tag — nothing frozen locally")
+                )
+            for baseline in baseline_state.baselines:
+                if baseline.snapshot.config is None:
+                    notices.append(
+                        Notice(
+                            f"baseline {baseline.label}: before trace configuration "
+                            "— freezes nothing"
+                        )
+                    )
+                for tag in baseline.tags:
+                    if not tag.annotated:
+                        notices.append(
+                            Notice(
+                                f"baseline {tag.name}: lightweight tag — weaker evidence; "
+                                "no tagger or tag date"
+                            )
+                        )
+        if config.change_requests or any(i.fields.get("Change") for i in graph.items()):
+            if register.available:
+                notices.append(
+                    Notice(
+                        f"change requests: {register.location} ({len(register.requests)} readable; "
+                        f"{len(register.findings)} malformed) — current working tree, not pinned"
+                    )
+                )
+            else:
+                notices.append(
+                    Notice(
+                        "change requests: NOT VERIFIED — "
+                        f"{register.location or 'no configured register'} "
+                        "is unavailable; fresh citations are verified at the ledger's import"
+                    )
+                )
         return Assessment(
             config=config,
             tree_label=self.tree.label,
@@ -126,7 +171,47 @@ class Workspace:
             siblings=tuple(state for state, _ in siblings),
             siblings_located=located,
             notices=tuple(notices),
+            baseline_state=baseline_state,
         )
+
+    def _baselines(
+        self,
+        graph: TraceGraph,
+        register: Register,
+    ) -> tuple[BaselineState, tuple[Finding, ...]]:
+        if not self.config.baselines:
+            return BaselineState(register=register), ()
+        source = self.git or GitCli(self.root)
+        source.state()
+        tags = tuple(
+            t
+            for t in source.tags_reachable_from_head()
+            if any(s.tag.fullmatch(t.name) for s in self.config.baselines.values())
+        )
+        commits = sorted({t.commit for t in tags})
+        ancestry = frozenset(
+            (a, b) for a in commits for b in commits if a != b and source.is_ancestor(a, b)
+        )
+        snapshots = {c: Snapshot(c, None) for c in commits}
+        selected = judge.resolve_baselines(self.config, tags, snapshots, ancestry)
+        for commit in sorted({b.snapshot.commit for b in selected}):
+            tree = GitTree(source, commit)
+            if CONFIG_FILE not in tree.files():
+                continue
+            config = _configuration(self.root, tree)
+            scan = _scan(tree, config, config.item_types.values(), with_misplaced=True)
+            items = tuple(i for part in scan.extracted for i in part.items)
+            problems = [f for part in scan.extracted for f in part.findings]
+            if problems or scan.misplaced or len({i.id for i in items}) != len(items):
+                raise CouldNotJudge(
+                    f"Historical trace data at {commit} cannot form a reliable snapshot.",
+                    "Fix: inspect the tagged configuration and source; do not replace historical "
+                    "data with today's tree or rewrite the baseline tag.",
+                )
+            snapshots[commit] = Snapshot(commit, config, items)
+        baselines = judge.resolve_baselines(self.config, tags, snapshots, ancestry)
+        comparisons, wrong = judge.guard(self.config, graph.items(), baselines, ancestry, register)
+        return BaselineState(baselines, comparisons, register), wrong
 
     def thread(self, item_id: str) -> Assessment:
         """The assessment, once `item_id` is known to be something this run can see.
@@ -157,8 +242,8 @@ class Workspace:
             details = "\n".join(f"{problem.what} {problem.next_move}" for problem in missing)
             raise CouldNotJudge(
                 details,
-                "No impact list was produced. Change-request reservations are not read yet; "
-                "an unseen ID is not presumed reserved.",
+                "No impact list was produced. Declare each starting item before requesting "
+                "its impact; a reservation does not establish its type or links.",
             )
         return assessment
 
@@ -209,9 +294,19 @@ class Workspace:
             beyond = f", and sibling {', '.join(unread)} could not be read"
         near = assessment.graph.closest(item_id)
         hint = f"the closest here: {', '.join(near)}; " if near else ""
+        register = assessment.baseline_state.register
+        reserved = sorted(
+            r.id for r in register.requests if r.state == register.accepted and item_id in r.impacts
+        )
+        reservation = (
+            f" It is listed in accepted request(s) {', '.join(reserved)}: "
+            "reserved, but not declared here."
+            if reserved
+            else ""
+        )
         return CouldNotJudge(
             f"{item_id} is not an item this run can see — nothing here declares or cites it"
-            f"{beyond}.",
+            f"{beyond}.{reservation}",
             f"Fix: check the ID — {hint}`qmstrace status` lists this repo's requirements.",
         )
 
@@ -284,7 +379,17 @@ def _configuration(root: Path, tree: ISourceTree) -> TraceConfig:
             f"{CONFIG_FILE} in {root} is not UTF-8 text.", "Fix: save it as UTF-8."
         ) from None
     reference = TraceConfig.schema_reference(local)
-    schema = _read(root / reference) if reference else None
+    try:
+        schema = (
+            (tree.read(reference) if isinstance(tree, GitTree) else _read(root / reference))
+            if reference
+            else None
+        )
+    except UnicodeDecodeError:
+        raise CouldNotJudge(
+            f"Historical schema '{reference}' is not UTF-8 text.",
+            "Fix: inspect the tagged schema; a current schema cannot replace it.",
+        ) from None
     return TraceConfig.parse(local, schema)
 
 
@@ -293,6 +398,33 @@ def _read(path: Path) -> str | None:
         return path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
         return None
+
+
+def _register(root: Path, ledger: Path | None, config: TraceConfig) -> Register:
+    spec = config.change_requests
+    if spec is None:
+        return Register()
+    location = _shown(root, ledger / spec.source) if ledger else None
+    files = request_files(ledger / spec.source, spec.prefix) if ledger else None
+    if files is None:
+        return Register(location, accepted=spec.accepted)
+    requests = []
+    wrong = []
+    for name, text in files.items():
+        file = posixpath.join(location or "", name)
+        if text is None:
+            wrong.append(findings.cannot_read(file))
+            continue
+        request_id = name.removesuffix(".md")
+        if not ID_TOKEN.fullmatch(request_id):
+            wrong.append(findings.cannot_parse(file, 1, "request filename is not an ID"))
+            continue
+        request, problem = change_requests.read(file, request_id, text)
+        if request:
+            requests.append(request)
+        else:
+            wrong.append(findings.cannot_parse(file, 1, problem or "invalid request metadata"))
+    return Register(location, True, spec.accepted, tuple(requests), tuple(wrong))
 
 
 # ── the one scan function ───────────────────────────────────────────────────────────────────

@@ -34,9 +34,10 @@ configured baseline. It is sorted and deduplicated. Upstream origins are context
 to this line. A starting origin can qualify only if its type is itself covered.
 
 The line proposes items to review; it does not claim they all need edits or are frozen.
-Baseline tags and change-request reservations are **not read yet**; they arrive with the
-baseline guard. When no known item type qualifies, the command explains why it emits no
-candidate line.
+The shared assessment reads baseline evidence and change requests, but candidate membership
+still depends on configured types, not frozen state. An accepted request's reservation is
+reported for an unseen start; it does not establish that item's type or links. When no known
+item type qualifies, the command explains why it emits no candidate line.
 
 ## Repository boundary
 

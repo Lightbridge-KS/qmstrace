@@ -3,7 +3,9 @@ impact — working-tree analysis, this repo only
 starting items:
   REQ-SVC-01 — A call carries a key · requirement · docs/req/service-srs.md:12
   REQ-SVC-02 — Records survive a restart · requirement · docs/req/service-srs.md:21
-  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
 downstream — grouped by item type:
   design element (2):

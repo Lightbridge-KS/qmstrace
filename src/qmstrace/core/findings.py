@@ -26,6 +26,10 @@ CODES: Final = {
     "V07": "an item declared in a file that is not scanned for its type",
     "V08": "a file that cannot be read or parsed",
     "V09": "an external ID its source does not declare",
+    "V10": "a controlled item changed or added without a fresh change-request citation",
+    "V11": "a cited change request does not exist, is malformed, or is not accepted",
+    "V12": "a cited change request does not list the item under Impacts",
+    "V13": "a frozen item's heading was removed",
     "V14": "a link field that holds something other than IDs",
     "V15": "a verifies marker in a form this tool does not read",
 }
@@ -226,6 +230,53 @@ def not_an_id(item_id: str, marker: str, token: str, file: str, line: int) -> Fi
         "the line and tell the developer what is missing — never invent an ID.",
         item_id,
         marker,
+    )
+
+
+def uncited_change(item: Item, baseline: str, state: str) -> Finding:
+    return Finding(
+        "V10",
+        item.file,
+        item.line,
+        f"{item.id} is {state} since {baseline}, but cites no fresh change request.",
+        "Fix: restore the item, or stop and ask for an accepted change request listing it; "
+        "add its ID to Change. An old citation does not authorize another edit.",
+        item.id,
+    )
+
+
+def invalid_request(item: Item, citation: str, detail: str) -> Finding:
+    return Finding(
+        "V11",
+        item.file,
+        item.line,
+        f"{item.id} cites {citation}, which {detail}.",
+        "Fix: stop and ask for an accepted change request; never invent one or approve it here.",
+        item.id,
+    )
+
+
+def missing_impact(item: Item, citation: str) -> Finding:
+    return Finding(
+        "V12",
+        item.file,
+        item.line,
+        f"{citation} does not list {item.id} under Impacts.",
+        "Fix: tell the project side that the impact analysis is incomplete; do not edit the "
+        "ledger to make this check pass.",
+        item.id,
+    )
+
+
+def removed_frozen(item: Item, baseline: str) -> Finding:
+    return Finding(
+        "V13",
+        item.file,
+        item.line,
+        f"{item.id}, frozen by {baseline}, has lost its heading.",
+        "Fix: restore the heading, then retire the item with Status: withdrawn and a fresh "
+        "accepted change request. Never delete a frozen identity.",
+        item.id,
     )
 
 

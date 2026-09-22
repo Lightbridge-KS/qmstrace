@@ -7,7 +7,10 @@ scanned (working tree, not pinned):
 links: 14
 external AGR-*: verified against ../ledger/agreement.md (3 declared)
 sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID
-baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines: no matching reachable local tag — nothing frozen locally
+change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
   REQ-SVC-01  security         origin AGR-1         design elements 1  test cases 1 (unit 1)         — A call carries a key
   REQ-SVC-02  reliability      origin AGR-2, AGR-3  design elements 1  test cases 2 (integration 2)  — Records survive a restart

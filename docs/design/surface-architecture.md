@@ -83,11 +83,24 @@ flowchart TD
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
+**M5a — decided 2026-09-22.** `status` reports governing tags and document comparisons;
+`check` emits V10–V13. Frozen counts include changed and removed items; new and current
+withdrawn counts are labelled separately. Annotation metadata is collected, lightweight tags
+are weaker evidence, and local-tag judgment never certifies remote completeness. Baselines
+and requests are structured assessment data, computed once for informational commands too.
+An unusable historical schema, incomplete local history or incomparable governing tags is
+exit 2, not partial judgment. Same-tree schemas and embedded copies are accepted at a tag;
+today's external schema cannot substitute. Fresh request citations are checked against exact
+accepted values and impact membership; unreadable registers retain a quiet-safe notice.
+Malformed register files are violations. Withdrawn endpoints do not count for coverage;
+graph traversal and test-result evidence remain visible and labelled. Suspects remain M5b.
+
 **M3b input handling — decided 2026-09-21.** If any starting ID passed to `impact` is not
 visible to the run, the whole request exits 2, with no partial impact listing and no
 copyable `Impacts:` line. The diagnostic names the unseen IDs, offers nearby matches and
 says which sources could not be read. An unseen ID is not presumed to be reserved by a
-change request; that verification arrives in M5a. **Rejected:** showing the known subset
+change request. M5a reports a reservation when a readable accepted request lists the ID,
+but still requires declaration before traversal. **Rejected:** showing the known subset
 with an incomplete label and exit 2 — a reader could still copy it as the complete list.
 
 **M3b impact contract.** Starts and downstream items appear once in their respective sections;
@@ -109,7 +122,7 @@ changes. Actual edits remain a human decision.
 Like `thread`, a produced walk exits 0 even when it reports violations; `check` remains the
 gate. Notices, unavailable sources and refused links remain visible. Sibling nodes are not
 pinned, and their own links are not scanned. Output ends with labelled counts and *this repo
-only*. Reserved-ID verification and baseline resolution remain M5a work; project-wide
+only*. M5a's assessment reads reservations and baseline evidence; project-wide
 traversal at pins belongs to the ledger.
 
 ### Results contract — M4
@@ -270,7 +283,7 @@ stateDiagram-v2
 |---|---|
 | `0` | Command completed. Informational views may contain failures; a check has no failing findings in this mode |
 | `1` | **The check failed** — violations, or gaps under the gate. The result line says which |
-| `2` | **Could not judge** — usage, configuration, the wrong kind of repo, an unknown ID, an unreadable report, a shallow clone where baselines are configured |
+| `2` | **Could not judge** — usage, configuration, the wrong kind of repo, an unknown ID, an unreadable report, incomplete local Git evidence, ambiguous governing tags or an unrecoverable historical schema |
 | `3` | Internal error |
 
 The command-line framework already exits `1` on an abort and `2` on a usage error, so this
@@ -309,7 +322,7 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 | "This requirement failed" | A test case that verifies several items failed | Mark the test case **shared**, with what else it verifies |
 | "No suspects" | The suspects were cleared by touching a file | Never let a suspect clear itself (D7) |
 | "An empty project" | A pin older than the repo's trace configuration | Refuse the import and say why |
-| "Nothing is frozen" | A shallow clone, unfetched tags, or not a repository at all | Say so, and exit *could not judge* when baselines are configured — a pipeline's default checkout is shallow, with no tags |
+| "Nothing is frozen" | A shallow clone, excluded tags, or not a repository at all | Exit *could not judge* for known incomplete evidence; otherwise report matching reachable local tags and keep remote-tag completeness unverified |
 | "Verified" | The ledger is not beside the repo | *Not verified* in the result line, surviving the quiet form; the citation is verified at the ledger's import |
 | "Covered" | `Verify-by: inspection`, with nothing recorded anywhere | List such items apart, until an inspection has a recorded basis |
 
@@ -405,5 +418,5 @@ Each is marked 💡 where it bites.
 | # | Decision | Where |
 |---|---|---|
 | 1 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger. **Settled for slice 1 (2026-09-21): the gate fails on every gap**; stage-aware gating waits for the ledger, where the project's stages live | §5 |
-| 2 | **A quiet form of `check`**, and how much of the header survives in the default form. **Settled in M3:** the default form keeps one `read:` line and the notices of what could not be verified or judged; `--quiet` keeps the notices, the bare findings and the result line; the result line itself carries what was not verified and that baselines are not judged, so a reader of the last line alone misses nothing | §6 |
+| 2 | **A quiet form of `check`**, and how much of the header survives in the default form. **Settled in M3; extended M5a:** the default form keeps one `read:` line and evidence notices; `--quiet` keeps the notices, findings and result line. The result line carries baseline counts, remote-tag completeness and unavailable-request limitations | §6 |
 | 3 | **The reviewer's and the auditor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |

@@ -1,5 +1,8 @@
 read: 4 requirements, 2 design elements, 2 components, 6 test cases
-  baselines: 2 configured (requirements, product) — not judged: this version of qmstrace does not read baselines yet
+  controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
 violations — wrong at any stage; each fails the check:
   V03  docs/design/service-design.md:14  DSN-SVC-02 → Satisfies → REQ-SVC-09: no such item in this repo or its siblings. Fix: declare it in docs/req/*-srs.md, or correct the ID.
@@ -25,4 +28,4 @@ gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on 
   G07  tests/test_top.py:1  tests/test_top.py::test_at_the_top: verifies nothing. Fix: write `@pytest.mark.verifies("<requirement or design element ID>")` on the test — only if it is true: the link states that this test case verifies that requirement or design element.
   G07  tests/unit/test_wrong.py:5  tests/unit/test_wrong.py::test_a_clause: verifies nothing. Fix: first fix V04 at tests/unit/test_wrong.py:5 — it refuses the link this rule needs. Do not add a second line.
 
-result: 13 violations, 7 gaps in 14 items · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict · baselines: not judged yet
+result: 13 violations, 7 gaps in 14 items · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED

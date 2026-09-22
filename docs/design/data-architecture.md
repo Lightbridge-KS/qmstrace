@@ -160,8 +160,8 @@ covers  = ["requirement", "design_element", "component", "test_case"]
   the `<subject>` of `docs/req/<subject>-srs.md` and the key inside its item IDs. A product
   repo carries several subjects at once, each claimed by a different project; freezing one
   must not freeze another.
-- **"An added item needs a change request" is judged against that subject's own requirements
-  baseline.** A subject begun after a product baseline is a new project under its own
+- **"An added item needs a change request" is judged within an already controlled subject
+  and item type.** A subject begun after a product baseline is a new project under its own
   agreement, not a string of change requests against the last release.
 - **The applicable baselines are the ones reachable from `HEAD`.** A maintenance line sees its
   own last release; a hotfix branch cut from the release branch sees only what was released.
@@ -188,13 +188,29 @@ implementation:
   carries its change request by convention (D7), so "frozen text changed" is asked of
   requirements and design elements, not of modules and tests.
 - **A tree at a tag is read with the configuration at that tag** — file patterns move.
+  **M5a clarification (2026-09-22):** its schema must also be recoverable from the tagged Git
+  tree, embedded or through a same-tree file path. An external historical schema path is
+  *could not judge*. Today's ledger is not evidence of yesterday's schema. **Rejected:**
+  reading the current external schema with a notice — it could change which frozen items
+  are even found. Future baselines include the schema; existing tags are not rewritten.
 - **A release cut before the repo was traced freezes nothing**: a subject that did not exist
   at a baseline is not judged against it. Without this rule, adopting the tool in a repo with
   old release tags would make every item "new since" and demand a change request for each.
-- **"Nothing is frozen" is only ever said when it is true.** A shallow clone, tags that were
-  not fetched, a directory that is not a repository: with baselines configured, each means
-  the guard *could not judge* — and a pipeline's default checkout is shallow, with no tags.
-  Reporting "none yet" there would switch the guard off while the gate passes.
+- **Local evidence is labelled honestly.** With baselines configured, shallow history,
+  explicit tag-exclusion settings, a non-repository or unavailable required objects are
+  *could not judge*. Otherwise the guard judges reachable local tags and reports when none
+  match. **Remote-tag completeness is always unverified.** An offline clone has no universal
+  proof that all remote tags were fetched; M5a corrects the earlier promise to detect that
+  condition. **Rejected:** requiring remote queries — the product-repo check remains offline
+  and never fetches. Checkout preparation owns obtaining the intended history and tags.
+- **Ancestry can be ambiguous.** Incomparable governing commits after a merge are *could not
+  judge*, naming all competing tags; establish an approved baseline after the merge. Tags
+  on the same commit are equivalent, with their annotation evidence retained. **Rejected:**
+  dates, numeric ordering or first-parent preference; none establishes approval precedence.
+- **Scope identity survives configuration edits.** Historical covered type names and item
+  identities remain eligible after a type or scope rename. Subject keys are exact ID segments;
+  unknown or ambiguous ownership is *could not judge*. A new subject absent from a historical
+  configuration is not frozen by that snapshot's wildcard release.
 
 How the standard's baselines fall onto a release-branch workflow, none of it new work:
 
@@ -233,6 +249,17 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
 - **Only a fresh citation counts.** An item that already cites a change request and is
   edited again needs a *new* citation: what licenses a change is a citation that was not there
   at the governing baseline. A permanent `Change:` line does not license later edits.
+  M5a checks every fresh citation offered for a changed or added controlled document item.
+  The register is read from its current working tree, not a verified ledger pin. Request IDs
+  come from filenames; `State` and `Impacts` are metadata before prose sections. Fenced
+  examples cannot authorize changes. Malformed or duplicate metadata fails, never becoming
+  the permissive unavailable-register case. Accepted values are case-sensitive.
+- **Withdrawal retains identity.** `Status: withdrawn` is read on document items whether or
+  not the schema requires the field. Withdrawal and reactivation change item text. Withdrawn
+  items raise no coverage gaps, and links with a withdrawn endpoint cannot satisfy active
+  items' coverage. Validation, graph traversal and test-result evidence remain visible.
+  **Rejected:** exempting only the withdrawn item's own gaps — a retired design would still
+  make an active requirement appear covered. Other status values receive no implicit exemption.
 - **Where the register cannot be reached** — a pipeline with no ledger beside it — a fresh
   citation passes *with a notice that survives the quiet form*, and is verified for real at
   the ledger's import. Failing instead would force every product repo's pipeline to check out
