@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from qmstrace.core.config import TraceConfig
+from qmstrace.core.graph import TraceGraph
 from qmstrace.core.model import Finding, Item
 
 
@@ -22,6 +23,7 @@ class Snapshot:
     commit: str
     config: TraceConfig | None
     items: tuple[Item, ...] = ()
+    graph: TraceGraph | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,3 +71,28 @@ class BaselineState:
     baselines: tuple[Baseline, ...] = ()
     comparisons: tuple[Comparison, ...] = ()
     register: Register = Register()
+
+
+@dataclass(frozen=True, slots=True)
+class SuspectReason:
+    root: str
+    baseline: Baseline
+    root_state: str
+    root_withdrawn: bool
+    edited: bool
+    historical_distance: int | None
+    current_distance: int | None
+
+    @property
+    def distance(self) -> int:
+        return min(d for d in (self.historical_distance, self.current_distance) if d is not None)
+
+
+@dataclass(frozen=True, slots=True)
+class Suspect:
+    item: Item
+    reasons: tuple[SuspectReason, ...]
+
+    @property
+    def distance(self) -> int:
+        return min(reason.distance for reason in self.reasons)

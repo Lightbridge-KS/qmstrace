@@ -27,8 +27,8 @@
    leaves request acceptance unverified even if the command succeeds; arrange verification
    against the register through the project workflow.
 
-6. Review affected designs, code and tests, and run relevant tests. M5a's guard does not yet
-   list downstream suspects. A successful gate is not evidence that those reviews occurred.
+6. [Review downstream suspects](review-suspects.md) and run relevant tests. A successful
+   gate is not evidence that those reviews occurred; edits do not clear the suspect list.
 
 Without a fresh citation, the guard reports:
 

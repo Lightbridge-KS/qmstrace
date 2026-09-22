@@ -69,3 +69,44 @@ def test_baseline_goldens(baseline, golden, case, command, exit_code):
     assert result.output == runner.invoke(app, args).output
     assert result.output == runner.invoke(app, [*command, "-C", str(baseline)]).output
     golden(GOLDEN / f"{command[0]}-baseline-{case}.txt", result.output)
+
+
+@pytest.mark.parametrize(
+    "command,case",
+    [
+        (["status"], "summary"),
+        (["check", "--strict"], "strict"),
+        (["check", "--strict", "--quiet"], "quiet"),
+        (["check"], "historical"),
+    ],
+)
+def test_suspects_are_informational_complete_and_deterministic(baseline, golden, command, case):
+    root = baseline
+    design = root / "docs/design/service-design.md"
+    # Meet the fixture's only coverage gap without changing the frozen requirements.
+    design.write_text(
+        design.read_text().replace("Satisfies: REQ-SVC-02", "Satisfies: REQ-SVC-02, REQ-SVC-03")
+    )
+    srs = root / "docs/req/service-srs.md"
+    srs.write_text(
+        srs.read_text().replace(
+            "A call carries a key", "A call requires a fresh key\nChange: CR-001"
+        )
+    )
+    (root.parent / "ledger/change-requests/CR-001.md").write_text(
+        "# CR-001\nState: accepted\nImpacts: REQ-SVC-01\n"
+    )
+    if case == "historical":
+        design.write_text(design.read_text().replace("Satisfies: REQ-SVC-01", ""))
+    args = [*command, "-C", str(root)]
+    result = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    assert result.output == runner.invoke(app, args).output
+    assert result.output == runner.invoke(app, ["-C", str(root), *command]).output
+    if command[0] == "check":
+        assert result.output.count("S01 ") == 7
+        assert "7 suspects (informational)" in result.output
+    else:
+        assert "suspects: 7" in result.output
+        assert "distance 2:" in result.output and "distance 3:" in result.output
+    golden(GOLDEN / f"{command[0]}-suspects-{case}.txt", result.output)

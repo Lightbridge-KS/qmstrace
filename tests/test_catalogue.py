@@ -14,11 +14,12 @@ from pathlib import Path
 
 import pytest
 
+from qmstrace.core import findings
 from qmstrace.core.baselines import Baseline, ChangeRequest, Register, Snapshot, Tag
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.findings import CODES
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.judge import guard
+from qmstrace.core.judge import guard, suspects
 from qmstrace.core.model import Finding, Item
 from qmstrace.extract.base import REGISTRY
 from qmstrace.infra.globbing import matches
@@ -53,6 +54,7 @@ def found(
 SRS, TESTS = "docs/req/s-srs.md", "tests/unit/test_t.py"
 Scenario = Callable[[TraceConfig], list[Finding]]
 SCENARIOS: dict[str, Scenario] = {
+    "S01": lambda c: suspect_scenario(c),
     "V01": lambda c: found(c, {SRS: REQ + "\n" + REQ}),
     "V02": lambda c: found(c, {SRS: REQ + "\n### REQ-SVC-1 — Short\n"}),
     "V03": lambda c: found(c, {TESTS: '@pytest.mark.verifies("REQ-SVC-09")\ndef test_x(): ...\n'}),
@@ -106,6 +108,33 @@ def test_every_catalogue_code_has_a_scenario_and_every_scenario_a_code() -> None
     assert set(SCENARIOS) == set(CODES)
 
 
+def suspect_scenario(config: TraceConfig) -> list[Finding]:
+    from qmstrace.core.baselines import Comparison
+
+    spec = config.item_types["requirement"]
+    parts = [REGISTRY["markdown"](SRS, REQ.replace("Statement.", "Changed."), spec, config)]
+    test_spec = config.item_types["test_case"]
+    tests = '@pytest.mark.verifies("REQ-SVC-01")\ndef test_x(): ...\n'
+    test_part = REGISTRY["pytest"](TESTS, tests, test_spec, config)
+    old, _ = TraceGraph.build(config, [REGISTRY["markdown"](SRS, REQ, spec, config), test_part])
+    current, _ = TraceGraph.build(config, [*parts, test_part])
+    baseline = Baseline(
+        "requirements",
+        "service",
+        ("requirement",),
+        (Tag("v1", "abc", False),),
+        Snapshot("abc", config, tuple(old.items()), old),
+    )
+    comparison = Comparison(
+        "REQ-SVC-01",
+        baseline,
+        old.nodes["REQ-SVC-01"].item,
+        current.nodes["REQ-SVC-01"].item,
+        "changed",
+    )
+    return [findings.suspect(s) for s in suspects(current, [comparison])]
+
+
 @pytest.mark.parametrize("code", sorted(SCENARIOS))
 def test_each_scenario_emits_its_code(service: TraceConfig, code: str) -> None:
     emitted = {finding.code for finding in SCENARIOS[code](service)}
@@ -115,7 +144,7 @@ def test_each_scenario_emits_its_code(service: TraceConfig, code: str) -> None:
 @pytest.mark.parametrize("code", sorted(SCENARIOS))
 def test_every_finding_says_what_to_do_next(service: TraceConfig, code: str) -> None:
     for finding in SCENARIOS[code](service):
-        assert finding.what and finding.next_move.startswith("Fix:"), finding
+        assert finding.what and finding.next_move.startswith(("Fix:", "Review:")), finding
 
 
 def test_every_gap_says_what_to_do_next(project: Path) -> None:

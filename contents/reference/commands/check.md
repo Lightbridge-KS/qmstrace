@@ -3,7 +3,8 @@
 !!! abstract "TL;DR"
 
     `qmstrace check` lists every violation and every gap in the repo, one line each, with what to
-    do next. Violations always fail it. Gaps — the work not done yet — fail only under
+    do next, followed by every suspect requiring review. Violations always fail it.
+    Gaps — the work not done yet — fail only under
     `--strict`, the gate a pull request passes. Run it after every change.
 
 ## Synopsis
@@ -47,6 +48,10 @@ not be verified still shows, above the findings and again in the result line:
 | the notices | what this run could not verify or judge — an external source, a sibling, baselines. They show in every form, `--quiet` too |
 | a finding | code · file:line · what is wrong · `Fix:` — the next move, and where a wrong move is tempting, which one not to make |
 | the result line | the counts, the exit code, the mode, and what was not verified. It names the gate, so a reader of the last line alone knows the command a pipeline should run |
+
+`S01` findings carry a `Review:` next move and never fail, even under `--strict`.
+All suspects appear under `--quiet` too. See [Downstream suspects](../suspects.md) for
+complete tested output and historical/current graph evidence.
 
 Violations come first: a gap often exists only because a violation refused the link it needs,
 and its `Fix:` then says to fix that violation first — never to add a second line. The codes:

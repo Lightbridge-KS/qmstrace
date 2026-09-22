@@ -115,7 +115,8 @@ def main(
 def status(ctx: typer.Context, directory: Directory = None) -> int:
     """What was scanned, what lies around the repo, and one line per requirement.
 
-    Includes governing baselines and change-request evidence. Not a check: it exits 0
+    Includes governing baselines, change-request evidence and a suspect summary.
+    Check lists all suspects; they never fail the gate. Not a check: it exits 0
     whatever it counts, or 2 when the evidence cannot be judged.
     """
     typer.echo(text.status(Workspace.open(_directory(ctx, directory)).assessment()))
@@ -185,7 +186,7 @@ def results(
 def check(
     ctx: typer.Context,
     strict: Annotated[
-        bool, typer.Option("--strict", help="The gate: gaps fail too, not only violations.")
+        bool, typer.Option("--strict", help="The gate: gaps fail too; suspects never fail.")
     ] = False,
     quiet: Annotated[
         bool,
@@ -193,10 +194,11 @@ def check(
     ] = False,
     directory: Directory = None,
 ) -> int:
-    """List every violation and every gap, each with its next move.
+    """List every violation, gap and suspect, each with its next move.
 
     While authoring, gaps do not fail: they are the work not done yet. Under --strict — the gate
-    a pull request passes — they do. Violations always fail.
+    a pull request passes — they do. Violations always fail. Suspects never fail, even under
+    --strict: an edit or a passing test does not record review.
     """
     assessment = Workspace.open(_directory(ctx, directory)).assessment()
     typer.echo(text.check(assessment, strict=strict, quiet=quiet))

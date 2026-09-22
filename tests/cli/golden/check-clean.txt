@@ -3,4 +3,4 @@ read: 1 requirement, 1 test case
   baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
   baselines: no matching reachable local tag — nothing frozen locally
 
-result: 0 violations, 0 gaps in 2 items · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED
+result: 0 violations, 0 gaps in 2 items · 0 suspects (informational) · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

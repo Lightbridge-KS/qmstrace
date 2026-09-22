@@ -28,4 +28,4 @@ gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on 
   G07  tests/test_top.py:1  tests/test_top.py::test_at_the_top: verifies nothing. Fix: write `@pytest.mark.verifies("<requirement or design element ID>")` on the test — only if it is true: the link states that this test case verifies that requirement or design element.
   G07  tests/unit/test_wrong.py:5  tests/unit/test_wrong.py::test_a_clause: verifies nothing. Fix: first fix V04 at tests/unit/test_wrong.py:5 — it refuses the link this rule needs. Do not add a second line.
 
-result: 13 violations, 7 gaps in 14 items · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED
+result: 13 violations, 7 gaps in 14 items · 0 suspects (informational) · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED

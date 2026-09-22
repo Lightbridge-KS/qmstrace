@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M5a complete, M5b next; remaining slice-1 milestones, acceptance checks, verified evidence and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M5a landed, M5b implemented and verified locally awaiting review; M6 next, remaining slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -9,9 +9,10 @@ read_when:
 # qmstrace — progress
 
 **Updated 2026-09-22 · Slice 1: the product-repo half.** M0–M5a have landed.
-**Next: plan M5b — downstream suspects.** M5a merged in
+**M5b — implemented and verified locally; awaiting review**, on `codex/m5b-suspects`,
+retaining tracker cleanup `0dc5c8c`. Merge remains pending.
+**Next build: M6 — set up a repo.** M5a merged in
 [PR #11](https://github.com/Lightbridge-KS/qmstrace/pull/11) at `724ec02`.
-No engine implementation is currently in flight.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -24,12 +25,12 @@ Slice 1 is done when the product test bed runs on the engine instead of the stan
 Each milestone uses a branch and draft PR, passes the dry gate, and ships its
 [manual pages](../dev/writing-the-manual.md).
 
-- [ ] **M5b · suspects — next.** Item-level, transitive, grouped by distance: first hop
-  listed, the rest counted. An edit does not clear a suspect; an item new since the baseline
-  is not a suspect. Reuse the traversal behind `impact` and M5a's historical snapshots.
-  Standing contract: [data architecture D7](../design/data-architecture.md).
-  Explicit recorded-review clearance remains later work. Plan the command presentation
-  and remaining edge cases before implementation.
+- [ ] **M5b · suspects — awaiting review.** Separate historical/current walks,
+  per-upstream governing snapshots, deleted roots and retained edited/withdrawn dependants.
+  Status summarizes by distance; check/quiet emit every S01 without changing exits.
+  Tests, parity and manual verified below. Standing contract:
+  [data architecture D7](../design/data-architecture.md).
+  Explicit recorded-review clearance remains later work.
 - [ ] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
   test-framework marker registration; ship the skill as package data, including the
   “break it” loop and a parity test between skill and code.
@@ -60,16 +61,21 @@ Their settled outcomes live in the design docs; the
 
 ## Latest verified evidence
 
-**M5a, 2026-09-22:** local `just dry` passed with **492 tests, 99.29% coverage**,
-formatting, lint, strict types, wheel contents and strict manual build. GitHub's dry gate and
-Netlify deploy preview passed on final PR head `d814996`. Tag dates are normalized across
-Git versions (`Z` / `+00:00`); regression tests preserve non-UTC offsets and lightweight tags.
+**M5b, 2026-09-22:** local `just dry` passed with **528 tests, 99.31% coverage**,
+formatting, lint, strict types, wheel contents and strict manual build. Deterministic
+status/check/quiet goldens cover S01 reasons, distances, exits and both `-C` placements.
+M5b CI and deployment are not yet verified.
 
 - **E3 baseline replay:** disposable clones with explicit original-to-overlay commit
   mappings preserve traced source bytes at all three documented pins.
   **10 frozen · 2 changed · 1 new · 0 removed**; all nine guard scenarios pass
   (addition/removal exercised separately); second baseline has 11 unchanged frozen items.
-  Suspect assertions remain M5b work.
+  **11 unique suspects** survive restoring the system-test file, appending a comment and
+  adding an unrelated test. The field-only change before the second baseline yields
+  **79 unique suspects** (8 designs, 9 components, 62 tests), including 8 edited items.
+  Reproduced stand-in output has 24 findings / 20 unique items: it excludes edited items,
+  follows direct links only and repeats shared dependants. The applicable second baseline
+  clears all chains: **0 suspects**.
 - **E4 graph/gap parity:** 177 items, 208 links, reach from 43 starts per repo.
   The engine correctly reports the stray marker that the stand-in silently accepts.
 - **E1 results parity:** 62 test cases / 78 runs, 10 passing requirements; all seven
@@ -77,13 +83,18 @@ Git versions (`Z` / `+00:00`); regression tests preserve non-UTC offsets and lig
   remain unchanged.
 - **Impact parity:** CR-001's two changed starts reach 18 downstream IDs; explicitly
   adding its already-declared new ID reproduces the candidate line.
-- **Manual:** ten built pages checked for expanded goldens; the two new M5a pages were
-  visually inspected. Both how-to examples were subsequently verified as complete code
-  blocks on the deployed preview. M5a production deployment has **not** been verified.
-  M3/M3b production pages were checked on 2026-09-21; M4 pages on 2026-09-22.
+- **Manual:** nine affected built pages checked; included goldens match complete code
+  blocks. Both new M5b pages were visually inspected. M5a's deployed preview previously
+  passed inspection; its production deployment has not been verified. M3/M3b production
+  pages were checked on 2026-09-21; M4 pages on 2026-09-22.
 
-Local reproduction records: `_playground/2026-09-22_m5a-baselines/` (mapped baseline
-replay and latest parity/gate logs), `_playground/2026-09-21_m4-results/` (results
+M5a's GitHub dry gate and Netlify preview passed on final PR head `d814996`.
+Its tag-date regression preserves non-UTC offsets and normalizes Git's `Z` / `+00:00`.
+
+Local reproduction records: `_playground/2026-09-22_m5b-suspects/` (mapped baseline and
+suspect replay, stand-in comparison, latest parity/gate/manual logs),
+`_playground/2026-09-22_m5a-baselines/` (earlier baseline replay),
+`_playground/2026-09-21_m4-results/` (results
 mutations), `_playground/2026-09-21_m3b-impact/` (impact), and
 `_playground/2026-09-21_parity/` (graph/gaps). These are local records, not packaged evidence.
 
@@ -94,10 +105,10 @@ switch-over. It does not claim the test bed already runs on the engine.
 
 | Check | Current evidence / remaining work |
 |---|---|
-| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Verified in M4 and replayed in M5a; repeat after M7 migration |
-| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Verified in mapped M5a clones; repeat after M7 migration |
-| E3: restore the system-test file from the tag; suspects appear and survive an appended comment or an added test | **M5b pending** |
-| Second requirements baseline: no suspects; preceding commit: field-only change has downstream suspects | Frozen comparison verified in M5a; **suspect checks pending M5b** |
+| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Verified in M4 and replayed through M5b; repeat after M7 migration |
+| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Replayed in mapped M5b clones; repeat after M7 migration |
+| E3: restore the system-test file from the tag; suspects appear and survive an appended comment or an added test | Verified in M5b clones: the same 11 unique items throughout |
+| Second requirements baseline: no suspects; preceding commit: field-only change has downstream suspects | Verified in M5b clones: 79 before, 0 at the applicable baseline |
 | Client: sibling items say not pinned; duplicate requirement names its owner; missing sibling says not reachable; missing ledger says not verified, including quiet output | Fixtures cover these cases; final two-repo replay remains M7 |
 | Lightweight tag warns; pre-tag feature branch sees no baseline; shallow history cannot look unfrozen | Verified in M5a fixtures |
 | CR-001 impact: changed IDs `REQ-BCN-05`, `REQ-BCN-06` show downstream reach and origins; `REQ-BCN-11` participates only when declared and explicitly supplied | Reach verified in M3b; reserved unseen-ID rejection verified in M5a fixtures |

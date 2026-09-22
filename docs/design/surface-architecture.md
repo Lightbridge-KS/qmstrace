@@ -93,7 +93,22 @@ exit 2, not partial judgment. Same-tree schemas and embedded copies are accepted
 today's external schema cannot substitute. Fresh request citations are checked against exact
 accepted values and impact membership; unreadable registers retain a quiet-safe notice.
 Malformed register files are violations. Withdrawn endpoints do not count for coverage;
-graph traversal and test-result evidence remain visible and labelled. Suspects remain M5b.
+graph traversal and test-result evidence remain visible and labelled.
+
+**M5b suspects:** `status` lists nearest (distance-one) suspects in full and counts farther
+items by their minimum distance, with a unique-item total and a pointer to `check`.
+`check` and `check --quiet` list every S01 with its current location, contributing changed
+or removed roots, governing tags, graph-version reach and unchanged/edited state. Sort by
+minimum distance then ID; reasons by root and baseline. A dependant can be unchanged against
+one root's snapshot and edited against another. `Review:` names the next move; it records
+no approval. Counts remain in the check result line. Suspects never affect exits, including
+strict mode. Current source notices and historical boundary limits survive quiet output.
+
+Baseline and current graph walks are independent and include `Assumes`; a removed link
+cannot erase historical reach. Only local dependants existing in the upstream snapshot and
+today are reported. A downstream-only baseline cannot clear another root's chain.
+`thread`, `impact` and `results` retain their existing views; the complete historical/current
+suspect list belongs to `check`. See data architecture D7 for eligibility and clearance.
 
 **M3b input handling — decided 2026-09-21.** If any starting ID passed to `impact` is not
 visible to the run, the whole request exits 2, with no partial impact listing and no

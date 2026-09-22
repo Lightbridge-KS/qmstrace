@@ -261,6 +261,13 @@ sequenceDiagram
 
 ## 7. Extension Points
 
+M5b extends the existing assessment: workspace builds and caches each historical local graph
+under its tagged schema, without reading external historical dependencies. Pure suspect
+judgment combines independent walks from that graph and the current graph, retaining each
+root's snapshot and per-version distances. Structured suspects live in the assessment;
+renderers format the compact status view and complete check findings. Suspects do not enter
+the failure predicate or persist review state.
+
 Configuration before code: **item types, ID patterns, link types and coverage rules are data**
 in the trace schema, and a **profile** is data too — a second standard needs no engine
 change (PRD goal 6). In code, the one planned extension is **an extractor** — another test

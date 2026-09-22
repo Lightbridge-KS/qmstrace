@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
-from qmstrace.core.baselines import BaselineState
+from qmstrace.core.baselines import BaselineState, Suspect
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import TraceGraph
 from qmstrace.core.model import Finding, Notice
@@ -65,6 +65,7 @@ class Assessment:
     siblings_located: bool
     notices: tuple[Notice, ...]
     baseline_state: BaselineState = field(default_factory=BaselineState)
+    suspects: tuple[Suspect, ...] = ()
 
     def fails(self, *, strict: bool) -> bool:
         """Whether the check fails: on any violation, and — under the gate — on any gap too."""

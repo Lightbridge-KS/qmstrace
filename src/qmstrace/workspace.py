@@ -128,6 +128,16 @@ class Workspace:
                     Notice("baselines: no matching reachable local tag — nothing frozen locally")
                 )
             for baseline in baseline_state.baselines:
+                historical = baseline.snapshot.graph
+                if historical is not None and any(
+                    n.item is None for n in historical.nodes.values()
+                ):
+                    notices.append(
+                        Notice(
+                            f"baseline {baseline.label}: historical external/sibling citations "
+                            "NOT VERIFIED — snapshot traversal stops at this repo's edge"
+                        )
+                    )
                 if baseline.snapshot.config is None:
                     notices.append(
                         Notice(
@@ -172,6 +182,7 @@ class Workspace:
             siblings_located=located,
             notices=tuple(notices),
             baseline_state=baseline_state,
+            suspects=judge.suspects(graph, baseline_state.comparisons),
         )
 
     def _baselines(
@@ -201,14 +212,22 @@ class Workspace:
             config = _configuration(self.root, tree)
             scan = _scan(tree, config, config.item_types.values(), with_misplaced=True)
             items = tuple(i for part in scan.extracted for i in part.items)
-            problems = [f for part in scan.extracted for f in part.findings]
+            historical, problems = TraceGraph.build(
+                config,
+                scan.extracted,
+                Surroundings(every_sibling_read=False),
+                misplaced=scan.misplaced,
+            )
             if problems or scan.misplaced or len({i.id for i in items}) != len(items):
+                tags_here = ", ".join(t.name for t in tags if t.commit == commit)
+                details = "; ".join(f"{f.code} {f.file}:{f.line}: {f.what}" for f in problems)
                 raise CouldNotJudge(
-                    f"Historical trace data at {commit} cannot form a reliable snapshot.",
+                    f"Historical trace data at {tags_here} ({commit}) cannot form a reliable "
+                    f"snapshot: {details}",
                     "Fix: inspect the tagged configuration and source; do not replace historical "
                     "data with today's tree or rewrite the baseline tag.",
                 )
-            snapshots[commit] = Snapshot(commit, config, items)
+            snapshots[commit] = Snapshot(commit, config, items, historical)
         baselines = judge.resolve_baselines(self.config, tags, snapshots, ancestry)
         comparisons, wrong = judge.guard(self.config, graph.items(), baselines, ancestry, register)
         return BaselineState(baselines, comparisons, register), wrong

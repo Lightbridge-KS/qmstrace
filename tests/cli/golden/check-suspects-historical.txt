@@ -1,0 +1,22 @@
+read: 3 requirements, 2 design elements, 2 components, 4 test cases
+  baseline requirements (service): baseline/service/requirements/1 @ 12b71d858be9
+    baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
+  controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baseline baseline/service/requirements/1: historical external/sibling citations NOT VERIFIED — snapshot traversal stops at this repo's edge
+  change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on them:
+  G05  docs/design/service-design.md:8  DSN-SVC-01: satisfies no requirement — every design element points back to one. Fix: write `Satisfies: <requirement ID>` under its heading — only if it is true: the link states that this design element satisfies that requirement.
+  G01  docs/req/service-srs.md:12  REQ-SVC-01: no design element satisfies it yet. Fix: on the design element, write `Satisfies: REQ-SVC-01` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-01.
+
+suspects — review needed; never fail the gate:
+  S01  docs/design/service-design.md:8  DSN-SVC-01 — REQ-SVC-01 (changed) since baseline/service/requirements/1: historical-only: distance 1; edited — still needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  tests/unit/test_keys.py:6  tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused — REQ-SVC-01 (changed) since baseline/service/requirements/1: both versions: baseline distance 1, current distance 1; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  docs/design/service-design.md:13  DSN-SVC-02 — REQ-SVC-01 (changed) since baseline/service/requirements/1: historical-only: distance 2; edited — still needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  src/service/keys.py:1  src/service/keys.py — REQ-SVC-01 (changed) since baseline/service/requirements/1: historical-only: distance 2; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  tests/unit/test_keys.py:12  tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler — REQ-SVC-01 (changed) since baseline/service/requirements/1: historical-only: distance 2; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  src/service/store.py:1  src/service/store.py — REQ-SVC-01 (changed) since baseline/service/requirements/1: historical-only: distance 3; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  tests/integration/test_store.py:5  tests/integration/test_store.py::test_a_record_survives_a_restart — REQ-SVC-01 (changed) since baseline/service/requirements/1: historical-only: distance 3; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+
+result: 0 violations, 2 gaps in 11 items · 7 suspects (informational) · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

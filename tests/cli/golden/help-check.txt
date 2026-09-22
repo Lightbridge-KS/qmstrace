@@ -1,12 +1,14 @@
 Usage: qmstrace check [OPTIONS]
 
-  List every violation and every gap, each with its next move.
+  List every violation, gap and suspect, each with its next move.
 
   While authoring, gaps do not fail: they are the work not done yet. Under
   --strict — the gate a pull request passes — they do. Violations always fail.
+  Suspects never fail, even under --strict: an edit or a passing test does not
+  record review.
 
 Options:
-  --strict  The gate: gaps fail too, not only violations.
+  --strict  The gate: gaps fail too; suspects never fail.
   --quiet   Findings only — what could not be verified still shows.
   -C PATH   Run as if qmstrace had been started in PATH, as with git -C. Before
             or after the command.

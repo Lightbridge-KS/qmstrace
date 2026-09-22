@@ -36,8 +36,24 @@ def status(assessment: Assessment) -> str:
     lines += _baselines(assessment)
     lines += [notice.text for notice in assessment.notices]
     lines += _listing(assessment)
+    lines += _suspects(assessment)
     lines += ["", _violations(assessment)]
     return "\n".join(lines)
+
+
+def _suspects(assessment: Assessment) -> list[str]:
+    lines = ["", f"suspects: {len(assessment.suspects)} — informational; this repo only"]
+    for suspect in assessment.suspects:
+        if suspect.distance == 1:
+            lines.append(_finding(findings.suspect(suspect), indent="  "))
+    farther = Counter(s.distance for s in assessment.suspects if s.distance > 1)
+    for distance, count in sorted(farther.items()):
+        lines.append(f"  distance {distance}: {count} {_noun(count, 'suspect', 'suspects')}")
+    if assessment.suspects:
+        lines.append(
+            "  qmstrace check lists every suspect and its reasons; review is not recorded here"
+        )
+    return lines
 
 
 def _schema(assessment: Assessment) -> str:
@@ -692,7 +708,9 @@ def check(assessment: Assessment, *, strict: bool, quiet: bool) -> str:
         lines.append(_read(assessment))
     lines += notices if quiet else [f"  {n}" for n in notices]
     for heading, found in ((VIOLATION_HEADING, assessment.violations),
-                           (findings.GAP_HEADING + ":", assessment.gaps)):  # fmt: skip
+                           (findings.GAP_HEADING + ":", assessment.gaps),
+                           ("suspects — review needed; never fail the gate:",
+                            tuple(findings.suspect(s) for s in assessment.suspects))):  # fmt: skip
         if not found:
             continue
         if not quiet:
@@ -766,6 +784,8 @@ def _result(assessment: Assessment, *, strict: bool) -> str:
     parts = [
         f"result: {violations} {_noun(violations, 'violation', 'violations')}, {gaps} "
         f"{_noun(gaps, 'gap', 'gaps')} in {items} {_noun(items, 'item', 'items')}",
+        f"{len(assessment.suspects)} "
+        f"{_noun(len(assessment.suspects), 'suspect', 'suspects')} (informational)",
         f"exit {1 if assessment.fails(strict=strict) else 0}",
         "gate: gaps fail"
         if strict

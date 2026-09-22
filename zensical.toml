@@ -24,6 +24,7 @@ nav = [
     { "Write an impact list" = "how-to/write-an-impact-list.md" },
     { "Read test results" = "how-to/read-test-results.md" },
     { "Change a frozen item" = "how-to/change-a-frozen-item.md" },
+    { "Review downstream suspects" = "how-to/review-suspects.md" },
   ] },
   { "Reference" = [
     { "qmstrace status" = "reference/commands/status.md" },
@@ -36,6 +37,7 @@ nav = [
     { "Exit codes" = "reference/exit-codes.md" },
     { "Configuration" = "reference/configuration.md" },
     { "Baselines and change control" = "reference/baselines.md" },
+    { "Downstream suspects" = "reference/suspects.md" },
   ] },
   { "Explanation" = [
     { "The chain" = "explanation/the-chain.md" },

@@ -1,0 +1,33 @@
+schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml
+scanned (working tree, not pinned):
+  requirement       3 items in  1 file   docs/req/*-srs.md
+  design_element    2 items in  1 file   docs/design/*.md
+  component         2 items in  2 files  src/**/*.py · 1 file ignored by **/__init__.py
+  test_case         4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one test case
+links: 15
+external AGR-*: verified against ../ledger/agreement.md (3 declared)
+sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID
+baseline requirements (service): baseline/service/requirements/1 @ 12b71d858be9
+  baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
+controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baseline baseline/service/requirements/1: historical external/sibling citations NOT VERIFIED — snapshot traversal stops at this repo's edge
+change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+  REQ-SVC-01 [changed: CR-001; baseline/service/requirements/1]  security         origin AGR-1         design elements 1  test cases 1 (unit 1)         — A call requires a fresh key
+  REQ-SVC-02 [frozen; baseline/service/requirements/1]           reliability      origin AGR-2, AGR-3  design elements 1  test cases 2 (integration 2)  — Records survive a restart
+
+verified by inspection — no recorded basis yet, listed apart:
+  REQ-SVC-03 [frozen; baseline/service/requirements/1]           maintainability  origin AGR-3         design elements 1  test cases 0                  — The record format is written down
+
+categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, portability, design-constraint, legal-regulatory
+  (a prompt, not a gap — not every product needs one under every category)
+
+suspects: 7 — informational; this repo only
+  S01  docs/design/service-design.md:8  DSN-SVC-01 — REQ-SVC-01 (changed) since baseline/service/requirements/1: both versions: baseline distance 1, current distance 1; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  tests/unit/test_keys.py:6  tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused — REQ-SVC-01 (changed) since baseline/service/requirements/1: both versions: baseline distance 1, current distance 1; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  distance 2: 3 suspects
+  distance 3: 2 suspects
+  qmstrace check lists every suspect and its reasons; review is not recorded here
+
+0 violations · 0 gaps

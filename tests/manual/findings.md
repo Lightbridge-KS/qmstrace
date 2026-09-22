@@ -1,5 +1,6 @@
 | Code | Kind | What is wrong |
 |---|---|---|
+| S01 | suspect | an existing local item downstream of changed or removed frozen content needs review |
 | V01 | violation | an ID declared twice — in this repo, or already in a sibling |
 | V02 | violation | an ID of this repo's kind that does not match its pattern |
 | V03 | violation | a link to an ID that exists nowhere this run could read |
