@@ -121,9 +121,10 @@ its status, not its ID.
 _Avoid_: key, number
 
 **Item Text**:
-An item's title and body, its link fields included, with layout ignored. It is what a baseline
-freezes and what a change is measured against: re-wrapping a paragraph is not a change,
-rewording is, and so is a changed origin.
+An item's title and its section — everything down to the next heading at the same or a higher
+level, sub-sections, tables and diagrams included — its link fields included, with layout
+ignored. It is what a baseline freezes and what a change is measured against: re-wrapping a
+paragraph or renumbering a heading is not a change, rewording is, and so is a changed origin.
 _Avoid_: content, body, hash
 
 **Frozen**:
@@ -147,8 +148,20 @@ _Avoid_: depends-on, uses, requires
 
 **Marker**:
 An item or link declaration written in the place where the item itself is authored — a
-heading, a line in a design section, a tag on a test.
+heading that starts with the item's ID, a line in the item's section, a tag on a test.
 _Avoid_: annotation, tag (collides with a Git tag), comment
+
+**Stray**:
+A marker written in a form the tool does not read — an `Implements:` in a comment instead of
+the module docstring, a `Satisfies:` line outside every item's section, a `Satisfies` table
+row. It links nothing; the gap it leaves names it.
+_Avoid_: orphan, dangling marker
+
+**Mention**:
+An ID written where it declares nothing — later in a heading, in a table, in prose or in a
+diagram. It links nothing and counts toward no coverage rule. A mention of this repo's kind
+that nothing declares, written where a declaration was likely meant, is reported.
+_Avoid_: reference, citation (that is a link to another repo's item)
 
 **Origin**:
 The customer-side source a requirement traces back to: an agreement clause or a

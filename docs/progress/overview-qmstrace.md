@@ -50,39 +50,46 @@ The data architecture already requires that an item written where it is not read
 reported, not silently skipped"*; the Markdown extractor, unlike the Python and pytest ones,
 reports no strays.
 
-**Decided 2026-09-24:**
+**Decided 2026-09-24** (decision form, then planning on `feat/m9-rich-markdown`):
 
 - **Sections.** An item is its heading and everything down to the next heading at the same
-  or a higher level; its fields and links count anywhere in that section. A heading that
-  starts with an ID always opens a new item, so items never nest. *Rejected:* fields only
-  before the first sub-heading — the section would be the item's text but not its fields.
-- **Near-misses are reported.** A link field outside any item is a stray, named by the gap it
-  leaves. A heading holding an undeclared ID of this repo's own pattern, but not first, and a
-  table row whose first cell is one, are violations with the next move.
-- **Heading forms, in the same milestone.** A leading section number (`4.2`), emphasis around
-  the ID and a trailing `{#…}` attribute are accepted; an ID at the end of a heading stays
-  prose. Shipping the near-misses alone would tell authors to remove numbers that this then
-  accepts.
+  or a higher level; its fields and links count anywhere in that section. *Rejected:* fields
+  only before the first sub-heading — the section would be the item's text but not its fields.
+- **Only this repo's IDs end an item.** A heading ends the open item when its first word
+  matches one of this repo's item-ID patterns or shares their prefix; `#### IEC-62304 …`
+  stays inside as a sub-heading. Items never nest.
+- **Heading forms.** A leading section number (`4.2`, `4.2.1.`), an ID wrapped in emphasis
+  or backticks, and a trailing `{#…}`, `{.…}` or `{-}` are accepted; an ID at the end of a
+  heading stays prose. Decoration is layout: renumbering or restyling is not a change. A
+  sub-heading's number is dropped from the item text only when it continues the item's own
+  (`4.2` → `4.2.1`); `#### 404 …` keeps its number.
+- **Near-misses are reported.** A link marker the item type carries, written outside every
+  item's section or as a table row, is a stray, named by the gap it leaves. An undeclared ID
+  of this repo's kind later in a heading, or as a table row's first cell, is **V16** — one
+  code, two fixes. V16 never aborts a historical snapshot: it declares nothing.
+- **A fence closes** only on a line of the same character, at least as long as its opener,
+  with nothing after it.
 - **Recorded inline** in data architecture § Item text and § Marker syntax v0, with the
-  rejected rule — as F1–F12 amended v0 sections.
+  rejected rules — as F1–F12 amended v0 sections.
 - **Requirements are declared in the SRS only**; the PRD stays untraced and may mention SRS
   IDs. Declaring items in table rows is rejected for now: a heading can hold acceptance
   criteria and diagrams that a table cell cannot.
+- **The stanza is unchanged.** It already points at the skill; restating the grammar would
+  rewrite every traced repo's `AGENTS.md` on the next `init`.
 
-- [ ] Amend data architecture § Marker syntax v0 and § Item text; add *stray* to the glossary.
-- [ ] Scenario catalogue: every probe above becomes a fixture, with the regressions that pass
-  today — table and Mermaid inside an item, bold keys, front matter, fields inside a fence.
-- [ ] Markdown extractor: sections, heading forms, strays. Each new finding code gets its
-  catalogue text and an emitting fixture.
+- [ ] Specification: data architecture § Marker syntax v0, § Item text, § Kinds of finding;
+  *stray* and *mention* in the glossary; the scenario catalogue's M9 section.
+- [ ] Today's digests and titles of the fixture project pinned before the rules change.
+- [ ] Fence closing, sections and item edges, heading forms, strays, V16 — each a commit
+  with its tests; V16 gets catalogue text, a scenario and a line in `check-every-finding`.
+- [ ] A lens-style fixture repo (`tests/fixtures/mini/rich/`) with its goldens, and the
+  how-to *Write traced docs with diagrams and tables*.
+- [ ] The shipped skill states the grammar; the parity test covers a sub-section and a
+  decorated heading.
 - [ ] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
   unchanged — expected, since no beacon item has a deeper heading; not yet verified.
-- [ ] Stanza and shipped skill state the grammar; the skill parity test covers the new forms.
-- [ ] Manual: a how-to, *Write traced docs with diagrams and tables*, and the findings
-  reference for new codes.
 - [ ] Lens skills: a traced-repo note, filed as
   [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71); not part of M9.
-
-Open for planning: whether the near-misses take new finding codes or extend V02/V07.
 
 **Validation after M9 — dogfooding.** qmstrace itself becomes a traced product repo, with a
 sibling ledger repo beside it holding the schema, agreement and change requests. One

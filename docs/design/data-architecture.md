@@ -487,6 +487,8 @@ told it whether it was done.
 
 ### Marker syntax v0
 
+*Amended 2026-09-24 (M9): sections, heading forms, near-misses — below the table.*
+
 | Item | Declared as | Its ID | Link marker |
 |---|---|---|---|
 | Requirement | a heading `### <ID> — <title>` in the subject's specification file, followed by one checkable statement and its fields | authored, from the trace schema's pattern | `- Origin: <clause>[, <clause>]` |
@@ -496,9 +498,31 @@ told it whether it was done.
 
 - **A field whose name is a link marker *is* the link.** `Origin` is at once a required field
   of a requirement and its link to the clause; nothing else declares it.
-- Fields are `- Key: value` lines under the heading; bold keys are accepted. Several targets
-  are comma-separated.
-- A heading inside a code fence is not a declaration. Frontmatter is tolerated and ignored.
+- Fields are `- Key: value` lines in the item's section; bold keys are accepted. Several
+  targets are comma-separated.
+- **An item is a section** — its heading and everything under it down to the next heading at
+  the same or a higher level. A deeper heading belongs to the item: its sub-sections,
+  diagrams and tables are item text, and fields and links count anywhere in it.
+  *Rejected — an item ends at the next heading of any level* (the rule until M9): an edit
+  under `#### Acceptance criteria` in a frozen requirement escaped change control, and a
+  `#### Traceability` sub-section written by an architecture skill was dropped (user
+  acceptance, 2026-09-24). *Rejected — fields only before the first sub-heading:* the
+  section would be the item's text but not its fields, two rules for one block.
+- **Only this repo's IDs end an item.** A heading ends the open item when its first word
+  matches one of this repo's item-ID patterns or shares their prefix; any other heading is a
+  sub-heading if deeper, a boundary if not. `#### IEC-62304 software safety class` stays
+  inside a requirement although its first word has an ID's shape. Items never nest.
+- **Heading forms.** The ID comes first, after an optional section number (`4.2`, `4.2.1.`),
+  and may be wrapped in emphasis or backticks; a trailing Pandoc attribute (`{#…}`, `{.…}`,
+  `{-}`) is not part of the title. Decoration is layout: renumbering or restyling a heading
+  is not a change. An ID later in a heading declares nothing.
+- **Tables, prose and diagrams declare nothing.** An ID there is a mention. An undeclared ID
+  of this repo's kind later in a heading, or as a table row's first cell, is a near-miss and
+  a violation (V16). A link marker this item type carries, written as a table row or outside
+  every item's section, is a stray: it links nothing, and the gap it leaves names it.
+- A heading inside a code fence is not a declaration. A fence closes only on a line of the
+  same character, at least as long as its opener, with nothing after it — so a fenced
+  example can hold a fence of its own. Frontmatter is tolerated and ignored.
 - **The file an item is declared in matters**, because each item type is read from the file
   patterns its trace schema names. An item declared elsewhere is invisible — and must be
   reported, not silently skipped.
@@ -594,15 +618,24 @@ Exercised once, with two product repos — see the fourth experiment.
 
 ### Item text
 
-An item's **text** is its title and its body up to the next heading, link fields included,
-with every run of whitespace — line breaks too — collapsed to one space, and with the
-`Change:` line left out.
+An item's **text** is its title and its section — every line down to the next heading at the
+same or a higher level, sub-headings included — link fields included, with every run of
+whitespace — line breaks too — collapsed to one space, and with the `Change:` line left out.
+A sub-heading enters as its words: without its `#` marks and trailing attribute, and without
+a section number that continues the item's own (item `4.2`, sub-heading `4.2.1`). Any other
+number, as in `#### 404 when unknown`, is text.
 
 - Re-wrapping a paragraph is not a change. It is the most common harmless edit an agent makes,
   and the first implementation got it wrong.
 - Rewording is a change. So is a changed link field: an origin that gains a clause changes what
   the requirement derives from.
 - Citing a change request is not a change, which is why that one line is excluded.
+- Renumbering the document is not a change: a heading's number and attribute are layout.
+- **A stricter reading can make an old tag unreadable.** Both sides of a baseline comparison
+  are read by today's extractor, so a rule that reads more — fields in a sub-section, a
+  decorated heading — can turn a tagged tree into one with violations, and the run then
+  cannot judge. The way out is a new baseline, never a rewritten tag. V16 alone never
+  blocks a snapshot: it declares nothing.
 - Text is read as UTF-8 and normalised (NFC) before digesting; a digest carries its algorithm
   — `sha256:…` — because it becomes a format the day the ledger writes it into the lock.
 - **A field-only change is still a change, and it is noisy**: moving eleven requirements from
@@ -616,7 +649,7 @@ with every run of whitespace — line breaks too — collapsed to one space, and
 
 | Kind | Meaning | Fails |
 |---|---|---|
-| **Violation** | Wrong at any stage: an unknown or malformed ID, a marker pointing at the wrong type of item, a missing required field, an item declared where it is not read, an external ID its source does not declare, a frozen item changed or added without an accepted change request that lists it, a frozen heading deleted | always |
+| **Violation** | Wrong at any stage: an unknown or malformed ID, a marker pointing at the wrong type of item, a missing required field, an item declared where it is not read, an ID of this repo's kind written where it declares nothing, an external ID its source does not declare, a frozen item changed or added without an accepted change request that lists it, a frozen heading deleted | always |
 | **Gap** | A coverage rule not yet met. Expected in the middle of the work; the agent uses the list as its work queue | the gate only — and, in the engine, only from the rule's stage on. *Slice 1: every gap fails the gate; stages come with the ledger* |
 | **Suspect** | Downstream of an item that changed since the last baseline. Needs a fresh look, not necessarily an edit | never — it clears at the next baseline (D7) |
 

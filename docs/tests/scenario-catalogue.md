@@ -82,8 +82,9 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - A rule no item type this repo scans can meet is still a gap, and says so; `rules` marks it.
 - `rules` prints what is in force and says which part is the project's and which the repo's.
 - A rule whose direction contradicts its link type is a configuration error.
-- *Recorded for later:* a marker line in Markdown above the first heading, or under a heading
-  with no ID, is dropped silently — the Markdown counterpart of the stray `Implements:`.
+- A marker line in Markdown outside every item's section, or written as a table row, is a
+  stray: the gap it leaves names it — the Markdown counterpart of the stray `Implements:`
+  (recorded for later in M3, built in M9).
 
 ## Results
 
@@ -297,3 +298,36 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - Node hover displays the full title as literal text, with a full-ID fallback for untitled
   nodes. Tooltips survive redraws, wrap long text and do not change selection; keyboard
   list/inspector access remains available.
+
+## M9 — rich Markdown
+
+Docs written with the architecture lens skills — numbered and nested headings, tables,
+Mermaid. Probes T1–T11 from user acceptance on the beacon test bed, 2026-09-24, become these
+scenarios.
+
+| Scenario | Expected |
+|---|---|
+| A sub-heading inside an item, and an edit under it | the edit changes the item's text: V10 on a frozen item, suspects downstream (T2) |
+| A link field under a sub-heading of its item | read as the item's link (T3) |
+| A plain heading at the item's level or higher | ends the item |
+| A heading whose first word is ID-shaped but of no kind this repo declares (`#### IEC-62304 …`) | a sub-heading; the item goes on |
+| A heading that starts with another type's ID, at any depth | ends the item; the lines under it belong to that other item, not to strays |
+| `4.2`, `4.2.1.`, `**ID**`, `*ID*`, `_ID_`, `` `ID` `` before the ID; `{#…}`, `{.…}`, `{-}` after the title | declares the item, title without decoration (T4, T6) |
+| Renumbering or restyling an item's heading, or a sub-heading numbered as a continuation of the item's number | not a change |
+| A sub-heading number that does not continue the item's number (`#### 404 when unknown`) | text: changing it is a change |
+| An ID at the end of a heading, declared nowhere | V16, naming where the heading form belongs (T5) |
+| An ID at the end of a heading, declared elsewhere | a mention: nothing reported |
+| A table row whose first cell is an ID of this repo's kind, declared nowhere | V16: a table declares nothing (T7) |
+| A table row `\| Satisfies \| IDs \|`, or a `Satisfies:` line outside every item's section | a stray; the gap it leaves names the row or line (T8) |
+| A stray in a table inside an item | named only on that item's outgoing gap |
+| An ID-shaped token of no kind this repo declares (`SHA-256`, `UTF-8`, `AGR-1`) later in a heading or in a table | nothing reported |
+| A file scanned for two item types | each near-miss reported once |
+| A V16 inside a baseline tag's tree | the snapshot is still read — V16 declares nothing |
+| A decorated heading with this repo's ID in a document not scanned for its type | V07; when the ID is declared elsewhere, the fix says not to start a heading with it |
+| A second `Change:` line in a sub-section | V08, naming the first |
+| A marker the item type does not carry, in its sub-section | V04 |
+| A fenced example holding a shorter fence of its own | the outer fence stays open until its own closing line |
+| A table and a Mermaid diagram inside an item; bold field keys; front matter; a field inside a fence | unchanged: item text; read; ignored; ignored (T1, T6b, T10, T11) |
+| IDs mentioned in prose or diagrams, declared nowhere | nothing reported yet — M10 (T9) |
+| An item with no sub-heading and no decoration | its digest and title are unchanged by M9 |
+
