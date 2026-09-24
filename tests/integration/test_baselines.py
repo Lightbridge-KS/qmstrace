@@ -460,3 +460,19 @@ def test_unconfigured_register_stays_unverified_in_result_line(controlled):
         "change requests NOT VERIFIED"
         in text.check(view, strict=False, quiet=True).splitlines()[-1]
     )
+
+
+def test_an_edit_under_a_sub_heading_of_a_frozen_item_needs_a_request(controlled):
+    """Found in user acceptance: `#### Acceptance criteria` once ended the item, so an edit
+    under it escaped change control."""
+    path = controlled / REQ
+    lines = path.read_text().splitlines(keepends=True)
+    index = next(n for n, line in enumerate(lines) if "### REQ-SVC-01" in line)
+    end = next(n for n in range(index + 1, len(lines)) if lines[n].startswith("#"))
+    lines.insert(end, "#### Acceptance criteria\n- A call with no key gets 401.\n\n")
+    path.write_text("".join(lines))
+    commit(controlled, "criteria")
+    git(controlled, "tag", "-a", "baseline/service/requirements/2", "-m", "criteria approved")
+    assert not codes(controlled)
+    path.write_text(path.read_text().replace("gets 401", "gets 403"))
+    assert codes(controlled) == {"V10"}

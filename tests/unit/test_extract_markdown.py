@@ -2,8 +2,8 @@
 
 The load-bearing claims, each pinned by a test:
 
-1. A heading whose ID matches the type's pattern declares an item; its body runs to the next
-   heading of any level — the test bed's `## Section` headings end an item.
+1. A heading whose ID matches the type's pattern declares an item; the item is its section,
+   down to the next heading at the same or a higher level. Only this repo's IDs end it.
 2. Fields are `Key: value` lines, list bullet and bold keys tolerated; a field named after a
    link marker is a link, several targets comma-separated. Other `Key:` lines are prose.
 3. A heading inside a code fence declares nothing; frontmatter is not read.
@@ -13,6 +13,7 @@ The load-bearing claims, each pinned by a test:
 6. A heading that starts with some other ID is handed back as a lead, never dropped.
 7. What the fixture project declares today keeps its titles and digests; a fence closes on
    its own mark.
+8. A sub-section is part of its item: its text, its fields and its links.
 """
 
 from pathlib import Path
@@ -336,3 +337,90 @@ def test_a_longer_fence_holds_a_fenced_example(service: TraceConfig) -> None:
 def test_a_line_with_an_info_string_does_not_close_a_fence(service: TraceConfig) -> None:
     text = "```\n```python\n### REQ-SVC-09 — an example\n```\n### REQ-SVC-01 — X\n"
     assert [item.id for item in read(service, text).items] == ["REQ-SVC-01"]
+
+
+# ── 8. an item is a section ────────────────────────────────────────────────────────────────
+
+SECTIONED = """\
+### REQ-SVC-01 — A call carries a key
+The service shall reject a call that carries no key.
+
+#### Acceptance criteria
+- A call with no key gets status 401.
+
+#### Traceability
+- Origin: AGR-1
+- Category: security
+
+### REQ-SVC-02 — Records survive a restart
+The service shall keep every record across a restart.
+"""
+
+
+def test_a_deeper_heading_keeps_the_item_open(service: TraceConfig) -> None:
+    found = read(service, SECTIONED)
+    one, _ = found.items
+    assert one.fields == {"Origin": "AGR-1", "Category": "security"}
+    assert [(link.src, link.dst, link.line) for link in found.links] == [("REQ-SVC-01", "AGR-1", 8)]
+
+
+def test_an_edit_under_a_sub_heading_is_a_change(service: TraceConfig) -> None:
+    edited = SECTIONED.replace("gets status 401", "gets status 403")
+    assert read(service, SECTIONED).items[0].digest != read(service, edited).items[0].digest
+    assert read(service, SECTIONED).items[1].digest == read(service, edited).items[1].digest
+
+
+def test_a_sub_heading_enters_the_text_without_its_marks(service: TraceConfig) -> None:
+    deeper = SECTIONED.replace("#### Acceptance criteria", "##### Acceptance criteria")
+    assert read(service, SECTIONED).items[0].digest == read(service, deeper).items[0].digest
+    renamed = SECTIONED.replace("#### Acceptance criteria", "#### Criteria")
+    assert read(service, SECTIONED).items[0].digest != read(service, renamed).items[0].digest
+
+
+@pytest.mark.parametrize("heading", ["### Notes", "## Notes", "# Notes"])
+def test_a_plain_heading_at_the_items_level_or_higher_ends_it(
+    service: TraceConfig, heading: str
+) -> None:
+    text = f"### REQ-SVC-01 — X\nStatement.\n{heading}\n- Origin: AGR-9\n"
+    found = read(service, text)
+    assert [item.id for item in found.items] == ["REQ-SVC-01"] and not found.links
+
+
+def test_an_id_shaped_word_of_no_kind_here_is_a_sub_heading(service: TraceConfig) -> None:
+    """`IEC-62304` has an ID's shape, but this repo declares nothing like it."""
+    text = "### REQ-SVC-01 — X\nStatement.\n#### IEC-62304 software safety class\n- Origin: AGR-1\n"
+    found = read(service, text)
+    (item,) = found.items
+    assert item.fields == {"Origin": "AGR-1"} and len(found.links) == 1
+
+
+@pytest.mark.parametrize("token", ["REQ-CLT-01", "DSN-SVC-01", "REQ-SVC-1"])
+def test_a_heading_with_this_repos_kind_of_id_ends_the_item(
+    service: TraceConfig, token: str
+) -> None:
+    text = f"### REQ-SVC-01 — X\nStatement.\n#### {token} — Other\n- Origin: AGR-9\n"
+    found = read(service, text)
+    assert [item.id for item in found.items] == ["REQ-SVC-01"] and not found.links
+    assert [lead.token for lead in found.leads] == [token]
+
+
+def test_items_never_nest(service: TraceConfig) -> None:
+    text = "## REQ-SVC-01 — X\nOne.\n### REQ-SVC-02 — Y\n- Origin: AGR-2\n"
+    one, two = read(service, text).items
+    assert (one.fields, two.fields) == ({}, {"Origin": "AGR-2"})
+
+
+def test_a_second_change_line_names_the_first(service: TraceConfig) -> None:
+    text = "### REQ-SVC-01 — X\n- Change: CR-001\n#### Change history\n- Change: CR-002\n"
+    (finding,) = read(service, text).findings
+    assert (finding.code, finding.line) == ("V08", 4)
+    assert "a second Change field for REQ-SVC-01 (the first is at line 2)" in finding.what
+
+
+def test_a_marker_in_a_sub_section_is_read_even_when_the_type_does_not_carry_it(
+    service: TraceConfig,
+) -> None:
+    """The graph refuses it (V04) — a sub-section is part of the item, not a hiding place."""
+    text = "### REQ-SVC-01 — X\nStatement.\n#### Design\nSatisfies: REQ-SVC-02\n"
+    (link,) = read(service, text).links
+    assert (link.src, link.marker, link.dst) == ("REQ-SVC-01", "Satisfies", "REQ-SVC-02")

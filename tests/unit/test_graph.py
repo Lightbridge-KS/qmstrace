@@ -151,6 +151,14 @@ def test_a_clean_repo_has_every_link_and_no_findings(service: TraceConfig) -> No
             "which a requirement may not carry",
         ),
         (
+            {
+                ("requirement", "docs/req/service-srs.md"): SRS
+                + "\n#### Design notes\nSatisfies: REQ-SVC-01\n"
+            },
+            "V04",
+            "which a requirement may not carry",
+        ),
+        (
             {("component", "src/service/keys.py"): '"""Implements: DSN-SVC-09"""\n'},
             "V03",
             "declare it in docs/design/*.md",
