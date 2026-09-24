@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance round 1 on the beacon-engine test bed; next, M9 rich Markdown and dogfooding; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance round 1 on the beacon-engine test bed; M9 rich Markdown built and verified, awaiting merge; then dogfooding; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M8 have landed.
+**Updated 2026-09-25 · Slice 1: the product-repo half.** M0–M8 have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
 including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
@@ -24,7 +24,8 @@ the surface doc holds); the `--help` summary now reads *Trace one item: …* so 
 it. An ID pattern no ID can match is now refused (see *Latest verified evidence*). The test
 bed's bundled `.engine-venv` predates PR #14; acceptance runs use a wheel built from `main`.
 
-**Next: [M9 · rich Markdown](#next--m9--rich-markdown)**, planned below from the same round.
+**M9 · rich Markdown** — built on `feat/m9-rich-markdown`, verified locally; see
+[below](#next--m9--rich-markdown) and *Latest verified evidence*.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -77,17 +78,20 @@ reports no strays.
 - **The stanza is unchanged.** It already points at the skill; restating the grammar would
   rewrite every traced repo's `AGENTS.md` on the next `init`.
 
-- [ ] Specification: data architecture § Marker syntax v0, § Item text, § Kinds of finding;
-  *stray* and *mention* in the glossary; the scenario catalogue's M9 section.
-- [ ] Today's digests and titles of the fixture project pinned before the rules change.
-- [ ] Fence closing, sections and item edges, heading forms, strays, V16 — each a commit
-  with its tests; V16 gets catalogue text, a scenario and a line in `check-every-finding`.
-- [ ] A lens-style fixture repo (`tests/fixtures/mini/rich/`) with its goldens, and the
-  how-to *Write traced docs with diagrams and tables*.
-- [ ] The shipped skill states the grammar; the parity test covers a sub-section and a
-  decorated heading.
-- [ ] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
-  unchanged — expected, since no beacon item has a deeper heading; not yet verified.
+- [x] Specification: data architecture § Marker syntax v0, § Item text, § Kinds of finding;
+  *stray* and *mention* in the glossary; the scenario catalogue's M9 section. `9c18d01`
+- [x] Today's digests and titles of the fixture project pinned before the rules change.
+  `84bbfac`
+- [x] Fence closing `f1b3c1f`, sections and item edges `cb86f4d`, heading forms `e13871a`,
+  strays `1e1d7e1`, V16 `0c18fbc` — each with its tests; V16 has catalogue text, a scenario
+  and two lines in `check-every-finding`.
+- [x] A lens-style fixture repo (`tests/fixtures/mini/rich/`) with its goldens, and the
+  how-to *Write traced docs with diagrams and tables*. `656793a`
+- [x] The shipped skill states the grammar; the parity test covers a sub-section and a
+  decorated heading. `0a155aa`
+- [x] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
+  unchanged — see *Latest verified evidence*.
+- [ ] Merge on `feat/m9-rich-markdown`: CI dry gate and the Netlify deploy preview.
 - [ ] Lens skills: a traced-repo note, filed as
   [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71); not part of M9.
 
@@ -146,6 +150,31 @@ Their settled outcomes live in the design docs; the
 [experiment record](../tests/beacon-authoring-experiment.md) retains methods and findings.
 
 ## Latest verified evidence
+
+**M9, 2026-09-25** (`feat/m9-rich-markdown`, local): `just dry` passed with **668 Python
+tests, 99.14% coverage**, four Node control tests, strict types, wheel assets and a strict
+manual build; the new how-to was checked in the built HTML — the included design doc is one
+code block with both inner Mermaid fences as text. With a wheel from the branch:
+
+- **Beacon digests** at the five mapped pins (gateway `7946e96`, `93edfd7`, `64032e8`,
+  `2840b8e`; agent `84f1153`) are identical to the pre-M9 fingerprints; the pre-M9 engine
+  reproduces them too, so the method is the same.
+- **E3/E4 replay** (`baselines/verify.py`, fresh clones): the summary and every output file are
+  byte-identical to the slice-closure run; E4 matches the lock, 177 items / 208 links.
+- **E1 replay** (`results/verify.py`): identical summary. The first run differed in one
+  mutation (REQ-BCN-08/09 failing under the REQ-BCN-10 mutation) because pytest itself failed
+  18 tests instead of 12 — bytecode left from the previous mutation; rerun with
+  `PYTHONDONTWRITEBYTECODE=1`, identical. A harness limit, not the engine.
+- **Probes T1–T11**, both engines, fixed reset: an edit under a sub-heading goes from nothing to
+  V10 + 9 S01; a link under a sub-heading, a numbered or a bold ID heading go from gaps or
+  11 × V03 to clean; a trailing-ID heading and a table-row requirement gain V16; a table-row
+  link's gaps now name the row. T1, T6b, T9–T11 unchanged.
+- **CLI** in disposable clones of both products: `init` refuses the previous skill copy (exit 2,
+  with the next move), refreshes it once removed, then changes nothing; `status`, `check
+  --strict`, `check --quiet`, `rules`, `thread`, `impact` give identical bytes with `-C`
+  before and after the command, and both products pass the gate.
+
+Raw records: `_playground/2026-09-25_m9-rich/` (local).
 
 **User acceptance, 2026-09-24 (`fix/beacon-uat-round-1`):** on the beacon test bed,
 `id_pattern = '^REQ_BCN_\d{2}$'` loaded, then `status` found 0 requirements and `check` gave
