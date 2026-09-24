@@ -206,15 +206,27 @@ def no_level(item: Item, levels: Iterable[str]) -> Finding:
 
 
 def not_scanned_here(
-    token: str, item_type: str, files: Iterable[str], file: str, line: int
+    token: str,
+    item_type: str,
+    files: Iterable[str],
+    file: str,
+    line: int,
+    *,
+    declared: Item | None = None,
 ) -> Finding:
+    move = f"Fix: {_a(item_type)} is read from {', '.join(files)}; move it there."
+    if declared is not None:  # a recap of an item declared where it is read
+        move = (
+            f"Fix: {token} is declared at {declared.file}:{declared.line}; here, do not start a "
+            "heading with its ID — name it later in the heading or in the text."
+        )
     return Finding(
         "V07",
         file,
         line,
         f"{token} is declared here, but this file is not scanned for {_a(item_type)} — so the "
         "tool cannot see it.",
-        f"Fix: {_a(item_type)} is read from {', '.join(files)}; move it there.",
+        move,
         token,
     )
 

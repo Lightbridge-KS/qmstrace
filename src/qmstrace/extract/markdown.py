@@ -5,6 +5,11 @@ pattern. The item is a section: its heading and everything down to the next head
 same or a higher level, sub-sections, tables and diagrams included. In it, `Key: value` lines
 are fields, and a field named after a link marker is a link.
 
+The ID comes first, after an optional section number (`4.2`, `4.2.1.`), and may be wrapped in
+emphasis or backticks; a trailing Pandoc attribute (`{#…}`, `{.…}`, `{-}`) is not part of the
+title. Decoration is layout, so renumbering or restyling a heading is not a change; a
+sub-heading's number is dropped from the item's text only when it continues the item's own.
+
 Only this repo's IDs end an item: a heading whose first word matches one of its item-ID
 patterns, or shares their prefix, starts that item's section — or, for another type, a
 section this pass does not read. Any other heading is a sub-heading when deeper, a boundary
@@ -34,6 +39,9 @@ _SEPARATOR: Final = re.compile(r"^[\s\u2014\u2013:-]+")  # em dash, en dash, col
 # A fence: three or more backticks or tildes. It closes on a line of the same character, at
 # least as long, with nothing after it — so a fenced example can hold a shorter fence.
 _FENCE: Final = re.compile(r"(`{3,}|~{3,})(.*)$")
+_ATTRIBUTE: Final = re.compile(r"\s*\{[#.-][^{}]*\}\s*$")  # Pandoc: {#id}, {.class}, {-}
+_NUMBER: Final = re.compile(r"(?:\u00a7\s*)?(\d+(?:\.\d+)*)\.?\s+")  # 4.2, 4.2.1., § 4.2
+_WRAPS: Final = ("**", "__", "`", "*", "_")  # longest first: `**` before `*`
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,9 +49,18 @@ class _Heading:
     """One heading line, read: its level, its words, and the ID it starts with, if any."""
 
     level: int
-    text: str  # the words as written, without the `#` marks
+    text: str  # the words, without the `#` marks and a trailing attribute
+    number: str | None  # a leading section number, `4.2`
+    bare: str  # the words without that number
     token: str | None  # the ID the heading starts with
     title: str  # the words after that ID and its separator
+
+    def in_item(self, number: str | None) -> str:
+        """The words this heading adds to an item's text: its number only when it is not a
+        continuation of the item's own — `4.2.1` under `4.2` is layout, `404` is text."""
+        if self.number and number and self.number.startswith(number + "."):
+            return self.bare
+        return self.text
 
 
 @dataclass
@@ -54,6 +71,7 @@ class _Open:
     line: int
     title: str
     level: int
+    number: str | None
     body: list[str] = field(default_factory=list)
     fields: dict[str, str] = field(default_factory=dict)
     change_line: int | None = None
@@ -98,7 +116,8 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             token = heading.token
             if token is not None and pattern is not None and pattern.fullmatch(token):
                 close()
-                current, other = _Open(token, number, heading.title, heading.level), None
+                started = _Open(token, number, heading.title, heading.level, heading.number)
+                current, other = started, None
                 continue
             if token is not None:
                 leads.append(Lead(token, item_type.name, path, number))
@@ -107,7 +126,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                     current, other = None, heading.level
                     continue
             if current is not None and heading.level > current.level:
-                current.body.append(heading.text)  # a sub-heading: part of the item's text
+                current.body.append(heading.in_item(current.number))  # a sub-heading
                 continue
             close()
             current = None
@@ -158,11 +177,35 @@ def _heading(raw: str) -> _Heading | None:
     found = _HEADING.match(raw)
     if found is None:
         return None
-    level, words = len(found.group(1)), found.group(2)
+    level, words = len(found.group(1)), _ATTRIBUTE.sub("", found.group(2))
+    numbered = _NUMBER.match(words)
+    number, bare = (numbered.group(1), words[numbered.end() :]) if numbered else (None, words)
+    token, title = _leading_id(bare)
+    return _Heading(level, words, number, bare, token, title if token else words)
+
+
+def _leading_id(words: str) -> tuple[str | None, str]:
+    """The ID a heading's words start with — bare, or wrapped in emphasis or backticks that
+    close right after it or at the end of the heading — and the title after it."""
+    for wrap in _WRAPS:
+        if not words.startswith(wrap):
+            continue
+        inner = words[len(wrap) :]
+        lead = _LEADING_ID.match(inner)
+        if lead is None:
+            continue
+        after = inner[lead.end(1) :]
+        if after.startswith(wrap):
+            after = after[len(wrap) :]
+        elif after.endswith(wrap):
+            after = after[: -len(wrap)]
+        else:
+            continue
+        return lead.group(1), _SEPARATOR.sub("", after).rstrip()
     lead = _LEADING_ID.match(words)
     if lead is None:
-        return _Heading(level, words, None, words)
-    return _Heading(level, words, lead.group(1), _SEPARATOR.sub("", lead.group(2)))
+        return None, words
+    return lead.group(1), _SEPARATOR.sub("", lead.group(2))
 
 
 def _item_shaped(token: str, patterned: list[ItemType]) -> bool:

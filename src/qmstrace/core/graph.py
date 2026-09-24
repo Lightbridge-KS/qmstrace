@@ -168,7 +168,12 @@ class TraceGraph:
         wrong += _leads(config, (lead for part in found for lead in part.leads), foreign)
         wrong += [
             findings.not_scanned_here(
-                item.id, item.type, config.item_types[item.type].files, item.file, item.line
+                item.id,
+                item.type,
+                config.item_types[item.type].files,
+                item.file,
+                item.line,
+                declared=local.get(item.id),
             )
             for item in misplaced
         ]

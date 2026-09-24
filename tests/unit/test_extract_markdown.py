@@ -14,6 +14,8 @@ The load-bearing claims, each pinned by a test:
 7. What the fixture project declares today keeps its titles and digests; a fence closes on
    its own mark.
 8. A sub-section is part of its item: its text, its fields and its links.
+9. A section number, emphasis or backticks around the ID and a trailing Pandoc attribute are
+   layout: the heading still declares, and restyling or renumbering is not a change.
 """
 
 from pathlib import Path
@@ -424,3 +426,71 @@ def test_a_marker_in_a_sub_section_is_read_even_when_the_type_does_not_carry_it(
     text = "### REQ-SVC-01 — X\nStatement.\n#### Design\nSatisfies: REQ-SVC-02\n"
     (link,) = read(service, text).links
     assert (link.src, link.marker, link.dst) == ("REQ-SVC-01", "Satisfies", "REQ-SVC-02")
+
+
+# ── 9. heading forms ───────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "heading",
+    [
+        "### REQ-SVC-01 — T",
+        "### 4.2 REQ-SVC-01 — T",
+        "### 4.2.1. REQ-SVC-01 — T",
+        "### § 4.2 REQ-SVC-01 — T",
+        "### **REQ-SVC-01** — T",
+        "### **REQ-SVC-01 — T**",
+        "### __REQ-SVC-01__ — T",
+        "### *REQ-SVC-01* — T",
+        "### _REQ-SVC-01_ — T",
+        "### `REQ-SVC-01` — T",
+        "### REQ-SVC-01 — T {#sec-t}",
+        "### REQ-SVC-01 — T {.unnumbered}",
+        "### REQ-SVC-01 — T {-}",
+        "### 4.2 **REQ-SVC-01** — T {#sec-t .unnumbered}",
+    ],
+)
+def test_a_decorated_heading_declares_the_item(service: TraceConfig, heading: str) -> None:
+    found = read(service, f"# Doc\n\n{heading}\nStatement.\n- Origin: AGR-1\n")
+    (item,) = found.items
+    assert (item.id, item.line, item.title) == ("REQ-SVC-01", 3, "T")
+    assert [link.dst for link in found.links] == ["AGR-1"] and not found.leads
+
+
+def test_renumbering_or_restyling_a_heading_is_not_a_change(service: TraceConfig) -> None:
+    plain = "### REQ-SVC-01 — T\nStatement.\n"
+    styled = "### 4.3 **REQ-SVC-01** — T {#sec-t}\nStatement.\n"
+    assert digest_of(service, plain) == digest_of(service, styled)
+
+
+def test_a_sub_heading_numbered_under_the_item_is_renumbered_freely(
+    service: TraceConfig,
+) -> None:
+    before = "### 4.2 REQ-SVC-01 — T\nS.\n#### 4.2.1 Flow {#flow}\nX.\n"
+    after = "### 4.3 REQ-SVC-01 — T\nS.\n#### 4.3.1 Flow\nX.\n"
+    assert digest_of(service, before) == digest_of(service, after)
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        ("#### 404 when unknown", "#### 410 when unknown"),
+        ("#### 1. Happy path", "#### 2. Happy path"),
+        ("#### 4.2.1 Flow", "#### 5.2.1 Flow"),
+    ],
+)
+def test_any_other_sub_heading_number_is_text(
+    service: TraceConfig, before: str, after: str
+) -> None:
+    item = "### 4.2 REQ-SVC-01 — T\nS.\n{}\nX.\n"
+    assert digest_of(service, item.format(before)) != digest_of(service, item.format(after))
+
+
+@pytest.mark.parametrize(
+    "heading",
+    ["### Calls need a key (REQ-SVC-01)", "## 2024 roadmap", "### 4.2 Overview {#overview}"],
+)
+def test_a_heading_that_does_not_start_with_an_id_declares_nothing(
+    service: TraceConfig, heading: str
+) -> None:
+    assert read(service, heading + "\n- Origin: AGR-1\n") == Extracted()
