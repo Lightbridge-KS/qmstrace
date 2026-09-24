@@ -1,0 +1,18 @@
+Usage: qmstrace graph [OPTIONS] [ID]
+
+  Export one working-tree assessment as a self-contained, read-only HTML
+  browser.
+
+  ID sets the initial selection; every visible-to-run item is still included.
+  Relative output paths start at -C or the current directory. No server or
+  network is needed. Findings do not fail this informational command. Traversal
+  stops at this repo's edge.
+
+Arguments:
+  ID  Initially focus this item.
+
+Options:
+  --out <path>  New HTML file; existing files are refused.  [required]
+  -C PATH       Run as if qmstrace had been started in PATH, as with git -C.
+                Before or after the command.
+  --help        Show this message and exit.

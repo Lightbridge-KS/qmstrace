@@ -92,3 +92,21 @@ list: [Check your work before you commit](../how-to/check-your-work.md).
 
 - Every block, and the pipeline's version of this output: [`qmstrace status`](../reference/commands/status.md).
 - What *not pinned* and *not verified here* mean, and why they do not fail: [Around the repo](../explanation/around-the-repo.md).
+
+
+## Open the same trace visually
+
+From the qmstrace clone, generate a new browser file:
+
+``` sh
+uv run qmstrace -C tests/fixtures/mini/service graph REQ-SVC-01 --out trace.html
+```
+
+Open `tests/fixtures/mini/service/trace.html` in a browser. The selected requirement is
+highlighted; its inspector names its origin and source location. Choose depth 1 to limit
+its immediate neighbors, then use the item list to select a design. Source notices remain
+below the graph and findings remain in their own list.
+
+The file is generated, so remove it after this exercise. For a real repo, continue with
+[Set up a repo](../how-to/set-up-a-repo.md); for detailed browser controls, see
+[Explore a trace](../how-to/explore-a-trace.md).

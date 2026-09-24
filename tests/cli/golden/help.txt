@@ -15,6 +15,8 @@ Commands:
   results  Test verdicts per requirement, from a pytest JUnit report.
   check    What is wrong, and what is not done yet — the gate with --strict.
   rules    What check holds this repo to, and whose each rule is.
+  init     Set up trace configuration, agent guidance and pytest markers.
+  graph    Write an offline, interactive view of the local trace graph.
 
   Exit codes:
     0  completed — informational views may include failures

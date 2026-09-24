@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M5a landed, M5b implemented and verified locally awaiting review; M6 next, remaining slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M5b landed; M6–M8 implemented and locally verified, awaiting combined PR review; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,35 +8,35 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-22 · Slice 1: the product-repo half.** M0–M5a have landed.
-**M5b — implemented and verified locally; awaiting review**, on `codex/m5b-suspects`,
-retaining tracker cleanup `0dc5c8c`. Merge remains pending.
-**Next build: M6 — set up a repo.** M5a merged in
-[PR #11](https://github.com/Lightbridge-KS/qmstrace/pull/11) at `724ec02`.
+**Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M5b have landed.
+M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
+including tracker cleanup `0dc5c8c`. **M6–M8 implemented and locally verified on `codex/m6-m8-slice-closure`; PR review pending.**
+The scope includes setup, test-bed migration, the local browser and slice closure in one PR.
+Routine implementation decisions are delegated; verification and Diátaxis pages ship together.
+The accepted local trace browser is M7b, after M7 migration and before M8 closure.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
 
-## Remaining milestones
+## Slice closure — implementation complete, review pending
 
-Slice 1 is done when the product test bed runs on the engine instead of the stand-in.
-Each milestone uses a branch and draft PR, passes the dry gate, and ships its
+Slice 1 requires the product test bed to run on the engine instead of the stand-in,
+followed by the accepted M7b local browser and M8 closure.
+M6–M8 share one branch and draft PR, pass the dry gate, and ship their
 [manual pages](../dev/writing-the-manual.md).
 
-- [ ] **M5b · suspects — awaiting review.** Separate historical/current walks,
-  per-upstream governing snapshots, deleted roots and retained edited/withdrawn dependants.
-  Status summarizes by distance; check/quiet emit every S01 without changing exits.
-  Tests, parity and manual verified below. Standing contract:
-  [data architecture D7](../design/data-architecture.md).
-  Explicit recorded-review clearance remains later work.
-- [ ] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
+- [x] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
   test-framework marker registration; ship the skill as package data, including the
   “break it” loop and a parity test between skill and code.
-- [ ] **M7 · switch the product test bed to the engine.** Migrate its configurations and
+- [x] **M7 · switch the product test bed to the engine.** Migrate its configurations and
   execute the acceptance checks below. Keep the ledger import on the stand-in until slice 2.
-- [ ] **M8 · close slice 1.** README, CHANGELOG, findings promoted into design,
+- [x] **M7b · local trace browser.** Generate an offline, read-only HTML view of one
+  assessment: item search, thread navigation, findings and evidence limits. Ship manual
+  pages and CLI/view parity checks. [Accepted design](../design/trace-browser.md) owns
+  scope and rejected alternatives; vis-network 10.1.2 adopted after local evaluation.
+- [x] **M8 · close slice 1.** README, CHANGELOG, findings promoted into design,
   trackers reconciled; archive the stand-in rather than delete it.
 
 ## Landed
@@ -54,6 +54,7 @@ Each milestone uses a branch and draft PR, passes the dry gate, and ships its
 | M3b | Multi-start `impact` and candidate `Impacts:` list | #9 · `23c80a5` |
 | M4 | Pytest JUnit matching and direct requirement verdicts | #10 · `1a4869d` |
 | M5a | Historical baselines, fresh request citations, V10–V13 and withdrawal | #11 · `724ec02` |
+| M5b | Independent historical/current suspect traversal, S01, status/check views and review manual | #12 · `8ea7bda` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
@@ -61,10 +62,32 @@ Their settled outcomes live in the design docs; the
 
 ## Latest verified evidence
 
+**M6–M8, 2026-09-24:** `just dry` passed with **571 Python tests, 99.09% coverage**,
+three Node browser-control tests, strict types, complete wheel-asset verification and strict
+manual build. Setup and graph help/output goldens were inspected; both command pages'
+built code blocks match their goldens exactly. Setup was inspected visually and the graph
+reference was inspected in the browser. Tutorial, how-to and explanation pages build.
+
+The engine-native test bed now lives at `../_tests/beacon-engine/`; original source repos and
+tags are unchanged. E1 mutation, E3 baseline/suspect and E4 graph/gap replays pass again.
+Every command runs in both migrated products; repeated setup and both `-C` placements have
+identical bytes. The wheel-installed graph command is deterministic in both repos.
+The retained stand-in archive serves only historical/ledger reproduction until slice 2.
+
+The browser was exercised on both product projections and a 1,000-node synthetic chain,
+including keyboard selection, depth controls, zoom and hostile literal text. Direct local
+file-opening was blocked by the verification browser policy and remains unverified;
+loopback-served rendering passed. Full methods, mapping commits and remaining limits live
+in [slice-1 closure verification](../tests/slice-1-closure.md). CI and deployed-preview evidence belongs to the combined PR; no release or production
+deployment is claimed.
+
+
 **M5b, 2026-09-22:** local `just dry` passed with **528 tests, 99.31% coverage**,
 formatting, lint, strict types, wheel contents and strict manual build. Deterministic
 status/check/quiet goldens cover S01 reasons, distances, exits and both `-C` placements.
-M5b CI and deployment are not yet verified.
+On PR head `393185b`, the [GitHub dry gate](https://github.com/Lightbridge-KS/qmstrace/actions/runs/35710423708)
+and Netlify deploy-preview build passed (confirmed 2026-09-24). M5b deployed-page inspection
+and production deployment remain unverified.
 
 - **E3 baseline replay:** disposable clones with explicit original-to-overlay commit
   mappings preserve traced source bytes at all three documented pins.
@@ -100,20 +123,21 @@ mutations), `_playground/2026-09-21_m3b-impact/` (impact), and
 
 ## Slice-1 acceptance
 
-The table distinguishes checks already exercised in clones/fixtures from the final M7
-switch-over. It does not claim the test bed already runs on the engine.
+M7 uses the retained engine-native test bed plus disposable replay clones. The historical
+workspace retains its old configuration for stand-in/ledger reproduction.
 
 | Check | Current evidence / remaining work |
 |---|---|
-| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Verified in M4 and replayed through M5b; repeat after M7 migration |
-| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Replayed in mapped M5b clones; repeat after M7 migration |
+| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Replayed in fresh E1 clones during M7; all seven targeted verdicts fail |
+| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Replayed during M7 with explicit mapped commits; guard checks pass |
 | E3: restore the system-test file from the tag; suspects appear and survive an appended comment or an added test | Verified in M5b clones: the same 11 unique items throughout |
 | Second requirements baseline: no suspects; preceding commit: field-only change has downstream suspects | Verified in M5b clones: 79 before, 0 at the applicable baseline |
-| Client: sibling items say not pinned; duplicate requirement names its owner; missing sibling says not reachable; missing ledger says not verified, including quiet output | Fixtures cover these cases; final two-repo replay remains M7 |
+| Client: sibling items say not pinned; duplicate requirement names its owner; missing sibling says not reachable; missing ledger says not verified, including quiet output | Fixtures and migrated two-repo replay pass, including quiet evidence |
 | Lightweight tag warns; pre-tag feature branch sees no baseline; shallow history cannot look unfrozen | Verified in M5a fixtures |
 | CR-001 impact: changed IDs `REQ-BCN-05`, `REQ-BCN-06` show downstream reach and origins; `REQ-BCN-11` participates only when declared and explicitly supplied | Reach verified in M3b; reserved unseen-ID rejection verified in M5a fixtures |
-| Client `Assumes` propagates impact without adding coverage; CR-002 is the later classification change across eleven requirements | Impact checked in M3b; retain both scenarios in M7 |
-| Every command in both product repos; `init` in a scratch copy reproduces the stanza; repeated runs produce identical bytes | Existing command goldens/determinism pass; `init` and final full replay await M6/M7 |
+| Client `Assumes` propagates impact without adding coverage; CR-002 is the later classification change across eleven requirements | M7 dependency mutation and field-only/baseline replay pass |
+| Every command in both product repos; `init` in a scratch copy reproduces the stanza; repeated runs produce identical bytes | Wheel-installed commands pass in both products; init and graph deterministic |
+| Local browser preserves CLI reach, findings and evidence limits; works offline and by keyboard; handles cycles and safely renders authored text | Shared-core parity, browser/control checks and 1,000-node example pass; direct file-opening smoke check remains unverified |
 
 Every command must have a golden, and every finding code an emitting fixture.
 Do not reproduce the stand-in's defects: file-level or self-clearing suspects, one-hop-only
@@ -135,7 +159,10 @@ overlapping scopes, or the silent passes in the [scenario catalogue](../tests/sc
 - **E5:** five-step audit demo once the engine has a ledger.
 - **Repo hygiene:** validating tracker commit references remains agreed but unscheduled.
 - **Later capabilities:** machine-readable output, recorded-review suspect clearance,
-  collectors, conformance view, trace browser and a second profile.
+  collectors, conformance view, project-wide trace browser at pins and a second profile.
+- **Browser extensions:** separate historical/current comparison views, explicitly supplied
+  test-result overlays and live refresh remain outside M7b; see the
+  [trace-browser boundaries](../design/trace-browser.md#evidence-and-scope).
 - **E2 option C** remains an optional comparison/on-ramp for unmarked repos.
   The real pilot remains under its own plan; the live audit is unchanged.
 - **`VISION.md`** remains deferred until slice-1 experience supports durable invariants.
@@ -151,6 +178,8 @@ Read these for contracts rather than copying their contents into this tracker:
 - [Surface architecture](../design/surface-architecture.md): command/exit contracts,
   findings, evidence limits and authoring loop; decorative markers and unrecorded
   inspection are known limits.
+- [Local trace browser](../design/trace-browser.md): accepted M7b experience and architecture;
+  pinned embedded vis-network 10.1.2 adopted after fixture evaluation.
 - [System architecture](../design/system-architecture.md) and
   [codebase blueprint](../structure/codebase-blueprint.md): module ownership and source-tree
   seam; Python 3.13+, frozen values, pure core, no DuckDB until slice 2.

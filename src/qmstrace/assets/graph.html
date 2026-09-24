@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>qmstrace · Local trace browser</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #193234;
+        --muted: #506366;
+        --paper: #f7f8f4;
+        --line: #cbd5cf;
+        --accent: #006a65;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+      }
+      header {
+        padding: 18px 24px;
+        background: #153e3b;
+        color: white;
+      }
+      h1 {
+        font-size: 23px;
+        margin: 0;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 0 0 10px;
+      }
+      h3 {
+        font-size: 15px;
+      }
+      p {
+        margin: 8px 0;
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #bce2d6;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+        color: inherit;
+        border: 1px solid #879c94;
+        border-radius: 5px;
+        padding: 6px 10px;
+        background: white;
+      }
+      button {
+        cursor: pointer;
+        text-align: left;
+      }
+      button:hover {
+        background: #e4f1e9;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #cd7400;
+        outline-offset: 2px;
+      }
+      button[aria-pressed="true"] {
+        background: #d0ebe1;
+        border-color: var(--accent);
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px 24px;
+        border-bottom: 1px solid var(--line);
+        align-items: center;
+      }
+      .toolbar label {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .workspace {
+        display: grid;
+        grid-template-columns: 270px minmax(0, 1fr) 350px;
+        min-height: 650px;
+      }
+      .panel {
+        padding: 18px;
+        border-right: 1px solid var(--line);
+        min-width: 0;
+      }
+      .panel:last-child {
+        border-left: 1px solid var(--line);
+        border-right: 0;
+        background: white;
+      }
+      #network {
+        height: 580px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+      .legend {
+        padding: 12px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 12px;
+      }
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 2px 8px;
+        display: inline-block;
+        margin: 2px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .list {
+        max-height: 430px;
+        overflow: auto;
+        margin-top: 12px;
+        display: grid;
+        gap: 5px;
+      }
+      .list button {
+        width: 100%;
+        font-size: 12px;
+        overflow-wrap: anywhere;
+      }
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 12px;
+        margin: 8px 0;
+      }
+      .filters label {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+      input[type="checkbox"] {
+        accent-color: var(--accent);
+      }
+      #inspector {
+        overflow-wrap: anywhere;
+        max-height: 560px;
+        overflow: auto;
+      }
+      #inspector dl {
+        font-size: 13px;
+      }
+      dt {
+        font-weight: 650;
+        margin-top: 8px;
+      }
+      dd {
+        margin: 0;
+      }
+      .evidence {
+        padding: 16px 24px;
+        border-top: 1px solid var(--line);
+        background: #edf3ed;
+      }
+      .evidence p {
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+      details {
+        margin: 8px 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 650;
+      }
+      #findings {
+        display: grid;
+        gap: 8px;
+        padding: 16px 24px;
+        max-height: 450px;
+        overflow: auto;
+      }
+      #findings button {
+        font-size: 13px;
+      }
+      #counts {
+        font-size: 13px;
+      }
+      .sr-only {
+        position: absolute;
+        left: -10000px;
+      }
+      noscript {
+        display: block;
+        padding: 20px;
+        color: #8b2700;
+      }
+      @media (max-width: 1050px) {
+        .workspace {
+          grid-template-columns: 240px minmax(0, 1fr);
+        }
+        .panel:last-child {
+          grid-column: 1/-1;
+        }
+        #inspector {
+          max-height: none;
+        }
+      }
+      @media (max-width: 650px) {
+        .workspace {
+          display: block;
+        }
+        #network {
+          height: 400px;
+        }
+        .list {
+          max-height: 190px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="eyebrow">qmstrace / working-tree snapshot</div>
+      <h1>Local trace browser</h1>
+      <p id="summary"></p>
+    </header>
+    <noscript
+      >This interactive document requires JavaScript. Use qmstrace status,
+      thread and check for the text views.</noscript
+    >
+    <div class="toolbar">
+      <label
+        >Scope
+        <select id="scope">
+          <option value="all">All items</option>
+          <option value="thread">Selected thread</option>
+        </select></label
+      >
+      <label
+        >Direction
+        <select id="direction">
+          <option value="both">Both</option>
+          <option value="forward">Downstream</option>
+          <option value="backward">Upstream</option>
+        </select></label
+      >
+      <label
+        >Depth
+        <select id="depth">
+          <option value="999999">All</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select></label
+      >
+      <button id="zoom-in" aria-label="Zoom in">+</button
+      ><button id="zoom-out" aria-label="Zoom out">−</button
+      ><button id="fit">Fit graph</button><button id="reset">Reset view</button
+      ><span id="counts" role="status" aria-live="polite"></span>
+    </div>
+    <main class="workspace">
+      <aside class="panel">
+        <h2>Find an item</h2>
+        <label for="search" class="sr-only">Search ID or title</label
+        ><input
+          id="search"
+          type="search"
+          placeholder="Search ID or title"
+          style="width: 100%"
+        />
+        <p class="muted">
+          Search lists all matches, including filtered items. Select one to
+          reveal its thread.
+        </p>
+        <details>
+          <summary>Item and link filters</summary>
+          <div id="types" class="filters"></div>
+          <div id="markers" class="filters"></div>
+        </details>
+        <p id="matches" class="muted"></p>
+        <div id="items" class="list" aria-label="Items"></div>
+      </aside>
+      <section aria-label="Trace graph">
+        <div
+          id="network"
+          role="img"
+          aria-label="Interactive trace graph. Use the item list and inspector for keyboard access."
+        ></div>
+        <div id="legend" class="legend"></div>
+        <div class="legend">
+          Arrows follow authored links: test → requirement. Selection highlights
+          trace reach. Dashed edges are dependencies. Drag to pan; scroll to
+          zoom.
+        </div>
+      </section>
+      <aside class="panel">
+        <h2>Inspector</h2>
+        <div id="inspector" aria-live="polite">
+          Select an item, link or finding. Essential evidence is also available
+          in the item and finding lists.
+        </div>
+      </aside>
+    </main>
+    <section class="evidence" aria-label="Evidence limits">
+      <h2>Evidence and limits</h2>
+      <p>
+        Current validated links only · Local traversal · Read-only · Regenerate
+        to refresh
+      </p>
+      <details>
+        <summary>All source and baseline notices</summary>
+        <div id="evidence"></div>
+      </details>
+    </section>
+    <section aria-label="Findings">
+      <div class="toolbar">
+        <h2 id="finding-title">Findings</h2>
+        <label
+          >Show
+          <select id="finding-kind">
+            <option value="all">All findings</option>
+            <option value="V">Violations</option>
+            <option value="G">Gaps</option>
+            <option value="S">Suspects</option>
+          </select></label
+        >
+      </div>
+      <div id="findings"></div>
+    </section>
+    <footer class="evidence">
+      <details>
+        <summary>Browser library · vis-network 10.1.2 · MIT license</summary>
+        <pre style="white-space: pre-wrap"><!--LICENSE--></pre>
+      </details>
+    </footer>
+    <script id="assessment" type="application/json">
+      /*ASSESSMENT*/
+    </script>
+    <script>
+      /*LIBRARY*/
+    </script>
+    <script>
+      /*VIEWER*/
+    </script>
+  </body>
+</html>

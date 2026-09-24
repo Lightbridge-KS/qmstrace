@@ -32,7 +32,7 @@ qmstrace check --strict         # the gate: no violations, no gaps
 ## 1. Overview
 
 qmstrace answers an auditor's questions by query. Its users never meet a database or a web
-application: they meet **a command line in the repository they are already working in**,
+service: they meet **a command line in the repository they are already working in**,
 **documents in the word processor they already use**, and, for an audit, **a page
 someone else drives**.
 
@@ -41,7 +41,7 @@ someone else drives**.
 | User | Surface | Status |
 |---|---|---|
 | The coding agent in a product repo — first-class | the command line; the stanza, the skill, the markers | ✔ validated |
-| The developer-manager | the same command line; the pull-request diff | ✔ command line · ◻ diff of the trace lock |
+| The developer-manager | the same command line; generated local trace browser; the pull-request diff | ✔ command line and local browser · ◻ diff of the trace lock |
 | Reviewers and approvers | rendered Word drafts, in the document store. **They install nothing** | ◻ planned |
 | The auditor | a generated, read-only view, driven by someone else | ◻ planned |
 
@@ -62,7 +62,8 @@ flowchart TD
     cli --> thread["thread ID ✔"]
     cli --> results["results REPORT ✔"]
     cli --> impact["impact ID… ✔"]
-    cli --> init["init ◻"]
+    cli --> init["init ✔"]
+    cli --> graph["graph ✔ — local offline browser"]
     cli --> ledger["ledger … — its own group"]
     ledger --> import["import NAME@PIN ✔ driver"]
     ledger --> emit["emit tables"]
@@ -79,7 +80,8 @@ flowchart TD
 | `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
 | `qmstrace results <report>` | Matches one pytest JUnit report to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
-| `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
+| `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers | ✔ |
+| `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
@@ -203,7 +205,7 @@ An agent spends far more time *writing* to this surface than invoking it.
 
 ## 3. Entry & Onboarding
 
-**In a product repo** ◻ — `qmstrace init` writes the trace configuration and the stanza; the skill
+**In a product repo** ✔ — `qmstrace init` writes the trace configuration and the stanza; the skill
 arrives with the engine. The first command is `qmstrace status`. Both experiments started this way
 by hand, and in both the agent learned what mattered from that first command:
 
@@ -414,6 +416,17 @@ requirement is gated, the work downstream of it is gated too.**
 
 ## 7. Configuration & Customization
 
+### Local trace browser — accepted 2026-09-24, M7b
+
+The [trace-browser design](trace-browser.md) owns the interaction and delivery contract.
+A single offline HTML snapshot presents the current assessment with stable schema-based
+layout and authored arrows. Findings and source limits remain visible; S01 reasons expose
+historical provenance without combining historical/current edges into one graph. Generation
+is informational, not a gate or a recorded review. M7b follows test-bed migration; the
+project-wide browser follows slice 2. The renderer library remains provisional.
+
+### Configuration
+
 - **The trace configuration** is the whole of it for a product repo: item types and their
   file patterns, link types, coverage rules, externals, baselines, change requests. Shape and
   reasoning: [Data Architecture § The trace configuration](data-architecture.md).
@@ -422,7 +435,8 @@ requirement is gated, the work downstream of it is gated too.**
 - **Baselines are recognised, not imposed**: a project's own tag names are configuration (D6).
 - **Machine-readable output comes later, and findings are structured from the first line of
   code.** No agent has needed a `--json` form — line output was enough in every experiment —
-  but the pull-request gate and the trace browser will. So a finding is data inside the
+  and the local trace browser consumes an internal projection of the assessment rather than
+  requiring a public JSON CLI. So a finding is data inside the
   engine — code, file, line, item, what is wrong, the next move — and the line an agent reads
   is one renderer of it. Which commands get the form, and its versioning, are decided then.
 
@@ -435,3 +449,29 @@ Each is marked 💡 where it bites.
 | 1 | **The gate's shape.** `check --strict` was enough on the test bed. In the engine a gap fails only from its rule's stage on, so the gate needs to know the stage — a flag, the trace configuration, or the ledger. **Settled for slice 1 (2026-09-21): the gate fails on every gap**; stage-aware gating waits for the ledger, where the project's stages live | §5 |
 | 2 | **A quiet form of `check`**, and how much of the header survives in the default form. **Settled in M3; extended M5a:** the default form keeps one `read:` line and evidence notices; `--quiet` keeps the notices, findings and result line. The result line carries baseline counts, remote-tag completeness and unavailable-request limitations | §6 |
 | 3 | **The reviewer's and the auditor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
+
+
+### Setup contract — M6
+
+`init [--subject NAME --key KEY]` creates a repo-owned starter at the effective directory
+when no ancestor has trace configuration. Defaults are `product` / `PROD`; no ledger,
+origin or baseline is invented. Existing configuration is preserved byte-for-byte and
+subject options then fail with exit 2. A ledger directory is not a product setup target.
+
+Managed guidance occupies exactly one begin/end block in `AGENTS.md`. Other text is
+preserved; an in-repo guide symlink is supported. Missing/conflicting markers, escaping
+symlinks and changed installed skill content fail before edits. Files are replaced
+atomically and earlier writes are restored if a later write fails; rollback failure names
+files needing recovery. The shipped skill lives at `.qmstrace/skill/SKILL.md` and marker
+examples are parsed by real extractors in the dry gate. It states the break/restore loop;
+`rules` owns project-specific rules. A differing prior skill is preserved for explicit
+review before replacement; setup never silently destroys local guidance.
+
+Pytest registration follows root configuration precedence, including native pytest TOML
+and `pyproject.toml`, preserves unrelated settings and registers `verifies` once. Otherwise
+it adds settings to an existing pyproject or creates `pytest.ini`. Malformed/unsupported
+edits exit 2 with a next move. Successful repeated runs change no bytes. Both `-C`
+placements work; no Git commit, fetch or inferred marker curation occurs.
+
+**Rejected:** infer project rules, rewrite authored configuration on every init, or replace
+an entire guide/settings file. Setup supplies a reviewable starting point, not project policy.

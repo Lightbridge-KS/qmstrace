@@ -807,3 +807,19 @@ def _result(assessment: Assessment, *, strict: bool) -> str:
     ) and not assessment.baseline_state.register.available:
         parts.append("change requests NOT VERIFIED")
     return " · ".join(parts)
+
+
+def evidence(assessment: Assessment) -> tuple[str, ...]:
+    """Source and baseline evidence shared by the offline browser and text views."""
+    return tuple(
+        [
+            _schema(assessment),
+            *(_external(state) for state in assessment.externals),
+            *_siblings(assessment),
+            *_baselines(assessment),
+            *(notice.text for notice in assessment.notices),
+            "Working-tree snapshot; its commit has not been verified. Regenerate to refresh.",
+            "Traversal stops at this repo's edge. Sibling contents are not pinned.",
+            "Suspects need review; edits and passing tests do not record review.",
+        ]
+    )

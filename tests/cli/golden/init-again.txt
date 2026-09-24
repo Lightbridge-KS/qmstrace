@@ -1,0 +1,5 @@
+unchanged: qmstrace.toml
+unchanged: AGENTS.md
+unchanged: .qmstrace/skill/SKILL.md
+unchanged: pytest.ini
+Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0.

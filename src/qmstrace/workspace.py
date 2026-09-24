@@ -13,13 +13,15 @@ from __future__ import annotations
 
 import os
 import posixpath
+import re
 from collections import Counter
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, replace
+from importlib.resources import files
 from pathlib import Path
 from typing import Final
 
-from qmstrace.core import findings, judge, results
+from qmstrace.core import findings, judge, results, setup
 from qmstrace.core.assessment import Assessment, ExternalState, Scanned, SiblingState
 from qmstrace.core.baselines import BaselineState, Register, Snapshot
 from qmstrace.core.config import ExternalSource, ItemType, SchemaForm, TraceConfig
@@ -31,6 +33,7 @@ from qmstrace.extract import change_requests, junit
 from qmstrace.extract.base import FORMS, REGISTRY
 from qmstrace.extract.pytest_tests import report_identity
 from qmstrace.infra.externals import request_files
+from qmstrace.infra.files import contained, read_optional, update_files, write_new
 from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.globbing import matches
 from qmstrace.infra.tree import GitTree, ISourceTree, WorkingTree
@@ -76,6 +79,89 @@ class Workspace:
         root = _find_root(start)
         tree = trees(root)
         return cls(root, tree, _configuration(root, tree), trees, git)
+
+    @classmethod
+    def initialize(
+        cls, start: Path, *, subject: str | None = None, key: str | None = None
+    ) -> tuple[str, ...]:
+        """Set up the selected directory, or refresh an existing ancestor's managed files."""
+        root = start.resolve()
+        if not root.is_dir():
+            raise CouldNotJudge(
+                "The setup directory does not exist.", "Fix: create it first, then run init."
+            )
+        for parent in (root, *root.parents):
+            if (parent / CONFIG_FILE).exists():
+                root = parent
+                break
+            if (parent / SCHEMA_FILE).exists():
+                raise CouldNotJudge(
+                    "This is a ledger directory, not a product repo.",
+                    "Fix: run init in a product repo.",
+                )
+        assets = files("qmstrace").joinpath("assets")
+        current = read_optional(contained(root, CONFIG_FILE))
+        if current is not None:
+            if subject is not None or key is not None:
+                raise CouldNotJudge(
+                    "Subject options only apply when creating a configuration.",
+                    "Fix: edit qmstrace.toml explicitly, then rerun init without options.",
+                )
+            config = cls.open(root).config
+        else:
+            subject, key = subject or "product", key or "PROD"
+            if not re.fullmatch(r"[a-z][a-z0-9-]*", subject) or not re.fullmatch(
+                r"[A-Z][A-Z0-9]*", key
+            ):
+                raise CouldNotJudge(
+                    "Subject must be a lowercase name; key must be uppercase letters/digits.",
+                    "Fix: use, for example, --subject service --key SVC.",
+                )
+            current = assets.joinpath("starter.toml").read_text(encoding="utf-8")
+            current = current.replace("__SUBJECT__", subject).replace("__KEY__", key)
+            config = TraceConfig.parse(current)
+        guide_path = contained(root, "AGENTS.md")
+        existing = read_optional(guide_path) or ""
+        block = setup.stanza(assets.joinpath("stanza.md").read_text(encoding="utf-8"), config)
+        skill_path = ".qmstrace/skill/SKILL.md"
+        skill = assets.joinpath("skill/SKILL.md").read_text(encoding="utf-8")
+        prior_skill = read_optional(contained(root, skill_path))
+        if prior_skill is not None and prior_skill != skill:
+            raise CouldNotJudge(
+                "The installed qmstrace skill differs from this version.",
+                "Fix: preserve any local edits, remove .qmstrace/skill/SKILL.md, then rerun init.",
+            )
+        edits = {CONFIG_FILE: current, "AGENTS.md": setup.guide(existing, block), skill_path: skill}
+        if any(t.extractor == "pytest" for t in config.item_types.values()):
+            selected = False
+            for name in (
+                "pytest.toml",
+                ".pytest.toml",
+                "pytest.ini",
+                ".pytest.ini",
+                "pyproject.toml",
+                "tox.ini",
+                "setup.cfg",
+            ):
+                source = read_optional(contained(root, name))
+                if source is None:
+                    continue
+                section = setup.pytest_section(name, source)
+                if section is not None:
+                    edits[name] = setup.register_marker(name, source, section)
+                    selected = True
+                    break
+            if not selected:
+                source = read_optional(contained(root, "pyproject.toml"))
+                name = "pyproject.toml" if source is not None else "pytest.ini"
+                section = "tool.pytest.ini_options" if source is not None else "pytest"
+                edits[name] = setup.register_marker(name, source or "", section)
+        return update_files(root, edits)
+
+    @staticmethod
+    def save_view(path: Path, content: str) -> None:
+        """Write an explicitly requested view without clobbering an existing artifact."""
+        write_new(path, content)
 
     def assessment(self) -> Assessment:
         """Scan, read what lies around the repo, build the graph — once."""

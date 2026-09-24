@@ -14,6 +14,9 @@ moved change control into P0, and replaced the first slice plan with what actual
 Capability IDs are assigned when a design doc, milestone or test first cites one.
 Terms follow [`CONTEXT.md`](../../CONTEXT.md).
 
+*2026-09-24 scope amendment:* the local part of the trace browser is accepted for M7b,
+after product test-bed migration; the project-wide audit view remains dependent on slice 2.
+
 ## Problem
 
 A very small team running ISO/IEC 29110 with coding agents already produces the facts an
@@ -133,7 +136,7 @@ worked through in parallel with the first slice, which does not depend on it.
 | Drift check on a Word document | IDs and generated tables compared with the ledger at the document's pin |
 | Reconcile helper | Word copy → comparable text → a diff the agent can turn into a patch |
 | Conformance view | Each normative requirement of the profile → the evidence that answers it |
-| Static read-only trace browser | Generated; for the person driving the screen during an audit |
+| Static read-only trace browser | Local relationship/finding exploration for developers in M7b; project-wide evidence at pins for the person driving an audit follows slice 2. See [accepted design](../design/trace-browser.md) |
 | A second trace schema | The legacy product's ID families, to prove nothing is hard-coded |
 
 ### P2 — later
@@ -153,13 +156,15 @@ Incremental, each end to end, each leaving something in use.
    stand-in dies; what it settled is in the design docs.
 1. **The product-repo half as an engine** — scan, check, rules, trace, results, the baseline
    guard, the impact set, setting up a repo. Done when the test bed runs on the engine instead
-   of the stand-in, with the stand-in's scenarios as its fixtures.
+   of the stand-in, with the stand-in's scenarios as its fixtures. **Scope extension accepted
+   2026-09-24:** after that migration, M7b adds the local offline trace browser before M8
+   closes the slice; it does not delay M6 setup or introduce project-wide traversal.
 2. **The ledger** — import several product repos at a pin, the trace lock, emitted tables
    rendered into a Word template. Done when a traceability record contains no hand-typed ID.
 3. **Work-product register and events** — the register is generated; a document's issue and
    a baseline are events with pinned evidence pointers.
 
-Then P1, ordered by what the first real project needs. The live pilot under certification audit stays
+Remaining P1 follows, ordered by what the first real project needs. The live pilot under certification audit stays
 as its plan declares; nothing there changes mid-audit.
 
 ## Constraints

@@ -18,6 +18,7 @@ import typer
 
 from qmstrace import __version__
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.render import graph as browser
 from qmstrace.render import text
 from qmstrace.workspace import Workspace
 
@@ -213,4 +214,54 @@ def rules(ctx: typer.Context, directory: Directory = None) -> int:
     Read from the configuration alone — nothing is scanned.
     """
     typer.echo(text.rules(Workspace.open(_directory(ctx, directory)).config))
+    return EXIT_OK
+
+
+@app.command(short_help="Set up trace configuration, agent guidance and pytest markers.")
+@outcome
+def init(
+    ctx: typer.Context,
+    subject: Annotated[
+        str | None, typer.Option(help="New repo subject name; default: product.")
+    ] = None,
+    key: Annotated[str | None, typer.Option(help="New repo ID key; default: PROD.")] = None,
+    directory: Directory = None,
+) -> int:
+    """Initialize the selected directory; refresh managed guidance in an existing traced repo.
+
+    Existing configuration and unrelated guide/settings content are preserved. Repeating init
+    changes nothing. The starter is repo-owned, with no invented origins or baseline tags.
+    Commit the generated files after reviewing the rules and scan paths.
+    """
+    for line in Workspace.initialize(_directory(ctx, directory), subject=subject, key=key):
+        typer.echo(line)
+    typer.echo("Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0.")
+    return EXIT_OK
+
+
+@app.command(short_help="Write an offline, interactive view of the local trace graph.")
+@outcome
+def graph(
+    ctx: typer.Context,
+    out: Annotated[Path, typer.Option("--out", help="New HTML file; existing files are refused.")],
+    item_id: Annotated[
+        str | None, typer.Argument(metavar="ID", help="Initially focus this item.")
+    ] = None,
+    directory: Directory = None,
+) -> int:
+    """Export one working-tree assessment as a self-contained, read-only HTML browser.
+
+    ID sets the initial selection; every visible-to-run item is still included. Relative output
+    paths start at -C or the current directory. No server or network is needed. Findings do not
+    fail this informational command. Traversal stops at this repo's edge.
+    """
+    start = _directory(ctx, directory)
+    workspace = Workspace.open(start)
+    assessment = workspace.thread(item_id) if item_id is not None else workspace.assessment()
+    workspace.save_view(start / out, browser.document(assessment, item_id))
+    typer.echo(
+        f"Written: {out} · {len(assessment.graph.nodes)} items · "
+        f"{len(assessment.graph.links)} links"
+    )
+    typer.echo("Offline working-tree snapshot; findings and evidence limits are included. Exit 0.")
     return EXIT_OK

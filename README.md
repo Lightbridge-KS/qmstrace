@@ -10,8 +10,30 @@ data and owns no evidence: it reads markers where people and coding agents alrea
 a requirement's heading, a line under a design section, a tag on a test — judges them, and
 points at evidence that stays in its home system.
 
-> **Status: the first engine slice is being built.** The design is settled and recorded; the
-> package does not yet do useful work. See [`docs/progress/`](docs/progress/).
+> **Status: product-repo engine implemented; slice-1 closure under review.** Setup, trace
+> queries, coverage checks, JUnit results, baseline/change guards, suspects and the offline
+> browser work locally. Ledger import, signatures and project-wide traversal at pins await
+> slice 2. See the [tracker](docs/progress/overview-qmstrace.md).
+
+## Use it
+
+With repository access, install from a clone using `uv tool install . --python 3.13`.
+For an isolated installation from an artifact, build with `uv build --wheel` and run
+`uv tool install dist/qmstrace-0.1.0-py3-none-any.whl --python 3.13`.
+A public package release has not been published.
+
+```sh
+qmstrace init --subject service --key SVC
+qmstrace status
+qmstrace rules
+qmstrace check --strict
+qmstrace graph --out trace.html
+```
+
+Review the generated scan patterns and rules before authoring. `thread ID` follows one item;
+`impact ID…` proposes a change-request list; `results report.xml` interprets a supplied pytest
+report. Informational exits do not assert approval or freshness. The HTML browser is a
+self-contained snapshot with source notices and a keyboard-accessible item list.
 
 **Using qmstrace?** The user manual is at <https://qmstrace.netlify.app/>. What follows is for
 working *on* qmstrace.
@@ -30,7 +52,8 @@ working *on* qmstrace.
 
 ## Develop
 
-Needs [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/). Python 3.13 is
+Needs [uv](https://docs.astral.sh/uv/), [just](https://just.systems/) and Node.js 22+ for browser
+control tests (no npm installation). Python 3.13 is
 fetched by uv.
 
 ```sh

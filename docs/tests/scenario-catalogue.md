@@ -259,3 +259,33 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - In a scratch copy of a test-bed repo it reproduces the committed stanza byte for byte.
 - Every fenced marker example in the shipped skill parses with the real extractors; every
   finding code has catalogue text. The skill and the tool cannot drift apart.
+
+
+## M6 — setup
+
+- Fresh repo: explicit subject/key or product/PROD defaults, own schema, no invented sources.
+- Existing trace configuration remains byte-identical; ancestor discovery and both `-C`
+  placements agree. Repeated runs change no bytes.
+- Only managed guide content changes. In-repo symlink works; escaping/aliasing paths,
+  conflicting markers, unreadable targets and changed skills are refused before writes.
+- A later write failure restores earlier files; a failed restoration names affected files.
+- Real pytest accepts `verifies` with strict markers across ini, tox, setup.cfg, native TOML
+  and pyproject settings; other settings and markers survive.
+- Packaged skill examples parse through the production extractors; break/restore guidance
+  remains explicit. The wheel carries every asset byte-for-byte.
+
+## M7b — offline browser
+
+- Optional initial ID selects a thread but exports all visible-to-run items. Unseen IDs and
+  an existing/unwritable output path exit 2 without replacing an artifact. `-C` and nested
+  invocation resolve output from the effective directory.
+- Every node type, including configured external types and unverified untyped nodes, appears
+  in filters and columns. Forward/backward reach equals the shared core for every item.
+- Only validated current links appear. Type/link/depth controls never recalculate findings;
+  hidden counts stay labelled. Search is global and selection works by keyboard.
+- Frozen/changed/withdrawn/suspect badges coexist. Historical-only suspects and deleted-root
+  findings remain selectable; full S01 roots/tags/version distances/next moves survive.
+- Hostile titles/metadata cannot terminate JSON or become DOM markup. Dependencies are
+  embedded, output is deterministic, the CSP denies connections, and no source is edited.
+- Measured test-bed and larger synthetic layouts are checked interactively before adoption
+  of the pinned renderer. Direct file-opening support is a separate browser smoke check.
