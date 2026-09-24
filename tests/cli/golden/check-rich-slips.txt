@@ -1,0 +1,11 @@
+read: 2 requirements, 2 design elements
+
+violations — wrong at any stage; each fails the check:
+  V16  docs/design/gateway-design.md:42  DSN-RCH-03 is in this heading but not first, so it declares nothing — and nothing else declares it. Fix: to declare it, start a heading with it — `### DSN-RCH-03 — <title>`, a section number before it is fine — where a design element is read (docs/design/*.md); if the heading only names it, correct the ID. Never invent the item to make the ID resolve.
+  V16  docs/req/gateway-srs.md:36  REQ-RCH-03 starts a table row, but a table declares nothing — and nothing else declares it. Fix: to declare it, write a heading `### REQ-RCH-03 — <title>` where a requirement is read (docs/req/*-srs.md); if the row only lists it, correct the ID. Never invent the item to make the ID resolve.
+
+gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on them:
+  G05  docs/design/gateway-design.md:32  DSN-RCH-02: satisfies no requirement — every design element points back to one. Fix: the 'Satisfies' table row at docs/design/gateway-design.md:40 is not read — a table declares nothing; write `Satisfies: …` as a line in the item's section.
+  G01  docs/req/gateway-srs.md:21  REQ-RCH-02: no design element satisfies it yet. Fix: the 'Satisfies' table row at docs/design/gateway-design.md:40 is not read — a table declares nothing; write `Satisfies: …` as a line in the item's section.
+
+result: 2 violations, 2 gaps in 4 items · 0 suspects (informational) · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict

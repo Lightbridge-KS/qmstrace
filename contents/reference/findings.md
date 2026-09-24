@@ -31,6 +31,8 @@ Every finding carries the same four parts, and the last one is never left out:
 --8<-- "manual/findings.md"
 
 `V10` to `V13` are emitted by the [baseline guard](baselines.md).
+`V16` is the one violation found in a baseline tag's tree that does not stop the tag being
+read: it declares nothing. How to avoid it: [write traced docs](../how-to/write-traced-docs.md).
 `S01` is a [suspect](suspects.md); its next move starts with `Review:` and does not claim
 that review or approval has happened.
 

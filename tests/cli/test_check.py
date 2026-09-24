@@ -105,6 +105,28 @@ def test_every_finding(project: Path, golden: Golden) -> None:
         assert f"\n  {code_}  " in output, f"{code_} is missing from the wording review"
 
 
+def test_docs_written_like_an_architecture_guide_pass_the_gate(
+    project: Path, golden: Golden
+) -> None:
+    """Numbered sections, sub-sections, tables and diagrams — every item still declared."""
+    code, output = check(project / "rich", "--strict")
+    assert code == 0
+    golden(GOLDEN / "check-rich.txt", output)
+
+
+def test_what_such_docs_slip_into_is_named(project: Path, golden: Golden) -> None:
+    """A link written into a table, a planned ID in a summary table, an ID at a heading's end."""
+    rich = project / "rich"
+    srs, design = rich / "docs/req/gateway-srs.md", rich / "docs/design/gateway-design.md"
+    in_a_line, in_the_table = "\n- Satisfies: REQ-RCH-02\n", "| Satisfies | REQ-RCH-02 |\n"
+    edit(design, "| wrong | 401 |\n" + in_a_line, "| wrong | 401 |\n" + in_the_table)
+    edit(srs, "| REQ-RCH-02 | P0 |\n", "| REQ-RCH-02 | P0 |\n| REQ-RCH-03 | P1 |\n")
+    write(design, design.read_text(encoding="utf-8") + "\n## 3. Later: an audit log (DSN-RCH-03)\n")
+    code, output = check(rich)
+    assert code == 1
+    golden(GOLDEN / "check-rich-slips.txt", output)
+
+
 def test_quiet_in_a_pipeline(alone: Callable[[str], Path], golden: Golden) -> None:
     code, output = check(alone("client"), "--quiet")
     assert code == 0

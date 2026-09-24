@@ -52,6 +52,12 @@ def test_status_in_a_repo_on_its_own(project: Path, golden: Golden) -> None:
     golden(GOLDEN / "status-solo.txt", output)
 
 
+def test_status_of_docs_written_like_an_architecture_guide(project: Path, golden: Golden) -> None:
+    code, output = status(project / "rich")
+    assert code == 0
+    golden(GOLDEN / "status-rich.txt", output)
+
+
 def test_what_cannot_be_found_or_read_is_said_in_the_header(
     project: Path, alone: Callable[[str], Path]
 ) -> None:
