@@ -25,7 +25,9 @@ CHANGE: Final = "Change"
 _HEADING: Final = re.compile(r"^#{1,6}\s+(.*?)\s*$")
 _LEADING_ID: Final = re.compile(rf"({ID_TOKEN.pattern})(?![A-Za-z0-9-])\s*(.*)$")
 _SEPARATOR: Final = re.compile(r"^[\s\u2014\u2013:-]+")  # em dash, en dash, colon, hyphen
-_FENCES: Final = ("```", "~~~")
+# A fence: three or more backticks or tildes. It closes on a line of the same character, at
+# least as long, with nothing after it — so a fenced example can hold a shorter fence.
+_FENCE: Final = re.compile(r"(`{3,}|~{3,})(.*)$")
 
 
 @dataclass
@@ -61,11 +63,12 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
     for number, raw in _lines(text):
         stripped = raw.lstrip()
         if fence is None:
-            fence = next((mark for mark in _FENCES if stripped.startswith(mark)), None)
+            opened = _FENCE.match(stripped)
+            fence = opened.group(1) if opened else None
             is_fence = fence is not None
         else:  # inside a fence nothing is a heading or a field; the lines are still text
             is_fence = True
-            if stripped.startswith(fence):
+            if _closes(stripped, fence):
                 fence = None
         if is_fence:
             if current is not None:
@@ -114,6 +117,17 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
 def form(marker: str, target: str) -> str:
     """How an item read by this extractor declares a link — for a gap's next move."""
     return f"`{marker}: {target}` under its heading"
+
+
+def _closes(stripped: str, fence: str) -> bool:
+    """Whether a line closes the open fence: its own character, at least as long, nothing after."""
+    run = _FENCE.match(stripped)
+    return (
+        run is not None
+        and run.group(1)[0] == fence[0]
+        and len(run.group(1)) >= len(fence)
+        and not run.group(2).strip()
+    )
 
 
 def _lines(text: str) -> list[tuple[int, str]]:

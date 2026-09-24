@@ -322,3 +322,17 @@ def test_a_fence_closes_on_its_own_mark(service: TraceConfig, opener: str, close
     other = "~~~" if closer == "```" else "```"
     text = f"{opener}\n{other}\n### REQ-SVC-09 — hidden\n{closer}\n### REQ-SVC-01 — X\n"
     assert [item.id for item in read(service, text).items] == ["REQ-SVC-01"]
+
+
+def test_a_longer_fence_holds_a_fenced_example(service: TraceConfig) -> None:
+    """A skill or a how-to shows a design doc with its Mermaid block inside a longer fence."""
+    text = (
+        "````markdown\n```mermaid\nflowchart LR\n```\n### REQ-SVC-09 — an example\n````\n"
+        "### REQ-SVC-01 — X\n"
+    )
+    assert [item.id for item in read(service, text).items] == ["REQ-SVC-01"]
+
+
+def test_a_line_with_an_info_string_does_not_close_a_fence(service: TraceConfig) -> None:
+    text = "```\n```python\n### REQ-SVC-09 — an example\n```\n### REQ-SVC-01 — X\n"
+    assert [item.id for item in read(service, text).items] == ["REQ-SVC-01"]
