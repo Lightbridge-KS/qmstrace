@@ -124,7 +124,7 @@ def status(ctx: typer.Context, directory: Directory = None) -> int:
     return EXIT_OK
 
 
-@app.command(short_help="What one item derives from, and what hangs off it.")
+@app.command(short_help="Trace one item: what it derives from, and what hangs off it.")
 @outcome
 def thread(
     ctx: typer.Context,

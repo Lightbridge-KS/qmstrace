@@ -34,6 +34,13 @@ SUPPORTED_VERSION: Final = 1
 EXTRACTORS: Final[Mapping[str, bool]] = {"markdown": True, "python-module": False, "pytest": False}
 
 _REGEX_META: Final = set("\\()[].*+?{|$")
+# Any start of the one shape every ID has (`model.ID_TOKEN`): capitals and digits in
+# hyphen-joined segments. A pattern or prefix that starts otherwise can never match an ID.
+_ID_START: Final = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]*)*")
+_ID_SHAPE: Final = (
+    "an ID is capital letters and digits in hyphen-joined segments, ending in a number, "
+    "such as REQ-SVC-01"
+)
 _FIX_UNKNOWN: Final = (
     "Fix: correct or remove the key — an unknown key is an error because a mistyped one "
     "would be a rule nobody can see."
@@ -446,6 +453,14 @@ def _literal_prefix(pattern: str) -> str:
     return "".join(literal)
 
 
+def _id_start(start: str, what: str, fix: str) -> None:
+    """Refuse a pattern or prefix that no ID can start with — it would match nothing, silently."""
+    if not _ID_START.fullmatch(start):
+        raise CouldNotJudge(
+            f"{what} starts with '{start}', which no ID can start with — {_ID_SHAPE}.", fix
+        )
+
+
 def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
     declared = schema.tables("item_types")
     locals_ = local.tables("items")
@@ -492,13 +507,28 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
                     "ID from where the item is — an ID pattern would never be applied.",
                     "Fix: remove id_pattern and id_prefix from this table.",
                 )
-            if pattern is not None and prefix is None:
-                prefix = _literal_prefix(pattern.pattern)
-                if not prefix:
+            if pattern is not None:
+                start = _literal_prefix(pattern.pattern)
+                if start:
+                    _id_start(
+                        start,
+                        f"{here.file}: the ID pattern of [items.{name}]",
+                        "Fix: write the pattern in that shape, e.g. "
+                        r"id_pattern = '^REQ-SVC-\d{2}$'.",
+                    )
+                elif prefix is None:
                     raise CouldNotJudge(
                         f"{here.file}: the ID pattern of [items.{name}] starts with no literal "
                         "text, so a malformed ID cannot be told from prose.",
                         'Fix: add id_prefix = "…" — the text every ID of this type starts with.',
+                    )
+                if prefix is None:
+                    prefix = start
+                else:
+                    _id_start(
+                        prefix,
+                        f"{here.file}: the id_prefix of [items.{name}]",
+                        'Fix: write the prefix in that shape, e.g. id_prefix = "REQ-".',
                     )
             here.done()
         found[name] = ItemType(
@@ -560,8 +590,14 @@ def _externals(schema: _Table) -> dict[str, ExternalSource]:
                 "with exactly one group — the ID.",
                 "Fix: put the ID, and nothing else, in parentheses.",
             )
+        prefix = table.text("prefix")
+        _id_start(
+            prefix,
+            f"{table.file}: 'externals.{name}.prefix'",
+            'Fix: write the prefix in that shape, e.g. prefix = "AGR-".',
+        )
         found[name] = ExternalSource(
-            name, table.text("item_type"), table.text("prefix"), table.text("source"), declared_as
+            name, table.text("item_type"), prefix, table.text("source"), declared_as
         )
         table.done()
     return found
@@ -571,7 +607,13 @@ def _change_requests(schema: _Table) -> ChangeRequests | None:
     table = schema.table("change_requests")
     if not table.raw:
         return None
-    found = ChangeRequests(table.text("prefix"), table.text("source"), table.text("accepted"))
+    prefix = table.text("prefix")
+    _id_start(
+        prefix,
+        f"{table.file}: 'change_requests.prefix'",
+        'Fix: write the prefix in that shape, e.g. prefix = "CR-".',
+    )
+    found = ChangeRequests(prefix, table.text("source"), table.text("accepted"))
     table.done()
     return found
 

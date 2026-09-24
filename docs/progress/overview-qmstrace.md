@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M8 landed; node-title hover follow-up implemented and verified; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance round 1 on the beacon-engine test bed; next, M9 rich Markdown and dogfooding; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -14,16 +14,87 @@ including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
 setup, test-bed migration, the local browser and slice closure.
 
-**Current follow-up:** node-title hover on `codex/graph-title-hover`. Tooltips show literal
-full titles with a full-ID fallback; list/inspector access remains available without hover.
-Verified: DSN-BCN-07 shows “Operator agent list”, AGR-2 falls back to its ID, and hover
-preserves selection. `just dry` passes: 571 Python tests, four Node control tests, strict
-types, wheel assets and manual build. Implementation is complete; PR review is pending.
+**Node-title hover** merged in [PR #14](https://github.com/Lightbridge-KS/qmstrace/pull/14)
+at `ea253f0`. Tooltips show literal full titles with a full-ID fallback; list/inspector access
+remains available without hover.
+
+**User acceptance on `../_tests/beacon-engine/`, round 1** (`fix/beacon-uat-round-1`). A user
+looking for the thread command reached for `trace`. The verb stays `thread` (the reasoning in
+the surface doc holds); the `--help` summary now reads *Trace one item: …* so the word leads to
+it. An ID pattern no ID can match is now refused (see *Latest verified evidence*). The test
+bed's bundled `.engine-venv` predates PR #14; acceptance runs use a wheel built from `main`.
+
+**Next: [M9 · rich Markdown](#next--m9--rich-markdown)**, planned below from the same round.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
+
+## Next — M9 · rich Markdown
+
+Planned 2026-09-24 from user acceptance. Docs written with the architecture lens skills —
+tables, Mermaid, numbered and nested headings — had never met the Markdown extractor: the
+beacon docs are flat. Probes on a disposable beacon clone, raw record in
+`_playground/2026-09-24_rich-docs/` (local):
+
+| Probe | Today |
+|---|---|
+| A sub-heading inside a frozen requirement, then an edit below it | 0 violations, 0 suspects |
+| `Satisfies:` under a sub-heading, or in a table cell | Link dropped; the gap's Fix repeats what was written |
+| A numbered, bold or trailing-ID heading | Item vanishes; 11 × V03 *no such item* |
+| A requirement only as a table row | No finding |
+| A table and a Mermaid diagram inside an item, then a cell edit | V10 + 9 S01 — correct |
+
+The data architecture already requires that an item written where it is not read *"must be
+reported, not silently skipped"*; the Markdown extractor, unlike the Python and pytest ones,
+reports no strays.
+
+**Decided 2026-09-24:**
+
+- **Sections.** An item is its heading and everything down to the next heading at the same
+  or a higher level; its fields and links count anywhere in that section. A heading that
+  starts with an ID always opens a new item, so items never nest. *Rejected:* fields only
+  before the first sub-heading — the section would be the item's text but not its fields.
+- **Near-misses are reported.** A link field outside any item is a stray, named by the gap it
+  leaves. A heading holding an undeclared ID of this repo's own pattern, but not first, and a
+  table row whose first cell is one, are violations with the next move.
+- **Heading forms, in the same milestone.** A leading section number (`4.2`), emphasis around
+  the ID and a trailing `{#…}` attribute are accepted; an ID at the end of a heading stays
+  prose. Shipping the near-misses alone would tell authors to remove numbers that this then
+  accepts.
+- **Recorded inline** in data architecture § Item text and § Marker syntax v0, with the
+  rejected rule — as F1–F12 amended v0 sections.
+- **Requirements are declared in the SRS only**; the PRD stays untraced and may mention SRS
+  IDs. Declaring items in table rows is rejected for now: a heading can hold acceptance
+  criteria and diagrams that a table cell cannot.
+
+- [ ] Amend data architecture § Marker syntax v0 and § Item text; add *stray* to the glossary.
+- [ ] Scenario catalogue: every probe above becomes a fixture, with the regressions that pass
+  today — table and Mermaid inside an item, bold keys, front matter, fields inside a fence.
+- [ ] Markdown extractor: sections, heading forms, strays. Each new finding code gets its
+  catalogue text and an emitting fixture.
+- [ ] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
+  unchanged — expected, since no beacon item has a deeper heading; not yet verified.
+- [ ] Stanza and shipped skill state the grammar; the skill parity test covers the new forms.
+- [ ] Manual: a how-to, *Write traced docs with diagrams and tables*, and the findings
+  reference for new codes.
+- [ ] Lens skills: a traced-repo note, filed as
+  [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71); not part of M9.
+
+Open for planning: whether the near-misses take new finding codes or extend V02/V07.
+
+**Validation after M9 — dogfooding.** qmstrace itself becomes a traced product repo, with a
+sibling ledger repo beside it holding the schema, agreement and change requests. One
+fresh-agent run covers PRD success criteria 5/6 and lens-style authoring, with measures fixed
+in `docs/tests/` before the run; it replaces the separate criteria-5/6 run listed below.
+💡 Dogfooding puts markers into the engine repo, which the PRD constraints and the system
+architecture keep free of project data. Amend that to mean *no other project's data* before
+the first marker lands — or trace a copy elsewhere.
+
+**Later — M10 · mentions.** Every token with a configured prefix in a scanned file — prose,
+table or Mermaid — must exist; a dangling one is a violation, like V03. Configured prefixes
+only: `SHA-256`, `UTF-8` and `ADR-0001` all fit the bare ID shape.
 
 ## Slice closure — landed
 
@@ -61,12 +132,18 @@ M6–M8 shipped together in PR #13 with the dry gate and their
 | M5a | Historical baselines, fresh request citations, V10–V13 and withdrawal | #11 · `724ec02` |
 | M5b | Independent historical/current suspect traversal, S01, status/check views and review manual | #12 · `8ea7bda` |
 | M6–M8 | Setup, engine-native test-bed migration, offline browser, Diátaxis pages and slice closure | #13 · `6fba9f8` |
+| Hover | Node titles on hover in the local browser | #14 · `ea253f0` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
 [experiment record](../tests/beacon-authoring-experiment.md) retains methods and findings.
 
 ## Latest verified evidence
+
+**User acceptance, 2026-09-24 (`fix/beacon-uat-round-1`):** on the beacon test bed,
+`id_pattern = '^REQ_BCN_\d{2}$'` loaded, then `status` found 0 requirements and `check` gave
+57 violations. The configuration now refuses an ID pattern or prefix whose literal start no
+ID can have, naming the shape; the agreement and change-request prefixes get the same check.
 
 **M6–M8, 2026-09-24:** `just dry` passed with **571 Python tests, 99.09% coverage**,
 three Node browser-control tests, strict types, complete wheel-asset verification and strict
@@ -161,7 +238,8 @@ overlapping scopes, or the silent passes in the [scenario catalogue](../tests/sc
   in the generated schema copy for offline citation verification. See
   [PRD open questions](../req/qmstrace-prd.md#open-questions) and data architecture D7/D9.
 - **After the engine slice:** a fresh agent run against PRD success criteria 5/6,
-  replaying E3, followed by a person-launched test-bed session.
+  replaying E3, followed by a person-launched test-bed session — now folded into the M9
+  dogfooding run above.
 - **E5:** five-step audit demo once the engine has a ledger.
 - **Repo hygiene:** validating tracker commit references remains agreed but unscheduled.
 - **Later capabilities:** machine-readable output, recorded-review suspect clearance,

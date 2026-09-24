@@ -234,6 +234,68 @@ def test_an_id_pattern_with_no_literal_start_needs_a_prefix() -> None:
 
 
 @pytest.mark.parametrize(
+    ("pattern", "start"),
+    [
+        (r"'^REQ_SVC_\d{2}$'", "REQ_SVC_"),  # underscores
+        (r"'^req-svc-\d{2}$'", "req-svc-"),  # lower case
+        (r"'^SRS FR-\d{2}$'", "SRS FR-"),  # a space
+        (r"'^FR:\d{2}$'", "FR:"),  # a colon
+    ],
+)
+def test_an_id_pattern_that_no_id_can_match_is_refused(pattern: str, start: str) -> None:
+    stopped = refusal(SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern, 1))
+    assert f"[items.requirement] starts with '{start}', which no ID can start with" in stopped.what
+    assert "such as REQ-SVC-01" in stopped.what
+    assert "id_pattern = '^REQ-SVC-" in stopped.next_move
+
+
+# Only the literal start is judged: `^FR\.\d{2}$` starts with `FR` and is accepted, though
+# `FR.12` is no ID — the extractor reports what then fails to link.
+@pytest.mark.parametrize(
+    "pattern", [r"'^REQ-SVC-\d{2}$'", r"'^R-\d+$'", r"'^REQ-SVC-0\d$'", r"'^FR\.\d{2}$'"]
+)
+def test_an_id_pattern_in_the_shape_is_accepted(pattern: str) -> None:
+    config = TraceConfig.parse(SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern, 1), SCHEMA)
+    assert config.item_types["requirement"].id_pattern is not None
+
+
+@pytest.mark.parametrize("item_id", ["REQ-SVC-01", "A-1", "R2D2-X-9", "CR-003"])
+def test_every_start_of_an_id_is_a_start_the_configuration_accepts(item_id: str) -> None:
+    from qmstrace.core.config import _ID_START
+    from qmstrace.core.model import ID_TOKEN
+
+    assert ID_TOKEN.fullmatch(item_id)  # keeps the two shapes in step
+    assert all(_ID_START.fullmatch(item_id[:end]) for end in range(1, len(item_id) + 1))
+
+
+def test_an_id_prefix_that_no_id_can_start_with_is_refused() -> None:
+    loose = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^(REQ|RQ)-SVC-\d{2}$'")
+    given = loose.replace(
+        'files      = ["docs/req', 'id_prefix  = "req-"\nfiles      = ["docs/req', 1
+    )
+    stopped = refusal(given)
+    assert "the id_prefix of [items.requirement] starts with 'req-'" in stopped.what
+    assert 'id_prefix = "REQ-"' in stopped.next_move
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "where"),
+    [
+        ('prefix      = "AGR-"', 'prefix      = "agr-"', "'externals.agreement.prefix'"),
+        ('prefix   = "CR-"', 'prefix   = "CR_"', "'change_requests.prefix'"),
+    ],
+)
+def test_a_ledger_prefix_that_no_id_can_start_with_is_refused(
+    old: str, new: str, where: str
+) -> None:
+    assert old in SCHEMA
+    stopped = refusal(SERVICE, SCHEMA.replace(old, new, 1))
+    assert f"{where} starts with" in stopped.what
+    assert "which no ID can start with" in stopped.what
+    assert stopped.next_move.startswith("Fix: write the prefix in that shape")
+
+
+@pytest.mark.parametrize(
     ("old", "new", "expected"),
     [
         ('extractor  = "markdown"', 'extractor  = "markdwn"', "names the extractor 'markdwn'"),
