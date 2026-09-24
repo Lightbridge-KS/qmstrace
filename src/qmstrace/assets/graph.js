@@ -105,6 +105,8 @@
       const label = n.id.length > 30 ? n.id.slice(0, 27) + "…" : n.id;
       nodes.push({
         id: i,
+        // Supply a text-only element so authored titles never become tooltip markup.
+        title: element("span", n.title || n.id),
         label:
           label + (n.badges.length ? "\n[" + n.badges.join(" · ") + "]" : ""),
         x: n.column * 230,

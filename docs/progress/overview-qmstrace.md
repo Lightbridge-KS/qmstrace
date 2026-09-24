@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M5b landed; M6–M8 implemented and locally verified, awaiting combined PR review; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M8 landed; node-title hover follow-up implemented and verified; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,23 +8,28 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M5b have landed.
+**Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M8 have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
-including tracker cleanup `0dc5c8c`. **M6–M8 implemented and locally verified on `codex/m6-m8-slice-closure`; PR review pending.**
-The scope includes setup, test-bed migration, the local browser and slice closure in one PR.
-Routine implementation decisions are delegated; verification and Diátaxis pages ship together.
-The accepted local trace browser is M7b, after M7 migration and before M8 closure.
+including tracker cleanup `0dc5c8c`. M6–M8 merged in
+[PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
+setup, test-bed migration, the local browser and slice closure.
+
+**Current follow-up:** node-title hover on `codex/graph-title-hover`. Tooltips show literal
+full titles with a full-ID fallback; list/inspector access remains available without hover.
+Verified: DSN-BCN-07 shows “Operator agent list”, AGR-2 falls back to its ID, and hover
+preserves selection. `just dry` passes: 571 Python tests, four Node control tests, strict
+types, wheel assets and manual build. Implementation is complete; PR review is pending.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
 
-## Slice closure — implementation complete, review pending
+## Slice closure — landed
 
 Slice 1 requires the product test bed to run on the engine instead of the stand-in,
 followed by the accepted M7b local browser and M8 closure.
-M6–M8 share one branch and draft PR, pass the dry gate, and ship their
+M6–M8 shipped together in PR #13 with the dry gate and their
 [manual pages](../dev/writing-the-manual.md).
 
 - [x] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
@@ -55,6 +60,7 @@ M6–M8 share one branch and draft PR, pass the dry gate, and ship their
 | M4 | Pytest JUnit matching and direct requirement verdicts | #10 · `1a4869d` |
 | M5a | Historical baselines, fresh request citations, V10–V13 and withdrawal | #11 · `724ec02` |
 | M5b | Independent historical/current suspect traversal, S01, status/check views and review manual | #12 · `8ea7bda` |
+| M6–M8 | Setup, engine-native test-bed migration, offline browser, Diátaxis pages and slice closure | #13 · `6fba9f8` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the

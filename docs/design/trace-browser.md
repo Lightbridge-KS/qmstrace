@@ -8,7 +8,7 @@ read_when:
 
 # Local trace browser
 
-**Implemented for review: 2026-09-24.** M7b follows M7's product test-bed
+**Landed in PR #13 (`6fba9f8`): 2026-09-24.** M7b follows M7's product test-bed
 migration and precedes M8's slice-1 closure. This brings forward
 the local part of the PRD's static trace-browser capability; the project-wide audit view
 follows slice 2's traversal at pins.
@@ -62,6 +62,9 @@ Working-tree snapshot · sibling not pinned · unread sources
   controls. Match the existing traversal semantics, including backward `Assumes` boundaries.
 - Zoom, pan and drag; filter item/link types with visible counts of hidden items.
   Filtering does not recalculate coverage or make findings disappear from the assessment.
+- Hovering a node shows its full title as literal text, or its full ID when no title is
+  available. Long titles wrap; hovering does not change selection. The list and inspector
+  retain the same information for keyboard and touch users.
 - Selecting a link shows the exact authored relationship and declaration location.
 - Selecting a finding focuses its item and shows the existing diagnostic and next move.
   Findings without a current graph item remain accessible in the findings list.
