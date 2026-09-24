@@ -29,7 +29,16 @@ from typing import Final
 
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Lead, Link, text_digest
+from qmstrace.core.model import (
+    ID_TOKEN,
+    Extracted,
+    Finding,
+    Item,
+    Lead,
+    Link,
+    Stray,
+    text_digest,
+)
 from qmstrace.extract.fields import FIELD, link_line
 
 CHANGE: Final = "Change"
@@ -42,6 +51,8 @@ _FENCE: Final = re.compile(r"(`{3,}|~{3,})(.*)$")
 _ATTRIBUTE: Final = re.compile(r"\s*\{[#.-][^{}]*\}\s*$")  # Pandoc: {#id}, {.class}, {-}
 _NUMBER: Final = re.compile(r"(?:\u00a7\s*)?(\d+(?:\.\d+)*)\.?\s+")  # 4.2, 4.2.1., § 4.2
 _WRAPS: Final = ("**", "__", "`", "*", "_")  # longest first: `**` before `*`
+_DELIMITER: Final = re.compile(r":?-+:?")  # a table's header rule, `|---|:--:|`
+_CELL_MARKS: Final = re.compile(r"[*_`\[\]]")  # emphasis, code and link marks in a cell
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,10 +93,12 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
     pattern = item_type.id_pattern
     known = set(config.links) | item_type.fields | {CHANGE, "Status"}
     patterned = [t for t in config.item_types.values() if t.id_pattern is not None]
+    carried = {marker for marker, link in config.links.items() if item_type.name in link.sources}
     items: list[Item] = []
     links: list[Link] = []
     wrong: list[Finding] = []
     leads: list[Lead] = []
+    strays: list[Stray] = []
     current: _Open | None = None
     other: int | None = None  # the level of another type's item, whose section is not read
 
@@ -133,10 +146,24 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             if other is not None and heading.level <= other:
                 other = None
             continue
-        if current is None:
+        if other is not None:  # another type's item: the pass for that type reads it
+            continue
+        cells = _cells(raw)
+        if cells is not None:  # a table row: item text, never a declaration
+            if written := _table_marker(cells, carried):
+                owner = current.id if current else None
+                strays.append(Stray(*written, path, number, "table", owner))
+            if current is not None:
+                current.body.append(raw)
             continue
         found = FIELD.match(raw)
         key = found.group(1) if found else None
+        if current is None:
+            if found is not None and key in carried:
+                targets = tuple(ID_TOKEN.findall(found.group(2)))
+                if targets:
+                    strays.append(Stray(found.group(1), targets, path, number, "outside"))
+            continue
         if found is None or key not in known:
             current.body.append(raw)
             continue
@@ -164,7 +191,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             links += made
             wrong += bad
     close()
-    return Extracted(tuple(items), tuple(links), tuple(wrong), tuple(leads))
+    return Extracted(tuple(items), tuple(links), tuple(wrong), tuple(leads), tuple(strays))
 
 
 def form(marker: str, target: str) -> str:
@@ -206,6 +233,33 @@ def _leading_id(words: str) -> tuple[str | None, str]:
     if lead is None:
         return None, words
     return lead.group(1), _SEPARATOR.sub("", lead.group(2))
+
+
+def _cells(raw: str) -> list[str] | None:
+    """A table row's cells — none for a header rule — or `None` when the line is no row."""
+    line = raw.strip()
+    if not line.startswith("|"):
+        return None
+    cells = [cell.strip() for cell in line.strip("|").split("|")]
+    return [] if all(_DELIMITER.fullmatch(cell) for cell in cells) else cells
+
+
+def _table_marker(cells: list[str], carried: set[str]) -> tuple[str, tuple[str, ...]] | None:
+    """A link marker written as a table row — `| Satisfies | IDs |` or `| Satisfies: IDs |` —
+    with the IDs it names; `None` when the row names no marker this type carries, or no ID."""
+    if not cells:
+        return None
+    first = _CELL_MARKS.sub("", cells[0]).strip()
+    rest = " ".join(cells[1:])
+    written = FIELD.match(first)
+    if written is not None and written.group(1) in carried and written.group(2):
+        marker, rest = written.group(1), written.group(2) + " " + rest
+    elif first.rstrip(":").strip() in carried:
+        marker = first.rstrip(":").strip()
+    else:
+        return None
+    targets = tuple(ID_TOKEN.findall(rest))
+    return (marker, targets) if targets else None
 
 
 def _item_shaped(token: str, patterned: list[ItemType]) -> bool:

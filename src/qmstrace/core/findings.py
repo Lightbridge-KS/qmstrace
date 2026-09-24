@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Final
 if TYPE_CHECKING:
     from qmstrace.core.baselines import Suspect
 
-from qmstrace.core.model import Finding, Item, Link
+from qmstrace.core.model import Finding, Item, Link, Stray
 
 # A code's first letter is its kind, and says what it fails (data architecture § Kinds of finding).
 KINDS: Final = {"V": "violation", "G": "gap", "S": "suspect"}
@@ -358,9 +358,21 @@ def fix_refused(violation: Finding) -> str:
     )
 
 
-def fix_stray(marker: str, file: str, line: int) -> str:
+def fix_stray(stray: Stray) -> str:
+    where, marker = f"{stray.file}:{stray.line}", stray.marker
+    if stray.kind == "table":
+        return (
+            f"the '{marker}' table row at {where} is not read — a table declares nothing; "
+            f"write `{marker}: …` as a line in the item's section."
+        )
+    if stray.kind == "outside":
+        return (
+            f"the '{marker}:' line at {where} is outside every item's section, so it is not "
+            "read — move it under the heading of the item it belongs to, above the next "
+            "heading of the same or a higher level."
+        )
     return (
-        f"the '{marker}:' line at {file}:{line} is outside the module docstring, so it is not "
+        f"the '{marker}:' line at {where} is outside the module docstring, so it is not "
         "read — move it into the docstring."
     )
 

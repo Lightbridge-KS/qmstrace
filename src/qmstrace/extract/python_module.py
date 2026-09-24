@@ -67,5 +67,5 @@ def _strays(path: str, text: str, docstring: range, markers: set[str]) -> tuple[
             continue
         targets = tuple(ID_TOKEN.findall(match.group(2)))
         if targets:
-            found.append(Stray(match.group(1), targets, path, number))
+            found.append(Stray(match.group(1), targets, path, number, "docstring"))
     return tuple(found)

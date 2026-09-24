@@ -187,3 +187,22 @@ def test_a_rule_no_type_here_can_meet_says_so(project: Path) -> None:
 def test_gaps_come_back_sorted(service: TraceConfig) -> None:
     found = [f for f in judged(service) if f.code.startswith("G")]
     assert found == sorted(found, key=lambda f: (f.file, f.line, f.code))
+
+
+def test_a_table_row_is_named_only_on_its_own_items_gap(service: TraceConfig) -> None:
+    tabled = DESIGN.replace(
+        "Satisfies: REQ-SVC-01", "| Link | Target |\n|---|---|\n| Satisfies | REQ-SVC-01 |"
+    ).replace("Satisfies: REQ-SVC-02", "Body.")
+    found = judged(service, {"docs/design/service-design.md": tabled})
+    assert "'Satisfies' table row at docs/design/service-design.md:4 is not read" in fix_of(
+        found, "G05", "DSN-SVC-01"
+    )
+    assert "table row" not in fix_of(found, "G05", "DSN-SVC-02")
+    assert "docs/design/service-design.md:4" in fix_of(found, "G01", "REQ-SVC-01")
+
+
+def test_a_line_outside_every_section_is_named_on_the_files_items(service: TraceConfig) -> None:
+    loose = "Satisfies: REQ-SVC-01\n\n" + DESIGN.replace("Satisfies: REQ-SVC-01\n", "")
+    found = judged(service, {"docs/design/service-design.md": loose})
+    assert "is outside every item's section" in fix_of(found, "G05", "DSN-SVC-01")
+    assert "docs/design/service-design.md:1" in fix_of(found, "G01", "REQ-SVC-01")

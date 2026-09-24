@@ -6,6 +6,9 @@ The load-bearing claims, each pinned by a test:
    A next move that names a syntax the tool does not read would be a hidden rule gone wrong.
 2. A marker written outside the module docstring is a stray: it links nothing, and it is
    reported with its targets, so a gap can say why. A mention in prose is not a stray.
+3. In Markdown, a marker the item type carries is a stray when it is written outside every
+   item's section, or as a table row — which then names the item whose section holds it.
+   Lines in another type's section, in a fence, or naming no ID are not strays.
 """
 
 import re
@@ -19,6 +22,13 @@ CODE = re.compile(r"`([^`]+)`")
 
 CASES = [
     ("design_element", "docs/design/d.md", "Satisfies", "REQ-SVC-01", "## DSN-SVC-01 — X\n{}\n"),
+    (
+        "design_element",
+        "docs/design/d.md",
+        "Satisfies",
+        "REQ-SVC-01",
+        "## 4.1 DSN-SVC-01 — X\nBody.\n\n### Traceability\n{}\n",
+    ),
     ("component", "src/service/m.py", "Implements", "DSN-SVC-01", '"""M.\n\n{}\n"""\n'),
     (
         "test_case",
@@ -83,3 +93,63 @@ def test_a_module_without_a_docstring_reports_its_marker_as_a_stray(service: Tra
     )
     assert found.links == ()
     assert [s.line for s in found.strays] == [1]
+
+
+# ── Markdown strays ────────────────────────────────────────────────────────────────────────
+
+
+def design(
+    service: TraceConfig, text: str
+) -> list[tuple[str, tuple[str, ...], int, str, str | None]]:
+    found = REGISTRY["markdown"](
+        "docs/design/d.md", text, service.item_types["design_element"], service
+    )
+    return [(s.marker, s.targets, s.line, s.kind, s.item) for s in found.strays]
+
+
+@pytest.mark.parametrize(
+    ("text", "line"),
+    [
+        ("Satisfies: REQ-SVC-01\n\n## DSN-SVC-01 — X\nBody.\n", 1),
+        ("## DSN-SVC-01 — X\nBody.\n## Links\n- **Satisfies:** REQ-SVC-01\n", 4),
+    ],
+)
+def test_a_marker_outside_every_items_section_is_a_stray(
+    service: TraceConfig, text: str, line: int
+) -> None:
+    assert design(service, text) == [("Satisfies", ("REQ-SVC-01",), line, "outside", None)]
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        "| Satisfies | REQ-SVC-01, REQ-SVC-02 |",
+        "| **Satisfies:** | `REQ-SVC-01` · REQ-SVC-02 |",
+        "| Satisfies: REQ-SVC-01, REQ-SVC-02 |",
+    ],
+)
+def test_a_marker_written_as_a_table_row_is_a_stray_of_its_item(
+    service: TraceConfig, row: str
+) -> None:
+    text = f"## DSN-SVC-01 — X\n\n| Link | Target |\n|---|:---:|\n{row}\n"
+    found = REGISTRY["markdown"](
+        "docs/design/d.md", text, service.item_types["design_element"], service
+    )
+    assert found.links == ()
+    assert design(service, text) == [
+        ("Satisfies", ("REQ-SVC-01", "REQ-SVC-02"), 5, "table", "DSN-SVC-01")
+    ]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "### REQ-SVC-01 — R\nSatisfies: REQ-SVC-02\n",  # another type's section: that pass reads it
+        "```\nSatisfies: REQ-SVC-01\n```\n",  # a fence
+        "Implements: DSN-SVC-01\n| Implements | DSN-SVC-01 |\n",  # a marker this type never carries
+        "Satisfies: see the design review.\n| Satisfies | Notes |\n",  # no ID
+        "| DSN-SVC-01 | Key check |\n",  # a row of IDs, no marker
+    ],
+)
+def test_what_is_not_a_markdown_stray(service: TraceConfig, text: str) -> None:
+    assert design(service, text) == []

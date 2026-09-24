@@ -493,4 +493,14 @@ def test_any_other_sub_heading_number_is_text(
 def test_a_heading_that_does_not_start_with_an_id_declares_nothing(
     service: TraceConfig, heading: str
 ) -> None:
-    assert read(service, heading + "\n- Origin: AGR-1\n") == Extracted()
+    found = read(service, heading + "\n- Origin: AGR-1\n")
+    assert found.items == found.links == found.leads == ()
+    (stray,) = found.strays  # the line under it belongs to no item — and says so
+    assert (stray.marker, stray.line, stray.kind) == ("Origin", 2, "outside")
+
+
+@pytest.mark.parametrize("heading", ["### **Note** REQ-SVC-01 — T", "### **REQ-SVC-01 — T"])
+def test_emphasis_that_does_not_wrap_the_id_declares_nothing(
+    service: TraceConfig, heading: str
+) -> None:
+    assert read(service, heading + "\n").items == ()
