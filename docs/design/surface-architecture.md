@@ -32,7 +32,7 @@ qmstrace check --strict         # the gate: no violations, no gaps
 ## 1. Overview
 
 qmstrace answers an auditor's questions by query. Its users never meet a database or a web
-application: they meet **a command line in the repository they are already working in**,
+service: they meet **a command line in the repository they are already working in**,
 **documents in the word processor they already use**, and, for an audit, **a page
 someone else drives**.
 
@@ -41,7 +41,7 @@ someone else drives**.
 | User | Surface | Status |
 |---|---|---|
 | The coding agent in a product repo — first-class | the command line; the stanza, the skill, the markers | ✔ validated |
-| The developer-manager | the same command line; the pull-request diff | ✔ command line · ◻ diff of the trace lock |
+| The developer-manager | the same command line; generated local trace browser; the pull-request diff | ✔ command line · ◻ local browser (M7b), diff of the trace lock |
 | Reviewers and approvers | rendered Word drafts, in the document store. **They install nothing** | ◻ planned |
 | The auditor | a generated, read-only view, driven by someone else | ◻ planned |
 
@@ -63,6 +63,7 @@ flowchart TD
     cli --> results["results REPORT ✔"]
     cli --> impact["impact ID… ✔"]
     cli --> init["init ◻"]
+    cli --> graph["graph ◻ — local offline browser, M7b"]
     cli --> ledger["ledger … — its own group"]
     ledger --> import["import NAME@PIN ✔ driver"]
     ledger --> emit["emit tables"]
@@ -80,6 +81,7 @@ flowchart TD
 | `qmstrace results <report>` | Matches one pytest JUnit report to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
 | `qmstrace init` | Generates the trace configuration and the stanza in a product repo | ◻ |
+| `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Accepted for M7b; argument details remain to be planned | ◻ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
@@ -414,6 +416,17 @@ requirement is gated, the work downstream of it is gated too.**
 
 ## 7. Configuration & Customization
 
+### Local trace browser — accepted 2026-09-24, M7b
+
+The [trace-browser design](trace-browser.md) owns the interaction and delivery contract.
+A single offline HTML snapshot presents the current assessment with stable schema-based
+layout and authored arrows. Findings and source limits remain visible; S01 reasons expose
+historical provenance without combining historical/current edges into one graph. Generation
+is informational, not a gate or a recorded review. M7b follows test-bed migration; the
+project-wide browser follows slice 2. The renderer library remains provisional.
+
+### Configuration
+
 - **The trace configuration** is the whole of it for a product repo: item types and their
   file patterns, link types, coverage rules, externals, baselines, change requests. Shape and
   reasoning: [Data Architecture § The trace configuration](data-architecture.md).
@@ -422,7 +435,8 @@ requirement is gated, the work downstream of it is gated too.**
 - **Baselines are recognised, not imposed**: a project's own tag names are configuration (D6).
 - **Machine-readable output comes later, and findings are structured from the first line of
   code.** No agent has needed a `--json` form — line output was enough in every experiment —
-  but the pull-request gate and the trace browser will. So a finding is data inside the
+  and the local trace browser consumes an internal projection of the assessment rather than
+  requiring a public JSON CLI. So a finding is data inside the
   engine — code, file, line, item, what is wrong, the next move — and the line an agent reads
   is one renderer of it. Which commands get the form, and its versioning, are decided then.
 

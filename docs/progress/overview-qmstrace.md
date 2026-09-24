@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M5a landed, M5b implemented and verified locally awaiting review; M6 next, remaining slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M5b landed; M6 next, M7b local trace browser accepted after migration; remaining slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,11 +8,10 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-22 · Slice 1: the product-repo half.** M0–M5a have landed.
-**M5b — implemented and verified locally; awaiting review**, on `codex/m5b-suspects`,
-retaining tracker cleanup `0dc5c8c`. Merge remains pending.
-**Next build: M6 — set up a repo.** M5a merged in
-[PR #11](https://github.com/Lightbridge-KS/qmstrace/pull/11) at `724ec02`.
+**Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M5b have landed.
+M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
+including tracker cleanup `0dc5c8c`. **Next build: M6 — set up a repo.**
+The accepted local trace browser is M7b, after M7 migration and before M8 closure.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -21,21 +20,20 @@ Commit hashes locate work; verification claims below refer to checks actually ru
 
 ## Remaining milestones
 
-Slice 1 is done when the product test bed runs on the engine instead of the stand-in.
+Slice 1 requires the product test bed to run on the engine instead of the stand-in,
+followed by the accepted M7b local browser and M8 closure.
 Each milestone uses a branch and draft PR, passes the dry gate, and ships its
 [manual pages](../dev/writing-the-manual.md).
 
-- [ ] **M5b · suspects — awaiting review.** Separate historical/current walks,
-  per-upstream governing snapshots, deleted roots and retained edited/withdrawn dependants.
-  Status summarizes by distance; check/quiet emit every S01 without changing exits.
-  Tests, parity and manual verified below. Standing contract:
-  [data architecture D7](../design/data-architecture.md).
-  Explicit recorded-review clearance remains later work.
 - [ ] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
   test-framework marker registration; ship the skill as package data, including the
   “break it” loop and a parity test between skill and code.
 - [ ] **M7 · switch the product test bed to the engine.** Migrate its configurations and
   execute the acceptance checks below. Keep the ledger import on the stand-in until slice 2.
+- [ ] **M7b · local trace browser.** Generate an offline, read-only HTML view of one
+  assessment: item search, thread navigation, findings and evidence limits. Ship manual
+  pages and CLI/view parity checks. [Accepted design](../design/trace-browser.md) owns
+  scope and rejected alternatives; implementation planning and renderer evaluation remain.
 - [ ] **M8 · close slice 1.** README, CHANGELOG, findings promoted into design,
   trackers reconciled; archive the stand-in rather than delete it.
 
@@ -54,6 +52,7 @@ Each milestone uses a branch and draft PR, passes the dry gate, and ships its
 | M3b | Multi-start `impact` and candidate `Impacts:` list | #9 · `23c80a5` |
 | M4 | Pytest JUnit matching and direct requirement verdicts | #10 · `1a4869d` |
 | M5a | Historical baselines, fresh request citations, V10–V13 and withdrawal | #11 · `724ec02` |
+| M5b | Independent historical/current suspect traversal, S01, status/check views and review manual | #12 · `8ea7bda` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
@@ -64,7 +63,9 @@ Their settled outcomes live in the design docs; the
 **M5b, 2026-09-22:** local `just dry` passed with **528 tests, 99.31% coverage**,
 formatting, lint, strict types, wheel contents and strict manual build. Deterministic
 status/check/quiet goldens cover S01 reasons, distances, exits and both `-C` placements.
-M5b CI and deployment are not yet verified.
+On PR head `393185b`, the [GitHub dry gate](https://github.com/Lightbridge-KS/qmstrace/actions/runs/35710423708)
+and Netlify deploy-preview build passed (confirmed 2026-09-24). M5b deployed-page inspection
+and production deployment remain unverified.
 
 - **E3 baseline replay:** disposable clones with explicit original-to-overlay commit
   mappings preserve traced source bytes at all three documented pins.
@@ -114,6 +115,7 @@ switch-over. It does not claim the test bed already runs on the engine.
 | CR-001 impact: changed IDs `REQ-BCN-05`, `REQ-BCN-06` show downstream reach and origins; `REQ-BCN-11` participates only when declared and explicitly supplied | Reach verified in M3b; reserved unseen-ID rejection verified in M5a fixtures |
 | Client `Assumes` propagates impact without adding coverage; CR-002 is the later classification change across eleven requirements | Impact checked in M3b; retain both scenarios in M7 |
 | Every command in both product repos; `init` in a scratch copy reproduces the stanza; repeated runs produce identical bytes | Existing command goldens/determinism pass; `init` and final full replay await M6/M7 |
+| Local browser preserves CLI reach, findings and evidence limits; works offline and by keyboard; handles cycles and safely renders authored text | M7b pending; evaluate the 177-item test bed and a larger synthetic graph |
 
 Every command must have a golden, and every finding code an emitting fixture.
 Do not reproduce the stand-in's defects: file-level or self-clearing suspects, one-hop-only
@@ -135,7 +137,10 @@ overlapping scopes, or the silent passes in the [scenario catalogue](../tests/sc
 - **E5:** five-step audit demo once the engine has a ledger.
 - **Repo hygiene:** validating tracker commit references remains agreed but unscheduled.
 - **Later capabilities:** machine-readable output, recorded-review suspect clearance,
-  collectors, conformance view, trace browser and a second profile.
+  collectors, conformance view, project-wide trace browser at pins and a second profile.
+- **Browser extensions:** separate historical/current comparison views, explicitly supplied
+  test-result overlays and live refresh remain outside M7b; see the
+  [trace-browser boundaries](../design/trace-browser.md#evidence-and-scope).
 - **E2 option C** remains an optional comparison/on-ramp for unmarked repos.
   The real pilot remains under its own plan; the live audit is unchanged.
 - **`VISION.md`** remains deferred until slice-1 experience supports durable invariants.
@@ -151,6 +156,8 @@ Read these for contracts rather than copying their contents into this tracker:
 - [Surface architecture](../design/surface-architecture.md): command/exit contracts,
   findings, evidence limits and authoring loop; decorative markers and unrecorded
   inspection are known limits.
+- [Local trace browser](../design/trace-browser.md): accepted M7b experience and architecture;
+  pinned embedded vis-network is provisional until fixture evaluation.
 - [System architecture](../design/system-architecture.md) and
   [codebase blueprint](../structure/codebase-blueprint.md): module ownership and source-tree
   seam; Python 3.13+, frozen values, pure core, no DuckDB until slice 2.

@@ -261,6 +261,13 @@ sequenceDiagram
 
 ## 7. Extension Points
 
+The accepted [M7b local trace browser](trace-browser.md) adds a presentation-data projection
+and an offline HTML renderer over one workspace assessment. Judgment stays in the core;
+browser code handles layout and interaction, with traversal parity against the core.
+There is no server or stored review state. Historical suspect reasons are displayed without
+joining graph versions. Project-wide browser data awaits the ledger's import at pins.
+An embedded renderer library is provisional until fixture evaluation.
+
 M5b extends the existing assessment: workspace builds and caches each historical local graph
 under its tagged schema, without reading external historical dependencies. Pure suspect
 judgment combines independent walks from that graph and the current graph, retaining each
