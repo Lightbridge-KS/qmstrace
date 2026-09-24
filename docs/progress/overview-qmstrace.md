@@ -73,6 +73,11 @@ Their settled outcomes live in the design docs; the
 
 ## Latest verified evidence
 
+**User acceptance, 2026-09-24 (`fix/id-pattern-shape`):** on the beacon test bed,
+`id_pattern = '^REQ_BCN_\d{2}$'` loaded, then `status` found 0 requirements and `check` gave
+57 violations. The configuration now refuses an ID pattern or prefix whose literal start no
+ID can have, naming the shape; the agreement and change-request prefixes get the same check.
+
 **M6–M8, 2026-09-24:** `just dry` passed with **571 Python tests, 99.09% coverage**,
 three Node browser-control tests, strict types, complete wheel-asset verification and strict
 manual build. Setup and graph help/output goldens were inspected; both command pages'

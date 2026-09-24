@@ -241,6 +241,10 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - A verb run in the wrong kind of repo says so and names the right place.
 - An extractor the engine does not have; `markdown` with no ID pattern; a type whose IDs are
   derived given one — a configuration error.
+- An ID pattern, `id_prefix`, agreement prefix or change-request prefix whose literal start no
+  ID can have — underscores, lower case, a space — could not judge, naming the ID shape.
+  Found in user acceptance: `^REQ_BCN_\d{2}$` was accepted and every requirement vanished.
+  Only the literal start is judged; `^FR\.\d{2}$` still passes.
 
 ## Command line
 

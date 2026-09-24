@@ -74,3 +74,9 @@ All notable changes to this project are recorded here. The format follows
 
 - `qmstrace --help` summarises `thread` as tracing one item, so a reader looking for *trace*
   finds it.
+
+### Fixed
+
+- An ID pattern, `id_prefix`, agreement prefix or change-request prefix that no ID can start
+  with — underscores, lower case, a space — is refused with the ID shape and the next move,
+  instead of being accepted and silently matching nothing.
