@@ -11,7 +11,11 @@ The load-bearing claims, each pinned by a test:
    change.
 5. A link field that is not a list of IDs is reported (V14) — `Origin: TBD` never passes.
 6. A heading that starts with some other ID is handed back as a lead, never dropped.
+7. What the fixture project declares today keeps its titles and digests; a fence closes on
+   its own mark.
 """
+
+from pathlib import Path
 
 import pytest
 
@@ -218,3 +222,103 @@ def test_a_heading_with_another_id_is_a_lead(service: TraceConfig, token: str) -
 @pytest.mark.parametrize("heading", ["### Overview", "### REQ-BCN-NN — a placeholder", "#hashtag"])
 def test_a_heading_with_no_id_is_prose(service: TraceConfig, heading: str) -> None:
     assert read(service, heading + "\n") == Extracted()
+
+
+# ── 7. what the fixture project declares today, pinned before any rule changes ────────────
+
+MINI = Path(__file__).parents[1] / "fixtures" / "mini"
+SCHEMA_TEXT = (MINI / "ledger" / "qmstrace.schema.toml").read_text(encoding="utf-8")
+
+# An item with no sub-heading and no decorated heading keeps its title and digest across
+# every change to the reading rules — a baseline cut before a change must stay comparable.
+PINNED = [
+    (
+        "service",
+        "docs/req/service-srs.md",
+        "requirement",
+        "REQ-SVC-01",
+        12,
+        "A call carries a key",
+        "sha256:2ebbd8cf2f7080afe6caf92bd49edd046483f8b3d215748a73371802a36a5347",
+    ),
+    (
+        "service",
+        "docs/req/service-srs.md",
+        "requirement",
+        "REQ-SVC-02",
+        21,
+        "Records survive a restart",
+        "sha256:41b1d2452671a501369cb6341d904159c2330f553546ed9e43aa95fbff1ba0c8",
+    ),
+    (
+        "service",
+        "docs/req/service-srs.md",
+        "requirement",
+        "REQ-SVC-03",
+        28,
+        "The record format is written down",
+        "sha256:4518974cafc1dde2714cf2abe1fb422d0086996f72edd360d9f063a7a910653b",
+    ),
+    (
+        "service",
+        "docs/design/service-design.md",
+        "design_element",
+        "DSN-SVC-01",
+        8,
+        "Key check",
+        "sha256:68cc4e200c84985560cb087d18749db5bfd8abc8533de46513f2ad51b0b1dd49",
+    ),
+    (
+        "service",
+        "docs/design/service-design.md",
+        "design_element",
+        "DSN-SVC-02",
+        13,
+        "Record store",
+        "sha256:1a3097d190e25774acafdf633877a9caa7d54014d068da878cec58619dc382f5",
+    ),
+    (
+        "client",
+        "docs/req/client-srs.md",
+        "requirement",
+        "REQ-CLT-01",
+        3,
+        "The client sends its key on every call",
+        "sha256:cdcb9b6b79c5dd6cd33bb8c604dc8c56919121efbdb40140c331c3f95920669c",
+    ),
+    (
+        "solo",
+        "docs/req/app-srs.md",
+        "requirement",
+        "REQ-APP-01",
+        3,
+        "A greeting",
+        "sha256:af5bdede9072ddd82920cb17ee815b697a3f6e6c2701175f7be60f0a276636b2",
+    ),
+]
+
+
+def _config(repo: str) -> TraceConfig:
+    local = (MINI / repo / "qmstrace.toml").read_text(encoding="utf-8")
+    return TraceConfig.parse(local) if repo == "solo" else TraceConfig.parse(local, SCHEMA_TEXT)
+
+
+@pytest.mark.parametrize(("repo", "path", "item_type"), sorted({p[:3] for p in PINNED}))
+def test_the_fixture_projects_items_keep_their_titles_and_digests(
+    repo: str, path: str, item_type: str
+) -> None:
+    config = _config(repo)
+    text = (MINI / repo / path).read_text(encoding="utf-8")
+    found = extract(path, text, config.item_types[item_type], config)
+    expected = [p[3:] for p in PINNED if p[:3] == (repo, path, item_type)]
+    assert [(i.id, i.line, i.title, i.digest) for i in found.items] == expected
+    assert not found.findings and not found.leads
+
+
+@pytest.mark.parametrize(
+    ("opener", "closer"), [("```", "```"), ("~~~", "~~~"), ("```python", "```")]
+)
+def test_a_fence_closes_on_its_own_mark(service: TraceConfig, opener: str, closer: str) -> None:
+    other = "~~~" if closer == "```" else "```"
+    text = f"{opener}\n{other}\n### REQ-SVC-09 — hidden\n{closer}\n### REQ-SVC-01 — X\n"
+    assert [item.id for item in read(service, text).items] == ["REQ-SVC-01"]
