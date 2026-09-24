@@ -15,7 +15,8 @@
    An unavailable source remains unavailable when a node is visible.
 3. Search by ID or title and select an item from the list. Keyboard users can Tab to the
    matching button and press Enter. The inspector gives the full ID and source location;
-   long labels may be shortened on the canvas.
+   long labels may be shortened on the canvas. Hover over a node to see its full title
+   without changing selection; untitled nodes show their full ID.
 4. Set **Direction** to downstream to see what hangs off the item, or upstream to see its
    ancestry. Start with depth 1, then widen it. **All items** restores surrounding context.
 5. Select an authored link in the inspector to read its marker and declaration location.

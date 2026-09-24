@@ -289,3 +289,7 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
   embedded, output is deterministic, the CSP denies connections, and no source is edited.
 - Measured test-bed and larger synthetic layouts are checked interactively before adoption
   of the pinned renderer. Direct file-opening support is a separate browser smoke check.
+
+- Node hover displays the full title as literal text, with a full-ID fallback for untitled
+  nodes. Tooltips survive redraws, wrap long text and do not change selection; keyboard
+  list/inspector access remains available.

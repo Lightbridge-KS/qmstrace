@@ -222,3 +222,20 @@ test("search remains global; depth and direction select only supplied reach", ()
   ids.items.children[0].listeners.click();
   assert.match(ids.inspector.textContent, /historical-only/);
 });
+
+test("node tooltips preserve literal titles and fall back to full IDs", () => {
+  const { ids, network, payload } = mount();
+  const assertTitles = () => {
+    for (const node of network.data.nodes) {
+      const source = payload.nodes[node.id];
+      assert.equal(node.title.textContent, source.title || source.id);
+      assert.equal(node.title.querySelectorAll("img").length, 0);
+      assert.equal(node.title.children.length, 0);
+    }
+  };
+  assertTitles(); // Includes a hostile HTML-looking title and untitled nodes.
+  ids.items.children[0].listeners.click();
+  assertTitles();
+  ids.reset.listeners.click();
+  assertTitles();
+});

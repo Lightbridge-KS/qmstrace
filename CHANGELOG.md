@@ -11,7 +11,8 @@ All notable changes to this project are recorded here. The format follows
 - `init`: conservative, idempotent repository setup, managed agent guidance, packaged skill
   and registration of pytest's `verifies` marker while preserving other settings.
 - `graph [ID] --out FILE`: a self-contained, offline trace browser with search, keyboard
-  selection, type/link/depth filters, evidence notices and full finding inspectors.
+  selection, node-title hover, type/link/depth filters, evidence notices and full finding
+  inspectors. Untitled nodes show their full ID on hover.
 - `impact ID…`: combined downstream reach and a baseline-type-filtered candidate Impacts
   line; any unseen start rejects the entire request.
 - `results REPORT`: safe pytest JUnit parsing, exact source-test matching and direct

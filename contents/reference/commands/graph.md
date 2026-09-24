@@ -33,6 +33,7 @@ qmstrace graph REQ-SVC-01 --out trace.html
 | Control | Behavior |
 |---|---|
 | Search | Finds IDs and titles across all included items, including filtered ones |
+| Node hover | Shows the full title, or the full ID when untitled, without changing selection |
 | Item list | Keyboard-accessible selection; reveals the selected item's type and thread |
 | Scope | All items, or the selected thread |
 | Direction / depth | Limits displayed upstream/downstream reach using the engine's traversal |
