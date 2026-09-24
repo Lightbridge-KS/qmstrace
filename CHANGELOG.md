@@ -8,6 +8,22 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- `init`: conservative, idempotent repository setup, managed agent guidance, packaged skill
+  and registration of pytest's `verifies` marker while preserving other settings.
+- `graph [ID] --out FILE`: a self-contained, offline trace browser with search, keyboard
+  selection, type/link/depth filters, evidence notices and full finding inspectors.
+- `impact ID…`: combined downstream reach and a baseline-type-filtered candidate Impacts
+  line; any unseen start rejects the entire request.
+- `results REPORT`: safe pytest JUnit parsing, exact source-test matching and direct
+  requirement verdicts; labelled case/run counts, partial matches and missing results.
+- Baseline selection by Git ancestry, historical configuration/schema reads, frozen-item
+  comparisons and change-request guards V10–V13, with offline evidence limits.
+- Withdrawn items remain in history and traversal while being exempt from coverage.
+- Informational downstream suspects (S01), combining independent baseline/current walks
+  with per-root provenance; edits, test passes and file touches do not clear review needs.
+- Diátaxis pages for setup, impact, results, controlled changes, suspect review and the browser;
+  command reference output is tested against goldens.
+
 - The package skeleton: a `qmstrace` command with `--version` and plain-text help.
 - Exit codes as a contract: `0` no failing findings, `1` the check failed, `2` could not judge,
   `3` internal error — never a bare traceback.

@@ -1,0 +1,129 @@
+"""Setup preserves authored files and produces runnable pytest registration."""
+
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+from typer.testing import CliRunner
+
+from qmstrace.cli import app
+from qmstrace.core.errors import CouldNotJudge
+from qmstrace.workspace import Workspace
+
+
+def test_new_repo_is_idempotent_and_its_marker_runs(tmp_path: Path) -> None:
+    first = Workspace.initialize(tmp_path, subject="service", key="SVC")
+    assert all(s.startswith("updated:") for s in first)
+    assert "service (SVC)" in (tmp_path / "AGENTS.md").read_text()
+    config = Workspace.open(tmp_path).config
+    assert config.schema_form.value == "the repo's own"
+    assert not config.baselines and not config.externals
+    second = Workspace.initialize(tmp_path)
+    assert all(s.startswith("unchanged:") for s in second)
+    (tmp_path / "test_example.py").write_text(
+        'import pytest\n@pytest.mark.verifies("REQ-SVC-01")\ndef test_it(): assert True\n'
+    )
+    run = subprocess.run(
+        [sys.executable, "-m", "pytest", "--strict-markers", "-q"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0, run.stdout + run.stderr
+
+
+def test_refresh_existing_nested_config_and_symlinked_guide(project: Path) -> None:
+    root = project / "service"
+    before = (root / "qmstrace.toml").read_bytes()
+    (root / "guide.md").write_text("Before\n")
+    (root / "AGENTS.md").symlink_to("guide.md")
+    Workspace.initialize(root / "src")
+    assert (root / "AGENTS.md").is_symlink()
+    assert (root / "guide.md").read_text().startswith("Before\n")
+    assert (root / "qmstrace.toml").read_bytes() == before
+    assert all(s.startswith("unchanged:") for s in Workspace.initialize(root))
+    with pytest.raises(CouldNotJudge, match="Subject options"):
+        Workspace.initialize(root, subject="wrong")
+
+
+@pytest.mark.parametrize(
+    "guide", ["<!-- qmstrace:begin -->", "<!-- qmstrace:end --><!-- qmstrace:begin -->"]
+)
+def test_bad_guides_write_nothing(tmp_path: Path, guide: str) -> None:
+    (tmp_path / "AGENTS.md").write_text(guide)
+    with pytest.raises(CouldNotJudge):
+        Workspace.initialize(tmp_path)
+    assert not (tmp_path / "qmstrace.toml").exists()
+    assert (tmp_path / "AGENTS.md").read_text() == guide
+
+
+def test_symlink_outside_repo_is_refused(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    outside = tmp_path / "guide.md"
+    outside.write_text("keep")
+    (root / "AGENTS.md").symlink_to(outside)
+    with pytest.raises(CouldNotJudge, match="leaves"):
+        Workspace.initialize(root)
+    assert outside.read_text() == "keep"
+    assert not (root / "qmstrace.toml").exists()
+
+
+def test_edited_skill_is_preserved(tmp_path: Path) -> None:
+    Workspace.initialize(tmp_path)
+    skill = tmp_path / ".qmstrace/skill/SKILL.md"
+    skill.write_text("edited")
+    with pytest.raises(CouldNotJudge, match="skill differs"):
+        Workspace.initialize(tmp_path)
+    assert skill.read_text() == "edited"
+
+
+@pytest.mark.parametrize(
+    "name,content",
+    [
+        ("pyproject.toml", '[project]\nname="example"\n'),
+        ("tox.ini", "[pytest]\naddopts = -q\n"),
+        ("setup.cfg", "[tool:pytest]\naddopts = -q\n"),
+        ("pytest.toml", '[pytest]\naddopts = ["-q"]\n'),
+        ("pyproject.toml", '[tool.pytest]\naddopts = ["-q"]\n'),
+        ("pyproject.toml", '[tool.pytest.ini_options]\nmarkers = ["slow: expensive"]\n'),
+    ],
+)
+def test_existing_settings_remain_runnable(tmp_path: Path, name: str, content: str) -> None:
+    (tmp_path / name).write_text(content)
+    Workspace.initialize(tmp_path)
+    assert not (tmp_path / "pytest.ini").exists()
+    assert all(s.startswith("unchanged:") for s in Workspace.initialize(tmp_path))
+    (tmp_path / "test_it.py").write_text(
+        'import pytest\n@pytest.mark.verifies("REQ-PROD-01")\ndef test_it(): pass\n'
+    )
+    run = subprocess.run(
+        [sys.executable, "-m", "pytest", "--strict-markers", "-q"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+    )
+    assert run.returncode == 0, run.stdout + run.stderr
+
+
+def test_init_cli_goldens(tmp_path: Path, golden) -> None:
+    runner = CliRunner()
+    first = runner.invoke(app, ["-C", str(tmp_path), "init"])
+    assert first.exit_code == 0, first.output
+    golden(Path("tests/cli/golden/init-new.txt"), first.output)
+    again = runner.invoke(app, ["init", "-C", str(tmp_path)])
+    assert again.exit_code == 0
+    golden(Path("tests/cli/golden/init-again.txt"), again.output)
+    assert runner.invoke(app, ["init", "-C", str(tmp_path)]).output == again.output
+
+
+def test_invalid_inputs_are_usage_failures(tmp_path: Path, project: Path) -> None:
+    for path, options in [
+        (tmp_path / "missing", []),
+        (project / "ledger", []),
+        (tmp_path, ["--subject", "../bad"]),
+        (tmp_path, ["--key", "bad"]),
+    ]:
+        result = CliRunner().invoke(app, ["init", "-C", str(path), *options])
+        assert result.exit_code == 2, result.output

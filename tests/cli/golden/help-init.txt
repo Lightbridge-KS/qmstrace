@@ -1,0 +1,16 @@
+Usage: qmstrace init [OPTIONS]
+
+  Initialize the selected directory; refresh managed guidance in an existing
+  traced repo.
+
+  Existing configuration and unrelated guide/settings content are preserved.
+  Repeating init changes nothing. The starter is repo-owned, with no invented
+  origins or baseline tags. Commit the generated files after reviewing the rules
+  and scan paths.
+
+Options:
+  --subject <str>  New repo subject name; default: product.
+  --key <str>      New repo ID key; default: PROD.
+  -C PATH          Run as if qmstrace had been started in PATH, as with git -C.
+                   Before or after the command.
+  --help           Show this message and exit.

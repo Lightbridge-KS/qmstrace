@@ -28,6 +28,8 @@ in the tool. The standard is data too: ISO/IEC 29110 comes first.
 
 | To… | Read |
 |---|---|
+| set up an existing product repo | [Set up a repo](how-to/set-up-a-repo.md) |
+| explore links and findings interactively | [Explore a trace](how-to/explore-a-trace.md) |
 | see it work, in five minutes | [A first look](tutorials/first-look.md) |
 | prepare a change request's impact analysis | [Write an impact list](how-to/write-an-impact-list.md) |
 | interpret a pytest report against requirements | [Read test results](how-to/read-test-results.md) |
@@ -41,6 +43,6 @@ goal, reference states facts, explanation gives the reasons. Every page opens wi
 
 ## Where it stands
 
-Built: `qmstrace status`, `thread`, `impact`, `results`, `check` and `rules`, including baseline
-and change-request checks and downstream suspects. Repository setup follows; this manual
-grows with it.
+Built: `qmstrace init`, `status`, `thread`, `impact`, `results`, `check`, `rules` and `graph`,
+including baseline/change-request guards and downstream suspects. Ledger import, signatures
+and project-wide traversal at pins remain future work.

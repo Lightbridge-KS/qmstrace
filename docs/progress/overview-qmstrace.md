@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M5b landed; M6 next, M7b local trace browser accepted after migration; remaining slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M5b landed; M6–M8 implemented and locally verified, awaiting combined PR review; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -10,7 +10,9 @@ read_when:
 
 **Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M5b have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
-including tracker cleanup `0dc5c8c`. **Next build: M6 — set up a repo.**
+including tracker cleanup `0dc5c8c`. **M6–M8 implemented and locally verified on `codex/m6-m8-slice-closure`; PR review pending.**
+The scope includes setup, test-bed migration, the local browser and slice closure in one PR.
+Routine implementation decisions are delegated; verification and Diátaxis pages ship together.
 The accepted local trace browser is M7b, after M7 migration and before M8 closure.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
@@ -18,23 +20,23 @@ This is the single active tracker. Detailed milestone history and earlier planni
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
 
-## Remaining milestones
+## Slice closure — implementation complete, review pending
 
 Slice 1 requires the product test bed to run on the engine instead of the stand-in,
 followed by the accepted M7b local browser and M8 closure.
-Each milestone uses a branch and draft PR, passes the dry gate, and ships its
+M6–M8 share one branch and draft PR, pass the dry gate, and ship their
 [manual pages](../dev/writing-the-manual.md).
 
-- [ ] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
+- [x] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
   test-framework marker registration; ship the skill as package data, including the
   “break it” loop and a parity test between skill and code.
-- [ ] **M7 · switch the product test bed to the engine.** Migrate its configurations and
+- [x] **M7 · switch the product test bed to the engine.** Migrate its configurations and
   execute the acceptance checks below. Keep the ledger import on the stand-in until slice 2.
-- [ ] **M7b · local trace browser.** Generate an offline, read-only HTML view of one
+- [x] **M7b · local trace browser.** Generate an offline, read-only HTML view of one
   assessment: item search, thread navigation, findings and evidence limits. Ship manual
   pages and CLI/view parity checks. [Accepted design](../design/trace-browser.md) owns
-  scope and rejected alternatives; implementation planning and renderer evaluation remain.
-- [ ] **M8 · close slice 1.** README, CHANGELOG, findings promoted into design,
+  scope and rejected alternatives; vis-network 10.1.2 adopted after local evaluation.
+- [x] **M8 · close slice 1.** README, CHANGELOG, findings promoted into design,
   trackers reconciled; archive the stand-in rather than delete it.
 
 ## Landed
@@ -59,6 +61,26 @@ Their settled outcomes live in the design docs; the
 [experiment record](../tests/beacon-authoring-experiment.md) retains methods and findings.
 
 ## Latest verified evidence
+
+**M6–M8, 2026-09-24:** `just dry` passed with **571 Python tests, 99.09% coverage**,
+three Node browser-control tests, strict types, complete wheel-asset verification and strict
+manual build. Setup and graph help/output goldens were inspected; both command pages'
+built code blocks match their goldens exactly. Setup was inspected visually and the graph
+reference was inspected in the browser. Tutorial, how-to and explanation pages build.
+
+The engine-native test bed now lives at `../_tests/beacon-engine/`; original source repos and
+tags are unchanged. E1 mutation, E3 baseline/suspect and E4 graph/gap replays pass again.
+Every command runs in both migrated products; repeated setup and both `-C` placements have
+identical bytes. The wheel-installed graph command is deterministic in both repos.
+The retained stand-in archive serves only historical/ledger reproduction until slice 2.
+
+The browser was exercised on both product projections and a 1,000-node synthetic chain,
+including keyboard selection, depth controls, zoom and hostile literal text. Direct local
+file-opening was blocked by the verification browser policy and remains unverified;
+loopback-served rendering passed. Full methods, mapping commits and remaining limits live
+in [slice-1 closure verification](../tests/slice-1-closure.md). CI and deployed-preview evidence belongs to the combined PR; no release or production
+deployment is claimed.
+
 
 **M5b, 2026-09-22:** local `just dry` passed with **528 tests, 99.31% coverage**,
 formatting, lint, strict types, wheel contents and strict manual build. Deterministic
@@ -101,21 +123,21 @@ mutations), `_playground/2026-09-21_m3b-impact/` (impact), and
 
 ## Slice-1 acceptance
 
-The table distinguishes checks already exercised in clones/fixtures from the final M7
-switch-over. It does not claim the test bed already runs on the engine.
+M7 uses the retained engine-native test bed plus disposable replay clones. The historical
+workspace retains its old configuration for stand-in/ledger reproduction.
 
 | Check | Current evidence / remaining work |
 |---|---|
-| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Verified in M4 and replayed through M5b; repeat after M7 migration |
-| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Replayed in mapped M5b clones; repeat after M7 migration |
+| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Replayed in fresh E1 clones during M7; all seven targeted verdicts fail |
+| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Replayed during M7 with explicit mapped commits; guard checks pass |
 | E3: restore the system-test file from the tag; suspects appear and survive an appended comment or an added test | Verified in M5b clones: the same 11 unique items throughout |
 | Second requirements baseline: no suspects; preceding commit: field-only change has downstream suspects | Verified in M5b clones: 79 before, 0 at the applicable baseline |
-| Client: sibling items say not pinned; duplicate requirement names its owner; missing sibling says not reachable; missing ledger says not verified, including quiet output | Fixtures cover these cases; final two-repo replay remains M7 |
+| Client: sibling items say not pinned; duplicate requirement names its owner; missing sibling says not reachable; missing ledger says not verified, including quiet output | Fixtures and migrated two-repo replay pass, including quiet evidence |
 | Lightweight tag warns; pre-tag feature branch sees no baseline; shallow history cannot look unfrozen | Verified in M5a fixtures |
 | CR-001 impact: changed IDs `REQ-BCN-05`, `REQ-BCN-06` show downstream reach and origins; `REQ-BCN-11` participates only when declared and explicitly supplied | Reach verified in M3b; reserved unseen-ID rejection verified in M5a fixtures |
-| Client `Assumes` propagates impact without adding coverage; CR-002 is the later classification change across eleven requirements | Impact checked in M3b; retain both scenarios in M7 |
-| Every command in both product repos; `init` in a scratch copy reproduces the stanza; repeated runs produce identical bytes | Existing command goldens/determinism pass; `init` and final full replay await M6/M7 |
-| Local browser preserves CLI reach, findings and evidence limits; works offline and by keyboard; handles cycles and safely renders authored text | M7b pending; evaluate the 177-item test bed and a larger synthetic graph |
+| Client `Assumes` propagates impact without adding coverage; CR-002 is the later classification change across eleven requirements | M7 dependency mutation and field-only/baseline replay pass |
+| Every command in both product repos; `init` in a scratch copy reproduces the stanza; repeated runs produce identical bytes | Wheel-installed commands pass in both products; init and graph deterministic |
+| Local browser preserves CLI reach, findings and evidence limits; works offline and by keyboard; handles cycles and safely renders authored text | Shared-core parity, browser/control checks and 1,000-node example pass; direct file-opening smoke check remains unverified |
 
 Every command must have a golden, and every finding code an emitting fixture.
 Do not reproduce the stand-in's defects: file-level or self-clearing suspects, one-hop-only
@@ -157,7 +179,7 @@ Read these for contracts rather than copying their contents into this tracker:
   findings, evidence limits and authoring loop; decorative markers and unrecorded
   inspection are known limits.
 - [Local trace browser](../design/trace-browser.md): accepted M7b experience and architecture;
-  pinned embedded vis-network is provisional until fixture evaluation.
+  pinned embedded vis-network 10.1.2 adopted after fixture evaluation.
 - [System architecture](../design/system-architecture.md) and
   [codebase blueprint](../structure/codebase-blueprint.md): module ownership and source-tree
   seam; Python 3.13+, frozen values, pure core, no DuckDB until slice 2.

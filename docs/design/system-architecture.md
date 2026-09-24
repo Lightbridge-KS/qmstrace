@@ -296,3 +296,14 @@ of a test function's digest remains in the [progress tracker](../progress/overvi
 the ledger half — events,
 work-product states, the signature loop — in [Data Architecture § Not yet
 written](data-architecture.md).
+
+
+## Setup and local browser (M6/M7b)
+
+`init` writes explicit managed product-repo files through infrastructure, preserving authored
+configuration and unrelated guide/settings text. Its packaged skill and stanza arrive with
+the wheel. The offline browser is another renderer of one assessment: Python supplies
+validated current links, precomputed reach and findings; embedded JavaScript supplies
+layout and controls. The HTML is a disposable working-tree snapshot, with no server,
+source edits, network collection or review persistence. The pinned browser library is
+package data; Node.js is needed only for development control tests.

@@ -67,6 +67,7 @@ src/qmstrace/
                          comparisons (M5a), suspect values and per-root reasons (M5b); no IO
     results.py           frozen report/result values; pure exact matching, run deduplication and
                          direct-verifies verdict aggregation (M4)
+    setup.py             pure managed-block and pytest-settings edits (M6)
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
   extract/               text in, items out — never a path, never a repo
@@ -86,10 +87,14 @@ src/qmstrace/
     externals.py         raw change-request directory reads (M5a). The agreement and siblings need
                          no module: they are read as WorkingTrees
     globbing.py          the one matcher, for every tree
+    files.py             contained setup writes with rollback; exclusive view output (M6/M7b)
   render/
-    text.py              status, findings, rules, thread, impact, results — functions -> str
-  assets/                skill/SKILL.md · stanza.md · init templates — package data
+    text.py              status, findings, rules, thread, impact, results; shared evidence text
+    graph.py             deterministic assessment projection and standalone HTML (M7b)
+  assets/                skill/SKILL.md · stanza.md · starter.toml · graph.html/js · pinned
+                         vendor/vis-network and license — package data
 tests/
+  browser/               Node built-in tests for display-only control behavior; no npm deps
   unit/                  core and extract, on text — no Git, no disk
   integration/           real Git in tmp_path, a scrubbed environment, session-scoped templates
   cli/                   CliRunner against golden text files
@@ -278,3 +283,22 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | F2 — never import click | the approved plan's `main()` sketch | slice tracker § Module shape |
 
 All of these change **structure**. None removes a behaviour the surface doc promises.
+
+
+## Setup and browser ownership (M6/M7b)
+
+`Workspace.initialize` reads package templates and existing settings, plans every edit,
+then delegates writes to `infra/files.py`. `core/setup.py` transforms strings without IO.
+The browser renderer may read immutable package assets through `importlib.resources`;
+it never reads project files. `Workspace.save_view` owns the explicit exclusive output write.
+
+`render/graph.py` projects the already-judged assessment and calls the shared forward/backward
+walk for each visible item. Compact indexed reach arrays keep JavaScript limited to view
+selection, depth/type/link filtering and layout. All-pairs reach can grow quadratically;
+this is a deliberate local-view tradeoff, measured on 1,000 nodes, not a project-wide scale
+promise. A larger future view must retain core parity if it changes this strategy.
+
+Only validated current links enter the canvas. S01 text comes from the finding catalogue,
+with complete historical provenance even when no current connection exists. JSON escapes
+HTML delimiters and line separators, authored values enter the DOM through `textContent`,
+and a document CSP denies connections. No source archive or runtime server is introduced.

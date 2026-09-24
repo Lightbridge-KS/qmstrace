@@ -20,6 +20,8 @@ nav = [
     { "A first look" = "tutorials/first-look.md" },
   ] },
   { "How-to guides" = [
+    { "Explore a trace" = "how-to/explore-a-trace.md" },
+    { "Set up a repo" = "how-to/set-up-a-repo.md" },
     { "Check your work" = "how-to/check-your-work.md" },
     { "Write an impact list" = "how-to/write-an-impact-list.md" },
     { "Read test results" = "how-to/read-test-results.md" },
@@ -27,6 +29,8 @@ nav = [
     { "Review downstream suspects" = "how-to/review-suspects.md" },
   ] },
   { "Reference" = [
+    { "qmstrace graph" = "reference/commands/graph.md" },
+    { "qmstrace init" = "reference/commands/init.md" },
     { "qmstrace status" = "reference/commands/status.md" },
     { "qmstrace thread" = "reference/commands/thread.md" },
     { "qmstrace impact" = "reference/commands/impact.md" },
@@ -40,6 +44,7 @@ nav = [
     { "Downstream suspects" = "reference/suspects.md" },
   ] },
   { "Explanation" = [
+    { "A graph is a view" = "explanation/a-graph-is-a-view.md" },
     { "The chain" = "explanation/the-chain.md" },
     { "Kinds of finding" = "explanation/kinds-of-finding.md" },
     { "Around the repo" = "explanation/around-the-repo.md" },

@@ -10,6 +10,7 @@ sync:
 # run the tests, with the coverage floor
 test:
     uv run pytest -q
+    node --test tests/browser/*.test.cjs
 
 # check formatting and lint — changes nothing
 lint:
@@ -29,7 +30,7 @@ types:
 wheel:
     rm -rf dist
     uv build --wheel --quiet
-    uv run python -c "import glob, zipfile; names = zipfile.ZipFile(glob.glob('dist/*.whl')[0]).namelist(); assert 'qmstrace/assets/README.md' in names, names; print('wheel carries the package data')"
+    uv run python tests/check_wheel.py
 
 # the user manual, served with live reload at http://localhost:8000
 manual:

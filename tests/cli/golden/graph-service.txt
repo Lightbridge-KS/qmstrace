@@ -1,0 +1,2 @@
+Written: trace.html · 15 items · 14 links
+Offline working-tree snapshot; findings and evidence limits are included. Exit 0.
