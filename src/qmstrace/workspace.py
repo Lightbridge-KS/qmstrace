@@ -298,12 +298,13 @@ class Workspace:
             config = _configuration(self.root, tree)
             scan = _scan(tree, config, config.item_types.values(), with_misplaced=True)
             items = tuple(i for part in scan.extracted for i in part.items)
-            historical, problems = TraceGraph.build(
+            historical, found = TraceGraph.build(
                 config,
                 scan.extracted,
                 Surroundings(every_sibling_read=False),
                 misplaced=scan.misplaced,
             )
+            problems = [f for f in found if f.code not in findings.SNAPSHOT_SAFE]
             if problems or scan.misplaced or len({i.id for i in items}) != len(items):
                 tags_here = ", ".join(t.name for t in tags if t.commit == commit)
                 details = "; ".join(f"{f.code} {f.file}:{f.line}: {f.what}" for f in problems)

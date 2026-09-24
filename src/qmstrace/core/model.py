@@ -84,6 +84,18 @@ class Lead:
 
 
 @dataclass(frozen=True, slots=True)
+class Mention:
+    """An ID written where it declares nothing — later in a heading, or as a table row's first
+    cell. The graph decides whether it matters: one of this repo's kind that nothing declares
+    was likely meant as a declaration (V16)."""
+
+    token: str
+    file: str
+    line: int
+    where: Literal["heading", "row"]
+
+
+@dataclass(frozen=True, slots=True)
 class Stray:
     """A marker written where it is not read — an `Implements:` in a comment, a `Satisfies:`
     line outside every item's section, a `Satisfies` table row. It links nothing; a gap it
@@ -134,3 +146,4 @@ class Extracted:
     findings: tuple[Finding, ...] = ()
     leads: tuple[Lead, ...] = ()
     strays: tuple[Stray, ...] = ()
+    mentions: tuple[Mention, ...] = ()

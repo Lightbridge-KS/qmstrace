@@ -26,7 +26,7 @@ from enum import Enum
 
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import Extracted, Finding, Item, Lead, Link
+from qmstrace.core.model import Extracted, Finding, Item, Lead, Link, Mention
 
 
 class Home(Enum):
@@ -147,6 +147,7 @@ class TraceGraph:
         """
         around = surroundings or Surroundings()
         found = list(extracted)
+        misplaced = tuple(misplaced)
         foreign = {
             item_id: (repo, item.type)
             for repo, items in sorted(around.siblings.items())
@@ -166,6 +167,11 @@ class TraceGraph:
                 local[item.id] = item
         wrong += _fields(config, local.values())
         wrong += _leads(config, (lead for part in found for lead in part.leads), foreign)
+        wrong += _mentions(
+            config,
+            (mention for part in found for mention in part.mentions),
+            set(local) | set(foreign) | {item.id for item in misplaced},
+        )
         wrong += [
             findings.not_scanned_here(
                 item.id,
@@ -422,6 +428,24 @@ def _leads(
             wrong.append(
                 findings.malformed_id(lead.token, lead.item_type, pattern, lead.file, lead.line)
             )
+    return wrong
+
+
+def _mentions(
+    config: TraceConfig, mentions: Iterable[Mention], declared: set[str]
+) -> list[Finding]:
+    """V16 — an ID of this repo's kind, declared nowhere, where it declares nothing: later in a
+    heading, or as a table row's first cell. A file read for two types is reported once."""
+    wrong: list[Finding] = []
+    seen: set[tuple[str, str, int, str]] = set()
+    for mention in mentions:
+        key = (mention.token, mention.file, mention.line, mention.where)
+        own = _own_type(config, mention.token)
+        if key in seen or own is None or mention.token in declared:
+            continue
+        seen.add(key)
+        say = findings.id_not_first if mention.where == "heading" else findings.id_in_table
+        wrong.append(say(mention.token, own.name, own.files, mention.file, mention.line))
     return wrong
 
 

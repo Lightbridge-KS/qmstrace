@@ -61,6 +61,11 @@ def broken(service: Path) -> Path:
          'import pytest\n\npytestmark = pytest.mark.verifies("REQ-SVC-02")\n')  # fmt: skip  # V15
     edit(service / "src/service/store.py", '\nImplements: DSN-SVC-02\n"""\n',
          '\n"""\n\n# Implements: DSN-SVC-02\n')  # fmt: skip  # a stray
+    write(design, design.read_text(encoding="utf-8") + "\n## Record index (DSN-SVC-07)\n")  # V16
+    planned = "\n| Planned | For |\n|---|---|\n| REQ-SVC-12 | export |\n"
+    write(srs, srs.read_text(encoding="utf-8") + planned)  # V16
+    tabled = "\n| Link | Target |\n|---|---|\n| Satisfies | REQ-SVC-03 |\n"
+    edit(design, "before any handler runs.\n", "before any handler runs.\n" + tabled)  # a stray
     return service
 
 
@@ -83,7 +88,20 @@ def test_every_finding(project: Path, golden: Golden) -> None:
     code, output = check(broken(project / "service"))
     assert code == 1
     golden(GOLDEN / "check-every-finding.txt", output)
-    for code_ in ("V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09", "V14", "V15"):
+    for code_ in (
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V14",
+        "V15",
+        "V16",
+    ):
         assert f"\n  {code_}  " in output, f"{code_} is missing from the wording review"
 
 

@@ -35,8 +35,13 @@ CODES: Final = {
     "V13": "a frozen item's heading was removed",
     "V14": "a link field that holds something other than IDs",
     "V15": "a verifies marker in a form this tool does not read",
+    "V16": "an ID of this repo's kind, declared nowhere, written where it declares nothing",
     "S01": "an existing local item downstream of changed or removed frozen content needs review",
 }
+
+# Codes that never stop a baseline tag's tree being read as a snapshot. Any other violation in
+# a tagged tree means its items cannot be trusted; these declare nothing, so the items stand.
+SNAPSHOT_SAFE: Final = frozenset({"V16"})
 
 
 def suspect(value: Suspect) -> Finding:
@@ -227,6 +232,33 @@ def not_scanned_here(
         f"{token} is declared here, but this file is not scanned for {_a(item_type)} — so the "
         "tool cannot see it.",
         move,
+        token,
+    )
+
+
+def id_not_first(token: str, item_type: str, files: Iterable[str], file: str, line: int) -> Finding:
+    return Finding(
+        "V16",
+        file,
+        line,
+        f"{token} is in this heading but not first, so it declares nothing — and nothing else "
+        "declares it.",
+        f"Fix: to declare it, start a heading with it — `### {token} — <title>`, a section "
+        f"number before it is fine — where {_a(item_type)} is read ({', '.join(files)}); if the "
+        "heading only names it, correct the ID. Never invent the item to make the ID resolve.",
+        token,
+    )
+
+
+def id_in_table(token: str, item_type: str, files: Iterable[str], file: str, line: int) -> Finding:
+    return Finding(
+        "V16",
+        file,
+        line,
+        f"{token} starts a table row, but a table declares nothing — and nothing else declares it.",
+        f"Fix: to declare it, write a heading `### {token} — <title>` where {_a(item_type)} is "
+        f"read ({', '.join(files)}); if the row only lists it, correct the ID. Never invent the "
+        "item to make the ID resolve.",
         token,
     )
 

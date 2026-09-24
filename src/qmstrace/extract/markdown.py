@@ -36,6 +36,7 @@ from qmstrace.core.model import (
     Item,
     Lead,
     Link,
+    Mention,
     Stray,
     text_digest,
 )
@@ -53,6 +54,7 @@ _NUMBER: Final = re.compile(r"(?:\u00a7\s*)?(\d+(?:\.\d+)*)\.?\s+")  # 4.2, 4.2.
 _WRAPS: Final = ("**", "__", "`", "*", "_")  # longest first: `**` before `*`
 _DELIMITER: Final = re.compile(r":?-+:?")  # a table's header rule, `|---|:--:|`
 _CELL_MARKS: Final = re.compile(r"[*_`\[\]]")  # emphasis, code and link marks in a cell
+_MENTION: Final = re.compile(rf"(?<![A-Za-z0-9-])({ID_TOKEN.pattern})(?![A-Za-z0-9-])")
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,6 +101,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
     wrong: list[Finding] = []
     leads: list[Lead] = []
     strays: list[Stray] = []
+    mentions: list[Mention] = []
     current: _Open | None = None
     other: int | None = None  # the level of another type's item, whose section is not read
 
@@ -127,6 +130,10 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             continue
         if heading := _heading(raw):
             token = heading.token
+            later = heading.title if token else heading.text  # what follows a leading ID
+            mentions += [
+                Mention(m.group(1), path, number, "heading") for m in _MENTION.finditer(later)
+            ]
             if token is not None and pattern is not None and pattern.fullmatch(token):
                 close()
                 started = _Open(token, number, heading.title, heading.level, heading.number)
@@ -146,9 +153,11 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             if other is not None and heading.level <= other:
                 other = None
             continue
+        cells = _cells(raw)
+        if cells and (first := _MENTION.match(_CELL_MARKS.sub("", cells[0]).strip())):
+            mentions.append(Mention(first.group(1), path, number, "row"))
         if other is not None:  # another type's item: the pass for that type reads it
             continue
-        cells = _cells(raw)
         if cells is not None:  # a table row: item text, never a declaration
             if written := _table_marker(cells, carried):
                 owner = current.id if current else None
@@ -191,7 +200,9 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             links += made
             wrong += bad
     close()
-    return Extracted(tuple(items), tuple(links), tuple(wrong), tuple(leads), tuple(strays))
+    return Extracted(
+        tuple(items), tuple(links), tuple(wrong), tuple(leads), tuple(strays), tuple(mentions)
+    )
 
 
 def form(marker: str, target: str) -> str:

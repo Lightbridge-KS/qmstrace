@@ -476,3 +476,12 @@ def test_an_edit_under_a_sub_heading_of_a_frozen_item_needs_a_request(controlled
     assert not codes(controlled)
     path.write_text(path.read_text().replace("gets 401", "gets 403"))
     assert codes(controlled) == {"V10"}
+
+
+def test_a_near_miss_in_a_tagged_tree_does_not_block_the_snapshot(controlled):
+    """V16 declares nothing, so the tag's items still stand; every other violation blocks."""
+    path = controlled / REQ
+    path.write_text(path.read_text() + "\n| REQ-SVC-12 | planned |\n")
+    commit(controlled, "a plan")
+    git(controlled, "tag", "-a", "baseline/service/requirements/2", "-m", "with a plan")
+    assert codes(controlled) == {"V16"}

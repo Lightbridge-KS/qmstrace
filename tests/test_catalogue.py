@@ -76,6 +76,7 @@ SCENARIOS: dict[str, Scenario] = {
     },
     "V14": lambda c: found(c, {SRS: REQ.replace("AGR-1", "TBD")}),
     "V15": lambda c: found(c, {TESTS: 'pytestmark = pytest.mark.verifies("REQ-SVC-01")\n'}),
+    "V16": lambda c: found(c, {SRS: REQ + "\n| REQ-SVC-12 | a planned requirement |\n"}),
 }
 
 
