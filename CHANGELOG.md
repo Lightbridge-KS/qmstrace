@@ -69,3 +69,8 @@ All notable changes to this project are recorded here. The format follows
 - The user manual gains `check` and `rules`, a how-to for checking work before a commit, and an
   explanation of the kinds of finding.
 - A coverage rule whose direction contradicts its link type is refused.
+
+### Changed
+
+- `qmstrace --help` summarises `thread` as tracing one item, so a reader looking for *trace*
+  finds it.

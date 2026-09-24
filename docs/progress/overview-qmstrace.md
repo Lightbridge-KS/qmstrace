@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M8 landed; node-title hover follow-up implemented and verified; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance on the beacon-engine test bed under way; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -14,11 +14,15 @@ including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
 setup, test-bed migration, the local browser and slice closure.
 
-**Current follow-up:** node-title hover on `codex/graph-title-hover`. Tooltips show literal
-full titles with a full-ID fallback; list/inspector access remains available without hover.
-Verified: DSN-BCN-07 shows “Operator agent list”, AGR-2 falls back to its ID, and hover
-preserves selection. `just dry` passes: 571 Python tests, four Node control tests, strict
-types, wheel assets and manual build. Implementation is complete; PR review is pending.
+**Node-title hover** merged in [PR #14](https://github.com/Lightbridge-KS/qmstrace/pull/14)
+at `ea253f0`. Tooltips show literal full titles with a full-ID fallback; list/inspector access
+remains available without hover.
+
+**Current: user acceptance on `../_tests/beacon-engine/`.** A user looking for the thread
+command reached for `trace`. The verb stays `thread` (the reasoning in the surface doc holds);
+the `--help` summary now reads *Trace one item: …* so the word leads to it
+(`fix/thread-help-trace`). The test bed's bundled `.engine-venv` predates PR #14; acceptance
+runs use a wheel built from `main`.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -61,6 +65,7 @@ M6–M8 shipped together in PR #13 with the dry gate and their
 | M5a | Historical baselines, fresh request citations, V10–V13 and withdrawal | #11 · `724ec02` |
 | M5b | Independent historical/current suspect traversal, S01, status/check views and review manual | #12 · `8ea7bda` |
 | M6–M8 | Setup, engine-native test-bed migration, offline browser, Diátaxis pages and slice closure | #13 · `6fba9f8` |
+| Hover | Node titles on hover in the local browser | #14 · `ea253f0` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
