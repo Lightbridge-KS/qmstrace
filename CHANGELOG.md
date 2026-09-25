@@ -8,6 +8,19 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- Docs written the way architecture guides are written are traced: an item is its section,
+  down to the next heading at the same or a higher level, so sub-sections, tables and
+  diagrams are its text and its fields and links may sit in any sub-section. The ID may
+  follow a section number (`4.2`), be wrapped in emphasis or backticks, and the heading may
+  end with a Pandoc attribute (`{#…}`, `{.…}`, `{-}`); decoration is not a change.
+- `V16`: an ID of this repo's kind, declared nowhere, written where it declares nothing —
+  later in a heading or as a table row's first cell. It never stops a baseline tag's tree
+  being read.
+- A link marker in Markdown written outside every item's section, or as a table row, is
+  named by the gap it leaves.
+- The user manual gains *Write traced docs with diagrams and tables*, with a fixture repo
+  written that way.
+
 - `init`: conservative, idempotent repository setup, managed agent guidance, packaged skill
   and registration of pytest's `verifies` marker while preserving other settings.
 - `graph [ID] --out FILE`: a self-contained, offline trace browser with search, keyboard
@@ -74,9 +87,22 @@ All notable changes to this project are recorded here. The format follows
 
 - `qmstrace --help` summarises `thread` as tracing one item, so a reader looking for *trace*
   finds it.
+- A heading ends an item only when it starts with one of this repo's kinds of ID, or is at
+  the item's level or higher; `#### IEC-62304 …` stays inside the item. **An item with a
+  deeper heading inside it now has a larger text and a different digest**; an item without
+  one keeps its digest. A stricter reading can make an older baseline tag unreadable — cut a
+  new baseline, never rewrite the tag.
+- A decorated heading with this repo's ID in a file not scanned for its type is `V07`; when
+  the ID is declared where it is read, the fix says not to start a heading with it.
+- A second `Change:` line in an item names the first.
+- The shipped skill states these rules. A repo that installed the previous skill must remove
+  `.qmstrace/skill/SKILL.md` before `init` refreshes it.
 
 ### Fixed
 
+- A code fence closes only on a line of its own character, at least as long as its opener,
+  with nothing after it; a fenced example holding a shorter fence no longer hides or exposes
+  the headings after it.
 - An ID pattern, `id_prefix`, agreement prefix or change-request prefix that no ID can start
   with — underscores, lower case, a space — is refused with the ID shape and the next move,
   instead of being accepted and silently matching nothing.

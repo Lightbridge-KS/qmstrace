@@ -151,6 +151,14 @@ def test_a_clean_repo_has_every_link_and_no_findings(service: TraceConfig) -> No
             "which a requirement may not carry",
         ),
         (
+            {
+                ("requirement", "docs/req/service-srs.md"): SRS
+                + "\n#### Design notes\nSatisfies: REQ-SVC-01\n"
+            },
+            "V04",
+            "which a requirement may not carry",
+        ),
+        (
             {("component", "src/service/keys.py"): '"""Implements: DSN-SVC-09"""\n'},
             "V03",
             "declare it in docs/design/*.md",
@@ -455,3 +463,72 @@ def test_a_declared_clause_is_a_node_even_uncited(service: TraceConfig) -> None:
     node = graph.node("AGR-7")
     assert node is not None and node.home is Home.EXTERNAL
     assert graph.forward(["AGR-7"]).steps == {}
+
+
+# ── near-misses: an ID of this repo's kind where it declares nothing (V16) ──────────────────
+
+SRS_PATH = ("requirement", "docs/req/service-srs.md")
+
+
+def v16(found: list[Finding]) -> list[tuple[str, int, str]]:
+    return [(f.item or "", f.line, f.what) for f in found if f.code == "V16"]
+
+
+@pytest.mark.parametrize(
+    ("tail", "line", "said"),
+    [
+        ("\n| REQ-SVC-12 | planned |\n", 13, "starts a table row"),
+        ("\n| **[REQ-SVC-12](#x)** | planned |\n", 13, "starts a table row"),
+        ("\n## Export (REQ-SVC-12)\n", 13, "in this heading but not first"),
+        ("\n## **REQ-SVC-12 — unbalanced\n", 13, "in this heading but not first"),
+    ],
+)
+def test_an_undeclared_id_where_it_declares_nothing_is_v16(
+    service: TraceConfig, tail: str, line: int, said: str
+) -> None:
+    _, found = build(service, {SRS_PATH: SRS + tail})
+    ((item, at, what),) = v16(found)
+    assert (item, at) == ("REQ-SVC-12", line) and said in what
+
+
+def test_it_names_the_type_the_id_belongs_to(service: TraceConfig) -> None:
+    _, found = build(service, {SRS_PATH: SRS + "\n| DSN-SVC-09 | planned |\n"})
+    (finding,) = [f for f in found if f.code == "V16"]
+    assert "where a design element is read (docs/design/*.md)" in finding.next_move
+
+
+@pytest.mark.parametrize(
+    "tail",
+    [
+        "\n| REQ-SVC-02 | declared here |\n",  # a mention of a declared item
+        "\n## Keys, recapped (REQ-SVC-01)\n",
+        # not this repo's kind of ID
+        "\n| SHA-256 | UTF-8 |\n| AGR-1 | a clause |\n## Hashing (SHA-256)\n",
+        "\n```\n| REQ-SVC-12 | in a fence |\n```\n",
+    ],
+)
+def test_what_is_not_v16(service: TraceConfig, tail: str) -> None:
+    _, found = build(service, {SRS_PATH: SRS + tail})
+    assert v16(found) == []
+
+
+def test_an_id_declared_in_a_sibling_or_misplaced_is_not_v16(service: TraceConfig) -> None:
+    tail = "\n| REQ-SVC-12 | there |\n| REQ-SVC-13 | there |\n"
+    around = Surroundings(siblings={"client": sibling("REQ-SVC-12")}, externals=AGREEMENT.externals)
+    misplaced = REGISTRY["markdown"](
+        "docs/notes.md", "### REQ-SVC-13 — X\n", service.item_types["requirement"], service
+    ).items
+    _, found = TraceGraph.build(
+        service, extracted(service, CLEAN | {SRS_PATH: SRS + tail}), around, misplaced=misplaced
+    )
+    assert v16(found) == []
+
+
+def test_a_file_read_for_two_types_reports_each_near_miss_once(service: TraceConfig) -> None:
+    text = SRS + "\n| REQ-SVC-12 | planned |\n"
+    once = extracted(service, CLEAN | {SRS_PATH: text})
+    again = REGISTRY["markdown"](
+        "docs/req/service-srs.md", text, service.item_types["design_element"], service
+    )
+    _, found = TraceGraph.build(service, [*once, again], AGREEMENT)
+    assert len(v16(found)) == 1

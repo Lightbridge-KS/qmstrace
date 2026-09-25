@@ -300,10 +300,16 @@ def _fix(
         if (not incoming and own) or (incoming and violation.target == item.id):
             return findings.fix_refused(violation)
     for stray in strays:
-        if stray.marker == rule.marker and (
-            (not incoming and stray.file == item.file) or (incoming and item.id in stray.targets)
-        ):
-            return findings.fix_stray(stray.marker, stray.file, stray.line)
+        if stray.marker != rule.marker:
+            continue
+        if incoming:
+            meant = item.id in stray.targets
+        elif stray.item is not None:  # in an item's section: only that item's gap
+            meant = stray.item == item.id
+        else:
+            meant = stray.file == item.file
+        if meant:
+            return findings.fix_stray(stray)
 
     words = item.type.replace("_", " ")
     if incoming:

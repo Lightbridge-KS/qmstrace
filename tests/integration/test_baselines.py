@@ -460,3 +460,28 @@ def test_unconfigured_register_stays_unverified_in_result_line(controlled):
         "change requests NOT VERIFIED"
         in text.check(view, strict=False, quiet=True).splitlines()[-1]
     )
+
+
+def test_an_edit_under_a_sub_heading_of_a_frozen_item_needs_a_request(controlled):
+    """Found in user acceptance: `#### Acceptance criteria` once ended the item, so an edit
+    under it escaped change control."""
+    path = controlled / REQ
+    lines = path.read_text().splitlines(keepends=True)
+    index = next(n for n, line in enumerate(lines) if "### REQ-SVC-01" in line)
+    end = next(n for n in range(index + 1, len(lines)) if lines[n].startswith("#"))
+    lines.insert(end, "#### Acceptance criteria\n- A call with no key gets 401.\n\n")
+    path.write_text("".join(lines))
+    commit(controlled, "criteria")
+    git(controlled, "tag", "-a", "baseline/service/requirements/2", "-m", "criteria approved")
+    assert not codes(controlled)
+    path.write_text(path.read_text().replace("gets 401", "gets 403"))
+    assert codes(controlled) == {"V10"}
+
+
+def test_a_near_miss_in_a_tagged_tree_does_not_block_the_snapshot(controlled):
+    """V16 declares nothing, so the tag's items still stand; every other violation blocks."""
+    path = controlled / REQ
+    path.write_text(path.read_text() + "\n| REQ-SVC-12 | planned |\n")
+    commit(controlled, "a plan")
+    git(controlled, "tag", "-a", "baseline/service/requirements/2", "-m", "with a plan")
+    assert codes(controlled) == {"V16"}

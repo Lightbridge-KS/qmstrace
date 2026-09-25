@@ -187,6 +187,21 @@ def test_an_item_where_its_type_is_not_read_is_v07(project: Path) -> None:
     assert (finding.code, finding.file, finding.line) == ("V07", "docs/notes.md", 3)
 
 
+def test_a_decorated_heading_where_its_type_is_not_read_is_v07(project: Path) -> None:
+    write(project / "service" / "docs" / "notes.md", "# Notes\n\n## 4.2 **REQ-SVC-05** — X\n")
+    (finding,) = assess(project / "service").violations
+    assert (finding.code, finding.file, finding.line) == ("V07", "docs/notes.md", 3)
+    assert "move it there" in finding.next_move
+
+
+def test_a_recap_of_a_declared_item_says_not_to_start_a_heading_with_it(project: Path) -> None:
+    write(project / "service" / "docs" / "notes.md", "# Notes\n\n### 4.1 REQ-SVC-01 — recap\n")
+    (finding,) = assess(project / "service").violations
+    assert (finding.code, finding.file) == ("V07", "docs/notes.md")
+    assert "REQ-SVC-01 is declared at docs/req/service-srs.md:12" in finding.next_move
+    assert "do not start a heading with its ID" in finding.next_move
+
+
 def test_a_file_that_is_not_utf8_is_v08(project: Path) -> None:
     (project / "service" / "docs" / "notes.md").write_bytes(b"# Caf\xe9\n")
     (finding,) = assess(project / "service").violations

@@ -26,6 +26,10 @@ def test_all_shipped_marker_examples_parse(service) -> None:
         extracted = REGISTRY[spec.extractor](path, source, spec, service)
         assert len(extracted.items) == 1 and not extracted.findings
         assert extracted.links
+    for heading in re.findall(r"`(#{1,6} [^`]+)`", skill):  # inline heading examples
+        spec = service.item_types["requirement"]
+        found = REGISTRY["markdown"]("docs/req/service-srs.md", heading + "\n", spec, service)
+        assert len(found.items) == 1 and not found.findings, heading
     assert "Break the relevant behavior" in skill and "Restore the source" in skill
     assert "qmstrace.core.findings.CODES" in skill
     assert all(CODES.values())

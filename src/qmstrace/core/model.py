@@ -13,7 +13,7 @@ import re
 import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Final
+from typing import Final, Literal
 
 # What an item ID looks like, whatever the project's own patterns: capitals and digits in
 # hyphenated parts, ending in a number — REQ-SVC-01, DSN-BCN-08, AGR-3, CR-001. A project's
@@ -84,14 +84,33 @@ class Lead:
 
 
 @dataclass(frozen=True, slots=True)
+class Mention:
+    """An ID written where it declares nothing — later in a heading, or as a table row's first
+    cell. The graph decides whether it matters: one of this repo's kind that nothing declares
+    was likely meant as a declaration (V16)."""
+
+    token: str
+    file: str
+    line: int
+    where: Literal["heading", "row"]
+
+
+@dataclass(frozen=True, slots=True)
 class Stray:
-    """A marker written where it is not read — an `Implements:` in a comment, say. It links
-    nothing; a gap it leaves open can say why."""
+    """A marker written where it is not read — an `Implements:` in a comment, a `Satisfies:`
+    line outside every item's section, a `Satisfies` table row. It links nothing; a gap it
+    leaves open can say why.
+
+    `item` is the item whose section holds it, when one does — only that item's own gap
+    names it. Without one, any item in the file may be the one it was meant for.
+    """
 
     marker: str
     targets: tuple[str, ...]
     file: str
     line: int
+    kind: Literal["docstring", "outside", "table"] = "docstring"
+    item: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,3 +146,4 @@ class Extracted:
     findings: tuple[Finding, ...] = ()
     leads: tuple[Lead, ...] = ()
     strays: tuple[Stray, ...] = ()
+    mentions: tuple[Mention, ...] = ()

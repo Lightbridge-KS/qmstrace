@@ -16,3 +16,4 @@
 | V13 | violation | a frozen item's heading was removed |
 | V14 | violation | a link field that holds something other than IDs |
 | V15 | violation | a verifies marker in a form this tool does not read |
+| V16 | violation | an ID of this repo's kind, declared nowhere, written where it declares nothing |

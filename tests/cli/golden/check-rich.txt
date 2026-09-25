@@ -1,0 +1,3 @@
+read: 2 requirements, 2 design elements
+
+result: 0 violations, 0 gaps in 4 items · 0 suspects (informational) · exit 0 · gate: gaps fail

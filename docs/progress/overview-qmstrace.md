@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance round 1 on the beacon-engine test bed; next, M9 rich Markdown and dogfooding; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance round 1 on the beacon-engine test bed; M9 rich Markdown built and verified, awaiting merge; then dogfooding; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-24 · Slice 1: the product-repo half.** M0–M8 have landed.
+**Updated 2026-09-25 · Slice 1: the product-repo half.** M0–M8 have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
 including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
@@ -24,7 +24,8 @@ the surface doc holds); the `--help` summary now reads *Trace one item: …* so 
 it. An ID pattern no ID can match is now refused (see *Latest verified evidence*). The test
 bed's bundled `.engine-venv` predates PR #14; acceptance runs use a wheel built from `main`.
 
-**Next: [M9 · rich Markdown](#next--m9--rich-markdown)**, planned below from the same round.
+**M9 · rich Markdown** — built on `feat/m9-rich-markdown`, verified locally; see
+[below](#next--m9--rich-markdown) and *Latest verified evidence*.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -50,39 +51,49 @@ The data architecture already requires that an item written where it is not read
 reported, not silently skipped"*; the Markdown extractor, unlike the Python and pytest ones,
 reports no strays.
 
-**Decided 2026-09-24:**
+**Decided 2026-09-24** (decision form, then planning on `feat/m9-rich-markdown`):
 
 - **Sections.** An item is its heading and everything down to the next heading at the same
-  or a higher level; its fields and links count anywhere in that section. A heading that
-  starts with an ID always opens a new item, so items never nest. *Rejected:* fields only
-  before the first sub-heading — the section would be the item's text but not its fields.
-- **Near-misses are reported.** A link field outside any item is a stray, named by the gap it
-  leaves. A heading holding an undeclared ID of this repo's own pattern, but not first, and a
-  table row whose first cell is one, are violations with the next move.
-- **Heading forms, in the same milestone.** A leading section number (`4.2`), emphasis around
-  the ID and a trailing `{#…}` attribute are accepted; an ID at the end of a heading stays
-  prose. Shipping the near-misses alone would tell authors to remove numbers that this then
-  accepts.
+  or a higher level; its fields and links count anywhere in that section. *Rejected:* fields
+  only before the first sub-heading — the section would be the item's text but not its fields.
+- **Only this repo's IDs end an item.** A heading ends the open item when its first word
+  matches one of this repo's item-ID patterns or shares their prefix; `#### IEC-62304 …`
+  stays inside as a sub-heading. Items never nest.
+- **Heading forms.** A leading section number (`4.2`, `4.2.1.`), an ID wrapped in emphasis
+  or backticks, and a trailing `{#…}`, `{.…}` or `{-}` are accepted; an ID at the end of a
+  heading stays prose. Decoration is layout: renumbering or restyling is not a change. A
+  sub-heading's number is dropped from the item text only when it continues the item's own
+  (`4.2` → `4.2.1`); `#### 404 …` keeps its number.
+- **Near-misses are reported.** A link marker the item type carries, written outside every
+  item's section or as a table row, is a stray, named by the gap it leaves. An undeclared ID
+  of this repo's kind later in a heading, or as a table row's first cell, is **V16** — one
+  code, two fixes. V16 never aborts a historical snapshot: it declares nothing.
+- **A fence closes** only on a line of the same character, at least as long as its opener,
+  with nothing after it.
 - **Recorded inline** in data architecture § Item text and § Marker syntax v0, with the
-  rejected rule — as F1–F12 amended v0 sections.
+  rejected rules — as F1–F12 amended v0 sections.
 - **Requirements are declared in the SRS only**; the PRD stays untraced and may mention SRS
   IDs. Declaring items in table rows is rejected for now: a heading can hold acceptance
   criteria and diagrams that a table cell cannot.
+- **The stanza is unchanged.** It already points at the skill; restating the grammar would
+  rewrite every traced repo's `AGENTS.md` on the next `init`.
 
-- [ ] Amend data architecture § Marker syntax v0 and § Item text; add *stray* to the glossary.
-- [ ] Scenario catalogue: every probe above becomes a fixture, with the regressions that pass
-  today — table and Mermaid inside an item, bold keys, front matter, fields inside a fence.
-- [ ] Markdown extractor: sections, heading forms, strays. Each new finding code gets its
-  catalogue text and an emitting fixture.
-- [ ] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
-  unchanged — expected, since no beacon item has a deeper heading; not yet verified.
-- [ ] Stanza and shipped skill state the grammar; the skill parity test covers the new forms.
-- [ ] Manual: a how-to, *Write traced docs with diagrams and tables*, and the findings
-  reference for new codes.
+- [x] Specification: data architecture § Marker syntax v0, § Item text, § Kinds of finding;
+  *stray* and *mention* in the glossary; the scenario catalogue's M9 section. `9c18d01`
+- [x] Today's digests and titles of the fixture project pinned before the rules change.
+  `84bbfac`
+- [x] Fence closing `f1b3c1f`, sections and item edges `cb86f4d`, heading forms `e13871a`,
+  strays `1e1d7e1`, V16 `0c18fbc` — each with its tests; V16 has catalogue text, a scenario
+  and two lines in `check-every-finding`.
+- [x] A lens-style fixture repo (`tests/fixtures/mini/rich/`) with its goldens, and the
+  how-to *Write traced docs with diagrams and tables*. `656793a`
+- [x] The shipped skill states the grammar; the parity test covers a sub-section and a
+  decorated heading. `0a155aa`
+- [x] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
+  unchanged — see *Latest verified evidence*.
+- [ ] Merge on `feat/m9-rich-markdown`: CI dry gate and the Netlify deploy preview.
 - [ ] Lens skills: a traced-repo note, filed as
   [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71); not part of M9.
-
-Open for planning: whether the near-misses take new finding codes or extend V02/V07.
 
 **Validation after M9 — dogfooding.** qmstrace itself becomes a traced product repo, with a
 sibling ledger repo beside it holding the schema, agreement and change requests. One
@@ -139,6 +150,31 @@ Their settled outcomes live in the design docs; the
 [experiment record](../tests/beacon-authoring-experiment.md) retains methods and findings.
 
 ## Latest verified evidence
+
+**M9, 2026-09-25** (`feat/m9-rich-markdown`, local): `just dry` passed with **668 Python
+tests, 99.14% coverage**, four Node control tests, strict types, wheel assets and a strict
+manual build; the new how-to was checked in the built HTML — the included design doc is one
+code block with both inner Mermaid fences as text. With a wheel from the branch:
+
+- **Beacon digests** at the five mapped pins (gateway `7946e96`, `93edfd7`, `64032e8`,
+  `2840b8e`; agent `84f1153`) are identical to the pre-M9 fingerprints; the pre-M9 engine
+  reproduces them too, so the method is the same.
+- **E3/E4 replay** (`baselines/verify.py`, fresh clones): the summary and every output file are
+  byte-identical to the slice-closure run; E4 matches the lock, 177 items / 208 links.
+- **E1 replay** (`results/verify.py`): identical summary. The first run differed in one
+  mutation (REQ-BCN-08/09 failing under the REQ-BCN-10 mutation) because pytest itself failed
+  18 tests instead of 12 — bytecode left from the previous mutation; rerun with
+  `PYTHONDONTWRITEBYTECODE=1`, identical. A harness limit, not the engine.
+- **Probes T1–T11**, both engines, fixed reset: an edit under a sub-heading goes from nothing to
+  V10 + 9 S01; a link under a sub-heading, a numbered or a bold ID heading go from gaps or
+  11 × V03 to clean; a trailing-ID heading and a table-row requirement gain V16; a table-row
+  link's gaps now name the row. T1, T6b, T9–T11 unchanged.
+- **CLI** in disposable clones of both products: `init` refuses the previous skill copy (exit 2,
+  with the next move), refreshes it once removed, then changes nothing; `status`, `check
+  --strict`, `check --quiet`, `rules`, `thread`, `impact` give identical bytes with `-C`
+  before and after the command, and both products pass the gate.
+
+Raw records: `_playground/2026-09-25_m9-rich/` (local).
 
 **User acceptance, 2026-09-24 (`fix/beacon-uat-round-1`):** on the beacon test bed,
 `id_pattern = '^REQ_BCN_\d{2}$'` loaded, then `status` found 0 requirements and `check` gave

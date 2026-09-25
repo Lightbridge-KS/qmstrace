@@ -1,0 +1,45 @@
+# A repo whose docs are written the way architecture guides write them — numbered sections,
+# sub-sections, tables and diagrams. Its trace schema is its own, as in `solo`: the point here
+# is how the Markdown is written, not the project around it.
+
+version = 1
+
+[schema]
+version = 1
+project = "RICH"
+
+[schema.item_types.requirement]
+required = ["Category"]
+
+[schema.item_types.requirement.values]
+Category = ["functional-suitability", "security"]
+
+[schema.item_types.design_element]
+
+[schema.links]
+Satisfies = { from = ["design_element"], to = ["requirement"] }
+
+[[schema.rules]]
+code  = "G01"
+item  = "requirement"
+needs = "incoming:Satisfies"
+text  = "no design element satisfies it yet."
+
+[[schema.rules]]
+code  = "G05"
+item  = "design_element"
+needs = "outgoing:Satisfies"
+text  = "satisfies no requirement — every design element points back to one."
+
+[subjects.gateway]
+key = "RCH"
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-RCH-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]
+extractor  = "markdown"
+id_pattern = '^DSN-RCH-\d{2}$'
+files      = ["docs/design/*.md"]

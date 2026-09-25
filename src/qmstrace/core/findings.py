@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Final
 if TYPE_CHECKING:
     from qmstrace.core.baselines import Suspect
 
-from qmstrace.core.model import Finding, Item, Link
+from qmstrace.core.model import Finding, Item, Link, Stray
 
 # A code's first letter is its kind, and says what it fails (data architecture § Kinds of finding).
 KINDS: Final = {"V": "violation", "G": "gap", "S": "suspect"}
@@ -35,8 +35,13 @@ CODES: Final = {
     "V13": "a frozen item's heading was removed",
     "V14": "a link field that holds something other than IDs",
     "V15": "a verifies marker in a form this tool does not read",
+    "V16": "an ID of this repo's kind, declared nowhere, written where it declares nothing",
     "S01": "an existing local item downstream of changed or removed frozen content needs review",
 }
+
+# Codes that never stop a baseline tag's tree being read as a snapshot. Any other violation in
+# a tagged tree means its items cannot be trusted; these declare nothing, so the items stand.
+SNAPSHOT_SAFE: Final = frozenset({"V16"})
 
 
 def suspect(value: Suspect) -> Finding:
@@ -206,15 +211,54 @@ def no_level(item: Item, levels: Iterable[str]) -> Finding:
 
 
 def not_scanned_here(
-    token: str, item_type: str, files: Iterable[str], file: str, line: int
+    token: str,
+    item_type: str,
+    files: Iterable[str],
+    file: str,
+    line: int,
+    *,
+    declared: Item | None = None,
 ) -> Finding:
+    move = f"Fix: {_a(item_type)} is read from {', '.join(files)}; move it there."
+    if declared is not None:  # a recap of an item declared where it is read
+        move = (
+            f"Fix: {token} is declared at {declared.file}:{declared.line}; here, do not start a "
+            "heading with its ID — name it later in the heading or in the text."
+        )
     return Finding(
         "V07",
         file,
         line,
         f"{token} is declared here, but this file is not scanned for {_a(item_type)} — so the "
         "tool cannot see it.",
-        f"Fix: {_a(item_type)} is read from {', '.join(files)}; move it there.",
+        move,
+        token,
+    )
+
+
+def id_not_first(token: str, item_type: str, files: Iterable[str], file: str, line: int) -> Finding:
+    return Finding(
+        "V16",
+        file,
+        line,
+        f"{token} is in this heading but not first, so it declares nothing — and nothing else "
+        "declares it.",
+        f"Fix: to declare it, start a heading with it — `### {token} — <title>`, a section "
+        f"number before it is fine — where {_a(item_type)} is read ({', '.join(files)}); if the "
+        "heading only names it, correct the ID. Never invent the item to make the ID resolve.",
+        token,
+    )
+
+
+def id_in_table(token: str, item_type: str, files: Iterable[str], file: str, line: int) -> Finding:
+    return Finding(
+        "V16",
+        file,
+        line,
+        f"{token} starts a table row, but a table declares nothing — and nothing else declares it.",
+        f"Fix: to declare it, write a heading `### {token} — <title>` where {_a(item_type)} is "
+        f"read ({', '.join(files)}); if the row only lists it, correct the ID. Never invent the "
+        "item to make the ID resolve.",
         token,
     )
 
@@ -346,9 +390,21 @@ def fix_refused(violation: Finding) -> str:
     )
 
 
-def fix_stray(marker: str, file: str, line: int) -> str:
+def fix_stray(stray: Stray) -> str:
+    where, marker = f"{stray.file}:{stray.line}", stray.marker
+    if stray.kind == "table":
+        return (
+            f"the '{marker}' table row at {where} is not read — a table declares nothing; "
+            f"write `{marker}: …` as a line in the item's section."
+        )
+    if stray.kind == "outside":
+        return (
+            f"the '{marker}:' line at {where} is outside every item's section, so it is not "
+            "read — move it under the heading of the item it belongs to, above the next "
+            "heading of the same or a higher level."
+        )
     return (
-        f"the '{marker}:' line at {file}:{line} is outside the module docstring, so it is not "
+        f"the '{marker}:' line at {where} is outside the module docstring, so it is not "
         "read — move it into the docstring."
     )
 

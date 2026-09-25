@@ -27,7 +27,10 @@ A call without a valid key is refused.
 ```
 
 ```markdown
-### DSN-SVC-01 — Check the key before dispatch
+### 2.1 DSN-SVC-01 — Check the key before dispatch
+Every call passes the key check before any handler runs.
+
+#### Traceability
 - Satisfies: REQ-SVC-01
 ```
 
@@ -47,8 +50,15 @@ def test_a_call_without_a_valid_key_is_refused():
     assert True  # syntax example only; replace with a real behavioral assertion
 ```
 
-The heading and file pattern together declare a document item. Module links belong in the
-module docstring, never an ordinary comment. Tests use a direct `pytest.mark.verifies`
+A heading that starts with the item's ID, in a file its type is read from, declares a
+document item. The item is its section, down to the next heading at the same or a higher
+level: sub-sections, tables and diagrams inside it are its text, and its fields and links
+may sit in any of them as `Key: value` lines. A section number, bold or backticks around
+the ID and a trailing attribute are layout:
+`### 1.2 **REQ-SVC-02** — Records survive a restart {#records}`. Tables, diagrams and
+prose may name IDs but declare nothing: never write a link as a table cell, and never
+declare an item as a table row. Module links belong in the module docstring, never an
+ordinary comment. Tests use a direct `pytest.mark.verifies`
 decorator with literal IDs. Test cases have function identities; parameter variants are
 runs of that case. Put tests in the configured level folders. IDs are never reused.
 

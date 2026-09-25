@@ -55,7 +55,7 @@ src/qmstrace/
                          results(report_path) reads the explicit report and assesses once
   core/                  pure — no file, no Git, no framework
     errors.py            CouldNotJudge — the one way a run says it could not judge; carries the next move
-    model.py             Item, Link, Lead, Finding, Notice, Extracted — frozen dataclasses;
+    model.py             Item, Link, Lead, Mention, Stray, Finding, Notice, Extracted — frozen dataclasses;
                          ID_TOKEN, what reads as an ID at all; text_digest — item text, digested
     config.py            TraceConfig.parse(local_text, schema_text) — validate, merge, provenance
     graph.py             TraceGraph.build(config, extracted, Surroundings) -> (graph, findings);
@@ -74,7 +74,7 @@ src/qmstrace/
     base.py              IExtractor, the registry by name; FORMS — how each extractor's items
                          write a link, for a gap's next move (M3)
     fields.py            the field line `Key: value` — shared by every extractor that reads fields
-    markdown.py          headings, fields, fences, item text and its digest
+    markdown.py          headings and their forms, sections, fields, fences, strays, mentions, item text
     python_module.py     the module docstring's Implements line
     pytest_tests.py      test functions, verifies markers, own digest; report_identity(node_id)
     junit.py             bytes -> Report entries or parse diagnostic; safe defusedxml, no files
@@ -208,10 +208,11 @@ deciding eligibility. The check failure predicate remains violations plus strict
 |---|---|
 | reword a finding, or change its next move | `core/findings.py` — a gap's wording too; its code and text are the schema's |
 | change how a marker is written in a next move | the extractor's `form()` — `tests/unit/test_forms.py` round-trips it |
-| add a finding code | `core/findings.py`, the function in `core/judge.py` or `core/graph.py` that emits it, a fixture — `test_catalogue.py` fails until all three exist |
+| add a finding code | `core/findings.py`, the function in `core/judge.py` or `core/graph.py` that emits it, a `SCENARIOS` entry in `test_catalogue.py` — which fails until all three exist — and a line in `broken()` for the wording review |
 | add a coverage rule | no code — the trace schema |
 | read a new marker form, or another test framework | one new file in `extract/`, registered by name |
-| change what counts as an item's text | `extract/markdown.py` — and D-series in the design doc, because it moves every digest |
+| change what counts as an item's text | `extract/markdown.py` — and data architecture § Item text, because it moves digests; the pinned fixture digests in `test_extract_markdown.py` say which |
+| change which headings declare, or where an item ends | `extract/markdown.py` `_heading`, `_leading_id`, `_item_shaped` — and § Marker syntax v0 |
 | change how a baseline is chosen | `core/judge.py` `resolve_baselines` |
 | change what Git is asked | `infra/git.py` |
 | change a command's output | `render/text.py` and its golden file — then `rg <golden> contents/` for the prose that frames it |
@@ -268,6 +269,10 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | ★ Every finding, violation or gap, ends with a next move | `tests/test_catalogue.py` |
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspect_assessment.py` |
+| ★ An item is its section: an edit under a sub-heading of a frozen item is a change | `tests/integration/test_baselines.py` |
+| ★ A marker in a form the extractor does not read is reported — a stray named by its gap, or V16 — never silently dropped | `tests/unit/test_forms.py`, `tests/unit/test_graph.py` |
+| ★ An item with no sub-heading and no decorated heading keeps its title and digest across changes to the reading rules | `tests/unit/test_extract_markdown.py` § 7 |
+| ★ A near-miss (V16) never stops a baseline tag's tree being read; every other violation does | `tests/integration/test_baselines.py` |
 | A problem in the user's repo is a finding, never an exception | review; `extract/` has no `raise` outside parse failures it converts |
 | `cli.py` holds no logic | review; its handlers are open → render → return |
 
