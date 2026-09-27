@@ -1,0 +1,17 @@
+Usage: qmstrace ledger copy-schema [OPTIONS] [REPO…]
+
+  Write the project's trace schema into each product repo as a generated,
+  verified copy.
+
+  The copy sits between qmstrace markers in the repo's qmstrace.toml; every
+  other byte is kept. All the repos, or none: a problem in any names every
+  problem and writes nothing. A second run changes nothing. Commit the updated
+  qmstrace.toml in each repo.
+
+Arguments:
+  REPO…  Repos the schema names under [repos]; default: every one.
+
+Options:
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

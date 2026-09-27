@@ -38,6 +38,7 @@ nav = [
     { "qmstrace results" = "reference/commands/results.md" },
     { "qmstrace check" = "reference/commands/check.md" },
     { "qmstrace rules" = "reference/commands/rules.md" },
+    { "qmstrace ledger" = "reference/commands/ledger.md" },
     { "Findings" = "reference/findings.md" },
     { "Exit codes" = "reference/exit-codes.md" },
     { "Configuration" = "reference/configuration.md" },

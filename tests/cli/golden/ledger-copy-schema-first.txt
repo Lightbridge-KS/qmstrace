@@ -1,0 +1,4 @@
+schema: MINI sha256:be2233006ff50d90aebbe2db771dd6475ce858057b6d80eb951f3643cf022288
+updated: client — ../client/qmstrace.toml, was by path
+updated: service — ../service/qmstrace.toml, was by path
+Commit qmstrace.toml in each updated repo. Exit 0.

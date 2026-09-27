@@ -174,6 +174,29 @@ class Held:
     edited: bool = False  # a copy whose content no longer matches its digest
 
 
+@dataclass(frozen=True, slots=True)
+class Copied:
+    """One repo's copy, as `qmstrace ledger copy-schema` reports it."""
+
+    repo: str  # its name in the schema's [repos]
+    file: str  # its qmstrace.toml, as the ledger reaches it
+    changed: bool
+    before: str  # what it held: by path, a copy of older rules, one edited by hand, …
+
+
+def before_copy(held: Held, digest: str) -> str:
+    """What a repo held before the copy, in the words its report line uses."""
+    if held.kind == "path":
+        return "was by path"
+    if held.kind == "empty":
+        return "was an empty [schema]"
+    if held.edited:
+        return "replaced a copy edited by hand"
+    if held.digest == digest:
+        return "layout only — rules unchanged"
+    return f"rules changed (was {held.digest})"
+
+
 def held_schema(local_text: str, file: str = "qmstrace.toml") -> Held:
     """Find the project's schema in a product repo's configuration, and say what form it is in."""
     try:

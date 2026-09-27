@@ -1,0 +1,10 @@
+Usage: qmstrace ledger [OPTIONS] COMMAND [ARGS]...
+
+  The project side's verbs — run them in the ledger repo, where
+  qmstrace.schema.toml is.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  copy-schema  Copy the project's trace schema into its product repos.

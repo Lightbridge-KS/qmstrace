@@ -211,3 +211,25 @@ def test_rules_that_no_longer_fit_the_repo_are_refused_before_writing() -> None:
 def test_the_copy_parses_on_its_own() -> None:
     data = tomllib.loads(BLOCK)
     assert data["schema"]["project"] == "MINI"
+
+
+@pytest.mark.parametrize(
+    ("held", "said"),
+    [
+        (setup.Held(0, 1, "path", path="x"), "was by path"),
+        (setup.Held(0, 1, "empty"), "was an empty [schema]"),
+        (
+            setup.Held(0, 1, "copy", digest="sha256:a", edited=True),
+            "replaced a copy edited by hand",
+        ),
+        (setup.Held(0, 1, "copy", digest="sha256:b"), "layout only — rules unchanged"),
+        (setup.Held(0, 1, "copy", digest="sha256:a"), "rules changed (was sha256:a)"),
+    ],
+)
+def test_what_a_repo_held_is_said_in_its_report_line(held: setup.Held, said: str) -> None:
+    assert setup.before_copy(held, "sha256:b") == said
+
+
+def test_the_ledgers_trailing_newlines_do_not_change_the_block() -> None:
+    assert setup.schema_block(SCHEMA.rstrip("\n"), "MINI") == BLOCK
+    assert setup.schema_block(SCHEMA + "\n\n\n", "MINI") == BLOCK
