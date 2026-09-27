@@ -82,3 +82,12 @@ def test_a_page_includes_only_files_that_tests_own(page: str) -> None:
     for target in SNIPPET.findall((CONTENTS / page).read_text(encoding="utf-8")):
         assert target.startswith(INCLUDABLE), f"{page} includes {target}, outside {INCLUDABLE}"
         assert (TESTS / target).is_file(), f"{page} includes {target}, which does not exist"
+
+
+def test_the_copy_example_is_what_the_command_writes(
+    golden: Callable[[Path, str], None], embed: Callable[..., str]
+) -> None:
+    mini = TESTS / "fixtures" / "mini"
+    local = (mini / "service" / "qmstrace.toml").read_text(encoding="utf-8")
+    schema = (mini / "ledger" / "qmstrace.schema.toml").read_text(encoding="utf-8")
+    golden(MANUAL_GOLDEN / "copy-example.toml", embed(local, schema))

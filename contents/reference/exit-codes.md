@@ -17,7 +17,8 @@
 - **`0` means the command completed; `1` means a check failed.** For a check, `1` means
   violations — or, under the gate, gaps too. The command's last line says which.
 - **`2` is no verdict at all.** The run could not judge: no `qmstrace.toml` above the folder, a
-  trace schema it cannot read, a ledger repo where a product repo was expected. Fix what it
+  trace schema it cannot read, a ledger repo where a product repo was expected, or a product
+  repo where the ledger was. Fix what it
   names; do not read it as a pass or as a failure. A mistyped command or option exits `2` as
   well, as with most command-line tools.
 - **`3` is a fault in qmstrace, not in the repo.** It prints one line, never a traceback.

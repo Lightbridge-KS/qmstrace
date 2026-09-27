@@ -1,0 +1,141 @@
+# This product repo's TRACE CONFIGURATION — what is local to it. The project's trace schema
+# (link types, coverage rules, required fields, the agreement, change requests, baselines) is
+# the project's, not this repo's: `qmstrace rules` prints what is in force and whose it is.
+#
+# What does NOT belong here: rules. If a rule seems wrong, tell the project side.
+
+version = 1
+ledger  = "../ledger"               # optional: where the agreement and the change requests
+                                    # are. Without it they are reported as NOT VERIFIED.
+
+# qmstrace:begin — the MINI trace schema, generated in its ledger by `qmstrace ledger copy-schema`; edit it there, never here
+[schema]
+digest = "sha256:be2233006ff50d90aebbe2db771dd6475ce858057b6d80eb951f3643cf022288"
+# The project's TRACE SCHEMA — one project's declaration, authored here in the ledger repo and
+# shared by every product repo of the project. A product repo either points at this file or
+# carries a generated, verified copy of it.
+#
+# What does NOT belong here: which files a repo scans, its ID patterns, its subjects — those
+# are local to a product repo and live in its own qmstrace.toml.
+#
+# Paths in this file are relative to the ledger's root.
+
+version = 1
+project = "MINI"
+
+[schema.repos]                             # the product repos of this project
+service = "../service"
+client  = "../client"
+
+# ── item types the project knows; a repo declares the ones it has ─────────────────────────
+[schema.item_types.requirement]
+required = ["Category", "Origin", "Verify-by"]
+
+[schema.item_types.requirement.values]     # allowed values of a field
+Category    = ["functional-suitability", "performance-efficiency", "compatibility", "usability", "reliability",
+               "maintainability", "portability", "security", "design-constraint", "legal-regulatory"]
+"Verify-by" = ["test", "inspection", "analysis"]
+
+[schema.item_types.design_element]
+[schema.item_types.component]
+
+[schema.item_types.test_case]
+levels = ["unit", "integration", "system"]
+
+# ── link types — a field whose name is a link marker IS the link; all are many-to-many ────
+[schema.links]
+Origin     = { from = ["requirement"],                   to = ["origin_clause"] }
+Satisfies  = { from = ["design_element"],                to = ["requirement"] }
+Implements = { from = ["component"],                     to = ["design_element"] }
+verifies   = { from = ["test_case"],                     to = ["requirement", "design_element"] }
+Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
+# coverage = false: the link carries suspicion and impact, and no coverage rule may need it
+
+# ── coverage rules — an unmet rule is a gap ───────────────────────────────────────────────
+[[schema.rules]]
+code  = "G01"
+item  = "requirement"
+needs = "incoming:Satisfies"
+text  = "no design element satisfies it yet."
+
+[[schema.rules]]
+code  = "G02"
+item  = "requirement"
+where = { "Verify-by" = "test" }
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[schema.rules]]
+code  = "G03"
+item  = "design_element"
+needs = "incoming:Implements"
+text  = "no component implements it yet."
+
+[[schema.rules]]
+code  = "G04"
+item  = "design_element"
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[schema.rules]]
+code  = "G05"
+item  = "design_element"
+needs = "outgoing:Satisfies"
+text  = "satisfies no requirement — every design element points back to one."
+
+[[schema.rules]]
+code  = "G06"
+item  = "component"
+needs = "outgoing:Implements"
+text  = "implements no design element — every component points back to one."
+
+[[schema.rules]]
+code  = "G07"
+item  = "test_case"
+needs = "outgoing:verifies"
+text  = "verifies nothing."
+
+# ── what is declared outside any product repo: cited there, declared here ─────────────────
+[schema.externals.agreement]
+item_type   = "origin_clause"
+prefix      = "AGR-"
+source      = "agreement.md"
+declared_as = '^\s*[-*]\s+\*\*(AGR-\d+)\*\*'
+
+[schema.change_requests]
+prefix   = "CR-"
+source   = "change-requests"        # one file per request: CR-NNN.md
+accepted = "accepted"
+
+# ── baselines — tags a project already cuts, recognised by pattern (never imposed) ────────
+[schema.baselines.requirements]            # freezes one subject's requirements
+tag    = '^baseline/(?P<subject>[a-z0-9-]+)/requirements/(?P<n>\d+)$'
+covers = ["requirement"]
+
+[schema.baselines.product]                 # a release tag IS the product baseline
+tag     = '^v\d+\.\d+\.\d+$'
+covers  = ["requirement", "design_element"]
+subject = "*"
+# qmstrace:end
+
+[subjects.service]                  # a named body of requirements; a baseline freezes a subject
+key = "SVC"                         # the key inside its item IDs
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-SVC-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]
+extractor  = "markdown"
+id_pattern = '^DSN-SVC-\d{2}$'
+files      = ["docs/design/*.md"]
+
+[items.component]                   # ID = the module's path
+extractor = "python-module"
+files     = ["src/**/*.py"]
+ignore    = ["**/__init__.py"]
+
+[items.test_case]                   # ID = the test function's node id
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]

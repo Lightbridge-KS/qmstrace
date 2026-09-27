@@ -54,7 +54,7 @@ cites from them cannot be looked up:
 | the agreement | `external AGR-*: NOT VERIFIED` | nothing — each cited clause is judged at the ledger's import |
 | a sibling | `sibling …: NOT REACHABLE` and `not verified here: …` | nothing — unless the ID matches this repo's own pattern |
 | the ledger's location (no `ledger` key) | `NOT VERIFIED`, `siblings: NOT LOCATED` | nothing |
-| the trace schema, read by path | the run cannot judge — exit `2` | the run |
+| the trace schema, read by path | the run cannot judge — exit `2` | the run — which is why a repo judged alone carries a copy |
 
 **Why not fail?** Failing would force every product repo's pipeline to check out the ledger and
 every sibling, only to judge them against a colleague's uncommitted work. The ledger's import
@@ -64,8 +64,8 @@ reads them all together, at a pin, and judges every citation for real.
 say, in the client — gets no such benefit: this repo *was* read, so the ID is known not to
 exist, and the run reports `V03`.
 
-!!! note "Not built yet"
-
-    A pipeline needs a copy of the project's trace schema in the repo, generated and verified,
-    because it has no ledger to read it from. Nothing generates that copy yet; until it does, a
-    pipeline checks out the ledger repo beside the product repo.
+**A pipeline has no ledger to read the schema from**, so a product repo carries a generated,
+verified copy of it — written in the ledger by `qmstrace ledger copy-schema` and committed in
+the repo. Its digest is checked on every run; only the rules travel, and everything else the
+ledger holds stays *not verified* until the ledger's import. See
+[share the project's schema](../how-to/share-the-schema.md).
