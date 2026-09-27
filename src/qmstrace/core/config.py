@@ -28,6 +28,11 @@ from qmstrace.core.errors import CouldNotJudge
 
 SUPPORTED_VERSION: Final = 1
 
+# A product repo's copy of the project's trace schema sits between these two comment lines —
+# generated in the ledger by `qmstrace ledger copy-schema`, never edited by hand (D9).
+COPY_BEGIN: Final = "# qmstrace:begin"
+COPY_END: Final = "# qmstrace:end"
+
 # The extractors this qmstrace ships, and whether each reads IDs someone wrote — so an ID
 # pattern is required — or derives them from a path or a test function, so one is refused.
 # `extract/` registers exactly these names; a test keeps the two in step.
@@ -247,6 +252,14 @@ class TraceConfig:
                     )
             holder.consume_all()
 
+        if form is not SchemaForm.VERIFIED_COPY and marked(local_text):
+            raise CouldNotJudge(
+                f"{local_name}: the qmstrace markers hold a generated copy of the project's "
+                "trace schema, but [schema] carries no digest — it was edited by hand.",
+                "Fix: have the copy generated again — `qmstrace ledger copy-schema` in the "
+                "project's ledger — or, if this repo is to hold its own schema, remove the two "
+                "marker lines.",
+            )
         _version(schema)
         config = cls(
             project=schema.text("project"),
@@ -267,6 +280,41 @@ class TraceConfig:
         local.done()
         _cross_check(config, schema.file)
         return config
+
+    @classmethod
+    def of_schema(
+        cls, schema_text: str, *, schema_name: str = "qmstrace.schema.toml"
+    ) -> TraceConfig:
+        """The project's trace schema on its own — its project, repos and rules, validated as a
+        product repo would read them, with no item type declared here."""
+        placeholder = 'version = 1\n[schema]\npath = "qmstrace.schema.toml"\n'
+        return cls.parse(placeholder, schema_text, local_name=schema_name, schema_name=schema_name)
+
+
+def structural(lines: list[str]) -> list[bool]:
+    """For each line, whether everything above it is complete TOML — only such a line can be a
+    table header or a copy marker, never one inside a multi-line string or array."""
+    found: list[bool] = []
+    for index, line in enumerate(lines):
+        if not line.lstrip().startswith(("[", "#")):
+            found.append(False)
+            continue
+        try:
+            tomllib.loads("".join(lines[:index]))
+        except tomllib.TOMLDecodeError:
+            found.append(False)
+        else:
+            found.append(True)
+    return found
+
+
+def marked(text: str) -> bool:
+    """Whether the text holds a schema copy's begin marker, where a marker can be."""
+    lines = text.splitlines(keepends=True)
+    return any(
+        ok and line.startswith(COPY_BEGIN)
+        for line, ok in zip(lines, structural(lines), strict=True)
+    )
 
 
 def schema_digest(schema: Mapping[str, object]) -> str:
