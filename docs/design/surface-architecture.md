@@ -65,7 +65,7 @@ flowchart TD
     cli --> init["init ✔"]
     cli --> graph["graph ✔ — local offline browser"]
     cli --> ledger["ledger … — its own group"]
-    ledger --> copy["copy-schema ◻ M9b"]
+    ledger --> copy["copy-schema ✔"]
     ledger --> import["import NAME@PIN ✔ driver"]
     ledger --> emit["emit tables"]
     ledger --> event["record an event"]
@@ -83,7 +83,7 @@ flowchart TD
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
 | `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers | ✔ |
 | `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
-| `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *M9b* | ◻ |
+| `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *In the engine since M9b* | ✔ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 

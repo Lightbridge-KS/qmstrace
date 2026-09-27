@@ -8,6 +8,12 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- `ledger copy-schema [REPO…]`, the first verb of the `ledger` group: run in the ledger, it
+  writes the project's trace schema into each product repo as a generated, verified copy
+  between `# qmstrace:begin` / `# qmstrace:end`, keeping every other byte. All repos or
+  none; a second run changes nothing. A product repo carrying the copy is judged on its own,
+  and at a baseline tag cut after it. A how-to, *Share the project's schema*, and a
+  reference page for the group.
 - Docs written the way architecture guides are written are traced: an item is its section,
   down to the next heading at the same or a higher level, so sub-sections, tables and
   diagrams are its text and its fields and links may sit in any sub-section. The ID may
@@ -95,6 +101,8 @@ All notable changes to this project are recorded here. The format follows
 - A decorated heading with this repo's ID in a file not scanned for its type is `V07`; when
   the ID is declared where it is read, the fix says not to start a heading with it.
 - A second `Change:` line in an item names the first.
+- While the schema copy's begin marker stands, `[schema]` must carry its digest; an unmarked
+  copy from before stays valid.
 - The shipped skill states these rules. A repo that installed the previous skill must remove
   `.qmstrace/skill/SKILL.md` before `init` refreshes it.
 

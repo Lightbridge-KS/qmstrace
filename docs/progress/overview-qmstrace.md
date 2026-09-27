@@ -49,17 +49,27 @@ notes about it. The developer chose to build the command before the experiment.
   adoption replaces the run of `[schema…]` tables; verified before writing; all repos or none;
   a begin marker means `[schema]` must carry a digest. Rejected names and forms are recorded
   in D9.
-- [ ] Specification: D9, the surface contract, the scenario catalogue, *Schema Copy* in the
-  glossary.
-- [ ] The pure transform and the marker rule, with unit tests; the test suite's copy
-  prototype replaced by it, every golden unchanged.
-- [ ] One rollback across several repos; the command meta-tests cover a group's verbs.
-- [ ] The command, its goldens and reference page; integration tests including a baseline
+- [x] Specification: D9, the surface contract, the scenario catalogue, *Schema Copy* in the
+  glossary. `beeba5c`
+- [x] The pure transform and the marker rule, with unit tests `180d13c`; the test suite's copy
+  prototype replaced by it `0a29c0a` — the only golden change is the baseline commit hash in
+  nine outputs, since the committed configuration now carries markers and comments.
+- [x] One rollback across several repos `8f787d5`; the command meta-tests cover a group's
+  verbs `a7c32a1`.
+- [x] The command, its goldens and reference page `e684ddb`; integration tests including a baseline
   tag read after the copy.
-- [ ] Manual: a how-to for sharing the schema; the configuration, setup, baselines and exit
+- [x] Manual `c34a6f2`: a how-to for sharing the schema; the configuration, setup, baselines and exit
   codes pages; the two *not built yet* notes resolved.
-- [ ] Beacon replay in disposable clones: only the two marker lines added; `status` and
+- [x] Beacon replay in disposable clones: only the two marker lines added; `status` and
   `check --strict` unchanged.
+
+**M9b evidence, 2026-09-27** (`feat/m9b-schema-copy`, local): `just dry` passed with 726
+Python tests at 99.07% coverage, four Node tests, strict types, wheel assets and a strict
+manual build. With a wheel from the branch, in disposable clones of the beacon test bed:
+`ledger copy-schema` reported both products *layout only — rules unchanged*; each diff is
+exactly the two marker lines; `status` and `check --strict` are byte-identical before and
+after, and `m5b/requirements/2` is still read; a second run changes nothing. Merge, CI and
+the deploy preview remain.
 
 ## Next — dogfooding
 
