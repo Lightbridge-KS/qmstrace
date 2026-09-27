@@ -65,6 +65,7 @@ flowchart TD
     cli --> init["init ✔"]
     cli --> graph["graph ✔ — local offline browser"]
     cli --> ledger["ledger … — its own group"]
+    ledger --> copy["copy-schema ◻ M9b"]
     ledger --> import["import NAME@PIN ✔ driver"]
     ledger --> emit["emit tables"]
     ledger --> event["record an event"]
@@ -82,6 +83,7 @@ flowchart TD
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
 | `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers | ✔ |
 | `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
+| `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *M9b* | ◻ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
@@ -450,6 +452,32 @@ Each is marked 💡 where it bites.
 | 2 | **A quiet form of `check`**, and how much of the header survives in the default form. **Settled in M3; extended M5a:** the default form keeps one `read:` line and evidence notices; `--quiet` keeps the notices, findings and result line. The result line carries baseline counts, remote-tag completeness and unavailable-request limitations | §6 |
 | 3 | **The reviewer's and the auditor's surfaces are unvalidated.** Draft marking, read-only tables, reconcile and the read-only view are decisions on paper (D3, the PRD); none has met a reviewer | §2 |
 
+
+### Schema copy contract — M9b
+
+`ledger copy-schema [REPO…]` runs where `qmstrace.schema.toml` is found, walking up from the
+effective directory; run where a `qmstrace.toml` is found first, it exits 2 and names the
+ledger — as a product verb run in a ledger already names the product repo. With no names it
+copies into every repo in the schema's `[repos]`, resolved from the ledger; a name outside
+`[repos]` exits 2 with the names it knows.
+
+Output — one line for the schema, one per repo, a closing line:
+
+```text
+schema: MINI sha256:<digest>
+updated: client — ../client/qmstrace.toml, was by path
+unchanged: service — ../service/qmstrace.toml
+Commit qmstrace.toml in each updated repo. Exit 0.
+```
+
+A repo's line says what it held before: *was by path*, *rules changed (was sha256:…)*,
+*layout only — rules unchanged*, *replaced a copy edited by hand*. Any refusal exits 2 with
+every repo's problem and writes nothing; the next move says what to change by hand — for a
+repo holding its own schema, replace its `[schema]` with a `path` to the ledger first. The
+copy is written, never committed: the product repo's pull request carries the diff.
+
+**Rejected:** a `--check` mode before the ledger has a pipeline of its own; stamping the
+ledger's commit into the block, which would make every run a change.
 
 ### Setup contract — M6
 

@@ -30,12 +30,36 @@ at `e7d38b6`: an item is its section, decorated ID headings declare, markers wri
 are not read are reported (strays, V16), and a fence closes on its own mark. See
 [M9](#m9--rich-markdown--landed) and *Latest verified evidence*.
 
-**Next: [dogfooding](#next--dogfooding)** — decisions pending.
+**Now: [M9b · the schema copy](#now--m9b--the-schema-copy)**, then [dogfooding](#next--dogfooding).
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
+
+## Now — M9b · the schema copy
+
+Planned 2026-09-27 on `feat/m9b-schema-copy`, before dogfooding. A product repo reading the
+project's schema by path cannot be judged at a baseline tag — the tagged tree holds no ledger
+— and D9's generated, verified copy had no generator; the manual carried two *not built yet*
+notes about it. The developer chose to build the command before the experiment.
+
+- **Decided:** `qmstrace ledger copy-schema [REPO…]`, the `ledger` group's first verb, run in
+  the ledger; the copy between `# qmstrace:begin` / `# qmstrace:end`, comments kept; first
+  adoption replaces the run of `[schema…]` tables; verified before writing; all repos or none;
+  a begin marker means `[schema]` must carry a digest. Rejected names and forms are recorded
+  in D9.
+- [ ] Specification: D9, the surface contract, the scenario catalogue, *Schema Copy* in the
+  glossary.
+- [ ] The pure transform and the marker rule, with unit tests; the test suite's copy
+  prototype replaced by it, every golden unchanged.
+- [ ] One rollback across several repos; the command meta-tests cover a group's verbs.
+- [ ] The command, its goldens and reference page; integration tests including a baseline
+  tag read after the copy.
+- [ ] Manual: a how-to for sharing the schema; the configuration, setup, baselines and exit
+  codes pages; the two *not built yet* notes resolved.
+- [ ] Beacon replay in disposable clones: only the two marker lines added; `status` and
+  `check --strict` unchanged.
 
 ## Next — dogfooding
 

@@ -186,6 +186,13 @@ what is local to the repo — the item types it declares, their ID patterns, the
 its baselines.
 _Avoid_: trace schema (that is the project's), settings
 
+**Schema Copy**:
+The project's trace schema written into a product repo's trace configuration, between
+`# qmstrace:begin` and `# qmstrace:end`, with a digest that is checked on every run. Generated
+in the ledger by `qmstrace ledger copy-schema`, never edited by hand; what lets a product repo
+be judged without its ledger beside it.
+_Avoid_: embedded schema, vendored schema, schema cache
+
 **Coverage Rule**:
 A statement of which links an item type must have, and from which stage onward.
 _Avoid_: check, constraint
