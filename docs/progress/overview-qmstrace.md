@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M8 and node-title hover landed; user acceptance round 1 on the beacon-engine test bed; M9 rich Markdown built and verified, awaiting merge; then dogfooding; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M9 landed, M9 being rich Markdown; next, dogfooding qmstrace as a traced product repo with a ledger repo beside it; then M10 mentions; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-25 · Slice 1: the product-repo half.** M0–M8 have landed.
+**Updated 2026-09-27 · Slice 1: the product-repo half.** M0–M9 have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
 including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
@@ -18,21 +18,43 @@ setup, test-bed migration, the local browser and slice closure.
 at `ea253f0`. Tooltips show literal full titles with a full-ID fallback; list/inspector access
 remains available without hover.
 
-**User acceptance on `../_tests/beacon-engine/`, round 1** (`fix/beacon-uat-round-1`). A user
+**User acceptance on `../_tests/beacon-engine/`, round 1** merged in
+[PR #15](https://github.com/Lightbridge-KS/qmstrace/pull/15) at `58fc525`. A user
 looking for the thread command reached for `trace`. The verb stays `thread` (the reasoning in
 the surface doc holds); the `--help` summary now reads *Trace one item: …* so the word leads to
 it. An ID pattern no ID can match is now refused (see *Latest verified evidence*). The test
 bed's bundled `.engine-venv` predates PR #14; acceptance runs use a wheel built from `main`.
 
-**M9 · rich Markdown** — built on `feat/m9-rich-markdown`, verified locally; see
-[below](#next--m9--rich-markdown) and *Latest verified evidence*.
+**M9 · rich Markdown** merged in [PR #17](https://github.com/Lightbridge-KS/qmstrace/pull/17)
+at `e7d38b6`: an item is its section, decorated ID headings declare, markers written where they
+are not read are reported (strays, V16), and a fence closes on its own mark. See
+[M9](#m9--rich-markdown--landed) and *Latest verified evidence*.
+
+**Next: [dogfooding](#next--dogfooding)** — decisions pending.
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
 
-## Next — M9 · rich Markdown
+## Next — dogfooding
+
+**Validation after M9 — dogfooding.** qmstrace itself becomes a traced product repo, with a
+sibling ledger repo beside it holding the schema, agreement and change requests. One
+fresh-agent run covers PRD success criteria 5/6 and lens-style authoring, with measures fixed
+in `docs/tests/` before the run; it replaces the separate criteria-5/6 run listed below.
+💡 Dogfooding puts markers into the engine repo, which the PRD constraints and the system
+architecture keep free of project data. Amend that to mean *no other project's data* before
+the first marker lands — or trace a copy elsewhere.
+
+The ledger repo sits beside this one and is published to GitHub; its name, visibility, keys
+and what is traced first are being decided before any marker lands.
+
+**Later — M10 · mentions.** Every token with a configured prefix in a scanned file — prose,
+table or Mermaid — must exist; a dangling one is a violation, like V03. Configured prefixes
+only: `SHA-256`, `UTF-8` and `ADR-0001` all fit the bare ID shape.
+
+## M9 · rich Markdown — landed
 
 Planned 2026-09-24 from user acceptance. Docs written with the architecture lens skills —
 tables, Mermaid, numbered and nested headings — had never met the Markdown extractor: the
@@ -91,21 +113,10 @@ reports no strays.
   decorated heading. `0a155aa`
 - [x] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
   unchanged — see *Latest verified evidence*.
-- [ ] Merge on `feat/m9-rich-markdown`: CI dry gate and the Netlify deploy preview.
+- [x] Merged in #17 at `e7d38b6`: the GitHub dry gate passed and the Netlify deploy preview
+  built (confirmed 2026-09-27). The how-to page as deployed has not been inspected.
 - [ ] Lens skills: a traced-repo note, filed as
   [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71); not part of M9.
-
-**Validation after M9 — dogfooding.** qmstrace itself becomes a traced product repo, with a
-sibling ledger repo beside it holding the schema, agreement and change requests. One
-fresh-agent run covers PRD success criteria 5/6 and lens-style authoring, with measures fixed
-in `docs/tests/` before the run; it replaces the separate criteria-5/6 run listed below.
-💡 Dogfooding puts markers into the engine repo, which the PRD constraints and the system
-architecture keep free of project data. Amend that to mean *no other project's data* before
-the first marker lands — or trace a copy elsewhere.
-
-**Later — M10 · mentions.** Every token with a configured prefix in a scanned file — prose,
-table or Mermaid — must exist; a dangling one is a violation, like V03. Configured prefixes
-only: `SHA-256`, `UTF-8` and `ADR-0001` all fit the bare ID shape.
 
 ## Slice closure — landed
 
@@ -144,6 +155,8 @@ M6–M8 shipped together in PR #13 with the dry gate and their
 | M5b | Independent historical/current suspect traversal, S01, status/check views and review manual | #12 · `8ea7bda` |
 | M6–M8 | Setup, engine-native test-bed migration, offline browser, Diátaxis pages and slice closure | #13 · `6fba9f8` |
 | Hover | Node titles on hover in the local browser | #14 · `ea253f0` |
+| UAT round 1 | `thread` help summary; refusal of an ID pattern no ID can match | #15 · `58fc525` |
+| M9 | Rich Markdown: sections, heading forms, strays, V16, fence closing; lens-style fixture and how-to | #17 · `e7d38b6` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
@@ -174,7 +187,9 @@ code block with both inner Mermaid fences as text. With a wheel from the branch:
   --strict`, `check --quiet`, `rules`, `thread`, `impact` give identical bytes with `-C`
   before and after the command, and both products pass the gate.
 
-Raw records: `_playground/2026-09-25_m9-rich/` (local).
+Raw records: `_playground/2026-09-25_m9-rich/` (local). On
+[PR #17](https://github.com/Lightbridge-KS/qmstrace/pull/17) the GitHub dry gate and the Netlify
+deploy preview passed (confirmed 2026-09-27).
 
 **User acceptance, 2026-09-24 (`fix/beacon-uat-round-1`):** on the beacon test bed,
 `id_pattern = '^REQ_BCN_\d{2}$'` loaded, then `status` found 0 requirements and `check` gave
