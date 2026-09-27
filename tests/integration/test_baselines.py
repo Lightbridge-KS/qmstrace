@@ -369,7 +369,7 @@ def test_unusable_historical_snapshot_fails(controlled, kind):
 
 def test_type_rename_does_not_hide_frozen_identity(controlled):
     config = controlled / "qmstrace.toml"
-    source = re.sub(r"(?m)^digest = .*\n", "", config.read_text())
+    source = re.sub(r"(?m)^(?:digest = |# qmstrace:(?:begin|end)).*\n", "", config.read_text())
     config.write_text(source.replace("requirement", "need"))
     edit(controlled)
     # Scope names were renamed too; match the old tag with the renamed configured scope.
@@ -449,7 +449,7 @@ def test_tag_with_same_named_branch_and_other_subject(controlled):
 
 def test_unconfigured_register_stays_unverified_in_result_line(controlled):
     config = controlled / "qmstrace.toml"
-    source = re.sub(r"(?m)^digest = .*\n", "", config.read_text())
+    source = re.sub(r"(?m)^(?:digest = |# qmstrace:(?:begin|end)).*\n", "", config.read_text())
     config.write_text(
         re.sub(r"(?ms)^\[schema.change_requests\].*?(?=^\[schema.baselines)", "", source)
     )

@@ -193,11 +193,17 @@ def test_an_unknown_key_in_the_schema_names_the_schema_file() -> None:
     assert stopped.what.startswith("qmstrace.schema.toml: unknown key 'projct'")
 
 
-def test_an_unknown_key_in_a_copy_names_the_repos_file(embed: Embed) -> None:
-    import tomllib
+def test_an_unknown_key_in_a_copy_names_the_repos_file() -> None:
+    from qmstrace.core import setup
 
     broken = SCHEMA.replace('project = "MINI"', 'project = "MINI"\nprojct = "x"')
-    stopped = refusal(embed(SERVICE, broken, digest=schema_digest(tomllib.loads(broken))), None)
+    held, lines = setup.held_schema(SERVICE), SERVICE.splitlines(keepends=True)
+    copy = (
+        "".join(lines[: held.start])
+        + setup.schema_block(broken, "MINI")
+        + "".join(lines[held.end :])
+    )  # written by hand: the transform itself refuses a schema the repo cannot load
+    stopped = refusal(copy, None)
     assert stopped.what.startswith("qmstrace.toml: unknown key 'schema.projct'")
 
 

@@ -175,7 +175,11 @@ def test_renamed_current_types_do_not_reinterpret_historical_schema(suspect_repo
     change(suspect_repo)
     config = suspect_repo / "qmstrace.toml"
     config.write_text(
-        re.sub(r"(?m)^digest = .*\n", "", config.read_text().replace("design_element", "design"))
+        re.sub(
+            r"(?m)^(?:digest = |# qmstrace:(?:begin|end)).*\n",
+            "",
+            config.read_text().replace("design_element", "design"),
+        )
     )
     found = values(suspect_repo)
     assert len(found) == 7
@@ -193,7 +197,7 @@ def test_downstream_only_baseline_does_not_clear_upstream_chain(suspect_repo):
     config = root / "qmstrace.toml"
     config.write_text(
         re.sub(
-            r"(?m)^digest = .*\n",
+            r"(?m)^(?:digest = |# qmstrace:(?:begin|end)).*\n",
             "",
             config.read_text().replace(
                 'covers  = ["requirement", "design_element"]', 'covers  = ["design_element"]'

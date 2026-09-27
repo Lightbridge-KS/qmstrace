@@ -5,7 +5,6 @@ as text; integration tests copy it into a temporary directory and make real Git 
 """
 
 import os
-import re
 import shutil
 import subprocess
 import tomllib
@@ -14,7 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from qmstrace.core.config import TraceConfig, schema_digest
+from qmstrace.core import setup
+from qmstrace.core.config import TraceConfig
 
 # The fixture project holds product repos with test files of their own. They are data for the
 # engine to read, never tests for this suite to collect.
@@ -27,20 +27,17 @@ def mini_text(*parts: str) -> str:
     return MINI.joinpath(*parts).read_text(encoding="utf-8")
 
 
-def _embed(local: str, schema: str, *, digest: str | None = None) -> str:
-    head, _, tables = schema.partition("\n[")
-    tables = re.sub(r"(?m)^\[\[(.+?)\]\]", r"[[schema.\1]]", "[" + tables)
-    tables = re.sub(r"(?m)^\[(?!\[)(.+?)\]", r"[schema.\1]", tables)
-    stated = digest or schema_digest(tomllib.loads(schema))
-    copy = f'[schema]\ndigest = "{stated}"\n{head}\n{tables}'
-    # a function, not a string: the schema text holds backslashes that re.sub would read as escapes
-    return re.sub(r"(?ms)^\[schema\][^\n]*\n.*?(?=^\[subjects)", lambda _: copy + "\n", local)
+def _embed(local: str, schema: str) -> str:
+    """The configuration with the project's schema copied in — by the production transform,
+    exactly as `qmstrace ledger copy-schema` writes it."""
+    block = setup.schema_block(schema, str(tomllib.loads(schema)["project"]))
+    return setup.copy_schema(local, setup.held_schema(local), block)
 
 
 @pytest.fixture(scope="session")
 def embed() -> Callable[..., str]:
-    """Turn a by-path configuration into one that carries a copy of the schema — what the
-    ledger side will generate in slice 2; this is its prototype."""
+    """Turn a by-path configuration into one that carries a generated, verified copy of the
+    project's schema."""
     return _embed
 
 
