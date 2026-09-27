@@ -53,6 +53,21 @@ def commands() -> list[str]:
 
 
 @pytest.fixture(scope="session")
+def subcommands() -> dict[str, list[str]]:
+    """Every group's verbs, by the words a user types — `ledger` → `copy-schema`."""
+    from typer.main import get_command
+
+    from qmstrace.cli import app
+
+    group = get_command(app)
+    return {
+        name: sorted(getattr(command, "commands", {}))
+        for name, command in sorted(getattr(group, "commands", {}).items())
+        if getattr(command, "commands", None)
+    }
+
+
+@pytest.fixture(scope="session")
 def golden() -> Callable[[Path, str], None]:
     """Compare text with a committed golden file. `QMSTRACE_REGOLD=1` rewrites the file instead —
     read the diff before committing it."""

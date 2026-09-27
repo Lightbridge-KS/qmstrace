@@ -55,6 +55,13 @@ def test_every_command_has_a_reference_page(commands: list[str]) -> None:
     assert not missing, f"commands with no page under contents/reference/commands/: {missing}"
 
 
+def test_a_groups_page_includes_each_verbs_help(subcommands: dict[str, list[str]]) -> None:
+    for group, verbs in subcommands.items():
+        page = (CONTENTS / "reference" / "commands" / f"{group}.md").read_text(encoding="utf-8")
+        missing = [v for v in verbs if f'--8<-- "cli/golden/help-{group}-{v}.txt"' not in page]
+        assert not missing, f"{group}.md does not include the help of: {missing}"
+
+
 @pytest.mark.parametrize("page", PAGES)
 def test_a_page_opens_with_its_title_and_a_tldr(page: str) -> None:
     lines = [line for line in (CONTENTS / page).read_text(encoding="utf-8").splitlines() if line]
