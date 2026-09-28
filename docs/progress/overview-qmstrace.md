@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M9c landed, M9c being the skill's new home; now qmstrace is traced by its own ledger and its gate is not green yet; then M10 mentions; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c (a table of merges, detail archived); now qmstrace is traced by its own ledger and its gate is not green yet; next M10 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,43 +8,13 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-28 · Slice 1: the product-repo half.** M0–M9c have landed.
-M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
-including tracker cleanup `0dc5c8c`. M6–M8 merged in
-[PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
-setup, test-bed migration, the local browser and slice closure.
+**Updated 2026-09-28 · Slice 1: the product-repo half.** Every milestone through M9c has
+landed — see [Landed](#landed). **Now: [qmstrace, traced by its own
+ledger](#now--qmstrace-traced-by-its-own-ledger)**; next, [M10 · mentions](#next--m10--mentions).
 
-**Node-title hover** merged in [PR #14](https://github.com/Lightbridge-KS/qmstrace/pull/14)
-at `ea253f0`. Tooltips show literal full titles with a full-ID fallback; list/inspector access
-remains available without hover.
-
-**User acceptance on `../_tests/beacon-engine/`, round 1** merged in
-[PR #15](https://github.com/Lightbridge-KS/qmstrace/pull/15) at `58fc525`. A user
-looking for the thread command reached for `trace`. The verb stays `thread` (the reasoning in
-the surface doc holds); the `--help` summary now reads *Trace one item: …* so the word leads to
-it. An ID pattern no ID can match is now refused (see *Latest verified evidence*). The test
-bed's bundled `.engine-venv` predates PR #14; acceptance runs use a wheel built from `main`.
-
-**M9 · rich Markdown** merged in [PR #17](https://github.com/Lightbridge-KS/qmstrace/pull/17)
-at `e7d38b6`: an item is its section, decorated ID headings declare, markers written where they
-are not read are reported (strays, V16), and a fence closes on its own mark. See
-[M9](#m9--rich-markdown--landed) and *Latest verified evidence*.
-
-**M9b · the schema copy** merged in [PR #18](https://github.com/Lightbridge-KS/qmstrace/pull/18)
-at `f4e770b`: `qmstrace ledger copy-schema` writes the project's schema into each product repo
-as a verified copy, so a baseline tag can be judged without the ledger beside it.
-
-**M9c · the skill's home** merged in [PR #23](https://github.com/Lightbridge-KS/qmstrace/pull/23)
-at `02caed1`: `init` installs the skill at `.agents/skills/qmstrace/`, where Codex lists it, and
-links it from `.claude/skills/qmstrace` when the repo has `.claude/`, so Claude Code does too.
-
-**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)**, then
-[M10 · mentions](#later--m10--mentions).
-
-This is the single active tracker. Detailed milestone history and earlier planning are
-[archived](../archive/progress/slice-1-product-repo-half.md); the
-[earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
-Commit hashes locate work; verification claims below refer to checks actually run.
+This tracker holds what is being done, what is next, and what landed work left open. Each
+landed milestone's decisions, checklists and evidence are archived — the links are under
+[Landed](#landed). Commit hashes locate work; verification claims refer to checks actually run.
 
 ## Now — qmstrace, traced by its own ledger
 
@@ -54,173 +24,22 @@ register. This repo carries the verified copy of the schema, the stanza and the 
 engine repo's constraint now reads *no other project's data*; the decision and the option that
 lost are in the [system architecture](../design/system-architecture.md).
 
-- [x] The ledger repo: the schema (G01–G06; test levels `unit`, `integration`, `cli`, `meta`;
-  requirement baselines), agreement clauses AGR-1…15 and the change-request register — ledger
-  `a3faeab`.
-- [x] Meta-tests moved to `tests/meta/` `9f8b399`; the constraint amended `d259ac6`; the trace
-  configuration, schema copy and `init` `910208f`; the installed skill and stanza held to the
-  package by meta-tests `dd29899`.
+- [x] The ledger repo, at `a3faeab`: the schema — rules G01–G06, test levels `unit`,
+  `integration`, `cli` and `meta`, requirement baselines — agreement clauses AGR-1…15 and the
+  change-request register.
+- [x] This repo traced, in [#19](https://github.com/Lightbridge-KS/qmstrace/pull/19): the
+  meta-tests in a level folder of their own, the constraint amended, the trace configuration
+  with the schema copy, and the installed guidance held to the package by meta-tests.
+- [x] The skill installed where a harness lists it — `.agents/skills/qmstrace/`, linked from
+  `.claude/skills/qmstrace` — in [#23](https://github.com/Lightbridge-KS/qmstrace/pull/23) (M9c).
 - [ ] The gate is not green yet: `qmstrace check` reports 26 gaps — no module implements a
   design element, and no requirement or design element is declared.
 
-### M9c · the skill's home — landed
-
-Planned 2026-09-28 on `feat/m9c-skill-home`. `init` installed the skill at
-`.qmstrace/skill/SKILL.md`, where no harness lists it and whose folder breaks the Agent Skills
-rule that a skill's name matches its folder. The location was never decided; it arrived with
-M6 (`918d79e`). The skill moves to `.agents/skills/qmstrace/SKILL.md`, where Codex lists it;
-`init` links it from `.claude/skills/qmstrace` when the repo already has `.claude/`, so Claude
-Code lists it too; the stanza keeps pointing at it for every other agent.
-
-- **Decided (developer, 2026-09-28):** the new home; the link only when `.claude/` exists;
-  the link is create-only — setup never replaces what it did not write; a copy in the old
-  home is refused with a next move, never deleted. The options that lost are recorded in the
-  surface doc.
-- [x] `infra/files.py` writes a create-only link inside the one change with rollback;
-  `init`'s policy, the stanza's pointer, tests and goldens; this repo moves its copy and gains
-  the link, held by the own-trace meta-test. `874b189`
-- [x] Surface doc, with the decision and the options that lost; blueprint; glossary. `8308859`
-- [x] Manual: the `init` reference, with the output from a repo that has `.claude/`, and the
-  set-up how-to. `83c354c`
-- [x] Discovery end to end, in a fresh clone of the branch outside the workspace: Claude Code
-  2.1.283 lists `qmstrace` (as a bare name — its listing drops some descriptions in a setup
-  with many skills), and Codex 0.144.4's rendered prompt lists it with its description
-  shortened to its skills budget. In a clone of `main` before the move, neither lists it.
-- [x] Merged in #23 at `02caed1` on 2026-09-28: the GitHub dry gate passed and the Netlify
-  deploy preview built. Deferred and filed: #20 (files `init` creates are `0600`), #21
-  (rollback leaves the folders it created), #22 (`ux`: no symbolic links).
-
-**M9c evidence, 2026-09-28** (`feat/m9c-skill-home`, local): `just dry` passed with 746
-Python tests at 99.05% coverage, four Node tests, strict types, wheel assets and a strict
-manual build; the built `init` page shows the new output. Four mutations each failed their
-test and were restored: the link's literal-target comparison, the old-home refusal, the alias
-check under a link, and the link's rollback. `qmstrace check` with the pinned tool: 0
-violations, 26 gaps, 426 items. Raw record: `_playground/2026-09-28_skill-location/` (local).
-
-## Later — M10 · mentions
+## Next — M10 · mentions
 
 Every token with a configured prefix in a scanned file — prose, table or Mermaid — must exist;
 a dangling one is a violation, like V03. Configured prefixes only: `SHA-256`, `UTF-8` and
 `ADR-0001` all fit the bare ID shape.
-
-## M9b · the schema copy — landed
-
-Planned 2026-09-27 on `feat/m9b-schema-copy`. A product repo reading the
-project's schema by path cannot be judged at a baseline tag — the tagged tree holds no ledger
-— and D9's generated, verified copy had no generator; the manual carried two *not built yet*
-notes about it. The developer chose to build the command before tracing qmstrace itself.
-
-- **Decided:** `qmstrace ledger copy-schema [REPO…]`, the `ledger` group's first verb, run in
-  the ledger; the copy between `# qmstrace:begin` / `# qmstrace:end`, comments kept; first
-  adoption replaces the run of `[schema…]` tables; verified before writing; all repos or none;
-  a begin marker means `[schema]` must carry a digest. Rejected names and forms are recorded
-  in D9.
-- [x] Specification: D9, the surface contract, the scenario catalogue, *Schema Copy* in the
-  glossary. `beeba5c`
-- [x] The pure transform and the marker rule, with unit tests `180d13c`; the test suite's copy
-  prototype replaced by it `0a29c0a` — the only golden change is the baseline commit hash in
-  nine outputs, since the committed configuration now carries markers and comments.
-- [x] One rollback across several repos `8f787d5`; the command meta-tests cover a group's
-  verbs `a7c32a1`.
-- [x] The command, its goldens and reference page `e684ddb`; integration tests including a baseline
-  tag read after the copy.
-- [x] Manual `c34a6f2`: a how-to for sharing the schema; the configuration, setup, baselines and exit
-  codes pages; the two *not built yet* notes resolved.
-- [x] Beacon replay in disposable clones: only the two marker lines added; `status` and
-  `check --strict` unchanged.
-
-**M9b evidence, 2026-09-27** (`feat/m9b-schema-copy`, local): `just dry` passed with 726
-Python tests at 99.07% coverage, four Node tests, strict types, wheel assets and a strict
-manual build. With a wheel from the branch, in disposable clones of the beacon test bed:
-`ledger copy-schema` reported both products *layout only — rules unchanged*; each diff is
-exactly the two marker lines; `status` and `check --strict` are byte-identical before and
-after, and `m5b/requirements/2` is still read; a second run changes nothing.
-
-- [x] Merged in #18 at `f4e770b` on 2026-09-28: the GitHub dry gate passed and the Netlify
-  deploy preview built.
-
-## M9 · rich Markdown — landed
-
-Planned 2026-09-24 from user acceptance. Docs written with the architecture lens skills —
-tables, Mermaid, numbered and nested headings — had never met the Markdown extractor: the
-beacon docs are flat. Probes on a disposable beacon clone, raw record in
-`_playground/2026-09-24_rich-docs/` (local):
-
-| Probe | Today |
-|---|---|
-| A sub-heading inside a frozen requirement, then an edit below it | 0 violations, 0 suspects |
-| `Satisfies:` under a sub-heading, or in a table cell | Link dropped; the gap's Fix repeats what was written |
-| A numbered, bold or trailing-ID heading | Item vanishes; 11 × V03 *no such item* |
-| A requirement only as a table row | No finding |
-| A table and a Mermaid diagram inside an item, then a cell edit | V10 + 9 S01 — correct |
-
-The data architecture already requires that an item written where it is not read *"must be
-reported, not silently skipped"*; the Markdown extractor, unlike the Python and pytest ones,
-reports no strays.
-
-**Decided 2026-09-24** (decision form, then planning on `feat/m9-rich-markdown`):
-
-- **Sections.** An item is its heading and everything down to the next heading at the same
-  or a higher level; its fields and links count anywhere in that section. *Rejected:* fields
-  only before the first sub-heading — the section would be the item's text but not its fields.
-- **Only this repo's IDs end an item.** A heading ends the open item when its first word
-  matches one of this repo's item-ID patterns or shares their prefix; `#### IEC-62304 …`
-  stays inside as a sub-heading. Items never nest.
-- **Heading forms.** A leading section number (`4.2`, `4.2.1.`), an ID wrapped in emphasis
-  or backticks, and a trailing `{#…}`, `{.…}` or `{-}` are accepted; an ID at the end of a
-  heading stays prose. Decoration is layout: renumbering or restyling is not a change. A
-  sub-heading's number is dropped from the item text only when it continues the item's own
-  (`4.2` → `4.2.1`); `#### 404 …` keeps its number.
-- **Near-misses are reported.** A link marker the item type carries, written outside every
-  item's section or as a table row, is a stray, named by the gap it leaves. An undeclared ID
-  of this repo's kind later in a heading, or as a table row's first cell, is **V16** — one
-  code, two fixes. V16 never aborts a historical snapshot: it declares nothing.
-- **A fence closes** only on a line of the same character, at least as long as its opener,
-  with nothing after it.
-- **Recorded inline** in data architecture § Item text and § Marker syntax v0, with the
-  rejected rules — as F1–F12 amended v0 sections.
-- **Requirements are declared in the SRS only**; the PRD stays untraced and may mention SRS
-  IDs. Declaring items in table rows is rejected for now: a heading can hold acceptance
-  criteria and diagrams that a table cell cannot.
-- **The stanza is unchanged.** It already points at the skill; restating the grammar would
-  rewrite every traced repo's `AGENTS.md` on the next `init`.
-
-- [x] Specification: data architecture § Marker syntax v0, § Item text, § Kinds of finding;
-  *stray* and *mention* in the glossary; the scenario catalogue's M9 section. `9c18d01`
-- [x] Today's digests and titles of the fixture project pinned before the rules change.
-  `84bbfac`
-- [x] Fence closing `f1b3c1f`, sections and item edges `cb86f4d`, heading forms `e13871a`,
-  strays `1e1d7e1`, V16 `0c18fbc` — each with its tests; V16 has catalogue text, a scenario
-  and two lines in `check-every-finding`.
-- [x] A lens-style fixture repo (`tests/fixtures/mini/rich/`) with its goldens, and the
-  how-to *Write traced docs with diagrams and tables*. `656793a`
-- [x] The shipped skill states the grammar; the parity test covers a sub-section and a
-  decorated heading. `0a155aa`
-- [x] Beacon replay: E1/E3/E4 outcomes unchanged, and item digests at every mapped pin
-  unchanged — see *Latest verified evidence*.
-- [x] Merged in #17 at `e7d38b6`: the GitHub dry gate passed and the Netlify deploy preview
-  built (confirmed 2026-09-27). The how-to page as deployed has not been inspected.
-- [ ] Lens skills: a traced-repo note, filed as
-  [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71); not part of M9.
-
-## Slice closure — landed
-
-Slice 1 requires the product test bed to run on the engine instead of the stand-in,
-followed by the accepted M7b local browser and M8 closure.
-M6–M8 shipped together in PR #13 with the dry gate and their
-[manual pages](../dev/writing-the-manual.md).
-
-- [x] **M6 · set up a repo.** Idempotent `init`: trace configuration, stanza between markers,
-  test-framework marker registration; ship the skill as package data, including the
-  “break it” loop and a parity test between skill and code.
-- [x] **M7 · switch the product test bed to the engine.** Migrate its configurations and
-  execute the acceptance checks below. Keep the ledger import on the stand-in until slice 2.
-- [x] **M7b · local trace browser.** Generate an offline, read-only HTML view of one
-  assessment: item search, thread navigation, findings and evidence limits. Ship manual
-  pages and CLI/view parity checks. [Accepted design](../design/trace-browser.md) owns
-  scope and rejected alternatives; vis-network 10.1.2 adopted after local evaluation.
-- [x] **M8 · close slice 1.** README, CHANGELOG, findings promoted into design,
-  trackers reconciled; archive the stand-in rather than delete it.
 
 ## Landed
 
@@ -245,122 +64,35 @@ M6–M8 shipped together in PR #13 with the dry gate and their
 | M9b | `ledger copy-schema`: the verified schema copy, written across repos with one rollback | #18 · `f4e770b` |
 | M9c | The skill at `.agents/skills/qmstrace/`; a create-only `.claude/skills/qmstrace` link | #23 · `02caed1` |
 
-The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
-Their settled outcomes live in the design docs; the
-[experiment record](../tests/beacon-authoring-experiment.md) retains methods and findings.
+Each milestone's decisions, checklist and verification evidence are archived: M5a–M9c in
+[landed work, M5a–M9c](../archive/progress/landed-m5a-m9c.md), earlier ones in
+[slice 1 through M5a](../archive/progress/slice-1-product-repo-half.md), and the exploration
+before it in the [earlier overview](../archive/progress/overview-qmstrace.md). The exploration,
+E1/E3/E4 experiments and naming decisions are complete; their settled outcomes live in the
+design docs, and the [experiment record](../tests/beacon-authoring-experiment.md) keeps
+methods and findings.
 
-## Latest verified evidence
+## Open from landed work
 
-**M9, 2026-09-25** (`feat/m9-rich-markdown`, local): `just dry` passed with **668 Python
-tests, 99.14% coverage**, four Node control tests, strict types, wheel assets and a strict
-manual build; the new how-to was checked in the built HTML — the included design doc is one
-code block with both inner Mermaid fences as text. With a wheel from the branch:
-
-- **Beacon digests** at the five mapped pins (gateway `7946e96`, `93edfd7`, `64032e8`,
-  `2840b8e`; agent `84f1153`) are identical to the pre-M9 fingerprints; the pre-M9 engine
-  reproduces them too, so the method is the same.
-- **E3/E4 replay** (`baselines/verify.py`, fresh clones): the summary and every output file are
-  byte-identical to the slice-closure run; E4 matches the lock, 177 items / 208 links.
-- **E1 replay** (`results/verify.py`): identical summary. The first run differed in one
-  mutation (REQ-BCN-08/09 failing under the REQ-BCN-10 mutation) because pytest itself failed
-  18 tests instead of 12 — bytecode left from the previous mutation; rerun with
-  `PYTHONDONTWRITEBYTECODE=1`, identical. A harness limit, not the engine.
-- **Probes T1–T11**, both engines, fixed reset: an edit under a sub-heading goes from nothing to
-  V10 + 9 S01; a link under a sub-heading, a numbered or a bold ID heading go from gaps or
-  11 × V03 to clean; a trailing-ID heading and a table-row requirement gain V16; a table-row
-  link's gaps now name the row. T1, T6b, T9–T11 unchanged.
-- **CLI** in disposable clones of both products: `init` refuses the previous skill copy (exit 2,
-  with the next move), refreshes it once removed, then changes nothing; `status`, `check
-  --strict`, `check --quiet`, `rules`, `thread`, `impact` give identical bytes with `-C`
-  before and after the command, and both products pass the gate.
-
-Raw records: `_playground/2026-09-25_m9-rich/` (local). On
-[PR #17](https://github.com/Lightbridge-KS/qmstrace/pull/17) the GitHub dry gate and the Netlify
-deploy preview passed (confirmed 2026-09-27).
-
-**User acceptance, 2026-09-24 (`fix/beacon-uat-round-1`):** on the beacon test bed,
-`id_pattern = '^REQ_BCN_\d{2}$'` loaded, then `status` found 0 requirements and `check` gave
-57 violations. The configuration now refuses an ID pattern or prefix whose literal start no
-ID can have, naming the shape; the agreement and change-request prefixes get the same check.
-
-**M6–M8, 2026-09-24:** `just dry` passed with **571 Python tests, 99.09% coverage**,
-three Node browser-control tests, strict types, complete wheel-asset verification and strict
-manual build. Setup and graph help/output goldens were inspected; both command pages'
-built code blocks match their goldens exactly. Setup was inspected visually and the graph
-reference was inspected in the browser. Tutorial, how-to and explanation pages build.
-
-The engine-native test bed now lives at `../_tests/beacon-engine/`; original source repos and
-tags are unchanged. E1 mutation, E3 baseline/suspect and E4 graph/gap replays pass again.
-Every command runs in both migrated products; repeated setup and both `-C` placements have
-identical bytes. The wheel-installed graph command is deterministic in both repos.
-The retained stand-in archive serves only historical/ledger reproduction until slice 2.
-
-The browser was exercised on both product projections and a 1,000-node synthetic chain,
-including keyboard selection, depth controls, zoom and hostile literal text. Direct local
-file-opening was blocked by the verification browser policy and remains unverified;
-loopback-served rendering passed. Full methods, mapping commits and remaining limits live
-in [slice-1 closure verification](../tests/slice-1-closure.md). CI and deployed-preview evidence belongs to the combined PR; no release or production
-deployment is claimed.
-
-
-**M5b, 2026-09-22:** local `just dry` passed with **528 tests, 99.31% coverage**,
-formatting, lint, strict types, wheel contents and strict manual build. Deterministic
-status/check/quiet goldens cover S01 reasons, distances, exits and both `-C` placements.
-On PR head `393185b`, the [GitHub dry gate](https://github.com/Lightbridge-KS/qmstrace/actions/runs/35710423708)
-and Netlify deploy-preview build passed (confirmed 2026-09-24). M5b deployed-page inspection
-and production deployment remain unverified.
-
-- **E3 baseline replay:** disposable clones with explicit original-to-overlay commit
-  mappings preserve traced source bytes at all three documented pins.
-  **10 frozen · 2 changed · 1 new · 0 removed**; all nine guard scenarios pass
-  (addition/removal exercised separately); second baseline has 11 unchanged frozen items.
-  **11 unique suspects** survive restoring the system-test file, appending a comment and
-  adding an unrelated test. The field-only change before the second baseline yields
-  **79 unique suspects** (8 designs, 9 components, 62 tests), including 8 edited items.
-  Reproduced stand-in output has 24 findings / 20 unique items: it excludes edited items,
-  follows direct links only and repeats shared dependants. The applicable second baseline
-  clears all chains: **0 suspects**.
-- **E4 graph/gap parity:** 177 items, 208 links, reach from 43 starts per repo.
-  The engine correctly reports the stray marker that the stand-in silently accepts.
-- **E1 results parity:** 62 test cases / 78 runs, 10 passing requirements; all seven
-  mutations change their targeted requirement to `fail`. Original test-bed repos
-  remain unchanged.
-- **Impact parity:** CR-001's two changed starts reach 18 downstream IDs; explicitly
-  adding its already-declared new ID reproduces the candidate line.
-- **Manual:** nine affected built pages checked; included goldens match complete code
-  blocks. Both new M5b pages were visually inspected. M5a's deployed preview previously
-  passed inspection; its production deployment has not been verified. M3/M3b production
-  pages were checked on 2026-09-21; M4 pages on 2026-09-22.
-
-M5a's GitHub dry gate and Netlify preview passed on final PR head `d814996`.
-Its tag-date regression preserves non-UTC offsets and normalizes Git's `Z` / `+00:00`.
-
-Local reproduction records: `_playground/2026-09-22_m5b-suspects/` (mapped baseline and
-suspect replay, stand-in comparison, latest parity/gate/manual logs),
-`_playground/2026-09-22_m5a-baselines/` (earlier baseline replay),
-`_playground/2026-09-21_m4-results/` (results
-mutations), `_playground/2026-09-21_m3b-impact/` (impact), and
-`_playground/2026-09-21_parity/` (graph/gaps). These are local records, not packaged evidence.
+- **Not verified:** the M9 how-to page as deployed; the local browser opened directly from a
+  file (the one open slice-1 acceptance check); the manual's production deployment since M5a;
+  `init` where symbolic links are unavailable (#22).
+- **Filed:** #16 (`init` should replace an unedited earlier skill copy — its text still names
+  the skill's old home), #20 (files `init` creates are `0600`), #21 (rollback leaves the
+  folders it created), #22 (`ux`: no symbolic links);
+  [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71) (a traced-repo note
+  for the lens skills).
+- **Not filed yet:** recognise the same repo by its Git common dir — a clone beside the ledger
+  reads the real checkout as its sibling; the `results` report-path display; stale comments
+  in the beacon test bed's configurations.
 
 ## Slice-1 acceptance
 
-M7 uses the retained engine-native test bed plus disposable replay clones. The historical
-workspace retains its old configuration for stand-in/ledger reproduction.
+Met: every check in the acceptance table passed in the M7 and M5b replays, except the local
+browser opened directly from a file (above). The table and its evidence are archived with
+[landed work, M5a–M9c](../archive/progress/landed-m5a-m9c.md#slice-1-acceptance--the-checks-and-their-evidence).
 
-| Check | Current evidence / remaining work |
-|---|---|
-| E1: 0 violations, 0 gaps, 10 requirements, labelled 62 cases / 78 runs; seven mutations flip the same verdicts | Replayed in fresh E1 clones during M7; all seven targeted verdicts fail |
-| E3: 10 frozen · 2 changed · 1 new · 0 removed; all nine guard scenarios | Replayed during M7 with explicit mapped commits; guard checks pass |
-| E3: restore the system-test file from the tag; suspects appear and survive an appended comment or an added test | Verified in M5b clones: the same 11 unique items throughout |
-| Second requirements baseline: no suspects; preceding commit: field-only change has downstream suspects | Verified in M5b clones: 79 before, 0 at the applicable baseline |
-| Client: sibling items say not pinned; duplicate requirement names its owner; missing sibling says not reachable; missing ledger says not verified, including quiet output | Fixtures and migrated two-repo replay pass, including quiet evidence |
-| Lightweight tag warns; pre-tag feature branch sees no baseline; shallow history cannot look unfrozen | Verified in M5a fixtures |
-| CR-001 impact: changed IDs `REQ-BCN-05`, `REQ-BCN-06` show downstream reach and origins; `REQ-BCN-11` participates only when declared and explicitly supplied | Reach verified in M3b; reserved unseen-ID rejection verified in M5a fixtures |
-| Client `Assumes` propagates impact without adding coverage; CR-002 is the later classification change across eleven requirements | M7 dependency mutation and field-only/baseline replay pass |
-| Every command in both product repos; `init` in a scratch copy reproduces the stanza; repeated runs produce identical bytes | Wheel-installed commands pass in both products; init and graph deterministic |
-| Local browser preserves CLI reach, findings and evidence limits; works offline and by keyboard; handles cycles and safely renders authored text | Shared-core parity, browser/control checks and 1,000-node example pass; direct file-opening smoke check remains unverified |
-
-Every command must have a golden, and every finding code an emitting fixture.
+What stays binding: every command has a golden, and every finding code an emitting fixture.
 Do not reproduce the stand-in's defects: file-level or self-clearing suspects, one-hop-only
 reach, hard-coded tag patterns, missing lightweight-tag notices, duplicate findings across
 overlapping scopes, or the silent passes in the [scenario catalogue](../tests/scenario-catalogue.md).
