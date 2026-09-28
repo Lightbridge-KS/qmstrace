@@ -5,8 +5,8 @@
     The project side's verbs, run in the ledger repo — where `qmstrace.schema.toml` is.
     `check` judges every repo of the project together — coverage met across repos, each repo's
     own violations, suspects across repos — from their working trees; `--strict` is the
-    ledger's gate. `copy-schema` writes the project's trace schema into each product repo as a
-    generated, verified copy, so that a product repo can be judged on its own.
+    ledger's gate. `thread` and `impact` walk across every repo. `copy-schema` writes the
+    project's trace schema into each product repo as a generated, verified copy.
 
 ## The group
 
@@ -74,6 +74,47 @@ Exit `0` means no violation — and, under `--strict`, no gap; `1` means one rem
 the project could not be judged; `3` an internal fault. Suspects never fail. Each repo's own
 `qmstrace check` is unchanged: in the ledger, it still fails on gaps only another repo can
 meet, and its next move points here.
+
+## qmstrace ledger thread
+
+``` text
+--8<-- "cli/golden/help-ledger-thread.txt"
+```
+
+The same walk as [`thread`](thread.md) in one repo, over the whole project: forward from a
+requirement to the design, the code and the tests of every repo; backward to its origin.
+Each judged item says which repo it is in:
+
+``` text
+--8<-- "cli/golden/ledger-thread-requirement.txt"
+```
+
+A module's or a test's ID carries its repo, and backward from one reaches its origin across
+the repo edge:
+
+``` text
+--8<-- "cli/golden/ledger-thread-module.txt"
+```
+
+A start that no repo declares or cites exits `2`. A module's or a test's ID written without its
+repo — `tests/unit/test_api.py::…` — is answered with the qualified IDs it may mean.
+
+## qmstrace ledger impact
+
+``` text
+--8<-- "cli/golden/help-ledger-impact.txt"
+```
+
+The same as [`impact`](impact.md) in one repo, over the whole project — the downstream items
+of several starts, grouped by type, their origins, and a candidate `Impacts:` line limited to
+the item types a baseline covers:
+
+``` text
+--8<-- "cli/golden/ledger-impact-multiple.txt"
+```
+
+The order of the starts, and a start given twice, do not change the output. One unseen start
+refuses the whole request, exit `2`.
 
 ## qmstrace ledger copy-schema
 

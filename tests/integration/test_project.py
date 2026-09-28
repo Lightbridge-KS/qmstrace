@@ -14,6 +14,8 @@ The load-bearing claims, each pinned by a test:
    every repo — in another repo than the root's, by today's links only, labelled so.
 5. The old layout, documents beside the code, is judged the same way, and two runs give the
    same result.
+6. A walk from the ledger crosses every repo: forward from a requirement to the tests of each
+   repo that verifies it, backward from a module to its origin clause.
 """
 
 import shutil
@@ -206,3 +208,21 @@ def test_two_runs_give_the_same_bytes(split: Path) -> None:
     again = text.ledger_check(Workspace.project(split / "ledger"), strict=True, quiet=False)
     assert once == again
     assert str(split) not in once
+
+
+# ── 6. walks across repos ──────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.verifies("DSN-QMT-14")
+def test_a_walk_from_the_ledger_crosses_every_repo(split: Path) -> None:
+    project = Workspace.project_thread(split / "ledger", "REQ-SVC-01")
+    forward = project.graph.forward(["REQ-SVC-01"]).steps
+    assert {SERVICE_TEST, CLIENT_TEST, "service:src/service/keys.py"} <= forward.keys()
+    backward = project.graph.backward(["client:src/client/api.py"]).steps
+    assert {"DSN-CLT-01", "REQ-CLT-01", "AGR-3"} <= backward.keys()
+
+
+def test_an_unseen_start_refuses_the_whole_impact(split: Path) -> None:
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.project_impact(split / "ledger", ["REQ-SVC-01", "REQ-SVC-09"])
+    assert "REQ-SVC-09 is not an item of the project" in caught.value.what

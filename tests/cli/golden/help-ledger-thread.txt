@@ -1,0 +1,16 @@
+Usage: qmstrace ledger thread [OPTIONS] {ID}
+
+  Walk one item backward to what it derives from, and forward to what hangs off
+  it, across every repo the schema lists — from the ledger.
+
+  Each item is shown once, nearest first, under the link that reaches it first.
+  Each repo is read from its working tree, not at a pin, and the output says so.
+
+Arguments:
+  ID  A requirement, design element or clause ID — or a module's or test's ID
+      with its repo, as service:tests/unit/test_api.py::test_x.  [required]
+
+Options:
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

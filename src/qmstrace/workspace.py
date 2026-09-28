@@ -546,6 +546,56 @@ class Workspace:
             suspects=judge.suspects(union, comparisons),
         )
 
+    @classmethod
+    def project_thread(
+        cls,
+        start: Path,
+        item_id: str,
+        *,
+        trees: TreeFactory = WorkingTree,
+        gits: Callable[[Path], IGit] = GitCli,
+    ) -> ProjectAssessment:
+        """The ledger's check, once `item_id` is known to be an item of the project.
+
+        Raises
+        ------
+        CouldNotJudge
+            For an ID no repo declares or cites — and, for a module's or a test's ID written
+            without its repo, the qualified IDs it may mean.
+        """
+        project = cls.project(start, trees=trees, gits=gits)
+        if project.graph.node(item_id) is not None:
+            return project
+        raise _unseen_in_project(project, item_id)
+
+    @classmethod
+    def project_impact(
+        cls,
+        start: Path,
+        item_ids: Iterable[str],
+        *,
+        trees: TreeFactory = WorkingTree,
+        gits: Callable[[Path], IGit] = GitCli,
+    ) -> ProjectAssessment:
+        """The ledger's check once; the whole request is refused if any start is unseen."""
+        starts = sorted(set(item_ids))
+        if not starts:
+            raise CouldNotJudge("No starting IDs supplied.", "Fix: pass at least one item ID.")
+        project = cls.project(start, trees=trees, gits=gits)
+        missing = [
+            _unseen_in_project(project, item_id)
+            for item_id in starts
+            if project.graph.node(item_id) is None
+        ]
+        if missing:
+            details = "\n".join(f"{problem.what} {problem.next_move}" for problem in missing)
+            raise CouldNotJudge(
+                details,
+                "No impact list was produced. Declare each starting item before requesting "
+                "its impact; a reservation does not establish its type or links.",
+            )
+        return project
+
     def thread(self, item_id: str) -> Assessment:
         """The assessment, once `item_id` is known to be something this run can see.
 
@@ -853,6 +903,36 @@ def _members(ledger: Path, config: TraceConfig, trees: TreeFactory) -> list[_Mem
             "repo left unread would make a clean result a false one.",
         )
     return members
+
+
+def _unseen_in_project(project: ProjectAssessment, item_id: str) -> CouldNotJudge:
+    """An unseen start in the ledger's walk: every repo was read, so the ID is not there — and
+    a module's or a test's ID given without its repo is shown the IDs it may mean."""
+    qualified = sorted(
+        known for known in project.graph.nodes if ":" in known and known.split(":", 1)[1] == item_id
+    )
+    register = project.register
+    reserved = sorted(
+        r.id for r in register.requests if r.state == register.accepted and item_id in r.impacts
+    )
+    reservation = (
+        f" It is listed in accepted request(s) {', '.join(reserved)}: reserved, but not declared."
+        if reserved
+        else ""
+    )
+    if qualified:
+        move = (
+            "Fix: a module's or a test's ID carries its repo in the ledger's walk — "
+            f"{', '.join(qualified)}."
+        )
+    else:
+        near = project.graph.closest(item_id)
+        hint = f"the closest: {', '.join(near)}; " if near else ""
+        move = f"Fix: check the ID — {hint}`qmstrace ledger check` reads every repo."
+    return CouldNotJudge(
+        f"{item_id} is not an item of the project — no repo declares or cites it.{reservation}",
+        move,
+    )
 
 
 def _judged_baselines(

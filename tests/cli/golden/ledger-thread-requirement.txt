@@ -1,0 +1,19 @@
+REQ-SVC-01 — A call carries a key
+  requirement, in ledger · docs/req/service-srs.md:5
+
+backward — what it derives from:
+  Origin  AGR-1 · origin clause, in the agreement
+
+forward — what hangs off it, nearest first:
+  Satisfies   DSN-SVC-01 — Key check · design element, in ledger · docs/design/service-design.md:3
+    Implements  service:src/service/keys.py · component, in service
+    Assumes     DSN-CLT-01 — Key header · design element, in ledger · docs/design/client-design.md:3 · assumes it — counts toward no coverage
+      Implements  client:src/client/api.py · component, in client
+      verifies    client:tests/unit/test_api.py::test_every_call_carries_the_key · test case, in client, unit
+    Assumes     DSN-SVC-02 — Record store · design element, in ledger · docs/design/service-design.md:8 · assumes it — counts toward no coverage
+      Implements  service:src/service/store.py · component, in service
+      verifies    service:tests/integration/test_store.py::test_a_record_survives_a_restart · test case, in service, integration
+  verifies    client:tests/unit/test_api.py::test_a_call_without_a_key_is_refused · test case, in client, unit
+  verifies    service:tests/unit/test_api.py::test_a_call_without_a_key_is_refused · test case, in service, unit · also verifies DSN-SVC-01
+
+forward: 3 design elements, 3 components, 4 test cases · backward: 1 origin clause — the project's 3 repos, working trees, not pinned

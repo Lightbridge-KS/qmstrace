@@ -99,7 +99,9 @@ src/qmstrace/
                          change (M9b); a create-only Link in that change (M9c); exclusive view
                          output (M6/M7b)
   render/
-    text.py              status, findings, rules, thread, impact, results; shared evidence text
+    text.py              status, findings, rules, thread, impact, results; shared evidence text;
+                         ledger_check, ledger_thread, ledger_impact — the same walks on the
+                         project's graph (M10a, M10b)
     graph.py             deterministic assessment projection and standalone HTML (M7b)
   assets/                skill/SKILL.md · stanza.md · starter.toml · graph.html/js · pinned
                          vendor/vis-network and license — package data
@@ -496,8 +498,11 @@ the ledger's schema. Each repo is scanned with its own configuration; `Extracted
 items, so its own violations stay its own, and `TraceGraph.join` (`core/graph.py`) makes the
 union: every repo's items judged, every kept link kept. Coverage, each repo's baselines and
 suspects are judged on it, and `ProjectAssessment` (`core/assessment.py`) carries the result.
-Reasoning: [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md); surface architecture §
+`ledger thread` and `ledger impact` walk the same union (`Workspace.project_thread`,
+`project_impact`), rendered by the local walks' own code (`render/text.py`), which takes a
+configuration and a graph, not one repo's assessment. Reasoning:
+[ADR-0001](../adr/0001-the-ledger-holds-the-documents.md); surface architecture §
 *Project-wide check contract — M10a*.
 
-Satisfies: REQ-QMT-17
+Satisfies: REQ-QMT-17, REQ-QMT-18
 

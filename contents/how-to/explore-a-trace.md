@@ -28,6 +28,10 @@
 7. After editing source, generate a new filename and reopen it. The old file is unchanged.
    Run `qmstrace check --strict` separately when a gate is needed.
 
+The browser shows one repo, and its walks stop at that repo's edge. To walk an item across
+every repo of the project, run [`qmstrace ledger thread`](../reference/commands/ledger.md#qmstrace-ledger-thread)
+in the ledger.
+
 The browser cannot record completion or approve a change. For a copyable change-request
 candidate use [Write an impact list](write-an-impact-list.md); for explicit test verdicts
 use [Read test results](read-test-results.md).

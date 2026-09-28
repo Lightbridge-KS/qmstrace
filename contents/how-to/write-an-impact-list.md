@@ -25,8 +25,9 @@
 
 4. Inspect the downstream designs, components and tests to decide which need edits and which
    need review only. Inspect the listed origins to decide whether the proposed change also
-   requires a change to the agreement. The command's boundary is this repo; obtain the other
-   repos' analyses for a change that spans them.
+   requires a change to the agreement. The command's boundary is this repo. For a change that
+   spans repos, run [`qmstrace ledger impact`](../reference/commands/ledger.md#qmstrace-ledger-impact)
+   with the same IDs in the ledger: it walks every repo of the project.
 
 5. Use the candidate `Impacts:` line as the starting point for the change request's list.
    Review it against the proposed edits; record review-only work in the impact analysis.

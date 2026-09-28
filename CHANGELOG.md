@@ -18,6 +18,11 @@ All notable changes to this project are recorded here. The format follows
   than the ledger's schema, stops the check with exit 2, every problem named. A how-to,
   *Check the whole project*; the ledger reference, suspects, configuration and *Around the
   repo* pages cover the layout where the ledger holds the documents.
+- `ledger thread ID` and `ledger impact ID…`, run in the ledger: the walks of `thread` and
+  `impact` over the whole project, crossing every repo's edge — from a requirement to every
+  repo's tests, from a module back to its origin clause. A judged item says which repo it is
+  in; a module's or a test's ID given without its repo is answered with the qualified IDs it
+  may mean.
 - A test fixture in the layout of ADR-0001: a traced ledger that holds the requirements and
   the design, and product repos that hold code and tests and cite the ledger's IDs.
 

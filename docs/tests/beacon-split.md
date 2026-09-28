@@ -8,7 +8,7 @@ read_when:
 
 # beacon-split — acceptance of the project-wide check
 
-**Status: M10a run on 2026-09-28 — A1–A9 and A11–A13 pass; A10 waits for M10b.** Plan: M10 in the
+**Status: run on 2026-09-28 — A1–A13 pass (A10 with M10b).** Plan: M10 in the
 [tracker](../progress/overview-qmstrace.md). Layout: [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md).
 
 ## What is tested
@@ -122,7 +122,7 @@ The 208 links are E4's trace-lock count.
 | A7 | exit 2, naming agent and gateway, each with `run qmstrace ledger copy-schema <repo>`; after the copy, exit 0 on 177 items | pass |
 | A8 | exit 2: `agent: there is no ../beacon-agent/qmstrace.toml`; restored | pass |
 | A9 | V10 on REQ-BCN-05; 16 S01: DSN-BCN-02 in the ledger (both versions), and 15 gateway tests and components, each *current reach only … gateway is read from its working tree, not at that baseline — not pinned* | pass |
-| A10 | M10b | — |
+| A10 | on the M10b engine (`d36f424`, wheel sha256 `899e7b9c…`). `ledger thread REQ-BCN-05`: forward reaches 14 test cases, all qualified `gateway:tests/…`, plus the design element and the component; backward reaches its origins, AGR-3 and AGR-6. `ledger impact REQ-BCN-05 DSN-BAG-02`: 1 design element, 2 components and 22 test cases across the gateway and the agent, 6 origins, and the candidate `Impacts: REQ-BCN-05`, requirements only as the bed's baseline covers. Both identical when run twice; no home path. A13 re-checked after | pass |
 | A11 | 8 commands, each run twice: `ledger check`, plain, `--strict` and `--quiet`; `ledger copy-schema`; each repo's `check --strict`; gateway `status`. Identical bytes; no home path in any output | pass |
 | A12 | 0.38 s for `ledger check`, 177 items | informational |
 | A13 | `beacon-engine`: HEAD, branches, tags and `status --porcelain` identical before and after, in all three repos | pass |
