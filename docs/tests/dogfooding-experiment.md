@@ -11,7 +11,7 @@ read_when:
 Terms follow [`CONTEXT.md`](../../CONTEXT.md). The protocol follows the
 [beacon experiments](beacon-authoring-experiment.md) E1–E4, and differs where it says so.
 
-**Status: measures for run A fixed; not run.** Run B's measures are fixed in a later commit,
+**Status: measures for run A fixed, and approved at STOP 4 (2026-09-28); not run.** Run B's measures are fixed in a later commit,
 before it runs.
 
 ## What is being tested
@@ -80,8 +80,8 @@ As in E1–E4, with these differences:
   headless session started in a clone of the launch commit quoted its listing lines verbatim
   (2026-09-28), and the appendix copies them. 18 of the coding skills carry their own
   descriptions; `extensibility-architecture` shows none (its description is a folded YAML
-  block); `improve-codebase-architecture` is not listed (`disable-model-invocation`). 💡
-  **`qmstrace` is listed as a bare name**, because the session showed it that way. The cause
+  block); `improve-codebase-architecture` is not listed (`disable-model-invocation`).
+  **`qmstrace` is listed as a bare name** — approved at STOP 4 — because the session showed it that way. The cause
   is unknown — its description is one plain line. Listing it with its description would match
   a lighter setup instead of this one. Whether the agent reads the skill is measured
   (E6-A-10).
@@ -117,7 +117,7 @@ Boundaries: work only inside `qmstrace`. Outside it you may read `<workspace>/qm
 When you are done, reply in under 40 lines: the branch and its last commit, the final line of `qmstrace check --strict`, and anything you left undone and why. Put blunt feedback — anything in AGENTS.md, the skill or the tool's output that was unclear, that you had to guess at, or that got in your way — in <workspace>/pr-drafts/qmstrace-feedback.md, and don't commit it."
 ```
 
-💡 **The brief names the gate and asks for a pull request.** Criterion 5 as written says the
+**The brief names the gate and asks for a pull request** — approved at STOP 4. Criterion 5 as written says the
 agent does this *with no other instruction* than the help and the status view. This brief is
 the developer's ordinary ask — "get it through the gate, propose it" — and leaves how to find
 the work to the tool. The stricter reading would be *"qmstrace now traces this repo; take a
@@ -150,7 +150,7 @@ Fixed before the run.
 The sample is drawn by a fixed seed after the run, so the driver cannot pick the items that
 hold.
 
-💡 **Seed `29110`; six requirements; five modules.**
+**Seed `29110`; six requirements; five modules** — approved at STOP 4.
 
 - **Requirements.** The population is every requirement with `Verify-by: test` and no
   `Status: withdrawn` at the agent's last commit, sorted by ID. The sample is
@@ -184,14 +184,23 @@ statement — the driver's error, rewritten and said so.
   that appears anyway is removed with `git branch -dr origin/experiment/e6-measures`.
   Background fetches bring it back: on 2026-09-28 the ref appeared in the working copy from
   a `fetch` nobody ran in this checkout by hand, most likely the desktop app's Git
-  integration. 💡 **Close the gap for the run**, or accept it as a caveat? A negative fetch
-  refspec in the working copy's Git config — `git config --add remote.origin.fetch
-  '^refs/heads/experiment/*'`, removed after run A — keeps any fetch from storing the ref.
+  integration. **The gap is closed for the run** — approved at STOP 4: a negative fetch
+  refspec keeps any fetch from storing the ref (checked on a throwaway repo). Set at STOP 5
+  with `git config --add remote.origin.fetch '^refs/heads/experiment/*'`; removed after run A
+  with `git config --unset remote.origin.fetch '^\^refs/heads/experiment/\*$'`.
 - The ledger is at `a3faeab` with a clean tree.
 - `<workspace>/pr-drafts/` exists and is empty.
 - The starting state above is reproduced with the pinned tool.
-- The memory the teammate inherits is decided: the project memory index names the test bed and
-  the fresh-agent rule.
+- The two memory entries that give the run away — *qmstrace test bed* and *Background fetch
+  leaks hidden branches* — are parked outside the memory folder and their index lines removed
+  (decided at STOP 4); both are restored after run A.
+- The product repo holds no E6 material: its gitignored `_playground/` — where earlier session
+  notes name this run — is parked at `<workspace>/_tests/qmstrace-e6/parked-playground/` until
+  run A ends, and E6's driver material lives in `<workspace>/_tests/qmstrace-e6/`.
+- The brief sent is `<workspace>/_tests/qmstrace-e6/run-a/brief.txt`, assembled from this
+  document; its `assemble.py --check` proves the round trip.
+- With the developer's go, `git gc --prune=now` drops the objects the leaked fetches left
+  unreferenced in the working copy's `.git`.
 
 ## Caveats
 
@@ -212,7 +221,8 @@ statement — the driver's error, rewritten and said so.
   it to. A session launched by a person in the folder should confirm any finding that matters.
 - **The measures branch can surface.** A background fetch stores `origin/experiment/e6-measures`
   in the working copy unless the refspec above is set; the agent would then see a branch name,
-  and could read this document from it. The transcript shows whether it did.
+  and could read this document from it. Objects from the fetches before the refspec stay in
+  `.git` unreferenced until garbage collection. The transcript shows whether it looked.
 - **Siblings are visible.** Other folders in `<workspace>` can be listed from `..`, among them
   the beacon test bed of E1–E4 with its stand-in. The brief's boundary forbids reading them;
   the transcript shows whether it held.

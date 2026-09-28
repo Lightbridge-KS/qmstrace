@@ -13,8 +13,7 @@ unmerged until the runs end. The tracker on `main` stays neutral — it says onl
 qmstrace is traced by its own ledger and that the gate is not green yet — because agent A
 reads it.
 
-**Updated 2026-09-28. Now: STOP 4** — the developer approves the measures, the brief and the
-seed, and answers the experiment doc's 💡 points.
+**Updated 2026-09-28. Now: STOP 5** — pre-launch, from a fresh driver session; then run A.
 
 A STOP is where the developer acts or approves; the driver does not pass it alone.
 
@@ -27,8 +26,8 @@ A STOP is where the developer acts or approves; the driver does not pass it alon
 | **Phase 3 · STOP 3** | The setup pull request: meta-tests moved, the constraint amended, the trace configuration and schema copy, `init` | ✔ | #19 · `63b5c7f` |
 | M9c, before run A | The skill moved where a harness lists it; the engine re-pinned from the merge | ✔ | #23 · `02caed1`; wheel `d4e1dab1…2365` |
 | **Phase 4** | The experiment doc: test bed, verbatim brief and skill listing, measures E6-A-1…14, seeded sample, caveats | ✔ | this branch · `68dc0fd`, `ced08a4` |
-| **STOP 4** | Approve the measures, the brief and the seed; answer the doc's 💡 points | **now** | the experiment doc |
-| **STOP 5** | Pre-launch, from a fresh driver session on `main`: the checklist in the experiment doc | next | |
+| **STOP 4** | Approve the measures, the brief and the seed; settle the doc's four open points | ✔ | decision form, 2026-09-28: all six approved |
+| **STOP 5** | Pre-launch, from a fresh driver session on `main`: the checklist in the experiment doc | **now** | |
 | Phase 6 | Run A — a fresh teammate `qmstrace-dev-e6a` gets the brief | | |
 | Phase 7 · STOP 6 | The driver verifies A against E6-A-1…14; A's branch pushed and a draft pull request opened with A's text; the developer's review is itself a measure | | |
 | **STOP 7** | The developer approves the SRS and cuts `baseline/requirements/1`; the CI gate policy is decided | | |
@@ -49,18 +48,23 @@ A STOP is where the developer acts or approves; the driver does not pass it alon
   - the skill moves to `.agents/skills/qmstrace/`, with a link from `.claude/skills/` when the
     repo has `.claude/`, before run A (M9c);
   - this tracker lives here, not on `main`.
+- **STOP 4, decision form, 2026-09-28:** the measures E6-A-1…14, the brief, `qmstrace` listed
+  as a bare name, the brief naming the gate, seed `29110` with six requirements and five
+  modules, and the negative fetch refspec — all approved. Early STOP 5 answers: park the two
+  memory entries that give the run away; launch from a fresh driver session, from a handoff.
 
 ## Open
 
-- **At STOP 4:** the experiment doc's four 💡 points — `qmstrace` listed as a bare name in the
-  brief; the brief names the gate; seed `29110` with six requirements and five modules; a
-  negative fetch refspec for the run.
-- **At STOP 5:**
+- **At STOP 5**, from the checklist in the experiment doc:
   - the launch commit — `main` has moved past `02caed1` with docs-only commits, so the pin
     built there stays valid;
-  - the memory index the teammate inherits: it names the test bed, the fresh-agent rule, and
-    now the background fetch and this branch;
-  - `<workspace>/pr-drafts/` created empty.
+  - the two memory entries parked, the refspec set, `<workspace>/pr-drafts/` created empty;
+  - the offer of `git gc --prune=now`;
+  - the developer's go.
+- **After run A:** the refspec removed, memory and the playground restored, then Phase 7.
 - **Seen on the way:** a background fetch stored `origin/experiment/e6-measures` in the
   working copy twice on 2026-09-28, each time removed by hand. The experiment doc
-  carries it as a pre-launch check, a caveat and a 💡.
+  carries it as a pre-launch check, a caveat, and the refspec approved at STOP 4.
+- **Spoilers in the working tree:** the repo's gitignored `_playground/` held session notes
+  naming this run and its seed. Found at STOP 4; the playground is parked outside the repo
+  until run A ends, and E6's driver material lives in `<workspace>/_tests/qmstrace-e6/`.
