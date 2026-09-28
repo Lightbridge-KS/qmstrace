@@ -57,4 +57,5 @@ tests from the two files above, so it cannot drift from what the command writes:
 ```
 
 The comments point at [`qmstrace rules`](commands/rules.md), which prints the rules in force
-and says which part is the project's and which the repo's.
+and says which part is the project's and which the repo's. For why IDs have one fixed shape, and
+what can still change after a baseline, see [IDs and file patterns](../explanation/ids-and-file-patterns.md).

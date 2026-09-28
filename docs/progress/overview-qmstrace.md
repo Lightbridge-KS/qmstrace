@@ -68,6 +68,9 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
   - #20 files `init` creates are `0600`.
   - #21 rollback leaves folders behind.
   - #22 `ux`: no symbolic links.
+  - #25 an `id_pattern` with alternatives lets a slip in its second family pass silently.
+  - #26 `ux`: an ID without its subject key passes until the first baseline, then stops
+    every run.
   - [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71).
 - **Not filed, from run A:**
   - The stanza says to break behaviour in a "disposable test", but the skill says "disposable

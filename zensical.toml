@@ -49,6 +49,7 @@ nav = [
   { "Explanation" = [
     { "A graph is a view" = "explanation/a-graph-is-a-view.md" },
     { "The chain" = "explanation/the-chain.md" },
+    { "IDs and file patterns" = "explanation/ids-and-file-patterns.md" },
     { "Kinds of finding" = "explanation/kinds-of-finding.md" },
     { "Around the repo" = "explanation/around-the-repo.md" },
   ] },
