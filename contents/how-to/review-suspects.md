@@ -9,7 +9,9 @@
 1. Run `qmstrace status` and read the governing baseline and source notices.
    Resolve an inability to judge historical evidence before treating the list as complete.
 2. Run `qmstrace check` (or `check --quiet`) for every S01. Inspect each upstream root's
-   change against its listed tag. Several reasons can share one dependant.
+   change against its listed tag. Several reasons can share one dependant. Where the
+   project's documents and its code are in different repos, run `qmstrace ledger check` in
+   the ledger instead: it lists the suspects in every repo.
 3. Review unchanged items as well as edited ones. A historical-only reason means a former
    dependency needs attention even though today's graph no longer contains its path.
    Use the tagged source to understand that former relationship.

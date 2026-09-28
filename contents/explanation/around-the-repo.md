@@ -2,34 +2,42 @@
 
 !!! abstract "TL;DR"
 
-    A product repo is rarely alone. Its requirements trace back to an agreement kept in the
-    project's **ledger repo**, and it may cite items of the project's other product repos — its
-    **siblings**. qmstrace reads both from beside the repo when they are there, and says *not
-    pinned*, because it read a working tree. When it cannot read them — as in a pipeline, which
-    checks out one repo — it says *not verified here*, and fails nothing for it.
+    A product repo is rarely alone. Its items trace back to an agreement kept in the project's
+    **ledger repo**, and it may cite items of the project's other repos — its **siblings** — or
+    of the ledger itself, when the ledger holds the requirements and the design. qmstrace reads
+    them from beside the repo when they are there, and says *not pinned*. When it cannot — as in
+    a pipeline, which checks out one repo — it says *not verified here*, and fails nothing for
+    it. In the ledger, `qmstrace ledger check` judges every repo together.
 
 ## Three kinds of repository
 
 ``` mermaid
 flowchart LR
-  subgraph product["product repos — daily work"]
-    svc["service<br/>requirements · design · code · tests"]
-    clt["client<br/>requirements · code · tests"]
+  subgraph ledger["ledger repo — the project"]
+    docs["agreement · change requests · trace schema<br/>requirements · design"]
   end
-  ledger["ledger repo — the project<br/>agreement · change requests · trace schema"]
-  svc -. "cites by ID (a sibling)" .- clt
-  svc -- "read at a pin, later" --> ledger
-  clt -- "read at a pin, later" --> ledger
+  subgraph product["product repos — daily work"]
+    svc["service<br/>code · tests"]
+    clt["client<br/>code · tests"]
+  end
+  svc -- "cites by ID" --> docs
+  clt -- "cites by ID" --> docs
 ```
 
-- A **product repo** holds a product's code, tests and documents, with markers in them. It
-  outlives any one project.
-- The **ledger repo** holds one project: its agreement, its change requests, and its trace
-  schema — the rules every product repo of the project follows.
+- A **product repo** holds a product's code and tests, with markers in them. It outlives any
+  one project.
+- The **ledger repo** holds one project: its agreement, its change requests, its trace schema —
+  the rules every repo of the project follows — and, in this layout, the project's requirements
+  and design, which are reviewed and released together.
 - **qmstrace** is installed into them. It holds no project data of its own.
 
-A requirement has one home: the product repo that owns it. Another repo of the project cites it
-by ID, exactly like one of its own items, and never declares it again.
+The requirements and the design can also stay in the product repos, beside the code — the
+older layout, where the ledger holds only the agreement, the change requests and the schema.
+qmstrace judges either way. The ledger lists every repo to read under `[repos]`, and itself as
+`"."` when it holds documents.
+
+An item has one home: the repo that declares it. Another repo of the project cites it by ID,
+exactly like one of its own items, and never declares it again.
 
 ## Not pinned
 
@@ -37,8 +45,11 @@ In a product repo, qmstrace reads the ledger and the siblings from the folders b
 their working trees, as they are right now, with whatever is uncommitted there. That is enough
 while you work, and it is said on every run: *read from ../client's working tree, not pinned*.
 
-The project as a whole is judged later, in the ledger repo, which reads each product repo **at a
-pin** — one commit, named on purpose. That is where a citation across repos is decided for good.
+The project as a whole is judged in the ledger repo. `qmstrace ledger check` reads every repo's
+working tree together — coverage met in any repo, suspects across repos — and says *not
+pinned*, like everything else here ([check the whole project](../how-to/check-the-project.md)).
+Later, the ledger's import will read each repo **at a pin** — one commit, named on purpose — and
+decide every citation across repos for good.
 
 ## Not verified here
 
@@ -57,8 +68,8 @@ cites from them cannot be looked up:
 | the trace schema, read by path | the run cannot judge — exit `2` | the run — which is why a repo judged alone carries a copy |
 
 **Why not fail?** Failing would force every product repo's pipeline to check out the ledger and
-every sibling, only to judge them against a colleague's uncommitted work. The ledger's import
-reads them all together, at a pin, and judges every citation for real.
+every sibling, only to judge them against a colleague's uncommitted work. The ledger judges them
+all together: `qmstrace ledger check` over working trees now, the import at pins later.
 
 **Why an own ID still fails.** A cited ID that matches this repo's own pattern — `REQ-CLT-07`,
 say, in the client — gets no such benefit: this repo *was* read, so the ID is known not to

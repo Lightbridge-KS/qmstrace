@@ -1,0 +1,17 @@
+Usage: qmstrace ledger check [OPTIONS]
+
+  Read every repo the schema lists under [repos] — the ledger itself too, when
+  it holds documents — and judge them as one project.
+
+  A coverage rule is met by a link in any repo; each repo's own violations are
+  reported; a change to a frozen item makes what hangs off it suspect in every
+  repo. Each repo is read from its working tree, not at a pin, and the output
+  says so. A repo that cannot be read, or holds rules other than the ledger's
+  schema, stops the check: exit 2.
+
+Options:
+  --strict  The gate: gaps fail too; suspects never fail.
+  --quiet   Findings only — what could not be verified still shows.
+  -C PATH   Run as if qmstrace had been started in PATH, as with git -C. Before
+            or after the command.
+  --help    Show this message and exit.

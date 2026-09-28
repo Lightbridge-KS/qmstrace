@@ -8,7 +8,10 @@ One scan function serves every tree. A sibling is read with the same function, f
 types that carry authored IDs; its own findings are its own business and are dropped, and its
 own siblings are never read.
 
-Implements: DSN-QMT-02, DSN-QMT-07, DSN-QMT-09, DSN-QMT-11
+In the ledger, `Workspace.project` reads every repo of the project the same way and judges
+them as one graph — the ledger's check (M10).
+
+Implements: DSN-QMT-02, DSN-QMT-07, DSN-QMT-09, DSN-QMT-11, DSN-QMT-14
 """
 
 from __future__ import annotations
@@ -25,8 +28,15 @@ from pathlib import Path
 from typing import Final
 
 from qmstrace.core import findings, judge, results, setup
-from qmstrace.core.assessment import Assessment, ExternalState, Scanned, SiblingState
-from qmstrace.core.baselines import BaselineState, Register, Snapshot
+from qmstrace.core.assessment import (
+    Assessment,
+    ExternalState,
+    ProjectAssessment,
+    RepoState,
+    Scanned,
+    SiblingState,
+)
+from qmstrace.core.baselines import BaselineState, Comparison, Register, Snapshot
 from qmstrace.core.config import ExternalSource, ItemType, SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
@@ -62,6 +72,18 @@ class _Scan:
     extracted: tuple[Extracted, ...]
     scanned: tuple[Scanned, ...]
     misplaced: tuple[Item, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _Member:
+    """One repo of the project, opened for the ledger's check: its name in [repos], its root,
+    where it is from the ledger, its tree and its own configuration."""
+
+    name: str
+    root: Path
+    location: str
+    tree: ISourceTree
+    config: TraceConfig
 
 
 @dataclass(frozen=True, slots=True)
@@ -377,45 +399,152 @@ class Workspace:
         if not self.config.baselines:
             return BaselineState(register=register), ()
         source = self.git or GitCli(self.root)
-        source.state()
-        tags = tuple(
-            t
-            for t in source.tags_reachable_from_head()
-            if any(s.tag.fullmatch(t.name) for s in self.config.baselines.values())
-        )
-        commits = sorted({t.commit for t in tags})
-        ancestry = frozenset(
-            (a, b) for a in commits for b in commits if a != b and source.is_ancestor(a, b)
-        )
-        snapshots = {c: Snapshot(c, None) for c in commits}
-        selected = judge.resolve_baselines(self.config, tags, snapshots, ancestry)
-        for commit in sorted({b.snapshot.commit for b in selected}):
-            tree = GitTree(source, commit)
-            if CONFIG_FILE not in tree.files():
-                continue
-            config = _configuration(self.root, tree)
-            scan = _scan(tree, config, config.item_types.values(), with_misplaced=True)
-            items = tuple(i for part in scan.extracted for i in part.items)
-            historical, found = TraceGraph.build(
-                config,
-                scan.extracted,
-                Surroundings(every_sibling_read=False),
-                misplaced=scan.misplaced,
+        return _judged_baselines(self.root, self.config, source, graph.items(), register)
+
+    @classmethod
+    def project(
+        cls,
+        start: Path,
+        *,
+        trees: TreeFactory = WorkingTree,
+        gits: Callable[[Path], IGit] = GitCli,
+    ) -> ProjectAssessment:
+        """In the ledger: read every repo of the project — each from its working tree — and
+        judge them as one graph (M10, ADR-0001).
+
+        Each repo is scanned with its own configuration and built against the others' items,
+        so its own violations stay its own; the builds are joined, and coverage, baselines and
+        suspects are judged on the union. A module's or a test's ID carries its repo there.
+
+        Raises
+        ------
+        CouldNotJudge
+            When a repo the schema lists cannot be read, or holds other rules than the ledger's
+            schema — a repo that was not read would make a clean result a false one. Every
+            problem is named at once.
+        """
+        ledger = _find_ledger(start)
+        config = TraceConfig.of_schema(read_optional(ledger / SCHEMA_FILE) or "")
+        members = _members(ledger, config, trees)
+
+        parts: dict[str, tuple[_Member, _Scan, tuple[Extracted, ...], tuple[Item, ...]]] = {}
+        for member in members:
+            own = member.config
+            scan = _scan(member.tree, own, own.item_types.values(), with_misplaced=True)
+            derived = frozenset(t.name for t in own.item_types.values() if t.derives_ids)
+            extracted = tuple(
+                p.qualified(member.name, member.location, derived) for p in scan.extracted
             )
-            problems = [f for f in found if f.code not in findings.SNAPSHOT_SAFE]
-            if problems or scan.misplaced or len({i.id for i in items}) != len(items):
-                tags_here = ", ".join(t.name for t in tags if t.commit == commit)
-                details = "; ".join(f"{f.code} {f.file}:{f.line}: {f.what}" for f in problems)
-                raise CouldNotJudge(
-                    f"Historical trace data at {tags_here} ({commit}) cannot form a reliable "
-                    f"snapshot: {details}",
-                    "Fix: inspect the tagged configuration and source; do not replace historical "
-                    "data with today's tree or rewrite the baseline tag.",
+            misplaced = tuple(
+                replace(i, file=posixpath.normpath(posixpath.join(member.location, i.file)))
+                for i in scan.misplaced
+            )
+            parts[member.name] = (member, scan, extracted, misplaced)
+        authored = {
+            name: {
+                i.id: i
+                for part in extracted
+                for i in part.items
+                if member.config.item_types[i.type].id_pattern is not None
+            }
+            for name, (member, _, extracted, _) in parts.items()
+        }
+        externals = [
+            _external(ledger, config.externals[name], ledger) for name in sorted(config.externals)
+        ]
+        declared = {state.name: ids for state, ids in externals}
+
+        graphs: dict[str, TraceGraph] = {}
+        violations: list[Finding] = []
+        forms: dict[str, judge.Form] = {}
+        homes: dict[str, list[str]] = {}
+        for name, (member, _, extracted, misplaced) in parts.items():
+            around = Surroundings(
+                siblings={other: items for other, items in authored.items() if other != name},
+                every_sibling_read=True,
+                externals=declared,
+                whole_project=True,
+            )
+            graphs[name], found = TraceGraph.build(
+                member.config, extracted, around, misplaced=misplaced
+            )
+            violations += found
+            for t in member.config.item_types.values():
+                if t.declared_here and t.extractor is not None:
+                    forms[t.name] = FORMS[t.extractor]
+                    homes.setdefault(t.name, []).append(name)
+        union = TraceGraph.join(config, graphs)
+        strays = [s for _, _, extracted, _ in parts.values() for p in extracted for s in p.strays]
+        gaps = judge.coverage(
+            config,
+            union,
+            violations,
+            strays,
+            forms,
+            homes={t: tuple(sorted(names)) for t, names in homes.items()},
+        )
+
+        register = _register(ledger, ledger, config)
+        covered = {t for scope in config.baselines.values() for t in scope.covers}
+        states: list[RepoState] = []
+        comparisons: list[Comparison] = []
+        notices: list[Notice] = []
+        judged_any = False
+        for name, (member, scan, _, _) in parts.items():
+            state = BaselineState(register=register)
+            declares = {t.name for t in member.config.item_types.values() if t.declared_here}
+            if member.config.baselines and declares & covered:
+                judged_any = True
+                state, wrong = _judged_baselines(
+                    member.root,
+                    member.config,
+                    gits(member.root),
+                    graphs[name].items(),
+                    register,
+                    repo=name,
+                    location=member.location,
                 )
-            snapshots[commit] = Snapshot(commit, config, items, historical)
-        baselines = judge.resolve_baselines(self.config, tags, snapshots, ancestry)
-        comparisons, wrong = judge.guard(self.config, graph.items(), baselines, ancestry, register)
-        return BaselineState(baselines, comparisons, register), wrong
+                violations += wrong
+                comparisons += state.comparisons
+                notices += _baseline_notices(name, state)
+            states.append(RepoState(name, member.location, member.tree.label, scan.scanned, state))
+        violations += register.findings
+        violations.sort(key=lambda f: (f.file, f.line, f.code, f.what))
+        if judged_any:
+            notices.insert(
+                0,
+                Notice(
+                    "baselines: judged from each repo's reachable local tags — remote-tag "
+                    "completeness NOT VERIFIED; qmstrace never fetches"
+                ),
+            )
+        cited = any(i.fields.get("Change") for i in union.items())
+        if config.change_requests or cited:
+            if register.available:
+                notices.append(
+                    Notice(
+                        f"change requests: {register.location} ({len(register.requests)} "
+                        f"readable; {len(register.findings)} malformed) — working tree, not pinned"
+                    )
+                )
+            else:
+                notices.append(
+                    Notice(
+                        "change requests: NOT VERIFIED — "
+                        f"{register.location or 'no configured register'} is unavailable"
+                    )
+                )
+        return ProjectAssessment(
+            config=config,
+            repos=tuple(states),
+            graph=union,
+            violations=tuple(violations),
+            gaps=tuple(gaps),
+            externals=tuple(state for state, _ in externals),
+            register=register,
+            notices=tuple(notices),
+            suspects=judge.suspects(union, comparisons),
+        )
 
     def thread(self, item_id: str) -> Assessment:
         """The assessment, once `item_id` is known to be something this run can see.
@@ -667,6 +796,158 @@ def _register(root: Path, ledger: Path | None, config: TraceConfig) -> Register:
         else:
             wrong.append(findings.cannot_parse(file, 1, problem or "invalid request metadata"))
     return Register(location, True, spec.accepted, tuple(requests), tuple(wrong))
+
+
+def _members(ledger: Path, config: TraceConfig, trees: TreeFactory) -> list[_Member]:
+    """Every repo the schema lists, opened — or one refusal naming every repo that cannot be
+    judged with the others."""
+    if not config.repos:
+        raise CouldNotJudge(
+            f"{SCHEMA_FILE} names no repos under [repos], so there is no project to judge.",
+            'Fix: add each repo under [repos] — name = "../path", and the ledger itself as '
+            '"." when it holds documents — then check again.',
+        )
+    problems: list[str] = []
+    members: list[_Member] = []
+    seen: dict[str, str] = {}
+    for name, place in sorted(config.repos.items()):
+        root = ledger / place
+        shown = posixpath.normpath(posixpath.join(place, CONFIG_FILE))
+        twin = next((other for other, path in seen.items() if _same(ledger / path, root)), None)
+        if twin is not None:
+            problems.append(f"{name} and {twin} name the same folder, {place}")
+            continue
+        seen[name] = place
+        if not (root / CONFIG_FILE).is_file():
+            problems.append(f"{name}: there is no {shown}")
+            continue
+        try:
+            tree = trees(root)
+            own = _configuration(root, tree)
+        except CouldNotJudge as stopped:
+            problems.append(f"{name}: its configuration could not be read — {stopped.what}")
+            continue
+        if own.schema_digest != config.schema_digest:
+            itself = _same(root, ledger)
+            if itself:
+                move = f'replace its [schema] with path = "{SCHEMA_FILE}"'
+            elif own.schema_form is SchemaForm.VERIFIED_COPY:
+                move = f"run qmstrace ledger copy-schema {name}"
+            else:
+                move = f"point its [schema] at this ledger's {SCHEMA_FILE}, or copy it there"
+            problems.append(f"{name}: {shown} holds other rules than this ledger's — {move}")
+            continue
+        location = posixpath.normpath(place)
+        members.append(_Member(name, root.resolve(), location, tree, own))
+    listed = any(_same(ledger / place, ledger) for place in config.repos.values())
+    if (ledger / CONFIG_FILE).is_file() and not listed:
+        problems.append(
+            f"this ledger holds a {CONFIG_FILE}, but [repos] does not list it — add "
+            'ledger = "." under [repos], or the documents it holds are not judged'
+        )
+    if problems:
+        raise CouldNotJudge(
+            "the project cannot be judged as a whole, because not every repo can be read with "
+            "the ledger's rules — " + "; ".join(problems) + ".",
+            "Fix: deal with each repo named above, then run qmstrace ledger check again — a "
+            "repo left unread would make a clean result a false one.",
+        )
+    return members
+
+
+def _judged_baselines(
+    root: Path,
+    config: TraceConfig,
+    source: IGit,
+    items: Iterable[Item],
+    register: Register,
+    *,
+    repo: str | None = None,
+    location: str = ".",
+) -> tuple[BaselineState, tuple[Finding, ...]]:
+    """One repo's baselines, read from its reachable tags, and the guard over its items. In
+    the ledger's check, `repo` names it: its snapshots are read with the same qualified IDs and
+    locations as today's items, so the two can be compared."""
+    source.state()
+    tags = tuple(
+        t
+        for t in source.tags_reachable_from_head()
+        if any(s.tag.fullmatch(t.name) for s in config.baselines.values())
+    )
+    commits = sorted({t.commit for t in tags})
+    ancestry = frozenset(
+        (a, b) for a in commits for b in commits if a != b and source.is_ancestor(a, b)
+    )
+    snapshots = {c: Snapshot(c, None, repo=repo) for c in commits}
+    selected = judge.resolve_baselines(config, tags, snapshots, ancestry)
+    for commit in sorted({b.snapshot.commit for b in selected}):
+        tree = GitTree(source, commit)
+        if CONFIG_FILE not in tree.files():
+            continue
+        tagged = _configuration(root, tree)
+        scan = _scan(tree, tagged, tagged.item_types.values(), with_misplaced=True)
+        extracted, misplaced = scan.extracted, scan.misplaced
+        if repo is not None:
+            derived = frozenset(t.name for t in tagged.item_types.values() if t.derives_ids)
+            extracted = tuple(p.qualified(repo, location, derived) for p in extracted)
+            misplaced = tuple(
+                replace(i, file=posixpath.normpath(posixpath.join(location, i.file)))
+                for i in misplaced
+            )
+        found_items = tuple(i for part in extracted for i in part.items)
+        historical, found = TraceGraph.build(
+            tagged,
+            extracted,
+            Surroundings(every_sibling_read=False),
+            misplaced=misplaced,
+        )
+        problems = [f for f in found if f.code not in findings.SNAPSHOT_SAFE]
+        if problems or misplaced or len({i.id for i in found_items}) != len(found_items):
+            tags_here = ", ".join(t.name for t in tags if t.commit == commit)
+            details = "; ".join(f"{f.code} {f.file}:{f.line}: {f.what}" for f in problems)
+            where = f" in {repo}" if repo is not None else ""
+            raise CouldNotJudge(
+                f"Historical trace data at {tags_here} ({commit}){where} cannot form a reliable "
+                f"snapshot: {details}",
+                "Fix: inspect the tagged configuration and source; do not replace historical "
+                "data with today's tree or rewrite the baseline tag.",
+            )
+        snapshots[commit] = Snapshot(commit, tagged, found_items, historical, repo=repo)
+    baselines = judge.resolve_baselines(config, tags, snapshots, ancestry)
+    comparisons, wrong = judge.guard(config, items, baselines, ancestry, register)
+    return BaselineState(baselines, comparisons, register), wrong
+
+
+def _baseline_notices(repo: str, state: BaselineState) -> list[Notice]:
+    """What one repo's baselines leave unverified, in the ledger's check."""
+    if not state.baselines:
+        return [Notice(f"baselines in {repo}: no matching reachable local tag — nothing frozen")]
+    notices: list[Notice] = []
+    for baseline in state.baselines:
+        historical = baseline.snapshot.graph
+        if historical is not None and any(n.item is None for n in historical.nodes.values()):
+            notices.append(
+                Notice(
+                    f"baseline {baseline.label} in {repo}: historical citations outside it "
+                    "NOT VERIFIED — each tagged version is read on its own"
+                )
+            )
+        if baseline.snapshot.config is None:
+            notices.append(
+                Notice(
+                    f"baseline {baseline.label} in {repo}: before trace configuration — "
+                    "freezes nothing"
+                )
+            )
+        for tag in baseline.tags:
+            if not tag.annotated:
+                notices.append(
+                    Notice(
+                        f"baseline {tag.name} in {repo}: lightweight tag — weaker evidence; "
+                        "no tagger or tag date"
+                    )
+                )
+    return notices
 
 
 # ── the one scan function ───────────────────────────────────────────────────────────────────

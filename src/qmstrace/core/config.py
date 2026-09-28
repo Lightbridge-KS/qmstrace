@@ -82,6 +82,12 @@ class ItemType:
         return bool(self.files)
 
     @property
+    def derives_ids(self) -> bool:
+        """Whether this repo's extractor derives each ID from where the item is — a module's
+        path, a test's node ID — rather than reading one someone wrote."""
+        return self.extractor is not None and not EXTRACTORS[self.extractor]
+
+    @property
     def fields(self) -> frozenset[str]:
         """Every field name the project declares for this type."""
         return frozenset(self.required) | frozenset(self.values)

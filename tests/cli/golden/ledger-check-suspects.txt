@@ -1,0 +1,25 @@
+read — each repo's working tree, not pinned:
+  client   ../client   1 component · 2 test cases
+  ledger   .           3 requirements · 3 design elements
+  service  ../service  2 components · 2 test cases
+  external AGR-*: verified against agreement.md (3 declared)
+  baseline requirements in ledger (*): baseline/requirements/1 @ 3d0bc465eeb4
+    baseline/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
+  controlled document items: 6 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn
+  baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baseline baseline/requirements/1 in ledger: historical citations outside it NOT VERIFIED — each tagged version is read on its own
+  change requests: change-requests (1 readable; 0 malformed) — working tree, not pinned
+
+suspects — review needed; never fail the gate:
+  S01  docs/design/service-design.md:3  DSN-SVC-01 — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: both versions: baseline distance 1, current distance 1; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../client/tests/unit/test_api.py:10  client:tests/unit/test_api.py::test_a_call_without_a_key_is_refused — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 1 — client is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../service/tests/unit/test_api.py:5  service:tests/unit/test_api.py::test_a_call_without_a_key_is_refused — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 1 — service is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  docs/design/client-design.md:3  DSN-CLT-01 — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: both versions: baseline distance 2, current distance 2; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  docs/design/service-design.md:8  DSN-SVC-02 — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: both versions: baseline distance 2, current distance 2; unchanged — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../service/src/service/keys.py:1  service:src/service/keys.py — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 2 — service is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../client/src/client/api.py:1  client:src/client/api.py — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 3 — client is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../client/tests/unit/test_api.py:5  client:tests/unit/test_api.py::test_every_call_carries_the_key — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 3 — client is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../service/src/service/store.py:1  service:src/service/store.py — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 3 — service is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+  S01  ../service/tests/integration/test_store.py:5  service:tests/integration/test_store.py::test_a_record_survives_a_restart — REQ-SVC-01 (changed) since baseline/requirements/1 in ledger: current reach only: distance 3 — service is read from its working tree, not at that baseline — not pinned; unknown whether edited — needs review. Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.
+
+result: 0 violations, 0 gaps in 13 items across 3 repos · 10 suspects (informational) · exit 0 · authoring: gaps do not fail — the gate is qmstrace ledger check --strict · working trees, not pinned · controlled document items: 6 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

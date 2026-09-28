@@ -1,5 +1,5 @@
 ---
-summary: Data architecture of qmstrace. Settled — decisions D1–D10 with their rejected alternatives; the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, citation across repos, item text, baselines, change-request citation, the kinds of finding); and the ledger's import at a pin with the trace lock, v0. Not yet written — work-product states, events, evidence pointers, the ledger layout, the profile's format.
+summary: Data architecture of qmstrace. Settled — decisions D1–D10 with their rejected alternatives; the product-repo half of the model (the item chain, marker syntax v0, the trace configuration with rules as data, citation across repos and the ledger's check of the whole project over working trees (M10a, ADR-0001), item text, baselines, change-request citation, the kinds of finding); and the ledger's import at a pin with the trace lock, v0. Not yet written — work-product states, events, evidence pointers, the ledger layout, the profile's format.
 read_when:
   - deciding how trace data, work-product state or evidence is stored or moves
   - about to reopen one of the settled decisions below
@@ -310,6 +310,15 @@ a citation too; a frozen item's heading may not disappear — it is withdrawn, n
   schema; malformed local graph evidence prevents judgment. Historical sibling/external
   citations are unverified boundary nodes, never filled from today's filesystem. This is
   local change analysis, not project-wide traversal at pins.
+- **M10a — a dependant in another repo, in the ledger's check.** A root's governing snapshot
+  is one repo's tagged tree, so no version of another repo at that baseline is read. There a
+  dependant is reported **by today's reach only**: its reason names its repo, has no
+  historical distance, and leaves *edited* unknown rather than guessed; the output says *not
+  pinned*. Both rules above still hold on the root's side: nothing is spliced, and the
+  historical walk stops at the root's repo. A dependant in the root's own repo keeps the M5b
+  rule unchanged. **Rejected:** leaving product-repo tests silent until pins — in the layout of
+  [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md), every test is in another repo than
+  the requirement it verifies, so a changed requirement would never reach one.
 - **Refinements from E3:** a change to a link field such as `Origin` counts as a change to
   the item's text; a `Change:` line is permanent, since a generated revision history is built
   from it; a change request reserves the ID of any item it adds; and when a requirement is
@@ -370,7 +379,8 @@ the project. That is the project's **trace schema** — one file, `qmstrace.sche
 generated copy of it**, between markers in its own **trace configuration** (`qmstrace.toml`), beside what is local:
 the item types it declares, their ID patterns, the files to scan, its baselines. The copy
 carries a digest; the ledger's import refuses a repo whose copy does not match the schema at
-the pin. `rules` prints what is in force and says which part is the project's and which is
+the pin, and the ledger's check (M10a) refuses one whose rules differ from the ledger's working
+tree. `rules` prints what is in force and says which part is the project's and which is
 the repo's.
 
 - **Why a copy and not a path:** the pull-request gate runs in the product repo's own
@@ -489,7 +499,9 @@ mind three times and wrote a comment, because no marker fitted.
 - **It points at a requirement or a design element**, in this repo or a sibling; from a design
   element or a requirement.
 - **Across repos it is judged at the ledger's import, against the pin** — never against a
-  colleague's uncommitted working tree.
+  colleague's uncommitted working tree. *Amended by M10a:* the ledger's check carries it
+  across repos over working trees first — suspicion and reach, labelled *not pinned* — and the
+  import at pins still decides it for good.
 - **Rejected — the name `Depends-on`.** It would attract every import and every call. `Assumes`
   limits itself: it is written only when a change *there* could break something *here*.
 - **Rejected — leaving it in prose.** The knowledge exists at the moment the code is written
@@ -616,37 +628,54 @@ files      = ["docs/req/*-srs.md"]
 - **Where it lives across repos:** the shared part is authored in the ledger and copied here,
   generated and verified; the local part is written here (D9).
 
-### Across repos (v0)
+### Across repos (v1 — the ledger's check, M10a)
 
-*Amended 2026-09-28 by [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md): a requirement's one home may be the ledger repo, read by product repos as a sibling. Still to be rewritten, in the project-wide-check milestone.*
+First exercised with two product repos in the fourth experiment; since
+[ADR-0001](../adr/0001-the-ledger-holds-the-documents.md) the target layout keeps the
+documents in the ledger, which is traced itself and lists itself in `[repos]` as `"."`.
 
-Exercised once, with two product repos — see the fourth experiment.
-
-- **A requirement has one home.** It is declared in the repo that owns it, under that repo's
-  subject; another repo cites it by ID exactly like a local item, and a sibling's requirement
-  re-declared locally is a violation that says whose it is.
-- **Locally, a sibling is read from its working tree and the output says so** — "not pinned".
-  **Where a sibling cannot be read** — in a pipeline only one repo is checked out — a citation
-  of an ID that is not this repo's own enters the graph as *not verified here*, is named in the
-  header, and is judged at the ledger's import. An ID matching this repo's own pattern gets no
-  such benefit: this repo was read, so it is known not to exist (decided while planning M2).
-  Only the ledger's import reads at a pin.
-- **The thread between two repos runs through the origin.** Requirements are product-scoped —
-  "The gateway shall…" — so a client's design element cannot satisfy a gateway requirement,
-  and did not try to. What joins the two sides is the agreement clause both derive from: in
-  the test bed three clauses have requirements in both repos. A project-wide view should be
-  organised by origin clause; none is yet.
+- **An item has one home: the repo that declares it.** In the target layout that is the
+  ledger for requirements and design elements, and a product repo for modules and tests;
+  in the older layout, the product repo that owns the feature. Another repo cites it by ID,
+  exactly like a local item, and one declared again elsewhere is a violation that says whose
+  it is.
+- **In one repo, a sibling is read from its working tree and the output says so** — "not
+  pinned". **Where a sibling cannot be read** — in a pipeline only one repo is checked out — a
+  citation of an ID that is not this repo's own enters the graph as *not verified here* and is
+  named in the header. An ID matching this repo's own pattern gets no such benefit: this repo
+  was read, so it is known not to exist (decided while planning M2).
+- **In the ledger, `qmstrace ledger check` judges every repo together** — each read from its
+  working tree, said *not pinned*. Each repo is scanned with its own configuration and built
+  against the others' items, so what depends on one repo's patterns and files — V01, V02, V07,
+  V16, V04, V05 — stays that repo's, exactly as its own check reports it with every sibling
+  read. The repos' graphs are then joined, and on the union a coverage rule is met by a link in
+  any repo, walks cross repo edges, and a change makes what hangs off it suspect in every repo
+  (D7, M10a). Nothing in it is *not verified*: every repo was read, so an unknown ID is V03.
+- **A derived ID carries its repo there** — `service:tests/unit/test_api.py::test_x` — because
+  two repos can hold the same path, as the fourth experiment found. An authored ID is never
+  qualified: it is the project's already. Every location is written from the ledger
+  (`../service/…`).
+- **A repo not read makes a clean result false**, so the check refuses rather than reports:
+  a listed repo that is missing or unreadable, one whose schema differs from the ledger's
+  (D9), two names for one folder, or a traced ledger missing from `[repos]` — every problem
+  named at once, exit 2.
+- **The pinned half is still the ledger's import.** The check reads working trees; the import
+  reads each repo at a pin, writes the trace lock and decides every citation for good.
+- **The thread between two product repos runs through the origin.** Requirements are
+  product-scoped — "The gateway shall…" — so a client's design element cannot satisfy a gateway
+  requirement, and did not try to. What joins the two sides is the agreement clause both
+  derive from. A project-wide view organised by origin clause is not built yet.
 - **A true marker is not sufficient: the verdict has to land on whoever can act on it.** A
   client test that really does fail when the gateway's guard breaks would, tagged with the
   gateway's requirement, redden a requirement in a repo whose code is fine — or, tagged only
   with the client's, redden the client's for a gateway fault. `verifies` across repos is
-  allowed; it is not the natural cross-repo link.
-- **The link agents reach for across repos is a dependency — now `Assumes` (D10).** A client design element *assumes* something of the gateway: that re-registering is
-  harmless, that an unknown agent gets a 404, that the gateway owns the client-ID pattern — the
-  last "a negative delegation, which `Satisfies` gets backwards". Three times the agent had a
-  sibling's ID in mind and wrote a comment because no marker fitted. Such a link would count
-  toward **no coverage rule**; its job is to carry suspicion and the impact set across the
-  repo boundary, which today stop at the repo's edge.
+  allowed; it is not the natural cross-repo link between two product repos.
+- **The link agents reach for across repos is a dependency — `Assumes` (D10).** A client design
+  element *assumes* something of the gateway: that re-registering is harmless, that an unknown
+  agent gets a 404, that the gateway owns the client-ID pattern — the last "a negative
+  delegation, which `Satisfies` gets backwards". It counts toward **no coverage rule**; it
+  carries suspicion and the impact set across the repo boundary — in one repo up to its edge,
+  in the ledger's check across it.
 
 ### Item text
 

@@ -2,10 +2,11 @@
 
 !!! abstract "TL;DR"
 
-    The project side's verbs, run in the ledger repo — where `qmstrace.schema.toml` is. Today
-    there is one: `copy-schema` writes the project's trace schema into each product repo as a
-    generated, verified copy, so that a product repo can be judged on its own — in its
-    pipeline, or at a baseline tag. All repos or none; a second run changes nothing.
+    The project side's verbs, run in the ledger repo — where `qmstrace.schema.toml` is.
+    `check` judges every repo of the project together — coverage met across repos, each repo's
+    own violations, suspects across repos — from their working trees; `--strict` is the
+    ledger's gate. `copy-schema` writes the project's trace schema into each product repo as a
+    generated, verified copy, so that a product repo can be judged on its own.
 
 ## The group
 
@@ -16,6 +17,63 @@
 The ledger's verbs are kept apart from the product-repo loop: an agent reading the help in a
 product repo does not see verbs it must not use. Run one in a product repo and it names the
 ledger; run a product verb in the ledger and it names the product repos.
+
+## qmstrace ledger check
+
+``` text
+--8<-- "cli/golden/help-ledger-check.txt"
+```
+
+Every repo the schema lists under `[repos]` is read from its working tree, with its own
+`qmstrace.toml`, and the ledger too when it lists itself as `"."` — the layout where the
+ledger holds the requirements and the design ([Around the repo](../../explanation/around-the-repo.md)).
+Then they are judged as one project:
+
+``` text
+--8<-- "cli/golden/ledger-check-split.txt"
+```
+
+The header lists each repo read, where it is from the ledger and what it holds. Locations are
+written from the ledger (`../client/…`), and a module's or a test's ID carries its repo —
+`client:tests/unit/test_api.py::…` — because two repos can hold the same path. Every other
+ID is written as it was authored.
+
+Under the gate, with one test in the client losing its marker — the gaps name the repos where
+the link can be written:
+
+``` text
+--8<-- "cli/golden/ledger-check-strict.txt"
+```
+
+After a change to a frozen requirement in the ledger, cited to an accepted change request:
+what hangs off it is suspect in every repo. A dependant in another repo than the changed item
+is reached by today's links only — the ledger's baseline holds no version of that repo — so its
+reason says *current reach only … not pinned; unknown whether edited*:
+
+``` text
+--8<-- "cli/golden/ledger-check-suspects.txt"
+```
+
+**Refused, exit `2`, every problem named at once** — a clean result with a repo left unread
+would be a false one: a listed repo that is missing, has no `qmstrace.toml` or cannot be read;
+one holding rules other than the ledger's schema; two names for one folder; a ledger holding a
+`qmstrace.toml` that `[repos]` does not list; an empty `[repos]`.
+
+``` text
+--8<-- "cli/golden/ledger-check-refused.txt"
+```
+
+The older layout — documents in the product repos, the ledger holding only the agreement and
+the schema — is judged the same way:
+
+``` text
+--8<-- "cli/golden/ledger-check-mini.txt"
+```
+
+Exit `0` means no violation — and, under `--strict`, no gap; `1` means one remains; `2` means
+the project could not be judged; `3` an internal fault. Suspects never fail. Each repo's own
+`qmstrace check` is unchanged: in the ledger, it still fails on gaps only another repo can
+meet, and its next move points here.
 
 ## qmstrace ledger copy-schema
 

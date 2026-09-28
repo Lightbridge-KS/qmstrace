@@ -50,8 +50,12 @@ The same complete findings and evidence limits survive quiet output:
 - Withdrawn items keep their labels and review obligations. Their coverage exemption is separate.
 - A deleted frozen root retains its surviving dependants alongside V13. A missing dependant
   is not listed as an item to review today.
-- Traversal stops at this repo's edge. Historical sibling/external citations are **NOT
-  VERIFIED**; today's sibling files cannot supply historical evidence.
+- In a repo's own `check`, traversal stops at this repo's edge. Historical sibling/external
+  citations are **NOT VERIFIED**; today's sibling files cannot supply historical evidence.
+- [`qmstrace ledger check`](commands/ledger.md#qmstrace-ledger-check), in the ledger, walks
+  across every repo of the project. A dependant in another repo than the changed item is
+  reached by today's links only — no version of that repo at the baseline is read — so its
+  reason says *current reach only … not pinned* and leaves *edited* unknown.
 - Invalid historical local graphs prevent judgment with exit `2`, naming the tag and finding.
   Current graph violations remain visible, including the limits imposed by refused links.
 - Suspects never affect exit codes, including `check --strict`. No review state is persisted;

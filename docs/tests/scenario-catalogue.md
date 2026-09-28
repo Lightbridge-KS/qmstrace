@@ -359,3 +359,28 @@ names. Each line is at least one test.
 | A baseline tag cut after the copy | the tagged configuration is read and judged; before the copy it could not be |
 | The ledger listed as itself (`ledger = "."`, ADR-0001) | skipped, never written or refused — its `qmstrace.toml` stays byte for byte; named alone, nothing is copied |
 | A ledger whose `qmstrace.toml` already holds a copy of its own schema | skipped; the line says to replace that `[schema]` with `path = "qmstrace.schema.toml"` |
+
+## M10a — the ledger's check
+
+`qmstrace ledger check`, run in a ledger, judging every repo in `[repos]` as one project — in
+the layout of ADR-0001 (`tests/fixtures/split`) and in the older one (`tests/fixtures/mini`).
+Each line is at least one test.
+
+| Scenario | Expected |
+|---|---|
+| The ledger holds the documents; the product repos hold code and tests | every repo read; the ledger's G02–G04 met by the product repos; 0 gaps; the result line says *across N repos* and *working trees, not pinned* |
+| The ledger's own `check --strict` in that layout | fails on G02–G04 only; each fix names `qmstrace ledger check` |
+| The same test path in two repos | two items, `client:…` and `service:…`; no V01 |
+| A cited ID nothing declares | V03 *in any repo of the project*, located from the ledger (`../client/…`); never *not verified* |
+| Violations in several repos | each repo's are the ones its own `check` reports with every sibling read |
+| A gap only a product repo can meet | the next move names the repos that declare the type — *on the test case in client or service* |
+| A listed repo missing or without `qmstrace.toml`; a configuration that cannot be read | exit 2, naming it; every problem at once |
+| A repo holding an older copy of the schema | exit 2, naming it and `qmstrace ledger copy-schema <repo>` |
+| A traced ledger missing from `[repos]`; two names for one folder; an empty `[repos]` | exit 2, saying which |
+| Run in a product repo | exit 2, naming the ledger |
+| A frozen document reworded after the ledger's baseline, no request | V10 in the ledger |
+| The same, citing an accepted request that lists it | no V10; S01 on the ledger's design elements (both versions) and on the product repos' tests and modules (*current reach only … not pinned; unknown whether edited*) |
+| The older layout: a product repo's baseline, its requirement reworded | V10 there; the other repo's test that verifies it is suspect, current reach only |
+| `--quiet` | findings and the result line; what could not be verified still shows |
+| `-C` before or after the verb; two runs | the same bytes; no absolute path |
+

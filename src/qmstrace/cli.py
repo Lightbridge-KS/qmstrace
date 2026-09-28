@@ -32,7 +32,8 @@ Exit codes:
   0  completed — informational views may include failures
   1  the check failed — violations, or gaps under the gate; the result line says which
   2  could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
-     an unreadable report, a shallow clone where baselines are configured
+     an unreadable report, a shallow clone where baselines are configured, a repo of
+     the project that cannot be read or holds other rules
   3  internal error — a fault in qmstrace, not in the repo"""
 
 app = typer.Typer(
@@ -301,3 +302,31 @@ def graph(
     )
     typer.echo("Offline working-tree snapshot; findings and evidence limits are included. Exit 0.")
     return EXIT_OK
+
+
+@ledger.command(
+    "check", short_help="Judge every repo of the project together — the gate with --strict."
+)
+@outcome
+def ledger_check(
+    ctx: typer.Context,
+    strict: Annotated[
+        bool, typer.Option("--strict", help="The gate: gaps fail too; suspects never fail.")
+    ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option("--quiet", help="Findings only — what could not be verified still shows."),
+    ] = False,
+    directory: Directory = None,
+) -> int:
+    """Read every repo the schema lists under [repos] — the ledger itself too, when it holds
+    documents — and judge them as one project.
+
+    A coverage rule is met by a link in any repo; each repo's own violations are reported; a
+    change to a frozen item makes what hangs off it suspect in every repo. Each repo is read
+    from its working tree, not at a pin, and the output says so. A repo that cannot be read,
+    or holds rules other than the ledger's schema, stops the check: exit 2.
+    """
+    project = Workspace.project(_directory(ctx, directory))
+    typer.echo(text.ledger_check(project, strict=strict, quiet=quiet))
+    return EXIT_FAILED if project.fails(strict=strict) else EXIT_OK

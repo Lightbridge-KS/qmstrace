@@ -7,11 +7,16 @@ The load-bearing claims, each pinned by a test:
 2. `-C` before or after the command gives the same bytes.
 3. Run in a product repo it cannot judge and names the ledger; a product verb run in the ledger
    names the product repos and the `ledger` group. `qmstrace ledger` alone prints its verbs.
+4. `ledger check` is a golden file too — a clean project in the layout of ADR-0001, the gate
+   failing on gaps the product repos leave, `--quiet`, suspects across repos after a change to
+   a frozen document, a refusal, and the old layout — and `-C` on either side gives the same
+   bytes.
 
 Regenerate a golden after an intended change: `QMSTRACE_REGOLD=1 uv run pytest tests/cli`, then
 read the diff before committing it.
 """
 
+import shutil
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -104,3 +109,84 @@ def test_the_group_alone_lists_its_verbs() -> None:
     code, output = copy_schema("ledger")
     assert code == 2
     assert "copy-schema" in output
+
+
+# ── 4. ledger check ────────────────────────────────────────────────────────────────────────
+
+
+def ledger_check(ledger: Path, *flags: str) -> tuple[int, str]:
+    return copy_schema("-C", str(ledger), "ledger", "check", *flags)
+
+
+def rewrite(path: Path, old: str, new: str) -> None:
+    content = path.read_text(encoding="utf-8")
+    assert old in content
+    path.write_text(content.replace(old, new, 1), encoding="utf-8")
+
+
+def untested_client(split: Path) -> None:
+    """The client's test for its own requirement loses its marker."""
+    rewrite(
+        split / "client" / "tests" / "unit" / "test_api.py",
+        '@pytest.mark.verifies("REQ-CLT-01", "DSN-CLT-01")\n',
+        "",
+    )
+
+
+@pytest.mark.verifies("REQ-QMT-17")
+def test_ledger_check_on_a_project_whose_ledger_holds_the_documents(
+    split: Path, golden: Golden
+) -> None:
+    code, output = ledger_check(split / "ledger")
+    assert code == 0
+    golden(GOLDEN / "ledger-check-split.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-17")
+def test_ledger_check_strict_fails_on_gaps_across_repos(split: Path, golden: Golden) -> None:
+    untested_client(split)
+    code, output = ledger_check(split / "ledger", "--strict")
+    assert code == 1
+    golden(GOLDEN / "ledger-check-strict.txt", output)
+
+
+def test_ledger_check_quiet_keeps_what_it_could_not_verify(split: Path, golden: Golden) -> None:
+    untested_client(split)
+    code, output = ledger_check(split / "ledger", "--quiet")
+    assert code == 0
+    golden(GOLDEN / "ledger-check-quiet.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-17")
+def test_ledger_check_after_a_change_to_a_frozen_document(split: Path, golden: Golden) -> None:
+    ledger = split / "ledger"
+    subprocess.run(["git", "tag", "-a", "baseline/requirements/1", "-m", "approved"], cwd=ledger)
+    srs = ledger / "docs" / "req" / "service-srs.md"
+    rewrite(srs, "with status 401", "with status 403")
+    rewrite(srs, "- Verify-by: test\n", "- Verify-by: test\n- Change: CR-001\n")
+    code, output = ledger_check(ledger)
+    assert code == 0
+    golden(GOLDEN / "ledger-check-suspects.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-17")
+def test_ledger_check_refuses_a_project_it_cannot_read_whole(split: Path, golden: Golden) -> None:
+    copy_schema("-C", str(split / "ledger"), "ledger", "copy-schema", "service")
+    rewrite(split / "ledger" / "qmstrace.schema.toml", "verifies nothing.", "verifies nothing yet.")
+    shutil.rmtree(split / "client")
+    code, output = ledger_check(split / "ledger")
+    assert code == 2
+    golden(GOLDEN / "ledger-check-refused.txt", output)
+
+
+def test_ledger_check_on_the_old_layout(project: Path, golden: Golden) -> None:
+    code, output = ledger_check(project / "ledger")
+    assert code == 0
+    golden(GOLDEN / "ledger-check-mini.txt", output)
+
+
+def test_ledger_check_minus_c_before_or_after_gives_the_same_bytes(split: Path) -> None:
+    ledger = str(split / "ledger")
+    before = copy_schema("-C", ledger, "ledger", "check")
+    after = copy_schema("ledger", "check", "-C", ledger)
+    assert before == after and before[0] == 0

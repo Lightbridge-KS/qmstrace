@@ -13,9 +13,11 @@ and the priorities stay in the [PRD](qmstrace-prd.md), which carries no IDs. `Or
 clause of the agreement in the ledger repo (`AGR-n`). The design elements that satisfy these
 requirements are in the [codebase blueprint](../structure/codebase-blueprint.md#11-design-elements--what-the-code-is-traced-to).
 
-Scope: what slice 1 built — the product-repo half. Work-product state, events, the ledger's
-import and emitted tables are slices 2 and 3 and are not specified here yet. No baseline has
-been cut: nothing below is frozen.
+Scope: what slice 1 built — the product-repo half — and the project-wide check over working
+trees (M10). Work-product state, events, the ledger's import at pins and emitted tables are
+slices 2 and 3 and are not specified here yet. REQ-QMT-01…16 are frozen by the baseline tag
+`baseline/requirements/1`; a requirement added or changed since cites an accepted change request
+in the ledger under `Change:`.
 
 ## Rules as data
 
@@ -187,3 +189,20 @@ makes no connection, and never overwrites an existing file.
 - Category: usability
 - Origin: AGR-1
 - Verify-by: test
+
+## The project
+
+### REQ-QMT-17 — The project is judged as a whole, from its ledger
+
+`qmstrace ledger check`, run in the ledger repo, reads the working tree of every repo the trace
+schema lists under `[repos]` — the ledger itself too, when it lists itself as `"."` — and
+reports the project's violations, gaps and suspects in one run. A coverage rule is met by a
+link in any of those repos; each repo's own violations are reported with it; a change to a
+frozen item makes what hangs off it suspect in every repo. A listed repo that cannot be read,
+or holds rules other than the ledger's schema, stops the check with exit 2. The output says it
+read working trees, not pins.
+
+- Category: functional-suitability
+- Origin: AGR-1, AGR-15
+- Verify-by: test
+- Change: CR-001

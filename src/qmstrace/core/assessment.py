@@ -1,9 +1,10 @@
 """What one run found — the whole of it, as data, for a command to render.
 
 A command is: open the workspace → take its assessment → render → exit. Nothing here is
-computed on the way out; the renderer only arranges it.
+computed on the way out; the renderer only arranges it. A product repo's run gives an
+`Assessment`; the ledger's check of the whole project gives a `ProjectAssessment`.
 
-Implements: DSN-QMT-02
+Implements: DSN-QMT-02, DSN-QMT-14
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
-from qmstrace.core.baselines import BaselineState, Suspect
+from qmstrace.core.baselines import BaselineState, Register, Suspect
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import TraceGraph
 from qmstrace.core.model import Finding, Notice
@@ -67,6 +68,39 @@ class Assessment:
     siblings_located: bool
     notices: tuple[Notice, ...]
     baseline_state: BaselineState = field(default_factory=BaselineState)
+    suspects: tuple[Suspect, ...] = ()
+
+    def fails(self, *, strict: bool) -> bool:
+        """Whether the check fails: on any violation, and — under the gate — on any gap too."""
+        return bool(self.violations) or (strict and bool(self.gaps))
+
+
+@dataclass(frozen=True, slots=True)
+class RepoState:
+    """One repo of the project as the ledger's check read it: where it is, from the ledger;
+    what was scanned in it; its baselines."""
+
+    name: str
+    location: str
+    tree_label: str
+    scanned: tuple[Scanned, ...]
+    baseline_state: BaselineState = field(default_factory=BaselineState)
+
+
+@dataclass(frozen=True, slots=True)
+class ProjectAssessment:
+    """Everything `qmstrace ledger check` can say about the project: every repo in [repos]
+    read from its working tree, and judged as one graph. `config` is the ledger's schema — the
+    rules every repo holds."""
+
+    config: TraceConfig
+    repos: tuple[RepoState, ...]
+    graph: TraceGraph
+    violations: tuple[Finding, ...]
+    gaps: tuple[Finding, ...]
+    externals: tuple[ExternalState, ...]
+    register: Register
+    notices: tuple[Notice, ...]
     suspects: tuple[Suspect, ...] = ()
 
     def fails(self, *, strict: bool) -> bool:
