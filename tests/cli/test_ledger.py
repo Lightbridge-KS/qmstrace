@@ -2,8 +2,8 @@
 
 The load-bearing claims, each pinned by a test:
 
-1. Its output is a golden file: the first copy, a second run that changes nothing, and a copy
-   after the project's rules changed.
+1. Its output is a golden file: the first copy, a second run that changes nothing, a copy
+   after the project's rules changed, and a copy from a ledger that lists itself — skipped.
 2. `-C` before or after the command gives the same bytes.
 3. Run in a product repo it cannot judge and names the ledger; a product verb run in the ledger
    names the product repos and the `ledger` group. `qmstrace ledger` alone prints its verbs.
@@ -50,6 +50,13 @@ def test_a_second_run_changes_nothing(project: Path, golden: Golden) -> None:
     assert code == 0
     assert (project / "service" / "qmstrace.toml").read_bytes() == before
     golden(GOLDEN / "ledger-copy-schema-again.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-13")
+def test_a_copy_from_a_ledger_that_lists_itself(split: Path, golden: Golden) -> None:
+    code, output = copy_schema("-C", str(split / "ledger"), "ledger", "copy-schema")
+    assert code == 0
+    golden(GOLDEN / "ledger-copy-schema-split.txt", output)
 
 
 def test_a_copy_after_the_rules_changed(project: Path, golden: Golden) -> None:

@@ -817,14 +817,19 @@ def schema_copies(config: TraceConfig, copies: Iterable[Copied]) -> str:
     written = list(copies)
     lines = [f"schema: {config.project} {config.schema_digest}"]
     for copy in written:
-        if copy.changed:
+        if copy.skipped:
+            lines.append(f"skipped: {copy.repo} — the ledger itself; {copy.before}")
+        elif copy.changed:
             lines.append(f"updated: {copy.repo} — {copy.file}, {copy.before}")
         else:
             lines.append(f"unchanged: {copy.repo} — {copy.file}")
-    if any(copy.changed for copy in written):
+    copied = [copy for copy in written if not copy.skipped]
+    if any(copy.changed for copy in copied):
         lines.append("Commit qmstrace.toml in each updated repo. Exit 0.")
-    else:
+    elif copied:
         lines.append("Every repo already carries this schema. Exit 0.")
+    else:
+        lines.append("Nothing was copied. Exit 0.")
     return "\n".join(lines)
 
 

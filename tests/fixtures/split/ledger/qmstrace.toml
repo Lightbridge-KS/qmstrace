@@ -1,0 +1,26 @@
+# This ledger's own TRACE CONFIGURATION: it holds the project's documents, so it is traced like
+# any repo of the project — and reads the schema it holds by path, never as a copy.
+#
+# What does NOT belong here: rules. They are in qmstrace.schema.toml, beside this file.
+
+version = 1
+ledger  = "."                       # the agreement and the change requests are here
+
+[schema]
+path = "qmstrace.schema.toml"
+
+[subjects.service]                  # a named body of requirements; a baseline freezes a subject
+key = "SVC"
+
+[subjects.client]
+key = "CLT"
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-(SVC|CLT)-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]
+extractor  = "markdown"
+id_pattern = '^DSN-(SVC|CLT)-\d{2}$'
+files      = ["docs/design/*.md"]

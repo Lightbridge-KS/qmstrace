@@ -193,6 +193,26 @@ class Copied:
     file: str  # its qmstrace.toml, as the ledger reaches it
     changed: bool
     before: str  # what it held: by path, a copy of older rules, one edited by hand, …
+    skipped: bool = False  # the ledger itself, listed as "." — it reads its schema by path
+
+
+def ledger_itself(local_text: str | None) -> str:
+    """Why the ledger's own entry in [repos] is skipped, in the words its report line uses —
+    and, for a ledger that already holds a copy of its own schema, how to undo it."""
+    if local_text is None:
+        return "it holds the schema"
+    try:
+        held = held_schema(local_text)
+    except CouldNotJudge:
+        return "it holds the schema"
+    if held.kind == "copy":
+        return (
+            "but its qmstrace.toml holds a copy of its own schema — replace that [schema] with "
+            'path = "qmstrace.schema.toml", so the ledger reads the rules it holds'
+        )
+    if held.kind == "path":
+        return "its qmstrace.toml reads qmstrace.schema.toml by path"
+    return "it holds the schema"
 
 
 def before_copy(held: Held, digest: str) -> str:

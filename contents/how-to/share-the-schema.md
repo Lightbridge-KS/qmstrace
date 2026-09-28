@@ -9,7 +9,9 @@
 ## Steps
 
 1. **List the product repos** under `[repos]` in the ledger's `qmstrace.schema.toml`, each as a
-   name and a path from the ledger — `service = "../service"`.
+   name and a path from the ledger — `service = "../service"`. A ledger that holds the
+   project's documents lists itself too, as `ledger = "."`; the copy skips it, because it
+   reads the schema it holds by path.
 
 2. **Point each product repo at the schema.** A repo joining the project starts with
    `[schema] path = "../ledger/qmstrace.schema.toml"` in its `qmstrace.toml` — the first form

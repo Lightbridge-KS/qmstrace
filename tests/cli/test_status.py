@@ -2,7 +2,8 @@
 
 The load-bearing claims, each pinned by a test:
 
-1. Its output is a golden file: with everything beside the repo, and as a pipeline sees it.
+1. Its output is a golden file: with everything beside the repo, as a pipeline sees it, and in
+   a product repo whose documents are in the ledger (ADR-0001).
 2. Two runs give the same bytes, and no absolute path of this machine leaks into them.
 3. The root is found from a folder inside the repo, and `-C` runs it elsewhere — given before the
    command, as with `git -C`, or after it; given on both sides it is a usage error.
@@ -39,6 +40,14 @@ def test_status_with_everything_beside_the_repo(project: Path, golden: Golden) -
     code, output = status(project / "service")
     assert code == 0
     golden(GOLDEN / "status-service.txt", output)
+
+
+def test_status_of_a_product_repo_whose_documents_are_in_the_ledger(
+    split: Path, golden: Golden
+) -> None:
+    code, output = status(split / "service")
+    assert code == 0
+    golden(GOLDEN / "status-split-service.txt", output)
 
 
 def test_status_as_a_pipeline_sees_it(alone: Callable[[str], Path], golden: Golden) -> None:

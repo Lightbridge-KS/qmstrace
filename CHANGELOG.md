@@ -8,6 +8,9 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- A test fixture in the layout of ADR-0001: a traced ledger that holds the requirements and
+  the design, and product repos that hold code and tests and cite the ledger's IDs.
+
 - `init` links `.claude/skills/qmstrace` to the installed skill when the repo already has a
   `.claude/` folder, so Claude Code lists it. The link is created once and left alone;
   anything else at that path is refused before any write.
@@ -113,6 +116,9 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- `ledger copy-schema` no longer rewrites the ledger's own `qmstrace.toml` when the ledger
+  lists itself under `[repos]` as `"."`: that entry is skipped, and its line says why — or,
+  where an older run wrote a copy there, how to restore the path.
 - A code fence closes only on a line of its own character, at least as long as its opener,
   with nothing after it; a fenced example holding a shorter fence no longer hides or exposes
   the headings after it.

@@ -1,0 +1,18 @@
+schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo's qmstrace.toml
+scanned (working tree, not pinned):
+  requirement     known to the project, not scanned here
+  design_element  known to the project, not scanned here
+  component         2 items in  2 files  src/**/*.py · 1 file ignored by **/__init__.py
+  test_case         2 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one test case
+links: 6
+external AGR-*: verified against ../ledger/agreement.md (3 declared)
+sibling client: nothing declared — read from ../client's working tree, not pinned; cite its items by ID
+sibling ledger: 3 requirement, 3 design_element — read from ../ledger's working tree, not pinned; cite its items by ID
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines: no matching reachable local tag — nothing frozen locally
+change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+suspects: 0 — informational; this repo only
+
+0 violations · 0 gaps

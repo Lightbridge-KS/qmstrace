@@ -205,9 +205,15 @@ class Workspace:
         source = (ledger / SCHEMA_FILE).resolve()
         problems: list[str] = []
         planned: list[tuple[Path, str, setup.Copied]] = []
+        reports: list[setup.Copied] = []
         for name in dict.fromkeys(names) if names else sorted(config.repos):
             place = config.repos[name]
-            root, shown = (ledger / place).resolve(), posixpath.join(place, CONFIG_FILE)
+            root = (ledger / place).resolve()
+            shown = posixpath.normpath(posixpath.join(place, CONFIG_FILE))
+            if _same(ledger / place, ledger):  # the ledger reads the schema it holds, by path
+                reason = setup.ledger_itself(read_optional(ledger / CONFIG_FILE))
+                reports.append(setup.Copied(name, shown, False, reason, skipped=True))
+                continue
             local = read_optional(root / CONFIG_FILE) if root.is_dir() else None
             if local is None:
                 problems.append(f"{name}: there is no {shown}")
@@ -237,7 +243,9 @@ class Workspace:
                 problems.append(f"{name}: {stopped.what} {stopped.next_move}")
                 continue
             before = setup.before_copy(held, config.schema_digest)
-            planned.append((root, updated, setup.Copied(name, shown, updated != local, before)))
+            copied = setup.Copied(name, shown, updated != local, before)
+            planned.append((root, updated, copied))
+            reports.append(copied)
         if problems:
             raise CouldNotJudge(
                 "the schema could not be copied into every repo, so nothing was written — "
@@ -246,7 +254,7 @@ class Workspace:
                 "Fix: deal with each repo named above, then run qmstrace ledger copy-schema again.",
             )
         update_in({root: {CONFIG_FILE: text} for root, text, _ in planned})
-        return config, tuple(copied for _, _, copied in planned)
+        return config, tuple(reports)
 
     @staticmethod
     def save_view(path: Path, content: str) -> None:
