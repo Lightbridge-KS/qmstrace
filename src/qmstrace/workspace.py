@@ -34,7 +34,14 @@ from qmstrace.extract import change_requests, junit
 from qmstrace.extract.base import FORMS, REGISTRY
 from qmstrace.extract.pytest_tests import report_identity
 from qmstrace.infra.externals import request_files
-from qmstrace.infra.files import contained, read_optional, update_files, update_in, write_new
+from qmstrace.infra.files import (
+    Link,
+    contained,
+    read_optional,
+    update_files,
+    update_in,
+    write_new,
+)
 from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.globbing import matches
 from qmstrace.infra.tree import GitTree, ISourceTree, WorkingTree
@@ -124,15 +131,25 @@ class Workspace:
         guide_path = contained(root, "AGENTS.md")
         existing = read_optional(guide_path) or ""
         block = setup.stanza(assets.joinpath("stanza.md").read_text(encoding="utf-8"), config)
-        skill_path = ".qmstrace/skill/SKILL.md"
+        if os.path.lexists(root / setup.LEGACY_SKILL):
+            raise CouldNotJudge(
+                "The qmstrace skill has moved to .agents/skills/qmstrace/.",
+                "Fix: keep any local edits elsewhere, remove .qmstrace/, then run init again.",
+            )
         skill = assets.joinpath("skill/SKILL.md").read_text(encoding="utf-8")
-        prior_skill = read_optional(contained(root, skill_path))
+        prior_skill = read_optional(contained(root, setup.SKILL_FILE))
         if prior_skill is not None and prior_skill != skill:
             raise CouldNotJudge(
                 "The installed qmstrace skill differs from this version.",
-                "Fix: preserve any local edits, remove .qmstrace/skill/SKILL.md, then rerun init.",
+                f"Fix: preserve any local edits, remove {setup.SKILL_FILE}, then rerun init.",
             )
-        edits = {CONFIG_FILE: current, "AGENTS.md": setup.guide(existing, block), skill_path: skill}
+        edits: dict[str, str | Link] = {
+            CONFIG_FILE: current,
+            "AGENTS.md": setup.guide(existing, block),
+            setup.SKILL_FILE: skill,
+        }
+        if _links_for_claude(root):
+            edits[setup.CLAUDE_LINK] = Link(setup.CLAUDE_LINK_TARGET)
         if any(t.extractor == "pytest" for t in config.item_types.values()):
             selected = False
             for name in (
@@ -527,6 +544,19 @@ class Workspace:
 
 
 # ── finding and reading the repo ────────────────────────────────────────────────────────────
+
+
+def _links_for_claude(root: Path) -> bool:
+    """Link the skill into Claude Code's folder only where the repo already has one: `.claude/`
+    a plain folder, and its `skills/` not already the folder the skill lives in (one folder,
+    linked either way round) nor a link to anywhere else."""
+    claude = root / ".claude"
+    if not claude.is_dir() or claude.is_symlink():
+        return False
+    skills = claude / "skills"
+    if skills.resolve() == (root / ".agents" / "skills").resolve():
+        return False
+    return not skills.is_symlink()
 
 
 def _find_root(start: Path) -> Path:

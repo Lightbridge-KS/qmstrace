@@ -1,5 +1,6 @@
 """Setup preserves authored files and produces runnable pytest registration."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -8,6 +9,7 @@ import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
+from qmstrace.core import setup
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.workspace import Workspace
 
@@ -72,7 +74,7 @@ def test_symlink_outside_repo_is_refused(tmp_path: Path) -> None:
 
 def test_edited_skill_is_preserved(tmp_path: Path) -> None:
     Workspace.initialize(tmp_path)
-    skill = tmp_path / ".qmstrace/skill/SKILL.md"
+    skill = tmp_path / setup.SKILL_FILE
     skill.write_text("edited")
     with pytest.raises(CouldNotJudge, match="skill differs"):
         Workspace.initialize(tmp_path)
@@ -127,3 +129,92 @@ def test_invalid_inputs_are_usage_failures(tmp_path: Path, project: Path) -> Non
     ]:
         result = CliRunner().invoke(app, ["init", "-C", str(path), *options])
         assert result.exit_code == 2, result.output
+
+
+# ── the skill's home, and the link Claude Code reads ────────────────────────────────────────
+
+
+def test_the_skill_is_linked_where_the_repo_has_claude(tmp_path: Path) -> None:
+    (tmp_path / ".claude").mkdir()
+    first = Workspace.initialize(tmp_path)
+    assert f"updated: {setup.CLAUDE_LINK}" in first
+    assert os.readlink(tmp_path / setup.CLAUDE_LINK) == setup.CLAUDE_LINK_TARGET
+    packaged = (tmp_path / setup.SKILL_FILE).read_text()
+    assert (tmp_path / setup.CLAUDE_LINK / "SKILL.md").read_text() == packaged
+    assert f"unchanged: {setup.CLAUDE_LINK}" in Workspace.initialize(tmp_path)
+    assert f"`{setup.SKILL_FILE}`" in (tmp_path / "AGENTS.md").read_text()
+
+
+@pytest.mark.parametrize("claude", [None, "link"])
+def test_no_link_without_a_claude_folder_of_its_own(tmp_path: Path, claude: str | None) -> None:
+    if claude == "link":
+        (tmp_path / "elsewhere").mkdir()
+        (tmp_path / ".claude").symlink_to("elsewhere")
+    done = Workspace.initialize(tmp_path)
+    assert not any(".claude" in line for line in done)
+    assert not os.path.lexists(tmp_path / setup.CLAUDE_LINK)
+    assert claude or not (tmp_path / ".claude").exists()
+
+
+@pytest.mark.parametrize(
+    "canonical,linked", [(".agents/skills", ".claude/skills"), (".claude/skills", ".agents/skills")]
+)
+def test_one_skills_folder_needs_no_link(tmp_path: Path, canonical: str, linked: str) -> None:
+    (tmp_path / canonical).mkdir(parents=True)
+    (tmp_path / linked).parent.mkdir(exist_ok=True)
+    (tmp_path / linked).symlink_to(Path("..") / canonical)
+    done = Workspace.initialize(tmp_path)
+    assert not any(line.endswith(setup.CLAUDE_LINK) for line in done)
+    assert (tmp_path / setup.CLAUDE_LINK / "SKILL.md").is_file()
+    assert (tmp_path / setup.SKILL_FILE).is_file()
+
+
+def _occupy(root: Path, how: str) -> None:
+    link = root / setup.CLAUDE_LINK
+    if how == "skills-file":
+        (root / ".claude").mkdir()
+        (root / ".claude/skills").write_text("not a folder")
+        return
+    link.parent.mkdir(parents=True)
+    if how == "folder":
+        link.mkdir()
+    elif how == "file":
+        link.write_text("a file")
+    elif how == "dangling":
+        link.symlink_to("../../nowhere")
+    elif how == "elsewhere":
+        (root / "docs").mkdir()
+        link.symlink_to("../../docs")
+    elif how == "outside":
+        link.symlink_to(root.parent)
+
+
+@pytest.mark.parametrize(
+    "how", ["folder", "file", "dangling", "elsewhere", "outside", "skills-file"]
+)
+def test_what_setup_did_not_write_is_refused(tmp_path: Path, how: str) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    _occupy(root, how)
+    with pytest.raises(CouldNotJudge, match="holds something setup did not write"):
+        Workspace.initialize(root)
+    assert not (root / "qmstrace.toml").exists()
+    assert not (root / ".agents").exists()
+
+
+def test_a_skill_in_the_old_home_is_refused(tmp_path: Path) -> None:
+    old = tmp_path / setup.LEGACY_SKILL
+    old.parent.mkdir(parents=True)
+    old.write_text("an earlier copy")
+    with pytest.raises(CouldNotJudge, match="skill has moved"):
+        Workspace.initialize(tmp_path)
+    assert old.read_text() == "an earlier copy"
+    assert not (tmp_path / "qmstrace.toml").exists()
+    assert not (tmp_path / ".agents").exists()
+
+
+def test_init_cli_golden_with_claude(tmp_path: Path, golden) -> None:
+    (tmp_path / ".claude").mkdir()
+    done = CliRunner().invoke(app, ["-C", str(tmp_path), "init"])
+    assert done.exit_code == 0, done.output
+    golden(Path("tests/cli/golden/init-claude.txt"), done.output)
