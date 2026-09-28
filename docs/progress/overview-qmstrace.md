@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c (a table of merges, detail archived); now qmstrace is traced by its own ledger and its gate is green on a branch awaiting review; next M10 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c (a table of merges, detail archived); now qmstrace is traced by its own ledger, its gate is green and its first requirements baseline is cut; next M10 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -32,15 +32,17 @@ lost are in the [system architecture](../design/system-architecture.md).
   with the schema copy, and the installed guidance held to the package by meta-tests.
 - [x] The skill installed where a harness lists it — `.agents/skills/qmstrace/`, linked from
   `.claude/skills/qmstrace` — in [#23](https://github.com/Lightbridge-KS/qmstrace/pull/23) (M9c).
-- [ ] The gate green, on branch `chore/trace-own-gate` (pull request not yet open): 16
-  requirements in the [SRS](../req/qmstrace-srs.md), 13 design elements in
+- [x] The gate green — merged in [#24](https://github.com/Lightbridge-KS/qmstrace/pull/24) at
+  `9dbe29f`: 16 requirements in the [SRS](../req/qmstrace-srs.md), 13 design elements in
   [codebase blueprint § 11](../structure/codebase-blueprint.md#11-design-elements--what-the-code-is-traced-to),
-  `Implements:` in all 26 modules, `verifies` on 83 existing tests. `qmstrace check --strict`:
-  0 violations, 0 gaps in 455 items; `qmstrace results` on a full run: all 16 requirements
-  pass. A targeted mutation failed at least one tagged test of every design element and
-  every requirement — the list is in the pull request. **Not done:** the origins and the
-  links are agent-proposed and need the project side's review; no requirements baseline has
-  been cut.
+  `Implements:` in all 26 modules, `verifies` on 83 existing tests. The origins and links were
+  reviewed and accepted as merged.
+- [x] The first requirements baseline: `baseline/requirements/1`, annotated, on `9dbe29f`
+  (2026-09-28). `qmstrace status` reads it: 16 frozen · 0 changed · 0 new · 0 removed;
+  `check --strict` exits 0.
+- **Decided at the baseline:** `qmstrace check --strict` is not added to CI yet; baseline tags
+  keep the `baseline/requirements/<n>` form for now — a release-tag scope can be added once
+  qmstrace releases.
 
 ## Next — M10 · mentions
 
