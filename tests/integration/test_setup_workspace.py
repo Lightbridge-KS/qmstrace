@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -124,7 +125,6 @@ def test_init_cli_goldens(tmp_path: Path, golden) -> None:
 def test_invalid_inputs_are_usage_failures(tmp_path: Path, project: Path) -> None:
     for path, options in [
         (tmp_path / "missing", []),
-        (project / "ledger", []),
         (tmp_path, ["--subject", "../bad"]),
         (tmp_path, ["--key", "bad"]),
     ]:
@@ -220,3 +220,56 @@ def test_init_cli_golden_with_claude(tmp_path: Path, golden) -> None:
     done = CliRunner().invoke(app, ["-C", str(tmp_path), "init"])
     assert done.exit_code == 0, done.output
     golden(Path("tests/cli/golden/init-claude.txt"), done.output)
+
+
+# ── a ledger that holds the documents (M10c, ADR-0001) ──────────────────────────────────────
+
+LEDGER_GATE = "`qmstrace ledger check --strict` is the coverage gate"
+
+
+@pytest.mark.verifies("REQ-QMT-19")
+def test_an_untraced_ledger_is_set_up_to_hold_the_documents(
+    project: Path, golden: Callable[[Path, str], None]
+) -> None:
+    ledger = project / "ledger"
+    first = CliRunner().invoke(
+        app, ["init", "-C", str(ledger), "--subject", "service", "--key", "SVC"]
+    )
+    assert first.exit_code == 0, first.output
+    golden(Path("tests/cli/golden/init-ledger.txt"), first.output)
+    config = Workspace.open(ledger).config
+    assert (config.ledger, config.schema_form.value, config.project) == (".", "by path", "MINI")
+    assert [t.name for t in config.item_types.values() if t.declared_here] == [
+        "requirement",
+        "design_element",
+    ]
+    guide = (ledger / "AGENTS.md").read_text()
+    assert LEDGER_GATE in guide and "qmstrace ledger thread ID" in guide
+    assert not (ledger / "pytest.ini").exists() and not (ledger / "pyproject.toml").exists()
+    again = Workspace.initialize(ledger)
+    assert all(line.startswith(("unchanged:", "next:")) for line in again)
+
+
+def test_it_is_found_from_inside_an_untraced_ledger(project: Path) -> None:
+    inside = project / "ledger" / "change-requests"
+    inside.mkdir()
+    Workspace.initialize(inside)
+    assert (project / "ledger" / "qmstrace.toml").is_file()
+    assert not (inside / "qmstrace.toml").exists()
+
+
+@pytest.mark.verifies("REQ-QMT-19")
+def test_a_traced_ledgers_stanza_names_the_ledgers_verbs(split: Path) -> None:
+    done = Workspace.initialize(split / "ledger")
+    assert not any(line.startswith("next:") for line in done)  # it lists itself already
+    guide = (split / "ledger" / "AGENTS.md").read_text()
+    assert LEDGER_GATE in guide
+    assert "`qmstrace ledger check` lists every reason, in every repo" in guide
+    assert "`qmstrace check --strict` is the coverage gate" not in guide
+
+
+def test_a_product_repos_stanza_keeps_its_own_verbs(split: Path) -> None:
+    Workspace.initialize(split / "service")
+    guide = (split / "service" / "AGENTS.md").read_text()
+    assert "`qmstrace check --strict` is the coverage gate" in guide
+    assert "ledger check" not in guide

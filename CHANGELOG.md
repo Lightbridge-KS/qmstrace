@@ -23,6 +23,12 @@ All notable changes to this project are recorded here. The format follows
   repo's tests, from a module back to its origin clause. A judged item says which repo it is
   in; a module's or a test's ID given without its repo is answered with the qualified IDs it
   may mean.
+- `init` in a ledger sets it up to hold the project's documents (#30): with no `qmstrace.toml`
+  it writes the ledger's own — requirements and design elements, `ledger = "."`, the schema
+  by path — and in every ledger it writes a stanza naming the ledger's verbs:
+  `ledger check --strict` as the gate, `ledger thread` and `ledger impact` as the walks. It
+  never edits the schema; a `next:` line names the `[repos]` entry to add. A product repo's
+  stanza is unchanged.
 - A test fixture in the layout of ADR-0001: a traced ledger that holds the requirements and
   the design, and product repos that hold code and tests and cite the ledger's IDs.
 

@@ -1,0 +1,5 @@
+updated: qmstrace.toml
+updated: AGENTS.md
+updated: .agents/skills/qmstrace/SKILL.md
+next: list this ledger in qmstrace.schema.toml under [repos] — ledger = "." — so qmstrace ledger check reads its documents; init does not edit the schema
+Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0.

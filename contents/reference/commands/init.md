@@ -4,7 +4,8 @@
 
     Set up a product directory or refresh its managed guidance. Existing trace configuration
     is preserved. The starter uses subject `product` and key `PROD`; choose these explicitly
-    for a new repo. Repeating setup makes no further changes.
+    for a new repo. In a ledger, it sets the ledger up to hold the project's documents.
+    Repeating setup makes no further changes.
 
 ## Invocation
 
@@ -14,7 +15,8 @@
 
 Run in the intended product root, or pass `-C`. When a trace configuration exists above the
 invocation directory, setup refreshes that traced root. Without one, the selected directory
-is the new root. A ledger directory is refused.
+is the new root. A ledger — the folder that holds `qmstrace.schema.toml` — is set up as a
+ledger that holds the documents: see below.
 
 `--subject service --key SVC` applies only to a new configuration. Subject names use lowercase
 letters, digits and hyphens; keys use uppercase letters and digits. Existing configurations
@@ -67,3 +69,24 @@ Setup does not create a Git commit, baseline, requirement or test.
 Exit `0` means setup completed; exit `2` means the input or destination could not be used;
 exit `3` means an internal fault. A successful setup does not establish coverage: run `status`
 and `check` next. See [set up a repo](../../how-to/set-up-a-repo.md).
+
+## In a ledger
+
+In the layout where the ledger holds the requirements and the design
+([Around the repo](../../explanation/around-the-repo.md)), the ledger is traced too. `init`
+recognises it by its `qmstrace.schema.toml`:
+
+``` text
+--8<-- "cli/golden/init-ledger.txt"
+```
+
+- `qmstrace.toml` — only when absent: the ledger's own configuration, declaring requirements and
+  design elements, `ledger = "."`, and the schema beside it by path — never a copy. `--subject`
+  and `--key` set its subject, as in a product repo.
+- `AGENTS.md` — the ledger's stanza. It names the ledger's verbs: `qmstrace ledger check --strict`
+  as the gate, because the ledger's own `check --strict` fails on what only the product repos
+  can meet; `ledger thread` and `ledger impact` for the walks; `ledger check` for every suspect.
+- The skill, as in a product repo. No pytest settings: a ledger declares no tests.
+- `init` does not edit the schema. Until `[repos]` lists the ledger as `ledger = "."`, it says
+  so on a `next:` line, and `qmstrace ledger check` refuses to judge the project.
+

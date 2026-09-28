@@ -103,7 +103,7 @@ src/qmstrace/
                          ledger_check, ledger_thread, ledger_impact — the same walks on the
                          project's graph (M10a, M10b)
     graph.py             deterministic assessment projection and standalone HTML (M7b)
-  assets/                skill/SKILL.md · stanza.md · starter.toml · graph.html/js · pinned
+  assets/                skill/SKILL.md · stanza.md · starter.toml · ledger-starter.toml (M10c) · graph.html/js · pinned
                          vendor/vis-network and license — package data
 tests/
   browser/               Node built-in tests for display-only control behavior; no npm deps
@@ -466,10 +466,12 @@ Satisfies: REQ-QMT-11
 `core/setup.py` computes the managed blocks — the stanza, the pytest marker, the schema copy —
 as pure string edits; `Workspace.initialize` and `Workspace.copy_schema` plan every file;
 `infra/files.py` writes them as one change with rollback, refuses a path it did not write, and
-creates a link only when its place is free. Reasoning: surface architecture § Setup contract —
-M6, § Schema copy contract — M9b.
+creates a link only when its place is free. In a ledger, `Workspace.initialize` writes the
+ledger's own configuration from `assets/ledger-starter.toml` when it has none, and
+`setup.stanza(…, ledger=True)` names the ledger's verbs (M10c). Reasoning: surface architecture §
+Setup contract — M6, § Schema copy contract — M9b.
 
-Satisfies: REQ-QMT-12, REQ-QMT-13
+Satisfies: REQ-QMT-12, REQ-QMT-13, REQ-QMT-19
 
 ### DSN-QMT-12 — Plain-text renderers, deterministic
 

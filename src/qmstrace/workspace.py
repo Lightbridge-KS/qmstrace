@@ -116,21 +116,22 @@ class Workspace:
     def initialize(
         cls, start: Path, *, subject: str | None = None, key: str | None = None
     ) -> tuple[str, ...]:
-        """Set up the selected directory, or refresh an existing ancestor's managed files."""
+        """Set up the selected directory, or refresh an existing ancestor's managed files.
+
+        A ledger — the folder that holds `qmstrace.schema.toml` — is set up as a ledger that
+        holds the project's documents (ADR-0001): its own configuration reads the schema by
+        path, and its stanza names the ledger's verbs (M10c).
+        """
         root = start.resolve()
         if not root.is_dir():
             raise CouldNotJudge(
                 "The setup directory does not exist.", "Fix: create it first, then run init."
             )
         for parent in (root, *root.parents):
-            if (parent / CONFIG_FILE).exists():
+            if (parent / CONFIG_FILE).exists() or (parent / SCHEMA_FILE).exists():
                 root = parent
                 break
-            if (parent / SCHEMA_FILE).exists():
-                raise CouldNotJudge(
-                    "This is a ledger directory, not a product repo.",
-                    "Fix: run init in a product repo.",
-                )
+        ledger = (root / SCHEMA_FILE).is_file()
         assets = files("qmstrace").joinpath("assets")
         current = read_optional(contained(root, CONFIG_FILE))
         if current is not None:
@@ -149,12 +150,15 @@ class Workspace:
                     "Subject must be a lowercase name; key must be uppercase letters/digits.",
                     "Fix: use, for example, --subject service --key SVC.",
                 )
-            current = assets.joinpath("starter.toml").read_text(encoding="utf-8")
+            starter = "ledger-starter.toml" if ledger else "starter.toml"
+            current = assets.joinpath(starter).read_text(encoding="utf-8")
             current = current.replace("__SUBJECT__", subject).replace("__KEY__", key)
-            config = TraceConfig.parse(current)
+            schema = read_optional(root / SCHEMA_FILE) if ledger else None
+            config = TraceConfig.parse(current, schema)
         guide_path = contained(root, "AGENTS.md")
         existing = read_optional(guide_path) or ""
-        block = setup.stanza(assets.joinpath("stanza.md").read_text(encoding="utf-8"), config)
+        template = assets.joinpath("stanza.md").read_text(encoding="utf-8")
+        block = setup.stanza(template, config, ledger=ledger)
         if os.path.lexists(root / setup.LEGACY_SKILL):
             raise CouldNotJudge(
                 "The qmstrace skill has moved to .agents/skills/qmstrace/.",
@@ -198,7 +202,13 @@ class Workspace:
                 name = "pyproject.toml" if source is not None else "pytest.ini"
                 section = "tool.pytest.ini_options" if source is not None else "pytest"
                 edits[name] = setup.register_marker(name, source or "", section)
-        return update_files(root, edits)
+        written = update_files(root, edits)
+        if ledger and not any(_same(root / place, root) for place in config.repos.values()):
+            written += (
+                f'next: list this ledger in {SCHEMA_FILE} under [repos] — ledger = "." — so '
+                "qmstrace ledger check reads its documents; init does not edit the schema",
+            )
+        return written
 
     @classmethod
     def copy_schema(

@@ -515,7 +515,11 @@ result: 0 violations, 0 gaps in 13 items across 3 repos · … · working trees,
   read; V03 there says *in any repo of the project*, and nothing is *not verified*.
 - **A gap's next move names the repos that declare the type** that could meet it — "on the test
   case in client or service, write …". The gap heading names `qmstrace ledger check --strict`
-  as the gate.
+  as the gate. *Decided 2026-09-29:* kept as it is where an item's own repo does not declare the
+  type — in the older layout, a client requirement's G01 names the service's design elements,
+  guarded by *only if it is true*. **Rejected:** a caution clause (a branch only the older
+  layout needs); dropping the names (it would send every G02 in the target layout back to the
+  ledger, which declares no tests on purpose).
 - **A suspect in another repo than its root's** says so: *current reach only … not pinned;
   unknown whether edited*.
 - **Refused, exit 2, every problem named at once:** a listed repo that is missing, has no
@@ -549,7 +553,17 @@ the cross-repo gaps rather than judging them.
 `init [--subject NAME --key KEY]` creates a repo-owned starter at the effective directory
 when no ancestor has trace configuration. Defaults are `product` / `PROD`; no ledger,
 origin or baseline is invented. Existing configuration is preserved byte-for-byte and
-subject options then fail with exit 2. A ledger directory is not a product setup target.
+subject options then fail with exit 2.
+
+**In a ledger — M10c (ADR-0001, #30).** A folder that holds `qmstrace.schema.toml` is set up as
+a ledger that holds the documents. With no `qmstrace.toml`, `init` writes the ledger's own —
+requirements and design elements, `ledger = "."`, the schema by path — and in every ledger it
+writes the ledger's stanza: `ledger check --strict` is the gate, `ledger thread` and
+`ledger impact` are the walks, `ledger check` lists every suspect. A product repo's stanza is
+byte for byte what it was. `init` never edits the schema: while `[repos]` does not list the
+ledger, a `next:` line names `ledger = "."`. **Rejected:** `init` adding that line itself — the
+schema is authored by hand (D9), and no edit keeps its every other byte; an `init --ledger`
+flag — the ledger is recognised by the file it already holds.
 
 Managed guidance occupies exactly one begin/end block in `AGENTS.md`. Other text is
 preserved; an in-repo guide symlink is supported. Missing/conflicting markers, escaping
