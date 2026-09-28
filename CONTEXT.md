@@ -340,6 +340,12 @@ The short generated block in a product repo's agent guide saying that the repo i
 what that asks of an agent working there.
 _Avoid_: prompt, instructions, system prompt
 
+**Skill**:
+The authoring guide shipped with the engine — the chain, the markers, the loop, how to read
+findings — installed by `init` into a product repo at `.agents/skills/qmstrace/`, where a
+coding agent's harness lists it. It never restates a rule; it points at `qmstrace rules`.
+_Avoid_: playbook, prompt
+
 **Import**:
 Reading a product repo's markers into a ledger at a pin.
 _Avoid_: sync, fetch, collect (collectors harvest facts, imports read markers)

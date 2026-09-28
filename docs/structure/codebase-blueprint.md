@@ -89,7 +89,8 @@ src/qmstrace/
                          no module: they are read as WorkingTrees
     globbing.py          the one matcher, for every tree
     files.py             contained setup writes with rollback, across several repos as one
-                         change (M9b); exclusive view output (M6/M7b)
+                         change (M9b); a create-only Link in that change (M9c); exclusive view
+                         output (M6/M7b)
   render/
     text.py              status, findings, rules, thread, impact, results; shared evidence text
     graph.py             deterministic assessment projection and standalone HTML (M7b)
@@ -280,6 +281,8 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | ★ An item is its section: an edit under a sub-heading of a frozen item is a change | `tests/integration/test_baselines.py` |
 | ★ A schema copy reads as the schema by path, keeps every other byte, and a second copy changes nothing | `tests/unit/test_schema_copy.py` |
 | ★ The schema is copied into every named repo or none | `tests/integration/test_copy_into_repos.py`, `tests/integration/test_files.py` |
+| ★ Setup never replaces what it did not write: a link is created or left alone, anything else at its path is refused before any write, and rollback removes a link it created | `tests/integration/test_files.py`, `tests/integration/test_setup_workspace.py` |
+| ★ This repo's installed skill, its link and its stanza equal what the package ships | `tests/meta/test_own_trace.py` |
 | ★ A group's every verb has an output golden, a help golden and its help on the group's page | `tests/meta/test_catalogue.py`, `tests/cli/test_help.py`, `tests/meta/test_manual.py` |
 | ★ A marker in a form the extractor does not read is reported — a stray named by its gap, or V16 — never silently dropped | `tests/unit/test_forms.py`, `tests/unit/test_graph.py` |
 | ★ An item with no sub-heading and no decorated heading keeps its title and digest across changes to the reading rules | `tests/unit/test_extract_markdown.py` § 7 |
@@ -304,7 +307,10 @@ All of these change **structure**. None removes a behaviour the surface doc prom
 ## Setup and browser ownership (M6/M7b)
 
 `Workspace.initialize` reads package templates and existing settings, plans every edit,
-then delegates writes to `infra/files.py`. `core/setup.py` transforms strings without IO.
+then delegates writes to `infra/files.py`. `core/setup.py` transforms strings without IO and
+names the managed paths — the skill's home, the Claude Code link and its target (M9c).
+`Workspace.initialize` decides whether the link is wanted; `infra/files.py` decides whether
+its path is free.
 The browser renderer may read immutable package assets through `importlib.resources`;
 it never reads project files. `Workspace.save_view` owns the explicit exclusive output write.
 

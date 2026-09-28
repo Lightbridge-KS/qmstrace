@@ -192,7 +192,7 @@ An agent spends far more time *writing* to this surface than invoking it.
 |---|---|---|
 | **Markers** | Item headings and link lines in repo memory; a docstring line in a module; the test framework's own tag on a test. Syntax: [Data Architecture § Marker syntax v0](data-architecture.md) | ✔ |
 | **The stanza** | A generated block of about ten lines in the product repo's agent guide: the repo is traced, the ID patterns, start with `status`, the gate command, frozen items change only through a change request, a marker states a fact, never type a date or a verdict | ✔ |
-| **The skill** | Shipped with the engine: the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `qmstrace rules`.** Its ban on typed facts covers traced documents and test results; a tracker may cite a commit hash, as a pointer and never as evidence | ✔ |
+| **The skill** | Shipped with the engine and installed by `init` at `.agents/skills/qmstrace/`, where a harness lists it (M9c): the chain, the markers, the loop, how to read findings, what the tool cannot check. **It never restates a rule — it points at `qmstrace rules`.** Its ban on typed facts covers traced documents and test results; a tracker may cite a commit hash, as a pointer and never as evidence | ✔ |
 | **The trace configuration** | One file at the repo root: item types, link types, coverage rules, externals, baselines, change requests | ✔ |
 | **The trace lock's diff** | What a reviewer reads in a pull request when traceability changes (D1) | ◻ |
 
@@ -490,10 +490,41 @@ Managed guidance occupies exactly one begin/end block in `AGENTS.md`. Other text
 preserved; an in-repo guide symlink is supported. Missing/conflicting markers, escaping
 symlinks and changed installed skill content fail before edits. Files are replaced
 atomically and earlier writes are restored if a later write fails; rollback failure names
-files needing recovery. The shipped skill lives at `.qmstrace/skill/SKILL.md` and marker
-examples are parsed by real extractors in the dry gate. It states the break/restore loop;
-`rules` owns project-specific rules. A differing prior skill is preserved for explicit
-review before replacement; setup never silently destroys local guidance.
+files needing recovery. The shipped skill is installed at `.agents/skills/qmstrace/SKILL.md`
+(M9c) and marker examples are parsed by real extractors in the dry gate. It states the
+break/restore loop; `rules` owns project-specific rules. A differing prior skill is preserved
+for explicit review before replacement; setup never silently destroys local guidance.
+
+**The skill's home — M9c (decided 2026-09-28).** A harness lists a skill by itself only from
+the folder it reads for a repo's skills, named after the skill. Codex reads
+`.agents/skills/`; Claude Code documents `.claude/skills/`. So `init` installs the copy at
+`.agents/skills/qmstrace/SKILL.md` and, **only when the repo already has a `.claude/`
+folder**, links `.claude/skills/qmstrace` to `../../.agents/skills/qmstrace`. The stanza
+still points at the copy, for any agent whose harness lists no skills.
+
+| The repo has | `init` |
+|---|---|
+| no `.claude/`, or `.claude` is a link | writes no link |
+| `.claude/skills` and `.agents/skills` as one folder, linked either way round, or `.claude/skills` linking elsewhere | writes no link — the first already reaches the skill |
+| no `.claude/skills/qmstrace` | creates the link |
+| that link, with exactly this target | leaves it alone |
+| anything else there, or `.claude/skills` as a file | refuses before any write |
+
+A copy in the old home, `.qmstrace/skill/SKILL.md`, makes `init` refuse with the next move:
+remove `.qmstrace/`, then run it again. The link is written inside the same change as the
+files, validated first and removed on rollback. Where symbolic links are unavailable, the
+whole change rolls back.
+
+- **Rejected — keep `.qmstrace/skill/`.** No harness lists it; an agent reads it only if it
+  follows one stanza line, which E1–E4 never tested because each brief listed the skill. The
+  folder name also breaks the Agent Skills rule that a skill's name matches its folder.
+- **Rejected — print, don't copy** (a `qmstrace guide` command the stanza points at). No
+  drift, but no harness lists it, a reviewer cannot read it in the repo, and E1–E4 validated
+  a file.
+- **Rejected — `.claude/skills/` alone.** One harness; Codex offers to migrate it into
+  `.agents/skills/`.
+- **Rejected — a second copy instead of a link.** Works without symbolic links, but two
+  tracked copies to keep equal.
 
 Pytest registration follows root configuration precedence, including native pytest TOML
 and `pyproject.toml`, preserves unrelated settings and registers `verifies` once. Otherwise
