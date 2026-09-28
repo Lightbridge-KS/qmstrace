@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-SRC = Path(__file__).parents[1] / "src" / "qmstrace"
+SRC = Path(__file__).parents[2] / "src" / "qmstrace"
 
 # rows may import columns — third-party and first-party only; the standard library is free
 ALLOWED: dict[str, set[str]] = {

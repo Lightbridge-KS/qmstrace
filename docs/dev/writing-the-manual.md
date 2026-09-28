@@ -42,7 +42,7 @@ A page that mixes two kinds is split.
 ```
 
 Then the body. Zensical has no `tldr` admonition type, so the TL;DR is an `abstract` box with
-that title — `tests/test_manual.py` checks every page opens this way. Diagrams are Mermaid
+that title — `tests/meta/test_manual.py` checks every page opens this way. Diagrams are Mermaid
 fences. A page reached from nowhere is dead: every page is listed in `nav` in `zensical.toml`.
 
 ## Never restate what the tool prints
@@ -54,7 +54,7 @@ What qmstrace prints is included, never retyped. `pymdownx.snippets` includes fi
 |---|---|---|
 | a command's output | `cli/golden/<command>-<case>.txt` | `tests/cli/` |
 | a command's help, the exit codes | `cli/golden/help.txt`, `help-<command>.txt` | `tests/cli/test_help.py` |
-| the findings table | `manual/findings.md` | `tests/test_manual.py`, from `core/findings.py` |
+| the findings table | `manual/findings.md` | `tests/meta/test_manual.py`, from `core/findings.py` |
 | a configuration example | `fixtures/mini/**` | the tests that parse the fixture project |
 
 ```markdown

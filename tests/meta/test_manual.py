@@ -19,7 +19,7 @@ import pytest
 
 from qmstrace.core.findings import CODES, KINDS
 
-ROOT = Path(__file__).parents[1]
+ROOT = Path(__file__).parents[2]
 CONTENTS = ROOT / "contents"
 TESTS = ROOT / "tests"
 MANUAL_GOLDEN = TESTS / "manual"
