@@ -2,6 +2,8 @@
 
 The stand-in had two matchers that disagreed about `src/**/*.py`. This one is the standard
 library's: `**` matches zero or more whole segments, `*` never crosses a `/`, and case counts.
+
+Implements: DSN-QMT-10
 """
 
 from __future__ import annotations

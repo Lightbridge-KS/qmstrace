@@ -42,6 +42,7 @@ def test_ini_preserves_existing_marker(source: str) -> None:
     assert register_marker("pytest.ini", result, "pytest") == result
 
 
+@pytest.mark.verifies("DSN-QMT-11")
 def test_managed_block_preserves_surrounding_bytes() -> None:
     source = "before\n<!-- qmstrace:begin -->\nold\n<!-- qmstrace:end -->\nafter\n"
     block = "<!-- qmstrace:begin -->\nnew\n<!-- qmstrace:end -->\n"

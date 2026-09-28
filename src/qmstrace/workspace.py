@@ -7,6 +7,8 @@ other repos — and builds the graph once. A command renders the result.
 One scan function serves every tree. A sibling is read with the same function, for the item
 types that carry authored IDs; its own findings are its own business and are dropped, and its
 own siblings are never read.
+
+Implements: DSN-QMT-02, DSN-QMT-07, DSN-QMT-09, DSN-QMT-11
 """
 
 from __future__ import annotations

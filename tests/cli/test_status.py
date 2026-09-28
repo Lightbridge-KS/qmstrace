@@ -34,6 +34,7 @@ def status(root: Path) -> tuple[int, str]:
 # ── 1. goldens ─────────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-05")
 def test_status_with_everything_beside_the_repo(project: Path, golden: Golden) -> None:
     code, output = status(project / "service")
     assert code == 0
@@ -58,6 +59,7 @@ def test_status_of_docs_written_like_an_architecture_guide(project: Path, golden
     golden(GOLDEN / "status-rich.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-05")
 def test_what_cannot_be_found_or_read_is_said_in_the_header(
     project: Path, alone: Callable[[str], Path]
 ) -> None:
@@ -76,6 +78,7 @@ def test_what_cannot_be_found_or_read_is_said_in_the_header(
 # ── 2. determinism ─────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-12", "REQ-QMT-15")
 def test_two_runs_give_the_same_bytes_and_no_machine_path(project: Path) -> None:
     first, second = status(project / "client")[1], status(project / "client")[1]
     assert first == second

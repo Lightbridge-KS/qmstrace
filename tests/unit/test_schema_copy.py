@@ -54,6 +54,7 @@ def same_rules(a: TraceConfig, b: TraceConfig) -> bool:
 
 
 @pytest.mark.parametrize("local", [SERVICE, CLIENT], ids=["service", "client"])
+@pytest.mark.verifies("DSN-QMT-11")
 def test_a_copy_reads_as_the_schema_by_path_and_keeps_every_other_byte(local: str) -> None:
     new = copied(local)
     by_path, copy = TraceConfig.parse(local, SCHEMA), TraceConfig.parse(new)

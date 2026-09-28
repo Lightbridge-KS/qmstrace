@@ -221,6 +221,7 @@ as its plan declares; nothing there changes mid-audit.
 
 ## Related
 
+- The traced requirements, one checkable statement each: [`qmstrace-srs.md`](qmstrace-srs.md)
 - Settled design decisions, their rejected alternatives, and the product-repo half of the
   model: [`docs/design/data-architecture.md`](../design/data-architecture.md)
 - The surface as its users meet it: [`docs/design/surface-architecture.md`](../design/surface-architecture.md)

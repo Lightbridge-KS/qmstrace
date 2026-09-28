@@ -2,6 +2,8 @@
 
 Today there is one: the working tree. A tree at a baseline tag joins it when baselines are
 judged; the extractors never know which one they read, because they are handed text.
+
+Implements: DSN-QMT-10
 """
 
 from __future__ import annotations

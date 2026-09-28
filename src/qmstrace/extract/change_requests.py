@@ -1,4 +1,7 @@
-"""Read a request's metadata preamble; examples and prose never grant approval."""
+"""Read a request's metadata preamble; examples and prose never grant approval.
+
+Implements: DSN-QMT-07
+"""
 
 import re
 

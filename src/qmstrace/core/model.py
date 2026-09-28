@@ -4,6 +4,8 @@ An **item** is declared where its content is written; a **link** is declared at 
 end and points upstream. A **finding** is what is wrong in the user's repo — always data, never
 an exception. A **notice** is what a run could not verify or did not pin: it fails nothing, and
 no form of output may hide it.
+
+Implements: DSN-QMT-05
 """
 
 from __future__ import annotations

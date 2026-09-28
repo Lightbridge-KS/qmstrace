@@ -39,6 +39,7 @@ def write(path: Path, text: str) -> None:
 # ── 1. finding the root ────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-02")
 def test_the_root_is_found_from_a_folder_inside_the_repo(project: Path) -> None:
     workspace = Workspace.open(project / "service" / "src" / "service")
     assert workspace.root == project / "service"
@@ -67,6 +68,7 @@ def test_a_configuration_that_is_not_utf8_cannot_be_judged(project: Path) -> Non
 # ── 2. everything beside it ────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-02")
 def test_with_everything_beside_it_the_repo_is_judged_in_full(project: Path) -> None:
     found = assess(project / "client")
     assert found.violations == ()
@@ -101,6 +103,7 @@ def test_a_repo_scans_what_its_configuration_names(project: Path) -> None:
 # ── 3. a pipeline ──────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-02")
 def test_in_a_pipeline_what_cannot_be_read_is_not_verified_and_fails_nothing(
     alone: Callable[[str], Path],
 ) -> None:
@@ -208,6 +211,7 @@ def test_a_file_that_is_not_utf8_is_v08(project: Path) -> None:
     assert (finding.code, finding.file) == ("V08", "docs/notes.md")
 
 
+@pytest.mark.verifies("REQ-QMT-11")
 def test_an_ignored_note_is_never_read(project: Path) -> None:
     write(project / "service" / ".gitignore", "_playground/\n")
     write(project / "service" / "_playground" / "NOTES.md", "### REQ-SVC-01 — quoted\n")

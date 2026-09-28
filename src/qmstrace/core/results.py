@@ -3,6 +3,8 @@
 No history is written. A reported run is one distinct full JUnit identity; duplicate entries
 are combined, not treated as proof of additional attempts. Requirement verdicts say only what
 this report says about its directly linked tests.
+
+Implements: DSN-QMT-09
 """
 
 from __future__ import annotations

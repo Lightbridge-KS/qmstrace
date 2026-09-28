@@ -1,4 +1,7 @@
-"""Read request files without interpreting their metadata."""
+"""Read request files without interpreting their metadata.
+
+Implements: DSN-QMT-07
+"""
 
 from pathlib import Path
 

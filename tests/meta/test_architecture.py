@@ -86,6 +86,7 @@ _FILE_SYSTEM_MODULES = {"os", "io", "pathlib", "shutil", "subprocess", "glob", "
 _FILE_SYSTEM_CALLS = {"open", "read_text", "read_bytes", "write_text", "write_bytes", "iterdir"}
 
 
+@pytest.mark.verifies("DSN-QMT-04")
 def test_an_extractor_never_touches_the_file_system() -> None:
     for path in sorted((SRC / "extract").rglob("*.py")):
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):

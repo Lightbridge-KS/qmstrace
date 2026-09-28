@@ -1,4 +1,7 @@
-"""Read pytest JUnit XML bytes, without opening files or trusting suite summary counts."""
+"""Read pytest JUnit XML bytes, without opening files or trusting suite summary counts.
+
+Implements: DSN-QMT-09
+"""
 
 from defusedxml import ElementTree
 from defusedxml.common import DefusedXmlException

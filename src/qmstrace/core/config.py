@@ -11,6 +11,8 @@ repo's own file: what is local to it, plus the project's trace schema in one of 
 - *the repo's own*: the schema's content with no digest, for a repo that has no ledger.
 
 An unknown key anywhere is an error: a mistyped `requird` would be a hidden rule.
+
+Implements: DSN-QMT-03
 """
 
 from __future__ import annotations

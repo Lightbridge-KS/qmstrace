@@ -7,6 +7,7 @@ from qmstrace.core.errors import CouldNotJudge
 from qmstrace.infra import files
 
 
+@pytest.mark.verifies("DSN-QMT-11")
 def test_failed_setup_rolls_back(tmp_path: Path, monkeypatch) -> None:
     (tmp_path / "first").write_text("old")
     replace = files._replace
@@ -34,6 +35,7 @@ def test_setup_aliases_and_unreadable_destinations_fail_before_writes(tmp_path: 
     assert (tmp_path / "a").read_text() == "old"
 
 
+@pytest.mark.verifies("DSN-QMT-11")
 def test_a_failure_in_the_second_repo_restores_the_first(tmp_path: Path, monkeypatch) -> None:
     one, two = tmp_path / "one", tmp_path / "two"
     one.mkdir()
@@ -67,6 +69,7 @@ def test_several_repos_report_each_file(tmp_path: Path) -> None:
 # ── a link setup creates, never replaces ────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-11")
 def test_a_link_is_created_once_and_then_left_alone(tmp_path: Path) -> None:
     (tmp_path / "skill").mkdir()
     edits = {"skill/SKILL.md": "text", "links/skill": files.Link("../skill")}

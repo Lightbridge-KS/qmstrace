@@ -175,6 +175,7 @@ def test_a_clean_repo_has_every_link_and_no_findings(service: TraceConfig) -> No
         ),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-05")
 def test_a_refused_link_is_reported_and_never_enters(
     service: TraceConfig, changes: dict[tuple[str, str], str], code: str, said: str
 ) -> None:
@@ -336,6 +337,7 @@ def reached(closure: Closure) -> list[tuple[str, int, str, str]]:
     ]
 
 
+@pytest.mark.verifies("DSN-QMT-05")
 def test_forward_reaches_each_item_once_nearest_first(service: TraceConfig) -> None:
     graph, _ = build(service)
     walk = graph.forward(["REQ-SVC-01"])
@@ -361,6 +363,7 @@ def test_forward_follows_an_assumption_and_goes_on(service: TraceConfig) -> None
     assert walk.steps["DSN-SVC-02"].via.marker == "Assumes"
 
 
+@pytest.mark.verifies("DSN-QMT-05")
 def test_backward_stops_at_an_assumed_item(service: TraceConfig) -> None:
     graph, _ = build(service)
     walk = graph.backward(["DSN-SVC-02"])

@@ -3,6 +3,8 @@
 Deterministic: everything is sorted, nothing depends on the clock or the machine, and every
 path is shown relative to the repo. Every count is labelled. What could not be verified is
 said in the header, never left for the reader to infer from an empty line.
+
+Implements: DSN-QMT-12
 """
 
 from __future__ import annotations

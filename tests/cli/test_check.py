@@ -14,6 +14,7 @@ The load-bearing claims, each pinned by a test:
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
@@ -84,6 +85,7 @@ def test_the_gate_fails_on_a_gap(project: Path, golden: Golden) -> None:
     golden(GOLDEN / "check-strict.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-03")
 def test_every_finding(project: Path, golden: Golden) -> None:
     code, output = check(broken(project / "service"))
     assert code == 1
@@ -105,6 +107,7 @@ def test_every_finding(project: Path, golden: Golden) -> None:
         assert f"\n  {code_}  " in output, f"{code_} is missing from the wording review"
 
 
+@pytest.mark.verifies("REQ-QMT-02")
 def test_docs_written_like_an_architecture_guide_pass_the_gate(
     project: Path, golden: Golden
 ) -> None:
@@ -114,6 +117,7 @@ def test_docs_written_like_an_architecture_guide_pass_the_gate(
     golden(GOLDEN / "check-rich.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-02")
 def test_what_such_docs_slip_into_is_named(project: Path, golden: Golden) -> None:
     """A link written into a table, a planned ID in a summary table, an ID at a heading's end."""
     rich = project / "rich"
@@ -136,11 +140,13 @@ def test_quiet_in_a_pipeline(alone: Callable[[str], Path], golden: Golden) -> No
 # ── 2. exit codes ──────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-03")
 def test_gaps_do_not_fail_while_authoring_and_do_under_the_gate(project: Path) -> None:
     assert check(project / "service")[0] == 0
     assert check(project / "service", "--strict")[0] == 1
 
 
+@pytest.mark.verifies("REQ-QMT-03")
 def test_a_violation_fails_in_every_mode(project: Path) -> None:
     write(project / "service/docs/notes.md", "### REQ-SVC-05 — Stray\n")
     assert check(project / "service")[0] == 1
@@ -150,6 +156,7 @@ def test_a_violation_fails_in_every_mode(project: Path) -> None:
 # ── 3. what cannot be verified is never hidden ─────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-12")
 def test_what_could_not_be_verified_survives_quiet(alone: Callable[[str], Path]) -> None:
     output = check(alone("client"), "--quiet")[1]
     last = output.rstrip().splitlines()[-1]
@@ -158,6 +165,7 @@ def test_what_could_not_be_verified_survives_quiet(alone: Callable[[str], Path])
     assert "the gate is qmstrace check --strict" in last
 
 
+@pytest.mark.verifies("DSN-QMT-12")
 def test_an_empty_result_never_looks_clean(tmp_path: Path, project: Path) -> None:
     empty = project / "solo"
     for path in (empty / "docs/req").glob("*.md"):

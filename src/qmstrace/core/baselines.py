@@ -1,4 +1,7 @@
-"""Frozen evidence used by baseline resolution and change control; no IO."""
+"""Frozen evidence used by baseline resolution and change control; no IO.
+
+Implements: DSN-QMT-07, DSN-QMT-08
+"""
 
 from __future__ import annotations
 

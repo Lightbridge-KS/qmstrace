@@ -10,6 +10,7 @@ The load-bearing claims, each pinned by a test:
 6. Help is plain text: no box drawing for an agent to pay tokens for.
 """
 
+import pytest
 import typer
 from typer.testing import CliRunner
 
@@ -46,11 +47,13 @@ def _demo() -> typer.Typer:
     return demo
 
 
+@pytest.mark.verifies("DSN-QMT-01", "REQ-QMT-14")
 def test_a_returned_int_is_the_exit_code() -> None:
     assert runner.invoke(_demo(), ["ok"]).exit_code == 0
     assert runner.invoke(_demo(), ["failed"]).exit_code == 1
 
 
+@pytest.mark.verifies("DSN-QMT-01", "REQ-QMT-14")
 def test_could_not_judge_exits_2_and_says_the_next_move() -> None:
     result = runner.invoke(_demo(), ["stopped"])
     assert result.exit_code == 2
@@ -58,6 +61,7 @@ def test_could_not_judge_exits_2_and_says_the_next_move() -> None:
     assert "Fix: fetch the tags" in result.output
 
 
+@pytest.mark.verifies("DSN-QMT-01", "REQ-QMT-14")
 def test_an_unexpected_exception_exits_3_without_a_traceback() -> None:
     result = runner.invoke(_demo(), ["bug"])
     assert result.exit_code == 3
@@ -67,6 +71,7 @@ def test_an_unexpected_exception_exits_3_without_a_traceback() -> None:
     assert "Traceback" not in result.output
 
 
+@pytest.mark.verifies("REQ-QMT-14")
 def test_a_usage_error_exits_2() -> None:
     assert runner.invoke(_demo(), ["ok", "--no-such-option"]).exit_code == 2
     assert runner.invoke(app, ["no-such-command"]).exit_code == 2

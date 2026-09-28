@@ -68,6 +68,7 @@ def digest_of(config: TraceConfig, text: str) -> str:
 # ── 1 & 2. items, their bodies, fields and links ───────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-04")
 def test_a_heading_with_a_matching_id_declares_an_item(service: TraceConfig) -> None:
     found = read(service, SRS)
     one, two = found.items
@@ -87,6 +88,7 @@ def test_a_heading_with_a_matching_id_declares_an_item(service: TraceConfig) -> 
     assert not found.findings and not found.leads
 
 
+@pytest.mark.verifies("DSN-QMT-04")
 def test_a_field_named_after_a_link_marker_is_the_link(service: TraceConfig) -> None:
     links = read(service, SRS).links
     assert [(link.src, link.marker, link.dst, link.line) for link in links] == [

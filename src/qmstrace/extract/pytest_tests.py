@@ -11,6 +11,8 @@ yield no link. Every `mark.<link marker>` in the module is either read or report
 
 A test's level is read from the folder it sits in. The digest covers the function's own syntax
 tree, decorators included, so a comment or a neighbour's edit is not a change.
+
+Implements: DSN-QMT-04, DSN-QMT-09
 """
 
 from __future__ import annotations

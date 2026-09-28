@@ -39,6 +39,7 @@ def candidate(output: str) -> set[str]:
         ("impact-sibling", "client", ("REQ-SVC-01",)),
     ],
 )
+@pytest.mark.verifies("REQ-QMT-07")
 def test_golden(
     project: Path,
     golden: Callable[[Path, str], None],
@@ -59,6 +60,7 @@ def test_pipeline(alone: Callable[[str], Path], golden: Callable[[Path, str], No
     golden(GOLDEN / "impact-in-a-pipeline.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-07")
 def test_union_and_configured_candidate(project: Path) -> None:
     code, output = impact(project / "service", *STARTS)
     assert code == 0
@@ -69,6 +71,7 @@ def test_union_and_configured_candidate(project: Path) -> None:
     assert "not a claim of edits or frozen state" in output
 
 
+@pytest.mark.verifies("REQ-QMT-07")
 def test_repeated_and_reordered_starts_are_byte_identical(project: Path) -> None:
     expected = impact(project / "service", *STARTS)
     assert expected == impact(project / "service", *STARTS)
@@ -128,6 +131,7 @@ def test_origin_start_and_no_dependants(project: Path) -> None:
 
 
 @pytest.mark.parametrize("covers", [(), ("requirement",), ("component", "test_case")])
+@pytest.mark.verifies("REQ-QMT-01")
 def test_candidate_types_are_configuration(project: Path, covers: tuple[str, ...]) -> None:
     assessment = Workspace.open(project / "service").assessment()
     baseline = next(iter(assessment.config.baselines.values()))
@@ -151,6 +155,7 @@ def test_no_reached_item_has_a_covered_type(project: Path) -> None:
     assert "Impacts:" not in output
 
 
+@pytest.mark.verifies("REQ-QMT-01")
 def test_origins_are_configured_not_hard_coded(project: Path) -> None:
     schema = project / "ledger/qmstrace.schema.toml"
     schema.write_text(

@@ -81,6 +81,7 @@ def schema_listing(project: Path, extra: str) -> None:
     ],
     ids=["missing", "another-schema", "own-schema"],
 )
+@pytest.mark.verifies("REQ-QMT-13")
 def test_one_repo_that_cannot_take_the_copy_stops_every_write(
     project: Path, arrange, said: str
 ) -> None:

@@ -5,6 +5,8 @@ an agent branch on them. The framework already exits 2 on a usage error, so this
 fights it. This module never imports click: the framework vendors it privately. A handler
 returns an int; `outcome` turns that — and `CouldNotJudge`, and anything unexpected — into the
 exit code.
+
+Implements: DSN-QMT-01
 """
 
 from __future__ import annotations

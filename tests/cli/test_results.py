@@ -37,6 +37,7 @@ def verdicts(view: Results) -> dict[str, str]:
     return {target.node.id: target.verdict for target in view.requirements}
 
 
+@pytest.mark.verifies("REQ-QMT-10")
 def test_partial_failure_golden(project: Path, golden: Callable[[Path, str], None]) -> None:
     root = project / "service"
     (root / "report.xml").write_bytes(FIXTURE.read_bytes())
@@ -71,6 +72,7 @@ def test_input_order_does_not_change_output(project: Path) -> None:
         ([(STORE, "pass"), (RESTART, "pass")], "pass"),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-09")
 def test_requirement_precedence(
     project: Path, entries: list[tuple[str, str]], expected: str
 ) -> None:
@@ -114,6 +116,7 @@ def test_other_methods_and_untested_requirements(project: Path, method: str) -> 
     assert "linked tests only: fail" in text.results(view)
 
 
+@pytest.mark.verifies("REQ-QMT-10")
 def test_design_results_do_not_flow_to_requirements(project: Path) -> None:
     root = project / "service"
     node = "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler"
@@ -200,6 +203,7 @@ def test_ambiguous_and_missing_identities_are_not_guessed(project: Path) -> None
         b'<?xml version="1.0" encoding="bogus"?><testsuite/>',
     ],
 )
+@pytest.mark.verifies("REQ-QMT-10")
 def test_unusable_reports_exit_two(project: Path, payload: bytes) -> None:
     root = project / "service"
     (root / "report.xml").write_bytes(payload)

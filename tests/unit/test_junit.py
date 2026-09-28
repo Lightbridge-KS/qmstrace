@@ -17,6 +17,7 @@ from qmstrace.extract.pytest_tests import report_identity
         (b'<!DOCTYPE x SYSTEM "https://example.invalid/entity"><testsuite/>', "DTDForbidden"),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-09")
 def test_bad_payload_is_a_diagnostic(payload: bytes, problem: str) -> None:
     report = junit.read(payload)
     assert report.problem is not None and problem in report.problem
@@ -57,5 +58,6 @@ def test_xml_encoding_is_honored() -> None:
         ),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-09")
 def test_identity_matches_pytest(node_id: str, key: tuple[str, str]) -> None:
     assert report_identity(node_id) == key
