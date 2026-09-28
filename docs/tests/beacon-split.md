@@ -8,7 +8,7 @@ read_when:
 
 # beacon-split — acceptance of the project-wide check
 
-**Status: measures fixed on 2026-09-28, not run yet.** Plan: M10 in the
+**Status: M10a run on 2026-09-28 — A1–A9 and A11–A13 pass; A10 waits for M10b.** Plan: M10 in the
 [tracker](../progress/overview-qmstrace.md). Layout: [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md).
 
 ## What is tested
@@ -94,4 +94,43 @@ partial, with what was seen.
 
 ## Results
 
-Not run yet.
+### M10a — run 2026-09-28
+
+**Engine:** the wheel built from `feat/m10a-ledger-check` at `738e392`, sha256 `ed73a6a0…`,
+installed in `beacon-split/.engine-venv`. **Bed:** cloned from `beacon-engine`'s `engine-main`
+branches, reshaped, and committed as the ledger `a48bba6`, the gateway `61a02e4` and the agent
+`c9619e5`. The ledger is tagged `split/requirements/1`, annotated. Raw outputs are in the
+local playground, `_playground/2026-09-28_beacon-split/out/`.
+
+**M0, the old layout before the reshape:**
+
+| Repo | Items | Links | Violations | Gaps |
+|---|---|---|---|---|
+| gateway | 104 | 124 | 0 | 0 |
+| agent | 73 | 84 | 0 | 0 |
+
+The 208 links are E4's trace-lock count.
+
+| # | Seen | Verdict |
+|---|---|---|
+| A1 | exit 0; 177 items (104 + 73) across 3 repos, 208 links, 0 violations | pass |
+| A2 | `--strict`: exit 0, 0 gaps (M0 had none) | pass |
+| A3 | 18 `test_config.py` test cases, qualified `agent:` and `gateway:`; no V01 | pass |
+| A4 | the ledger's own `check --strict`: exit 1 on 47 gaps, all G02 (21), G03 (13) and G04 (13), every fix naming `qmstrace ledger check`, no violation. Gateway (85 items) and agent (58) exit 0 | pass |
+| A5 | `skipped: ledger — the ledger itself; its qmstrace.toml reads qmstrace.schema.toml by path`; the ledger's `qmstrace.toml` sha256 unchanged | pass |
+| A6 | exit 1: V03 at `../beacon-gateway/tests/integration/test_agent_endpoints.py:9`, *no such item in any repo of the project*. G07 on that test and G02 on REQ-BCN-01, which lost its only test, follow from it. Reverted | pass |
+| A7 | exit 2, naming agent and gateway, each with `run qmstrace ledger copy-schema <repo>`; after the copy, exit 0 on 177 items | pass |
+| A8 | exit 2: `agent: there is no ../beacon-agent/qmstrace.toml`; restored | pass |
+| A9 | V10 on REQ-BCN-05; 16 S01: DSN-BCN-02 in the ledger (both versions), and 15 gateway tests and components, each *current reach only … gateway is read from its working tree, not at that baseline — not pinned* | pass |
+| A10 | M10b | — |
+| A11 | 8 commands, each run twice: `ledger check`, plain, `--strict` and `--quiet`; `ledger copy-schema`; each repo's `check --strict`; gateway `status`. Identical bytes; no home path in any output | pass |
+| A12 | 0.38 s for `ledger check`, 177 items | informational |
+| A13 | `beacon-engine`: HEAD, branches, tags and `status --porcelain` identical before and after, in all three repos | pass |
+
+**Seen on the way:**
+
+- `init` in the traced ledger works: it installs the stanza and the skill, and no pytest
+  settings. But its stanza names `qmstrace check --strict` as the gate, where the ledger's
+  gate is `ledger check --strict`. This is the deferred *`init` in a ledger directory* item.
+- The ledger's `id_pattern` needs alternatives (`^REQ-(BCN|BAG)-\d{2}$`) to hold two subjects.
+  Its derived prefix `REQ-` covers both families, so #25 does not bite here.

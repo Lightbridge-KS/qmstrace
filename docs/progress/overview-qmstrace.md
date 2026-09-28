@@ -68,7 +68,8 @@ project. This is the first half of the ledger's import at pins (D2). Planned 202
     repo* rewritten.
 - [ ] **M10b**, a pull request: `ledger thread` and `ledger impact` across repos, and
   REQ-QMT-18.
-- [ ] Acceptance on beacon-split: A1–A9 and A11–A13 after M10a; A10 after M10b.
+- [x] Acceptance on beacon-split, M10a: A1–A9 and A11–A13 pass, run 2026-09-28 — [results](../tests/beacon-split.md#results)
+- [ ] Acceptance A10, after M10b.
 
 ## After — M11 · mentions
 
