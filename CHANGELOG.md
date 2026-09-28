@@ -8,6 +8,16 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- `ledger check [--strict] [--quiet]`, run in the ledger: every repo the schema lists under
+  `[repos]` — the ledger too, when it lists itself as `"."` — is read from its working tree
+  and judged as one project. A coverage rule is met by a link in any repo; each repo's own
+  violations are reported, located from the ledger; a change to a frozen item makes what hangs
+  off it suspect in every repo — in another repo than the change, by today's links only,
+  labelled *not pinned*. A module's or a test's ID carries its repo there
+  (`service:tests/unit/test_api.py::test_x`). A repo that cannot be read, or holds other rules
+  than the ledger's schema, stops the check with exit 2, every problem named. A how-to,
+  *Check the whole project*; the ledger reference, suspects, configuration and *Around the
+  repo* pages cover the layout where the ledger holds the documents.
 - A test fixture in the layout of ADR-0001: a traced ledger that holds the requirements and
   the design, and product repos that hold code and tests and cite the ledger's IDs.
 
@@ -96,6 +106,9 @@ All notable changes to this project are recorded here. The format follows
 - A coverage rule whose direction contradicts its link type is refused.
 
 ### Changed
+
+- A gap that only another repo of the project can meet now points at `qmstrace ledger check`,
+  run in the ledger, instead of the import; so does the footer of `qmstrace rules`.
 
 - `qmstrace --help` summarises `thread` as tracing one item, so a reader looking for *trace*
   finds it.

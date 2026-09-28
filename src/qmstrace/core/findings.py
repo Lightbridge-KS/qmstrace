@@ -51,18 +51,26 @@ def suspect(value: Suspect) -> Finding:
     details = []
     for reason in value.reasons:
         old, current = reason.historical_distance, reason.current_distance
-        reach = (
-            f"both versions: baseline distance {old}, current distance {current}"
-            if old is not None and current is not None
-            else f"historical-only: distance {old}"
-            if old is not None
-            else f"current-only: distance {current}"
-        )
-        state = "edited — still needs review" if reason.edited else "unchanged — needs review"
+        if reason.unpinned_repo is not None:
+            reach = (
+                f"current reach only: distance {current} — {reason.unpinned_repo} is read from "
+                "its working tree, not at that baseline — not pinned"
+            )
+        elif old is not None and current is not None:
+            reach = f"both versions: baseline distance {old}, current distance {current}"
+        elif old is not None:
+            reach = f"historical-only: distance {old}"
+        else:
+            reach = f"current-only: distance {current}"
+        if reason.edited is None:
+            state = "unknown whether edited — needs review"
+        else:
+            state = "edited — still needs review" if reason.edited else "unchanged — needs review"
         withdrawn = ", withdrawn" if reason.root_withdrawn else ""
+        repo = reason.baseline.snapshot.repo
+        since = f"{reason.baseline.label} in {repo}" if repo is not None else reason.baseline.label
         details.append(
-            f"{reason.root} ({reason.root_state}{withdrawn}) since {reason.baseline.label}: "
-            f"{reach}; {state}"
+            f"{reason.root} ({reason.root_state}{withdrawn}) since {since}: {reach}; {state}"
         )
     item = value.item
     withdrawn = " [withdrawn]" if item.fields.get("Status") == "withdrawn" else ""
@@ -128,13 +136,19 @@ def malformed_id(token: str, item_type: str, pattern: str, file: str, line: int)
     )
 
 
-def no_such_item(link: Link, *, home: str | None, siblings_read: bool) -> Finding:
-    where = "in this repo or its siblings" if siblings_read else "in this repo"
-    hint = (
-        f"declare it in {home}, or correct the ID"
-        if home
-        else "it may belong to another repo of the project — check the ID there, or correct it"
-    )
+def no_such_item(
+    link: Link, *, home: str | None, siblings_read: bool, whole_project: bool = False
+) -> Finding:
+    if whole_project:
+        where = "in any repo of the project"
+    else:
+        where = "in this repo or its siblings" if siblings_read else "in this repo"
+    if home:
+        hint = f"declare it in {home}, or correct the ID"
+    elif whole_project:
+        hint = "every repo of the project was read — correct the ID"
+    else:
+        hint = "it may belong to another repo of the project — check the ID there, or correct it"
     return Finding(
         "V03",
         link.file,
@@ -414,7 +428,15 @@ def fix_stray(stray: Stray) -> str:
 def fix_none_here(kinds: str, subject: str) -> str:
     return (
         f"this repo declares no {kinds} — declare the type in qmstrace.toml and write it here, "
-        f"or {subject} is met in another repo of the project and judged at the ledger's import."
+        f"or {subject} is met in another repo of the project: qmstrace ledger check, run in the "
+        "ledger, judges that."
+    )
+
+
+def fix_none_in_project(kinds: str, subject: str) -> str:
+    return (
+        f"no repo of the project declares a {kinds} — declare the type in the qmstrace.toml of "
+        f"the repo that holds them, then write the link to {subject} there."
     )
 
 
@@ -423,7 +445,12 @@ def fix_write(form: str, fact: str, on: str | None = None) -> str:
     return f"{where} {form} — only if it is true: the link states that {fact}."
 
 
-def fix_no_target(kinds: str, form: str) -> str:
+def fix_no_target(kinds: str, form: str, *, whole_project: bool = False) -> str:
+    if whole_project:
+        return (
+            f"no repo of the project declares a {kinds} for it to point at — declare the type "
+            f"where the design is kept, then add {form}."
+        )
     return (
         f"this repo declares no {kinds} for it to point at — write the design here and add "
         f"{form}, or cite another repo's only if this item really serves it."

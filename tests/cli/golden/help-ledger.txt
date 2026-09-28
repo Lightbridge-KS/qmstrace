@@ -8,3 +8,5 @@ Options:
 
 Commands:
   copy-schema  Copy the project's trace schema into its product repos.
+  check        Judge every repo of the project together — the gate with
+               --strict.

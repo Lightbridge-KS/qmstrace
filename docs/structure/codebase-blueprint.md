@@ -32,6 +32,7 @@ Verified by running code where it says so.
 | F10 | **D4's in-memory database × a check that runs fifteen times a session** over a few hundred items | The database arrives with the ledger. The guarantee is kept by construction: an illegal link never enters the graph. D4 amended |
 | F11 | **Verb → action → field.** Every verb the surface doc promises was walked to a use case and a field. `impact` had no reference behaviour; `init` did not say how it registers the test framework's marker; `results` did not list inspection-verified requirements apart; `thread` did not label its edges | Each is now specified in the scenario catalogue. The `ledger` verbs land nowhere in slice 1 — they are parked, and the surface doc marks them planned |
 | F12 | **Package data × the build backend.** A skill and templates must ship inside the wheel | `uv_build` includes files under the package directory *(verified: a wheel was built and the asset found in it)*. Milestone M1 repeats this in CI |
+| F13 | **D4's database "where the union of several repos is queried" × the ledger's check (M10a)**, which queries exactly that union over working trees | The union is the repos' graphs joined (`TraceGraph.join`) and judged by the same pure functions; no database. D4 stays the slice-2 intent — for a ledger that holds state and emits tables *(verified: the split fixture and the old layout are judged whole, `tests/integration/test_project.py`)* |
 
 ## 2. Forks — where each was settled
 
@@ -53,16 +54,20 @@ src/qmstrace/
   cli.py                 Typer wiring only: options, the @outcome decorator, exit codes. No logic
   workspace.py           Workspace.open(start).assessment() — the one place that sequences a run:
                          finds the root, reads the configuration, holds the one scan function;
-                         results(report_path) reads the explicit report and assesses once
+                         results(report_path) reads the explicit report and assesses once;
+                         Workspace.project(start) — the ledger's check: every repo in [repos],
+                         each built against the others, joined, judged as one (M10a)
   core/                  pure — no file, no Git, no framework
     errors.py            CouldNotJudge — the one way a run says it could not judge; carries the next move
     model.py             Item, Link, Lead, Mention, Stray, Finding, Notice, Extracted — frozen dataclasses;
-                         ID_TOKEN, what reads as an ID at all; text_digest — item text, digested
+                         ID_TOKEN, what reads as an ID at all; text_digest — item text, digested;
+                         Extracted.qualified — an extraction as the whole project sees it (M10a)
     config.py            TraceConfig.parse(local_text, schema_text) — validate, merge, provenance
     graph.py             TraceGraph.build(config, extracted, Surroundings) -> (graph, findings);
                          node() and its Home; incoming/outgoing; forward/backward -> Closure —
                          each item once, nearest first, the link that reached it and any other
-                         (`also`); thread, impact and suspects render it; closest()
+                         (`also`); thread, impact and suspects render it; closest();
+                         TraceGraph.join — the repos' graphs, one project's graph (M10a)
     judge.py             coverage (M3) · resolve_baselines · guard · suspects — pure functions
     baselines.py         frozen tag evidence, historical snapshots, request register and item
                          comparisons (M5a), suspect values and per-root reasons (M5b); no IO
@@ -71,7 +76,8 @@ src/qmstrace/
     setup.py             pure managed-block and pytest-settings edits (M6); the schema copy's
                          block, what a configuration holds, and the proven replacement (M9b)
     findings.py          the catalogue: each code once — what is wrong, the next move
-    assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
+    assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned;
+                         ProjectAssessment and RepoState — the ledger's check (M10a)
   extract/               text in, items out — never a path, never a repo
     base.py              IExtractor, the registry by name; FORMS — how each extractor's items
                          write a link, for a gap's next move (M3)
@@ -103,8 +109,11 @@ tests/
   integration/           real Git in tmp_path, a scrubbed environment, session-scoped templates
   cli/                   CliRunner against golden text files
   fixtures/mini/         the hand-made miniature project, plain files
-  conftest.py            project (the fixture project as real Git repos) · alone (one repo as a
-                         pipeline checks it out) · make_repo · git_env (a scrubbed environment)
+  fixtures/split/        the same project in the layout of ADR-0001 — a traced ledger holding the
+                         documents, product repos holding code and tests (M10·0)
+  conftest.py            project (the fixture project as real Git repos) · split (fixtures/split,
+                         likewise) · alone (one repo as a pipeline checks it out) · make_repo ·
+                         git_env (a scrubbed environment)
   meta/                  tests of the tool's own rules — a test's level is its folder here
     test_architecture.py the import matrix, enforced
     test_assets.py       package data is readable from the installed package
@@ -228,6 +237,10 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | add a command | `cli.py` (wiring, and a `short_help` that fits the command list), `render/text.py`, goldens for its output and its help, a page in `contents/reference/commands/` — `test_catalogue.py`, `test_help.py` and `test_manual.py` fail without them |
 | change a configuration key | `core/config.py`, both test-bed configurations, the `init` template |
 | change what the agent is told | `assets/skill/SKILL.md` or `assets/stanza.md` — `test_skill_parity.py` guards the examples |
+| change which repos the ledger's check reads, or when it refuses | `workspace.py` `_members` — `tests/integration/test_project.py` § refused |
+| change how a derived ID or a location is written for the whole project | `core/model.py` `Extracted.qualified` — and the trace lock's future `(ID, type, repo, file, digest)` line |
+| change how the repos' graphs are joined | `core/graph.py` `TraceGraph.join` — `tests/unit/test_graph.py` § the project's graph |
+| change when a dependant in another repo is suspect | `core/judge.py` `suspects` — `tests/unit/test_suspects.py` § across repos, and data architecture § D7 |
 
 ## 8. What is deliberately absent
 
@@ -238,9 +251,12 @@ deciding eligibility. The check failure predicate remains violations plus strict
 - **No renderer interface.** There is one renderer. It becomes an interface the day a second
   form exists, and findings are already data so that day is cheap.
 - **No fake Git.** A fake would encode assumptions about exactly the semantics under test.
-- **No database.** Until the ledger.
-- **No `Ledger` class.** `ledger copy-schema` is one classmethod on `Workspace`, like `init`;
-  a ledger-side object waits for the import, when the ledger holds state of its own.
+- **No database.** Until the ledger. The ledger's check (M10a) queries the union of several
+  repos without one: the same pure functions judge the joined graph (F13).
+- **No `Ledger` class.** `ledger copy-schema` and the ledger's check (`Workspace.project`) are
+  classmethods on `Workspace`, like `init`; the check's result is a value
+  (`ProjectAssessment`), not an object. A ledger-side object waits for the import, when the
+  ledger holds state of its own.
 - **No plugin system.** Extractors are a registry by name inside the package until two exist
   outside it.
 - **No `utils.py`, no barrel re-exports.** `__init__.py` files are empty but for the version.
@@ -274,8 +290,12 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | ★ An illegal link never enters the graph | `tests/unit/test_graph.py` — `build` returns it as a finding instead |
 | ★ A walk reaches each item once, nearest first; forward crosses a link that counts toward no coverage, backward stops at it | `tests/unit/test_graph.py` § walks |
 | ★ A sibling's item is a node but never this repo's own item | `tests/unit/test_graph.py`; the `status` goldens |
+| ★ The ledger's check reads every repo in `[repos]`, or refuses and names each one it cannot | `tests/integration/test_project.py` § refused |
+| ★ A derived ID is qualified by its repo in the project's graph; an authored ID never is | `tests/unit/test_model.py` § 4, `tests/integration/test_project.py` |
+| ★ In the ledger's check, each repo's violations are the ones its own check reports when every sibling is read | `tests/integration/test_project.py` § 2 |
+| ★ A suspect in another repo than its root's is reached by today's links only, and its edit state is never guessed | `tests/unit/test_suspects.py` § across repos |
 | ★ Every marker form a gap suggests round-trips through the extractor that reads it | `tests/unit/test_forms.py` |
-| ★ Gaps are judged on this repo's items; `Assumes` counts toward none; a gap whose link was refused names the violation | `tests/unit/test_judge.py` |
+| ★ Gaps are judged on the judged items — this repo's, or in the ledger's check every repo's; `Assumes` counts toward none; a gap whose link was refused names the violation | `tests/unit/test_judge.py`, `tests/integration/test_project.py` |
 | ★ Every finding, violation or gap, ends with a next move | `tests/meta/test_catalogue.py` |
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspect_assessment.py` |
@@ -301,6 +321,7 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | F8 — the suspect rule | Data Architecture D7, first form | amended in place |
 | F10 — the database arrives with the ledger | Data Architecture D4 | amended in place |
 | F2 — never import click | the approved plan's `main()` sketch | slice tracker § Module shape |
+| F13 — the union of several repos is judged without a database (M10a) | Data Architecture D4 ("the database earns its place where the union of several repos is queried") | noted here; D4 is left as the slice-2 intent, where the ledger holds state and emits tables |
 
 All of these change **structure**. None removes a behaviour the surface doc promises.
 
@@ -414,9 +435,11 @@ Satisfies: REQ-QMT-08
 `core/judge.py` `suspects` walks forward from every item whose digest differs from its
 governing snapshot, in the historical and the current graph, and records each reason
 (`core/baselines.py` `Suspect`, `SuspectReason`). Only a new baseline clears one; an edit,
-a new test or a passing report does not. Reasoning: data architecture § D7.
+a new test or a passing report does not. In the ledger's check, a dependant in another repo
+than the root's is reached in today's graph only: its reason names that repo, and whether it
+was edited is left unknown, never guessed. Reasoning: data architecture § D7.
 
-Satisfies: REQ-QMT-09
+Satisfies: REQ-QMT-09, REQ-QMT-17
 
 ### DSN-QMT-09 — Test results are matched to test cases by identity
 
@@ -462,3 +485,19 @@ policy that denies connections; `infra/files.py` writes it only to a path that d
 Reasoning: the [local trace browser](../design/trace-browser.md).
 
 Satisfies: REQ-QMT-16
+
+### DSN-QMT-14 — The project is judged as one graph, from the ledger
+
+`Workspace.project(start)`, in the ledger, opens every repo the schema lists under `[repos]`
+and refuses — every problem named at once — when one cannot be read or holds other rules than
+the ledger's schema. Each repo is scanned with its own configuration; `Extracted.qualified`
+(`core/model.py`) writes every location from the ledger and qualifies a derived ID by its repo
+(`service:tests/unit/test_api.py::test_x`). Each repo is built against the others' authored
+items, so its own violations stay its own, and `TraceGraph.join` (`core/graph.py`) makes the
+union: every repo's items judged, every kept link kept. Coverage, each repo's baselines and
+suspects are judged on it, and `ProjectAssessment` (`core/assessment.py`) carries the result.
+Reasoning: [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md); surface architecture §
+*Project-wide check contract — M10a*.
+
+Satisfies: REQ-QMT-17
+

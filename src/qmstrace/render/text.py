@@ -14,7 +14,13 @@ from collections.abc import Iterable
 from typing import Final
 
 from qmstrace.core import findings
-from qmstrace.core.assessment import Assessment, ExternalState, SiblingState
+from qmstrace.core.assessment import (
+    Assessment,
+    ExternalState,
+    ProjectAssessment,
+    SiblingState,
+)
+from qmstrace.core.baselines import BaselineState, Suspect
 from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
 from qmstrace.core.graph import Closure, Direction, Home, Node, Step
 from qmstrace.core.model import Finding, Item
@@ -569,7 +575,7 @@ def rules(config: TraceConfig) -> str:
         "",
         "No rule has a stage: in this version every gap fails the gate (qmstrace check --strict).",
         "Rules are judged on this repo's items; whether an item is covered across the project's "
-        "repos is the ledger's question.",
+        "repos is judged in the ledger, by qmstrace ledger check.",
     ]
     return "\n".join(lines)
 
@@ -710,10 +716,23 @@ def check(assessment: Assessment, *, strict: bool, quiet: bool) -> str:
     if not quiet:
         lines.append(_read(assessment))
     lines += notices if quiet else [f"  {n}" for n in notices]
-    for heading, found in ((VIOLATION_HEADING, assessment.violations),
-                           (findings.GAP_HEADING + ":", assessment.gaps),
+    lines += _findings_block(assessment.violations, assessment.gaps, assessment.suspects, quiet)
+    lines.append(_result(assessment, strict=strict))
+    return "\n".join(lines)
+
+
+def _findings_block(
+    violations: tuple[Finding, ...],
+    gaps: tuple[Finding, ...],
+    suspects: tuple[Suspect, ...],
+    quiet: bool,
+) -> list[str]:
+    """Violations, gaps and suspects — a heading each, one line per finding with its next move."""
+    lines: list[str] = []
+    for heading, found in ((VIOLATION_HEADING, violations),
+                           (findings.GAP_HEADING + ":", gaps),
                            ("suspects — review needed; never fail the gate:",
-                            tuple(findings.suspect(s) for s in assessment.suspects))):  # fmt: skip
+                            tuple(findings.suspect(s) for s in suspects))):  # fmt: skip
         if not found:
             continue
         if not quiet:
@@ -721,8 +740,114 @@ def check(assessment: Assessment, *, strict: bool, quiet: bool) -> str:
         lines += [_finding(f, indent="" if quiet else "  ") for f in found]
     if not quiet:
         lines.append("")
-    lines.append(_result(assessment, strict=strict))
+    return lines
+
+
+# ── ledger check ────────────────────────────────────────────────────────────────────────────
+
+PROJECT_GAP_HEADING: Final = (
+    "gaps — coverage not met yet; only the gate (qmstrace ledger check --strict) fails on them"
+)
+
+
+def ledger_check(project: ProjectAssessment, *, strict: bool, quiet: bool) -> str:
+    """The ledger's check: every repo read, judged as one graph, and a result line that says it
+    read working trees, not pins — in every form of the output, `--quiet` too."""
+    notices = _project_notices(project)
+    lines: list[str] = []
+    if not quiet:
+        lines.append("read — each repo's working tree, not pinned:")
+        lines += _project_repos(project)
+    lines += notices if quiet else [f"  {n}" for n in notices]
+    gaps_heading = findings.GAP_HEADING
+    block = _findings_block(project.violations, project.gaps, project.suspects, quiet)
+    lines += [PROJECT_GAP_HEADING + ":" if line == gaps_heading + ":" else line for line in block]
+    lines.append(_project_result(project, strict=strict))
     return "\n".join(lines)
+
+
+def _project_repos(project: ProjectAssessment) -> list[str]:
+    order = list(project.config.item_types)
+    name_width = max(len(repo.name) for repo in project.repos)
+    place_width = max(len(repo.location) for repo in project.repos)
+    lines = []
+    for repo in project.repos:
+        counted = [
+            f"{s.items} {s.item_type.replace('_', ' ')}{'' if s.items == 1 else 's'}"
+            for s in sorted(repo.scanned, key=lambda s: order.index(s.item_type))
+            if s.items
+        ]
+        shown = " · ".join(counted) if counted else "no items"
+        lines.append(f"  {repo.name:<{name_width}}  {repo.location:<{place_width}}  {shown}")
+    return lines
+
+
+def _project_notices(project: ProjectAssessment) -> list[str]:
+    """What the ledger's check could not verify or judge — in every form of its output."""
+    lines = [_external(state) for state in project.externals if state.declared is None]
+    lines += [
+        f"external {s.prefix}*: verified against {s.location} ({s.declared} declared)"
+        for s in project.externals
+        if s.declared is not None
+    ]
+    for repo in project.repos:
+        lines += _baseline_lines(repo.baseline_state, where=f" in {repo.name}")
+    if project.config.baselines:
+        lines.append(_project_change_counts(project))
+    return lines + [notice.text for notice in project.notices]
+
+
+def _baseline_lines(state: BaselineState, *, where: str = "") -> list[str]:
+    """Each governing baseline and its tags' evidence — `where` names the repo in the ledger's
+    check."""
+    lines = []
+    for baseline in state.baselines:
+        lines.append(
+            f"baseline {baseline.scope}{where} ({baseline.subject}): {baseline.label} "
+            f"@ {baseline.snapshot.commit[:12]}"
+        )
+        for tag in baseline.tags:
+            if tag.annotated:
+                lines.append(f"  {tag.name}: annotated; tagger {tag.tagger}; date {tag.date}")
+    return lines
+
+
+def _project_change_counts(project: ProjectAssessment) -> str:
+    comparisons = [c for repo in project.repos for c in repo.baseline_state.comparisons]
+    frozen = sum(c.before is not None for c in comparisons)
+    states = Counter(c.state for c in comparisons)
+    withdrawn = sum(i.fields.get("Status") == "withdrawn" for i in project.graph.items())
+    return (
+        f"controlled document items: {frozen} frozen · {states['changed']} changed · "
+        f"{states['new']} new · {states['removed']} removed · {withdrawn} withdrawn"
+    )
+
+
+def _project_result(project: ProjectAssessment, *, strict: bool) -> str:
+    items = len(project.graph.items())
+    repos = len(project.repos)
+    violations, gaps = len(project.violations), len(project.gaps)
+    parts = [
+        f"result: {violations} {_noun(violations, 'violation', 'violations')}, {gaps} "
+        f"{_noun(gaps, 'gap', 'gaps')} in {items} {_noun(items, 'item', 'items')} across "
+        f"{repos} {_noun(repos, 'repo', 'repos')}",
+        f"{len(project.suspects)} {_noun(len(project.suspects), 'suspect', 'suspects')} "
+        "(informational)",
+        f"exit {1 if project.fails(strict=strict) else 0}",
+        "gate: gaps fail"
+        if strict
+        else "authoring: gaps do not fail — the gate is qmstrace ledger check --strict",
+        "working trees, not pinned",
+    ]
+    unseen = [f"the {s.name}" for s in project.externals if s.declared is None]
+    if unseen:
+        parts.append(f"NOT VERIFIED: {', '.join(unseen)}")
+    if project.config.baselines:
+        parts += [_project_change_counts(project), "remote-tag completeness NOT VERIFIED"]
+    cited = any(i.fields.get("Change") for i in project.graph.items())
+    if (project.config.change_requests or cited) and not project.register.available:
+        parts.append("change requests NOT VERIFIED")
+    return " · ".join(parts)
 
 
 def _notices(assessment: Assessment) -> list[str]:
@@ -739,15 +864,7 @@ def _notices(assessment: Assessment) -> list[str]:
 
 
 def _baselines(assessment: Assessment) -> list[str]:
-    lines = []
-    for baseline in assessment.baseline_state.baselines:
-        lines.append(
-            f"baseline {baseline.scope} ({baseline.subject}): {baseline.label} "
-            f"@ {baseline.snapshot.commit[:12]}"
-        )
-        for tag in baseline.tags:
-            if tag.annotated:
-                lines.append(f"  {tag.name}: annotated; tagger {tag.tagger}; date {tag.date}")
+    lines = _baseline_lines(assessment.baseline_state)
     if assessment.config.baselines:
         lines.append(_change_counts(assessment))
     return lines

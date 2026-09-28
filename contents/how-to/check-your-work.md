@@ -47,8 +47,10 @@
 A rule may ask for an item type this repo does not declare — a repo with no design documents,
 say. `qmstrace rules` marks such a rule *cannot be met with the item types this repo scans*.
 The gap stands until the repo declares that type, or the item is met in another repo of the
-project and judged when the ledger imports it. Under `--strict` it fails, on purpose: the
-project's rules say so, and no exemption is hidden.
+project — judged by `qmstrace ledger check`, run in the ledger. Under `--strict` it fails, on
+purpose: the project's rules say so, and no exemption is hidden. Where the ledger holds the
+requirements and the design, every requirement's tests are in another repo: there the gate is
+[`qmstrace ledger check --strict`](check-the-project.md).
 
 ## In a pipeline
 

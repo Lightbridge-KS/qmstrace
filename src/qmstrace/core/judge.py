@@ -3,14 +3,15 @@
 A coverage rule is data in the project's trace schema: which link an item type must have. An
 unmet rule is a **gap** — expected in the middle of the work, and failed only by the gate. No
 rule is hidden: a rule with no `where` applies to every item of its type, and one with a `where`
-to the items whose field has exactly that value. Rules are judged on this repo's items only;
-whether an item is covered across the project is the ledger's question.
+to the items whose field has exactly that value. Rules are judged on the items the graph
+judges — one repo's own, or, in the ledger's check, every repo's, where a rule is met by a link
+in any of them.
 
 A gap's next move is built from data: the form of the marker to write comes from the extractor
 that reads it (`forms`), a violation that refused the needed link is named first, and a marker
 written where it is not read (a stray) is named when it is the reason.
 
-Implements: DSN-QMT-06, DSN-QMT-07, DSN-QMT-08
+Implements: DSN-QMT-06, DSN-QMT-07, DSN-QMT-08, DSN-QMT-14
 """
 
 from __future__ import annotations
@@ -42,8 +43,9 @@ def coverage(
     violations: Iterable[Finding] = (),
     strays: Iterable[Stray] = (),
     forms: Mapping[str, Form] | None = None,
+    homes: Mapping[str, tuple[str, ...]] | None = None,
 ) -> list[Finding]:
-    """Every unmet coverage rule on this repo's items, sorted by file, line and code.
+    """Every unmet coverage rule on the judged items, sorted by file, line and code.
 
     Parameters
     ----------
@@ -52,7 +54,10 @@ def coverage(
     strays
         Markers written where they are not read.
     forms
-        For each item type this repo scans, how its items write a link.
+        For each item type that is scanned, how its items write a link.
+    homes
+        In the ledger's check, the repos that declare each item type — a next move then names
+        where to write the link, and no gap is sent on to another repo.
     """
     refused = list(violations)
     stray_list = list(strays)
@@ -77,7 +82,7 @@ def coverage(
                 )
             ]
             if not active:
-                fix = _fix(config, rule, item, refused, stray_list, forms or {})
+                fix = _fix(config, rule, item, refused, stray_list, forms or {}, homes)
                 gaps.append(findings.unmet_rule(rule.code, item, rule.text, fix))
     return sorted(gaps, key=lambda f: (f.file, f.line, f.code))
 
@@ -226,6 +231,7 @@ def suspects(graph: TraceGraph, comparisons: Iterable[Comparison]) -> tuple[Susp
     and edited state are evaluated per reason, never globally.
     """
     current = {item.id: item for item in graph.items()}
+    repo_of = {node.id: node.repo for node in graph.nodes.values() if node.item is not None}
     reasons: dict[str, list[SuspectReason]] = {}
     for comparison in sorted(comparisons, key=lambda c: (c.id, c.baseline.snapshot.commit)):
         if comparison.state not in {"changed", "removed"}:
@@ -237,15 +243,36 @@ def suspects(graph: TraceGraph, comparisons: Iterable[Comparison]) -> tuple[Susp
         present = graph.forward([comparison.id]).steps if comparison.id in current else {}
         root = comparison.after or comparison.before
         assert root is not None
-        for item_id in sorted((historical.keys() | present.keys()) & old.keys() & current.keys()):
+        withdrawn = root.fields.get("Status") == "withdrawn"
+        for item_id in sorted((historical.keys() | present.keys()) & current.keys()):
             if item_id == comparison.id:
                 continue  # a cycle cannot make its own root suspect
+            elsewhere = repo_of.get(item_id)
+            if snapshot.repo is not None and elsewhere not in (None, snapshot.repo):
+                # Another repo than the root's: no version of it at that baseline was read, so
+                # only today's reach counts, and whether it was edited since is not known.
+                if item_id in present:
+                    reasons.setdefault(item_id, []).append(
+                        SuspectReason(
+                            comparison.id,
+                            comparison.baseline,
+                            comparison.state,
+                            withdrawn,
+                            None,
+                            None,
+                            present[item_id].distance,
+                            unpinned_repo=elsewhere,
+                        )
+                    )
+                continue
+            if item_id not in old:
+                continue  # a new dependant is traversed but not reported
             reasons.setdefault(item_id, []).append(
                 SuspectReason(
                     comparison.id,
                     comparison.baseline,
                     comparison.state,
-                    root.fields.get("Status") == "withdrawn",
+                    withdrawn,
                     current[item_id].digest != old[item_id].digest,
                     historical[item_id].distance if item_id in historical else None,
                     present[item_id].distance if item_id in present else None,
@@ -291,6 +318,7 @@ def _fix(
     refused: list[Finding],
     strays: list[Stray],
     forms: Mapping[str, Form],
+    homes: Mapping[str, tuple[str, ...]] | None = None,
 ) -> str:
     """The next move for one gap — the most specific reason first."""
     link = config.links[rule.marker]
@@ -318,13 +346,16 @@ def _fix(
         here = [t for t in link.sources if t in forms]
         if not here:
             kinds = " or ".join(t.replace("_", " ") for t in link.sources)
+            if homes is not None:
+                return findings.fix_none_in_project(kinds, item.id)
             return findings.fix_none_here(kinds, item.id)
         source = here[0].replace("_", " ")
         fact = f"the {source} {rule.marker.lower()} {item.id}"
-        return findings.fix_write(forms[here[0]](rule.marker, item.id), fact, on=source)
+        on = source if homes is None else f"{source} in {' or '.join(homes[here[0]])}"
+        return findings.fix_write(forms[here[0]](rule.marker, item.id), fact, on=on)
     target = " or ".join(t.replace("_", " ") for t in link.targets)
     form = forms.get(item.type)
     written = form(rule.marker, f"<{target} ID>") if form else f"'{rule.marker}: <{target} ID>'"
     if not any(t in forms for t in link.targets):
-        return findings.fix_no_target(target, written)
+        return findings.fix_no_target(target, written, whole_project=homes is not None)
     return findings.fix_write(written, f"this {words} {rule.marker.lower()} that {target}")

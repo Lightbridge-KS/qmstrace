@@ -24,6 +24,7 @@ nav = [
     { "Set up a repo" = "how-to/set-up-a-repo.md" },
     { "Check your work" = "how-to/check-your-work.md" },
     { "Share the project's schema" = "how-to/share-the-schema.md" },
+    { "Check the whole project" = "how-to/check-the-project.md" },
     { "Write traced docs with diagrams and tables" = "how-to/write-traced-docs.md" },
     { "Write an impact list" = "how-to/write-an-impact-list.md" },
     { "Read test results" = "how-to/read-test-results.md" },

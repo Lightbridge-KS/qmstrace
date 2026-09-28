@@ -14,6 +14,9 @@ The load-bearing claims, each pinned by a test:
 5. A walk reaches each item once, nearest first, under the link that reaches it first; a second
    link is kept as `also`. Forward follows an assumption; backward stops at it. A start reached
    from another start is still a step; a cycle ends; a link written twice is walked once.
+6. The project's graph joins the repos' graphs, each built against the others: every repo's
+   items are judged and name their repo, a sibling's node gives way to the judged one, and a
+   walk crosses from one repo to the other. With every repo read, an unknown ID is V03.
 """
 
 import pytest
@@ -535,3 +538,72 @@ def test_a_file_read_for_two_types_reports_each_near_miss_once(service: TraceCon
     )
     _, found = TraceGraph.build(service, [*once, again], AGREEMENT)
     assert len(v16(found)) == 1
+
+
+# ── 6. the project's graph ─────────────────────────────────────────────────────────────────
+
+DOCS = {k: v for k, v in CLEAN.items() if k[0] in ("requirement", "design_element")}
+CODE = {k: v for k, v in CLEAN.items() if k[0] in ("component", "test_case")}
+
+
+def project(config: TraceConfig) -> TraceGraph:
+    """The CLEAN repo split in two, as the ledger's check builds it: documents in `ledger`,
+    code and tests in `code`, each built against the other's authored items."""
+    docs = extracted(config, DOCS)
+    code = [
+        part.qualified("code", "../code", frozenset({"component", "test_case"}))
+        for part in extracted(config, CODE)
+    ]
+    authored = {i.id: i for part in docs for i in part.items}
+    whole = Surroundings(externals=AGREEMENT.externals, whole_project=True)
+    ledger, wrong = TraceGraph.build(config, docs, whole)
+    code_graph, more = TraceGraph.build(
+        config,
+        code,
+        Surroundings(
+            siblings={"ledger": authored}, externals=AGREEMENT.externals, whole_project=True
+        ),
+    )
+    assert wrong == [] and more == []
+    return TraceGraph.join(config, {"ledger": ledger, "code": code_graph})
+
+
+@pytest.mark.verifies("DSN-QMT-14")
+def test_the_joined_graph_judges_every_repos_items(service: TraceConfig) -> None:
+    graph = project(service)
+    test = "code:tests/unit/test_keys.py::test_a_call_without_a_key_is_refused"
+    assert [i.id for i in graph.items("test_case")] == [test]
+    requirement = graph.node("REQ-SVC-01")
+    assert requirement is not None and (requirement.home, requirement.repo) == (
+        Home.LOCAL,
+        "ledger",
+    )
+    assert [k.src for k in graph.incoming("REQ-SVC-01", "verifies")] == [test]
+    assert graph.node(test).where == "../code/tests/unit/test_keys.py:4"
+
+
+@pytest.mark.verifies("DSN-QMT-14")
+def test_a_walk_crosses_from_one_repo_to_the_other(service: TraceConfig) -> None:
+    graph = project(service)
+    reached = graph.forward(["REQ-SVC-01"]).steps
+    assert "code:src/service/keys.py" in reached
+    assert "code:tests/unit/test_keys.py::test_a_call_without_a_key_is_refused" in reached
+    back = graph.backward(["code:src/service/keys.py"]).steps
+    assert {"DSN-SVC-01", "REQ-SVC-01", "AGR-1"} <= back.keys()
+
+
+def test_with_every_repo_read_an_unknown_id_is_v03_never_unverified(service: TraceConfig) -> None:
+    code = extracted(
+        service,
+        {
+            (
+                "test_case",
+                "tests/unit/test_x.py",
+            ): '@pytest.mark.verifies("REQ-CLT-09")\ndef test_x(): ...\n'
+        },
+    )
+    graph, found = TraceGraph.build(
+        service, code, Surroundings(siblings={"ledger": {}}, whole_project=True)
+    )
+    assert codes(found) == ["V03"] and graph.unverified() == []
+    assert "in any repo of the project" in found[0].what

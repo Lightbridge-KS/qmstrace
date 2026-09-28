@@ -40,4 +40,4 @@ From this repo's qmstrace.toml
   knows, does not scan: design element
 
 No rule has a stage: in this version every gap fails the gate (qmstrace check --strict).
-Rules are judged on this repo's items; whether an item is covered across the project's repos is the ledger's question.
+Rules are judged on this repo's items; whether an item is covered across the project's repos is judged in the ledger, by qmstrace ledger check.

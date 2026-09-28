@@ -50,6 +50,22 @@ tests from the two files above, so it cannot drift from what the command writes:
 --8<-- "manual/copy-example.toml"
 ```
 
+## A ledger that holds the documents
+
+In the layout where the ledger holds the requirements and the design, the ledger is traced
+too. Its own `qmstrace.toml` reads the schema beside it by path — never a copy — and the
+schema lists the ledger under `[repos]` as `"."`:
+
+``` toml
+--8<-- "fixtures/split/ledger/qmstrace.toml"
+```
+
+The product repos then declare only what they hold:
+
+``` toml
+--8<-- "fixtures/split/service/qmstrace.toml"
+```
+
 ## A repo on its own
 
 ``` toml

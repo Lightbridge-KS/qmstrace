@@ -84,6 +84,7 @@ flowchart TD
 | `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers | ✔ |
 | `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
 | `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *In the engine since M9b* | ✔ |
+| `qmstrace ledger check [--strict] [--quiet]` | In the ledger: reads the working tree of every repo in `[repos]` — the ledger too, when it holds documents (ADR-0001) — and judges them as one project: coverage met across repos, each repo's own violations, suspects across repos. Refuses (exit 2) when a repo cannot be read or holds other rules. Says *not pinned* in every form. The ledger's gate with `--strict`. *In the engine since M10a* | ✔ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
@@ -341,6 +342,7 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 | "This requirement failed" | A test case that verifies several items failed | Mark the test case **shared**, with what else it verifies |
 | "No suspects" | The suspects were cleared by touching a file | Never let a suspect clear itself (D7) |
 | "An empty project" | A pin older than the repo's trace configuration | Refuse the import and say why |
+| "A clean project" | A repo in `[repos]` was not read — missing, unreadable, or holding other rules | Refuse the ledger's check (exit 2), naming every such repo at once (M10a) |
 | "Nothing is frozen" | A shallow clone, excluded tags, or not a repository at all | Exit *could not judge* for known incomplete evidence; otherwise report matching reachable local tags and keep remote-tag completeness unverified |
 | "Verified" | The ledger is not beside the repo | *Not verified* in the result line, surviving the quiet form; the citation is verified at the ledger's import |
 | "Covered" | `Verify-by: inspection`, with nothing recorded anywhere | List such items apart, until an inspection has a recorded basis |
@@ -485,6 +487,53 @@ the ledger was named, the closing line is `Nothing was copied. Exit 0.`
 
 **Rejected:** a `--check` mode before the ledger has a pipeline of its own; stamping the
 ledger's commit into the block, which would make every run a change.
+
+### Project-wide check contract — M10a
+
+`ledger check [--strict] [--quiet]` runs where `qmstrace.schema.toml` is found, as every
+ledger verb does; run in a product repo it exits 2 and names the ledger. It reads every repo
+the schema lists under `[repos]` — the ledger itself when it lists itself as `"."`
+([ADR-0001](../adr/0001-the-ledger-holds-the-documents.md)) — each from its working tree, with
+its own trace configuration, and judges them as one project.
+
+Output — a header of the repos read, the notices, the findings, a result line:
+
+```text
+read — each repo's working tree, not pinned:
+  client   ../client   1 component · 2 test cases
+  ledger   .           3 requirements · 3 design elements
+  service  ../service  2 components · 2 test cases
+  external AGR-*: verified against agreement.md (3 declared)
+  …
+result: 0 violations, 0 gaps in 13 items across 3 repos · … · working trees, not pinned · …
+```
+
+- **Locations are written from the ledger** (`../service/tests/…`), and a module's or a test's
+  ID carries its repo (`service:tests/unit/test_api.py::test_x`); an authored ID never does.
+- **Each repo's violations are its own**, the same its own `check` reports with every sibling
+  read; V03 there says *in any repo of the project*, and nothing is *not verified*.
+- **A gap's next move names the repos that declare the type** that could meet it — "on the test
+  case in client or service, write …". The gap heading names `qmstrace ledger check --strict`
+  as the gate.
+- **A suspect in another repo than its root's** says so: *current reach only … not pinned;
+  unknown whether edited*.
+- **Refused, exit 2, every problem named at once:** a listed repo that is missing, has no
+  `qmstrace.toml` or cannot be read; one whose schema differs from the ledger's — the next move
+  names `qmstrace ledger copy-schema <repo>`, or, for the ledger itself, `path =
+  "qmstrace.schema.toml"`; two names for one folder; a traced ledger missing from `[repos]`;
+  an empty `[repos]`.
+- **Exit codes** as `check`: 1 on a violation, or a gap under `--strict`; suspects never fail.
+
+The product repo's own `check` is unchanged: in the ledger, its gaps that only another repo
+can meet say *qmstrace ledger check, run in the ledger, judges that*, and its gate stays
+failing on them — the ledger's gate is `ledger check --strict`.
+
+**Rejected:** a `--project` flag, or `check` turning project-wide in a ledger — one word
+with two scopes, depending on the folder; `../path` as the qualified ID — it names where a
+repo is checked out, not which repo it is, and matches no line of the future trace lock; an
+unread repo passing as *not verified* — its violations would be hidden, and a clean result
+false; letting a repo exempt itself from rules, so a documents repo passes alone — it hides
+the cross-repo gaps rather than judging them.
 
 ### Setup contract — M6
 

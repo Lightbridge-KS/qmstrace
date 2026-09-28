@@ -54,11 +54,11 @@ project. This is the first half of the ledger's import at pins (D2). Planned 202
 
 **Checklist:**
 - [x] CR-001 drafted as `evaluated` in `qmstrace-ledger`
-- [ ] CR-001 accepted by the developer
-- [x] **M10·0**, a pull request:
+- [x] CR-001 accepted by the developer — `qmstrace-ledger` `bff7b99`
+- [x] **M10·0**, [#27](https://github.com/Lightbridge-KS/qmstrace/pull/27) · `e39856a`:
   - the fixture `tests/fixtures/split/`, in the ADR layout, with a colliding derived ID;
   - `ledger copy-schema` skips `"."`, and says how to undo a copy an older run wrote there.
-- [ ] **M10a**, a pull request:
+- [x] **M10a**, a pull request:
   - `ledger check [--strict] [--quiet]`: the union, coverage across repos, per-repo violations,
     refusals and cross-repo suspects;
   - the fix text;
@@ -68,7 +68,8 @@ project. This is the first half of the ledger's import at pins (D2). Planned 202
     repo* rewritten.
 - [ ] **M10b**, a pull request: `ledger thread` and `ledger impact` across repos, and
   REQ-QMT-18.
-- [ ] Acceptance on beacon-split: A1–A9 and A11–A13 after M10a; A10 after M10b.
+- [x] Acceptance on beacon-split, M10a: A1–A9 and A11–A13 pass, run 2026-09-28 — [results](../tests/beacon-split.md#results)
+- [ ] Acceptance A10, after M10b.
 
 ## After — M11 · mentions
 

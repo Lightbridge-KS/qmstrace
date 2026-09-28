@@ -5,16 +5,17 @@ end and points upstream. A **finding** is what is wrong in the user's repo — a
 an exception. A **notice** is what a run could not verify or did not pin: it fails nothing, and
 no form of output may hide it.
 
-Implements: DSN-QMT-05
+Implements: DSN-QMT-05, DSN-QMT-14
 """
 
 from __future__ import annotations
 
 import hashlib
+import posixpath
 import re
 import unicodedata
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Final, Literal
 
 # What an item ID looks like, whatever the project's own patterns: capitals and digits in
@@ -149,3 +150,35 @@ class Extracted:
     leads: tuple[Lead, ...] = ()
     strays: tuple[Stray, ...] = ()
     mentions: tuple[Mention, ...] = ()
+
+    def qualified(self, repo: str, location: str, derived: frozenset[str]) -> Extracted:
+        """What this file declares, as the whole project sees it: every location written from
+        the ledger (`../service/src/app.py`), and an ID derived from a path qualified by its
+        repo (`service:src/app.py`), because two repos may hold the same path. An authored ID
+        is the project's already and is never touched — nor is a link's target, which is
+        always one.
+
+        Examples
+        --------
+        ```python
+        part = Extracted(items=(Item("src/app.py", "component", "src/app.py", 1, "", ""),))
+        part.qualified("service", "../service", frozenset({"component"})).items[0].id
+        # 'service:src/app.py'
+        ```
+        """
+        renamed = {i.id: f"{repo}:{i.id}" for i in self.items if i.type in derived}
+
+        def at(file: str) -> str:
+            return posixpath.normpath(posixpath.join(location, file))
+
+        def named(item_id: str | None) -> str | None:
+            return renamed.get(item_id, item_id) if item_id is not None else None
+
+        return Extracted(
+            tuple(replace(i, id=renamed.get(i.id, i.id), file=at(i.file)) for i in self.items),
+            tuple(replace(k, src=renamed.get(k.src, k.src), file=at(k.file)) for k in self.links),
+            tuple(replace(f, file=at(f.file), item=named(f.item)) for f in self.findings),
+            tuple(replace(lead, file=at(lead.file)) for lead in self.leads),
+            tuple(replace(s, file=at(s.file), item=named(s.item)) for s in self.strays),
+            tuple(replace(m, file=at(m.file)) for m in self.mentions),
+        )

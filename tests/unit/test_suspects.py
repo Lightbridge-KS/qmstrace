@@ -6,7 +6,7 @@ import pytest
 
 from qmstrace.core import findings
 from qmstrace.core.baselines import Baseline, Comparison, Snapshot, Tag
-from qmstrace.core.graph import TraceGraph
+from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.judge import suspects
 from qmstrace.core.model import Extracted, Item, Link
 
@@ -135,3 +135,43 @@ def test_newness_is_relative_to_each_root_snapshot(service):
     result = suspects(current, [a, b])
     assert [s.item.id for s in result] == [name(3)]
     assert [r.root for r in result[0].reasons] == [name(2)]
+
+
+# ── across repos: the ledger's check ───────────────────────────────────────────────────────
+
+
+def dependant_in(repo_items, config, *, on):
+    """A repo whose one design element assumes `on`, a design element of the ledger."""
+    item = Item(name(9), "design_element", "../code/docs/d.md", 9, "Design 9", "same")
+    link = Link(name(9), name(on), "Assumes", "../code/docs/d.md", 9)
+    built, wrong = TraceGraph.build(
+        config,
+        [Extracted(items=(item,), links=(link,))],
+        Surroundings(siblings={"ledger": repo_items}, whole_project=True),
+    )
+    assert not wrong
+    return built
+
+
+@pytest.mark.verifies("DSN-QMT-08", "DSN-QMT-14")
+def test_a_dependant_in_another_repo_is_reached_today_and_labelled_so(service):
+    before = graph(service, [(1, 2)], ids=(1, 2))
+    ledger = graph(service, [(1, 2)], ids=(1, 2), edited=(1,))
+    code = dependant_in({i.id: i for i in ledger.items()}, service, on=2)
+    union = TraceGraph.join(service, {"ledger": ledger, "code": code})
+    baseline = Baseline(
+        "designs", "*", ("design_element",), (Tag("b1", "abc", True),),
+        Snapshot("abc", service, tuple(before.items()), before, repo="ledger"),
+    )  # fmt: skip
+    root = Comparison(
+        name(1), baseline, before.node(name(1)).item, ledger.node(name(1)).item, "changed"
+    )
+    result = {s.item.id: s for s in suspects(union, [root])}
+    assert set(result) == {name(2), name(9)}
+    same, across = result[name(2)].reasons[0], result[name(9)].reasons[0]
+    assert (same.unpinned_repo, same.edited, same.historical_distance) == (None, False, 1)
+    assert (across.unpinned_repo, across.edited, across.historical_distance) == ("code", None, None)
+    assert across.current_distance == 2
+    said = findings.suspect(result[name(9)]).what
+    assert "since b1 in ledger: current reach only: distance 2 — code is read from" in said
+    assert "not pinned; unknown whether edited" in said

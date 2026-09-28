@@ -14,7 +14,12 @@ A walk over the graph is a `Closure`: `forward` follows what hangs off some item
 what they derive from. `thread` and `impact` render it, and so will the suspects — one
 traversal, several renderers.
 
-Implements: DSN-QMT-05
+The project's graph is the repos' graphs joined (`TraceGraph.join`): each repo is built against
+the others' items, so what depends on one repo's configuration — its ID patterns, the files it
+reads — is judged there, and the union carries every item and every kept link. Nothing is
+unverified in it: every repo was read.
+
+Implements: DSN-QMT-05, DSN-QMT-14
 """
 
 from __future__ import annotations
@@ -23,7 +28,7 @@ import difflib
 import re
 from collections import defaultdict, deque
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 
 from qmstrace.core import findings
@@ -42,10 +47,12 @@ class Home(Enum):
 
 @dataclass(frozen=True, slots=True)
 class Node:
-    """One end of a link. `item` is set for this repo's own items only; `repo` names a sibling
-    or an external source. `title` and `where` are for display — `where` is a path as a reader
-    of this repo would write it. `fields` retains authored metadata for local and sibling
-    nodes, including verification methods, without treating sibling items as local ones."""
+    """One end of a link. `item` is set for the items this run judges — one repo's own, or in
+    the project's graph every repo's; `repo` names a sibling or an external source, and in the
+    project's graph the repo of every judged item. `title` and `where` are for display —
+    `where` is a path as the reader would write it. `fields` retains authored metadata for
+    judged and sibling nodes, including verification methods, without treating a sibling's
+    items as judged ones."""
 
     id: str
     home: Home
@@ -114,6 +121,7 @@ class Surroundings:
     siblings: Mapping[str, Mapping[str, Item]] = field(default_factory=dict)
     every_sibling_read: bool = True
     externals: Mapping[str, frozenset[str] | None] = field(default_factory=dict)
+    whole_project: bool = False  # every repo of the project is read — the ledger's check
 
 
 @dataclass(frozen=True, slots=True)
@@ -246,11 +254,44 @@ class TraceGraph:
         )
         return graph, sorted(wrong, key=lambda f: (f.file, f.line, f.code, f.what))
 
+    @classmethod
+    def join(cls, config: TraceConfig, parts: Mapping[str, TraceGraph]) -> TraceGraph:
+        """The project's graph: each repo's graph, built against the others, joined.
+
+        Every judged item stays judged and names its repo; a sibling's node gives way to the
+        judged node of the same ID; every kept link is kept. An ID two repos declare was
+        refused in both builds (V01), so no ID is judged twice.
+        """
+        nodes: dict[str, Node] = {}
+        for repo, part in sorted(parts.items()):
+            for node in part.nodes.values():
+                if node.item is not None:
+                    assert node.id not in nodes, f"{node.id} is judged in two repos"
+                    nodes[node.id] = replace(node, repo=repo)
+        for _, part in sorted(parts.items()):
+            for node in part.nodes.values():
+                nodes.setdefault(node.id, node)
+        kept = tuple(link for _, part in sorted(parts.items()) for link in part.links)
+        incoming: dict[str, list[Link]] = defaultdict(list)
+        outgoing: dict[str, list[Link]] = defaultdict(list)
+        for link in kept:
+            incoming[link.dst].append(link)
+            outgoing[link.src].append(link)
+        return cls(
+            nodes,
+            kept,
+            {k: tuple(v) for k, v in incoming.items()},
+            {k: tuple(v) for k, v in outgoing.items()},
+            tuple(config.links),
+            frozenset(m for m, link in config.links.items() if not link.counts_for_coverage),
+        )
+
     def node(self, item_id: str) -> Node | None:
         return self.nodes.get(item_id)
 
     def items(self, item_type: str | None = None) -> list[Item]:
-        """This repo's own items, by ID."""
+        """The items this run judges, by ID — one repo's own, or every repo's in the project's
+        graph."""
         own = (n.item for n in self.nodes.values() if n.item is not None)
         return sorted((i for i in own if item_type in (None, i.type)), key=lambda i: i.id)
 
@@ -372,7 +413,10 @@ def _resolve(
         if own is not None or around.every_sibling_read:
             home = ", ".join(own.files) if own is not None else None
             return None, findings.no_such_item(
-                link, home=home, siblings_read=bool(config.repos) and around.every_sibling_read
+                link,
+                home=home,
+                siblings_read=bool(config.repos) and around.every_sibling_read,
+                whole_project=around.whole_project,
             )
         return Node(link.dst, Home.UNVERIFIED, None), None
 

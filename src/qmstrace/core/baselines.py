@@ -27,6 +27,7 @@ class Snapshot:
     config: TraceConfig | None
     items: tuple[Item, ...] = ()
     graph: TraceGraph | None = None
+    repo: str | None = None  # the repo it was read from, in a project-wide run
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,13 +79,19 @@ class BaselineState:
 
 @dataclass(frozen=True, slots=True)
 class SuspectReason:
+    """Why one item needs review: its root, the root's governing baseline, and how far below it
+    the item is in each graph version. A dependant in another repo than the root's is reached
+    in today's graph only — `unpinned_repo` names its repo, and whether it was edited is not
+    known (`edited` is `None`) until the ledger reads every repo at a pin."""
+
     root: str
     baseline: Baseline
     root_state: str
     root_withdrawn: bool
-    edited: bool
+    edited: bool | None
     historical_distance: int | None
     current_distance: int | None
+    unpinned_repo: str | None = None
 
     @property
     def distance(self) -> int:

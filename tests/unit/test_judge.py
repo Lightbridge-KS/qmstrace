@@ -18,7 +18,7 @@ import pytest
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.judge import coverage
+from qmstrace.core.judge import _fix, coverage
 from qmstrace.core.model import Extracted, Finding, Item
 from qmstrace.extract.base import FORMS, REGISTRY
 
@@ -173,6 +173,20 @@ def test_the_form_to_write_comes_from_the_extractor_that_reads_it(service: Trace
     fix = fix_of(judged(service), "G02", "REQ-SVC-02")
     assert 'on the test case, write `@pytest.mark.verifies("REQ-SVC-02")` on the test' in fix
     assert "only if it is true" in fix
+
+
+@pytest.mark.verifies("DSN-QMT-14")
+def test_in_the_ledgers_check_a_next_move_names_the_repos_to_write_in(
+    service: TraceConfig,
+) -> None:
+    rule = next(r for r in service.rules if r.code == "G02")
+    requirement = Item("REQ-SVC-01", "requirement", "docs/req/srs.md", 1, "r", "d")
+    forms = {t.name: FORMS[t.extractor] for t in service.item_types.values() if t.extractor}
+    homes = {"test_case": ("client", "service"), "requirement": ("ledger",)}
+    said = _fix(service, rule, requirement, [], [], forms, homes)
+    assert said.startswith("on the test case in client or service, write")
+    nobody = _fix(service, rule, requirement, [], [], {}, {})
+    assert nobody.startswith("no repo of the project declares a test case")
 
 
 def test_a_rule_no_type_here_can_meet_says_so(project: Path) -> None:

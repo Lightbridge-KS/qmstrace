@@ -120,6 +120,12 @@ An item's identifier: immutable once committed and never reused. Retiring an ite
 its status, not its ID.
 _Avoid_: key, number
 
+**Qualified ID**:
+A derived item ID — a module's path, a test's node ID — prefixed by its repo's name in
+`[repos]` wherever the whole project is judged: `service:tests/unit/test_api.py::test_x`. Two
+repos may hold the same path; an authored ID is never qualified.
+_Avoid_: full ID, global ID, `../service/…` (that is a location, not an identity)
+
 **Item Text**:
 An item's title and its section — everything down to the next heading at the same or a higher
 level, sub-sections, tables and diagrams included — its link fields included, with layout
@@ -306,10 +312,17 @@ projects and carries markers, nothing more.
 _Avoid_: project repo, source repo
 
 **Sibling**:
-Another product repo of the same project, seen from one of them: listed in the trace schema,
-and read from its working tree — not pinned — so that its items can be cited by ID. Only the
-ledger's import reads it at a pin.
+Another repo of the same project, seen from one of them: listed in the trace schema, and read
+from its working tree — not pinned — so that its items can be cited by ID. Usually another
+product repo; where the ledger holds the documents (ADR-0001), the ledger is a sibling too.
+Only the ledger's import reads it at a pin.
 _Avoid_: dependency, neighbour, peer
+
+**Ledger's Check**:
+`qmstrace ledger check`, run in the ledger repo: every repo of the project read from its
+working tree and judged as one — coverage met across repos, each repo's own violations,
+suspects across repos. Not pinned; the import is the pinned half.
+_Avoid_: project check (ambiguous with a product repo's own `check`), import, sync
 
 **Repo Memory**:
 A product repo's casual, agent-first `docs/` tree — requirements, design, decisions,

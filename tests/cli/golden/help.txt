@@ -23,5 +23,6 @@ Commands:
     0  completed — informational views may include failures
     1  the check failed — violations, or gaps under the gate; the result line says which
     2  could not judge — usage, configuration, the wrong kind of repo, an unknown ID,
-       an unreadable report, a shallow clone where baselines are configured
+       an unreadable report, a shallow clone where baselines are configured, a repo of
+       the project that cannot be read or holds other rules
     3  internal error — a fault in qmstrace, not in the repo

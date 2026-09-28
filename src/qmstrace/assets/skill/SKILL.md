@@ -90,7 +90,9 @@ but traversal and review evidence remain.
 
 No command verifies semantic truth, report freshness or human approval merely by exiting 0.
 Source notices survive quiet output. Siblings are working trees, not pins; traversal ends at
-this repo's edge. Inspection/analysis requirements remain separate from tested requirements.
+this repo's edge. Where the whole project must be judged — coverage met in another repo,
+suspects across repos — `qmstrace ledger check`, run in the ledger, reads every repo together,
+from working trees. Inspection/analysis requirements remain separate from tested requirements.
 Use `qmstrace --help`, command help and the finding's next move; the catalogue in
 `qmstrace.core.findings.CODES` owns finding descriptions. Never type fabricated dates,
 verdicts or test results. A progress tracker may cite an observed commit as a pointer.
