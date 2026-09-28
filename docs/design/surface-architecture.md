@@ -85,6 +85,7 @@ flowchart TD
 | `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
 | `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *In the engine since M9b* | ✔ |
 | `qmstrace ledger check [--strict] [--quiet]` | In the ledger: reads the working tree of every repo in `[repos]` — the ledger too, when it holds documents (ADR-0001) — and judges them as one project: coverage met across repos, each repo's own violations, suspects across repos. Refuses (exit 2) when a repo cannot be read or holds other rules. Says *not pinned* in every form. The ledger's gate with `--strict`. *In the engine since M10a* | ✔ |
+| `qmstrace ledger thread <ID>` · `qmstrace ledger impact <ID>…` | In the ledger: `thread` and `impact` over the project's graph — a walk crosses every repo's edge, from a requirement to every repo's tests, from a module back to its origin clause. A module's or test's ID carries its repo; one given without it is refused with the qualified IDs it may mean. *In the engine since M10b* | ✔ |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
@@ -527,6 +528,14 @@ result: 0 violations, 0 gaps in 13 items across 3 repos · … · working trees,
 The product repo's own `check` is unchanged: in the ledger, its gaps that only another repo
 can meet say *qmstrace ledger check, run in the ledger, judges that*, and its gate stays
 failing on them — the ledger's gate is `ledger check --strict`.
+
+**Walks — M10b.** `ledger thread ID` and `ledger impact ID…` render the project's graph with
+the same code, and in the same shape, as `thread` and `impact` in one repo. Two differences:
+a judged item says which repo it is in (`component, in service`), and the closing line reads
+*— the project's N repos, working trees, not pinned* where one repo's reads *— this repo only*.
+A start no repo declares or cites exits 2; a module's or a test's ID written without its repo
+is answered with the qualified IDs it may mean. The candidate `Impacts:` line still lists only
+the item types a baseline covers.
 
 **Rejected:** a `--project` flag, or `check` turning project-wide in a ledger — one word
 with two scopes, depending on the folder; `../path` as the qualified ID — it names where a

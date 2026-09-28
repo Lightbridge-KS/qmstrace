@@ -1,0 +1,15 @@
+Usage: qmstrace ledger impact [OPTIONS] {ID…}
+
+  Show the combined downstream items and upstream origins of several starting
+  items, across every repo the schema lists — from the ledger.
+
+  The Impacts line is a candidate for review, filtered by configured baseline
+  types. Any unseen starting ID rejects the whole request.
+
+Arguments:
+  ID…  One or more item IDs of the project.  [required]
+
+Options:
+  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
+           or after the command.
+  --help   Show this message and exit.

@@ -10,3 +10,7 @@ Commands:
   copy-schema  Copy the project's trace schema into its product repos.
   check        Judge every repo of the project together — the gate with
                --strict.
+  thread       Trace one item across every repo: what it derives from, what
+               hangs off it.
+  impact       What changing several items affects across every repo of the
+               project.

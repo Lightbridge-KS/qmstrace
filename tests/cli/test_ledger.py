@@ -1,4 +1,4 @@
-"""`qmstrace ledger copy-schema` — the project side's first verb, pinned byte for byte.
+"""`qmstrace ledger …` — the project side's verbs, pinned byte for byte.
 
 The load-bearing claims, each pinned by a test:
 
@@ -11,6 +11,9 @@ The load-bearing claims, each pinned by a test:
    failing on gaps the product repos leave, `--quiet`, suspects across repos after a change to
    a frozen document, a refusal, and the old layout — and `-C` on either side gives the same
    bytes.
+5. `ledger thread` and `ledger impact` walk across every repo, each a golden file: a requirement
+   down to the tests of two repos, a module back to its origin, several starts at once — and
+   a test's ID given without its repo is refused with the qualified IDs it may mean.
 
 Regenerate a golden after an intended change: `QMSTRACE_REGOLD=1 uv run pytest tests/cli`, then
 read the diff before committing it.
@@ -190,3 +193,44 @@ def test_ledger_check_minus_c_before_or_after_gives_the_same_bytes(split: Path) 
     before = copy_schema("-C", ledger, "ledger", "check")
     after = copy_schema("ledger", "check", "-C", ledger)
     assert before == after and before[0] == 0
+
+
+# ── 5. ledger thread and ledger impact ─────────────────────────────────────────────────────
+
+
+@pytest.mark.verifies("REQ-QMT-18")
+def test_ledger_thread_from_a_requirement_reaches_both_repos_tests(
+    split: Path, golden: Golden
+) -> None:
+    code, output = copy_schema("-C", str(split / "ledger"), "ledger", "thread", "REQ-SVC-01")
+    assert code == 0
+    golden(GOLDEN / "ledger-thread-requirement.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-18")
+def test_ledger_thread_from_a_module_reaches_its_origin(split: Path, golden: Golden) -> None:
+    code, output = copy_schema(
+        "-C", str(split / "ledger"), "ledger", "thread", "service:src/service/keys.py"
+    )
+    assert code == 0
+    golden(GOLDEN / "ledger-thread-module.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-18")
+def test_ledger_impact_of_several_items(split: Path, golden: Golden) -> None:
+    ledger = str(split / "ledger")
+    code, output = copy_schema("-C", ledger, "ledger", "impact", "REQ-CLT-01", "DSN-SVC-02")
+    assert code == 0
+    golden(GOLDEN / "ledger-impact-multiple.txt", output)
+    again = copy_schema("-C", ledger, "ledger", "impact", "DSN-SVC-02", "REQ-CLT-01", "DSN-SVC-02")
+    assert again == (code, output)
+
+
+@pytest.mark.verifies("REQ-QMT-18")
+def test_a_tests_id_without_its_repo_is_shown_the_qualified_ones(split: Path) -> None:
+    unqualified = "tests/unit/test_api.py::test_a_call_without_a_key_is_refused"
+    code, output = copy_schema("-C", str(split / "ledger"), "ledger", "thread", unqualified)
+    assert code == 2
+    assert f"client:{unqualified}, service:{unqualified}" in output
+    code, output = copy_schema("-C", str(split / "ledger"), "ledger", "impact", "REQ-SVC-09")
+    assert code == 2 and "No impact list was produced" in output

@@ -206,3 +206,17 @@ read working trees, not pins.
 - Origin: AGR-1, AGR-15
 - Verify-by: test
 - Change: CR-001
+
+### REQ-QMT-18 — One item is traced across the whole project
+
+`qmstrace ledger thread ID` and `qmstrace ledger impact ID…`, run in the ledger repo, walk the
+project's repos as one graph — backward to the origin clauses, forward to the design, the code
+and the tests of every repo — with a module's or a test's ID written with its repo. An ID that
+no repo declares or cites is refused with exit 2, naming the qualified IDs a module's or a
+test's ID given without its repo may mean. The output says it read working trees, not pins.
+
+- Category: functional-suitability
+- Origin: AGR-1, AGR-15
+- Verify-by: test
+- Change: CR-001
+

@@ -64,5 +64,7 @@ At this repo's edge. A sibling's item is shown with its path and *not pinned*, b
 — what it derives from, what hangs off it over there — are not read. For the same reason, a
 sibling item that assumes something here cannot be seen from here.
 
-The ledger reads every product repo of the project at a pin, and walks the whole chain in one
-place. See [Around the repo](around-the-repo.md).
+In the ledger, [`qmstrace ledger thread`](../reference/commands/ledger.md#qmstrace-ledger-thread)
+walks the whole chain in one place, across every repo of the project — from their working
+trees, *not pinned*. Reading each repo at a pin is the ledger's import, later. See
+[Around the repo](around-the-repo.md).

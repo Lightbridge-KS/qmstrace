@@ -22,7 +22,7 @@ from qmstrace.core.assessment import (
 )
 from qmstrace.core.baselines import BaselineState, Suspect
 from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
-from qmstrace.core.graph import Closure, Direction, Home, Node, Step
+from qmstrace.core.graph import Closure, Direction, Home, Node, Step, TraceGraph
 from qmstrace.core.model import Finding, Item
 from qmstrace.core.results import Results, TargetResult, TestResult
 from qmstrace.core.setup import Copied
@@ -259,16 +259,30 @@ _SECTIONS: Final = {
 
 def thread(assessment: Assessment, item_id: str) -> str:
     """One item, what it derives from, and what hangs off it — each item once, nearest first."""
-    graph = assessment.graph
+    return _thread(
+        assessment.config, assessment.graph, item_id, _problems(assessment), "this repo only"
+    )
+
+
+def ledger_thread(project: ProjectAssessment, item_id: str) -> str:
+    """One item across the whole project, from the ledger — the walk crosses every repo's edge."""
+    return _thread(
+        project.config, project.graph, item_id, _project_problems(project), _project_scope(project)
+    )
+
+
+def _thread(
+    config: TraceConfig, graph: TraceGraph, item_id: str, problems: list[str], scope: str
+) -> str:
     start = graph.nodes[item_id]
     walks = [graph.backward([item_id]), graph.forward([item_id])]
     lines = [_heading(start), f"  {_what(start)}"]
-    lines += _problems(assessment)
+    lines += problems
     for walk in walks:
         lines += ["", _SECTIONS[walk.direction]]
-        lines += _tree(assessment, walk, item_id) or [f"  {_nothing(start, walk.direction)}"]
-    counted = " · ".join(f"{w.direction.value}: {_counts(assessment, w)}" for w in reversed(walks))
-    lines += ["", f"{counted} — this repo only"]
+        lines += _tree(config, walk, item_id) or [f"  {_nothing(start, walk.direction)}"]
+    counted = " · ".join(f"{w.direction.value}: {_counts(config, w)}" for w in reversed(walks))
+    lines += ["", f"{counted} — {scope}"]
     return "\n".join(lines)
 
 
@@ -279,34 +293,64 @@ def _heading(node: Node) -> str:
 def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
     """The combined impact of several starts, and a candidate change-request line."""
     graph = assessment.graph
+    notes = [f"  {notice.text}" for notice in assessment.notices]
+    if any(graph.nodes[i].home is Home.SIBLING for i in set(item_ids)):
+        notes.append("  sibling ancestry and downstream links there are not scanned")
+    return _impact(
+        assessment.config,
+        graph,
+        item_ids,
+        "impact — working-tree analysis, this repo only",
+        _problems(assessment) + notes,
+        "this repo only",
+    )
+
+
+def ledger_impact(project: ProjectAssessment, item_ids: Iterable[str]) -> str:
+    """The combined impact of several starts across the whole project, from the ledger."""
+    return _impact(
+        project.config,
+        project.graph,
+        item_ids,
+        f"impact — {_project_scope(project)}",
+        _project_problems(project),
+        _project_scope(project),
+    )
+
+
+def _impact(
+    config: TraceConfig,
+    graph: TraceGraph,
+    item_ids: Iterable[str],
+    title: str,
+    problems: list[str],
+    scope: str,
+) -> str:
     starts = set(item_ids)
     forward = graph.forward(starts)
     backward = graph.backward(starts)
     downstream = set(forward.steps) - starts
-    external_types = {source.item_type for source in assessment.config.externals.values()}
+    external_types = {source.item_type for source in config.externals.values()}
     origins = {
         item_id
         for item_id, step in backward.steps.items()
         if item_id not in starts
         and step.node.type in external_types
-        and not _is_dependency(assessment, step)
+        and not _is_dependency(config, step)
     }
-    lines = ["impact — working-tree analysis, this repo only", "", "starting items:"]
+    lines = [title, "", "starting items:"]
     lines += [f"  {_heading(graph.nodes[i])} · {_what(graph.nodes[i])}" for i in sorted(starts)]
-    lines += _problems(assessment)
-    lines += [f"  {notice.text}" for notice in assessment.notices]
-    if any(graph.nodes[i].home is Home.SIBLING for i in starts):
-        lines.append("  sibling ancestry and downstream links there are not scanned")
+    lines += problems
 
     lines += ["", "downstream — grouped by item type:"]
-    order = list(assessment.config.item_types)
+    order = list(config.item_types)
     groups = {graph.nodes[i].type or "unverified item" for i in downstream}
     for kind in sorted(groups, key=lambda t: (order.index(t) if t in order else len(order), t)):
         members = sorted(
             i for i in downstream if (graph.nodes[i].type or "unverified item") == kind
         )
         lines.append(f"  {kind.replace('_', ' ')} ({len(members)}):")
-        lines += [f"    {_line(assessment, forward, forward.steps[i])}" for i in members]
+        lines += [f"    {_line(config, forward, forward.steps[i])}" for i in members]
     if not downstream:
         lines.append("  nothing here hangs off the starting items")
 
@@ -315,9 +359,7 @@ def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
     if not origins:
         lines.append("  no upstream origins reached here")
 
-    covered = {
-        kind for baseline in assessment.config.baselines.values() for kind in baseline.covers
-    }
+    covered = {kind for baseline in config.baselines.values() for kind in baseline.covers}
     candidates = sorted(i for i in starts | downstream if graph.nodes[i].type in covered)
     unknown = sorted(i for i in starts | downstream if graph.nodes[i].type is None)
     lines += [
@@ -334,10 +376,27 @@ def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
         lines.append("  no candidate line — no items with a known type covered by a baseline")
     lines += [
         "",
-        f"starts: {len(starts)} · downstream: {_counts(assessment, forward)} · "
-        f"upstream origins: {len(origins)} — this repo only",
+        f"starts: {len(starts)} · downstream: {_counts(config, forward)} · "
+        f"upstream origins: {len(origins)} — {scope}",
     ]
     return "\n".join(lines)
+
+
+def _project_scope(project: ProjectAssessment) -> str:
+    count = len(project.repos)
+    return f"the project's {count} {_noun(count, 'repo', 'repos')}, working trees, not pinned"
+
+
+def _project_problems(project: ProjectAssessment) -> list[str]:
+    """What the ledger's walk could not read, and what it refused — only when there is any."""
+    lines = [_external(s) for s in project.externals if s.declared is None]
+    if project.violations:
+        count = len(project.violations)
+        lines.append(
+            f"{count} {_noun(count, 'violation', 'violations')} — the links they refuse are not "
+            "shown; `qmstrace ledger check` lists them"
+        )
+    return [f"  {line}" for line in lines]
 
 
 def _what(node: Node) -> str:
@@ -351,10 +410,23 @@ def _what(node: Node) -> str:
         kind += f", in the {node.repo}"
     elif node.home is Home.UNVERIFIED:
         return "not verified here — judged at the ledger's import"
+    elif node.repo is not None:  # a judged item of the project's graph: its repo
+        kind += f", in {node.repo}"
     if node.item is not None and node.item.level:
         kind += f", {node.item.level}"
-    shown_elsewhere = node.where is None or node.where.startswith(node.id.split("::")[0])
-    return kind if shown_elsewhere else f"{kind} · {node.where}"
+    return kind if _where_shown_by_id(node) else f"{kind} · {node.where}"
+
+
+def _where_shown_by_id(node: Node) -> bool:
+    """Whether the ID already says where the item is — a module's path, a test's node ID,
+    qualified by its repo or not — so the location need not be printed again."""
+    if node.where is None:
+        return True
+    path = node.id.split("::")[0]
+    if node.repo is not None and path.startswith(f"{node.repo}:"):
+        path = path[len(node.repo) + 1 :]
+    file = node.where.rsplit(":", 1)[0]
+    return file == path or file.endswith(f"/{path}")
 
 
 def _unread(assessment: Assessment) -> list[str]:
@@ -378,7 +450,7 @@ def _problems(assessment: Assessment) -> list[str]:
     return [f"  {line}" for line in lines]
 
 
-def _tree(assessment: Assessment, walk: Closure, start: str) -> list[str]:
+def _tree(config: TraceConfig, walk: Closure, start: str) -> list[str]:
     width = max((len(s.via.marker) for s in walk.steps.values()), default=0) + 2
     lines: list[str] = []
     shown = {start}
@@ -390,19 +462,19 @@ def _tree(assessment: Assessment, walk: Closure, start: str) -> list[str]:
                 lines.append(f"{'  ' * depth}{step.via.marker:<{width}}{item} — the item itself")
                 continue
             shown.add(item)
-            text = f"{'  ' * depth}{step.via.marker:<{width}}{_line(assessment, walk, step)}"
+            text = f"{'  ' * depth}{step.via.marker:<{width}}{_line(config, walk, step)}"
             lines.append(text)
-            if not _ends_here(assessment, walk, step):
+            if not _ends_here(config, walk, step):
                 descend(item, depth + 1)
 
     descend(start, 1)
     return lines
 
 
-def _line(assessment: Assessment, walk: Closure, step: Step) -> str:
+def _line(config: TraceConfig, walk: Closure, step: Step) -> str:
     node = step.node
     text = f"{_heading(node)} · {_what(node)}"
-    if _is_dependency(assessment, step):
+    if _is_dependency(config, step):
         text += (
             " · assumes it — counts toward no coverage"
             if walk.direction is Direction.FORWARD
@@ -420,14 +492,14 @@ def _line(assessment: Assessment, walk: Closure, step: Step) -> str:
     return text
 
 
-def _is_dependency(assessment: Assessment, step: Step) -> bool:
-    link_type = assessment.config.links.get(step.via.marker)
+def _is_dependency(config: TraceConfig, step: Step) -> bool:
+    link_type = config.links.get(step.via.marker)
     return link_type is not None and not link_type.counts_for_coverage
 
 
-def _ends_here(assessment: Assessment, walk: Closure, step: Step) -> bool:
+def _ends_here(config: TraceConfig, walk: Closure, step: Step) -> bool:
     """A backward walk shows an assumed item and stops there."""
-    return walk.direction is Direction.BACKWARD and _is_dependency(assessment, step)
+    return walk.direction is Direction.BACKWARD and _is_dependency(config, step)
 
 
 def _nothing(start: Node, direction: Direction) -> str:
@@ -442,7 +514,7 @@ def _nothing(start: Node, direction: Direction) -> str:
     return "it derives from nothing here"
 
 
-def _counts(assessment: Assessment, walk: Closure) -> str:
+def _counts(config: TraceConfig, walk: Closure) -> str:
     counted = Counter(
         (step.node.type or "unverified item").replace("_", " ")
         for item_id, step in walk.steps.items()
@@ -450,7 +522,7 @@ def _counts(assessment: Assessment, walk: Closure) -> str:
     )
     if not counted:
         return "nothing"
-    order = [t.replace("_", " ") for t in assessment.config.item_types]
+    order = [t.replace("_", " ") for t in config.item_types]
     ranked = sorted(counted, key=lambda t: (order.index(t) if t in order else len(order), t))
     return ", ".join(f"{counted[t]} {t if counted[t] == 1 else t + 's'}" for t in ranked)
 

@@ -42,7 +42,8 @@
 5. **Work through the findings.** A violation's location names the repo it is in
    (`../client/…`); fix it there. A gap's next move names the repos where the missing link can
    be written. A suspect in another repo than the changed item is reached by today's links only
-   — review it as any suspect: [review downstream suspects](review-suspects.md).
+   — review it as any suspect: [review downstream suspects](review-suspects.md). To see what
+   hangs off an item across every repo, `qmstrace ledger thread ID`.
 
 6. **Gate the ledger** on the strict form, in its pipeline:
 

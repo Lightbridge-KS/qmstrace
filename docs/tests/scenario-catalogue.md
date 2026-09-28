@@ -383,4 +383,10 @@ Each line is at least one test.
 | The older layout: a product repo's baseline, its requirement reworded | V10 there; the other repo's test that verifies it is suspect, current reach only |
 | `--quiet` | findings and the result line; what could not be verified still shows |
 | `-C` before or after the verb; two runs | the same bytes; no absolute path |
+| `ledger thread` from a requirement in the ledger | forward reaches the design, the code and the tests of every repo; each judged item says its repo; the last line says *the project's N repos, working trees, not pinned* |
+| `ledger thread` from a qualified module or test | backward reaches the design, the requirement and the origin clause across the repo edge |
+| A module's or a test's ID given without its repo | exit 2, listing the qualified IDs it may mean |
+| `ledger impact` of several starts | downstream grouped by type across repos; origins; a candidate `Impacts:` of baseline-covered types only; the same bytes whatever the order or repetition of the starts |
+| One unseen start among several | the whole impact request is refused, exit 2 |
+| `thread` and `impact` in one repo, after the renderers took a configuration and a graph | byte for byte the same as before |
 

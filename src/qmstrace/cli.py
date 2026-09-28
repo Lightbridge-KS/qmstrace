@@ -330,3 +330,54 @@ def ledger_check(
     project = Workspace.project(_directory(ctx, directory))
     typer.echo(text.ledger_check(project, strict=strict, quiet=quiet))
     return EXIT_FAILED if project.fails(strict=strict) else EXIT_OK
+
+
+@ledger.command(
+    "thread",
+    short_help="Trace one item across every repo: what it derives from, what hangs off it.",
+)
+@outcome
+def ledger_thread(
+    ctx: typer.Context,
+    item_id: Annotated[
+        str,
+        typer.Argument(
+            metavar="ID",
+            help="A requirement, design element or clause ID — or a module's or test's ID with "
+            "its repo, as service:tests/unit/test_api.py::test_x.",
+        ),
+    ],
+    directory: Directory = None,
+) -> int:
+    """Walk one item backward to what it derives from, and forward to what hangs off it, across
+    every repo the schema lists — from the ledger.
+
+    Each item is shown once, nearest first, under the link that reaches it first. Each repo is
+    read from its working tree, not at a pin, and the output says so.
+    """
+    project = Workspace.project_thread(_directory(ctx, directory), item_id)
+    typer.echo(text.ledger_thread(project, item_id))
+    return EXIT_OK
+
+
+@ledger.command(
+    "impact", short_help="What changing several items affects across every repo of the project."
+)
+@outcome
+def ledger_impact(
+    ctx: typer.Context,
+    item_ids: Annotated[
+        list[str],
+        typer.Argument(metavar="ID…", help="One or more item IDs of the project."),
+    ],
+    directory: Directory = None,
+) -> int:
+    """Show the combined downstream items and upstream origins of several starting items,
+    across every repo the schema lists — from the ledger.
+
+    The Impacts line is a candidate for review, filtered by configured baseline types. Any
+    unseen starting ID rejects the whole request.
+    """
+    project = Workspace.project_impact(_directory(ctx, directory), item_ids)
+    typer.echo(text.ledger_impact(project, item_ids))
+    return EXIT_OK
