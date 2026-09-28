@@ -66,10 +66,18 @@ project. This is the first half of the ledger's import at pins (D2). Planned 202
   - the docs the ADR lists;
   - the manual: the `ledger check` reference, `how-to/check-the-project.md`, and *Around the
     repo* rewritten.
-- [x] **M10b**, a pull request: `ledger thread` and `ledger impact` across repos, and
-  REQ-QMT-18.
+- [x] **M10b**, [#29](https://github.com/Lightbridge-KS/qmstrace/pull/29) · `b6ad49d`:
+  `ledger thread` and `ledger impact` across repos, and REQ-QMT-18.
 - [x] Acceptance on beacon-split, M10a: A1–A9 and A11–A13 pass, run 2026-09-28 — [results](../tests/beacon-split.md#results)
 - [x] Acceptance A10 on the M10b engine — [results](../tests/beacon-split.md#results)
+- [x] **Decided 2026-09-29** (ask record *Two loose ends from M10*):
+  - a gap's next move keeps naming the repos that declare the type, in the older layout too;
+  - `init` in a ledger is fixed now, as M10c, before M11.
+- [ ] CR-002 drafted as `evaluated` in `qmstrace-ledger`; accepted by the developer
+- [x] **M10c**, a pull request ([#30](https://github.com/Lightbridge-KS/qmstrace/issues/30)):
+  - `init` in a ledger: its own `qmstrace.toml` when it has none, and a stanza naming the
+    ledger's verbs;
+  - REQ-QMT-19; DSN-QMT-11 amended.
 
 ## After — M11 · mentions
 
@@ -159,7 +167,6 @@ the stand-in's defects returns ([scenario catalogue](../tests/scenario-catalogue
 - **After M10:**
   - pins: `ledger import NAME@PIN`, the trace lock, and the edit state of cross-repo
     dependants;
-  - `init` in a ledger directory, with a stanza that names `ledger check --strict` as the gate;
   - `ledger status`, `ledger results` and `ledger graph`;
   - a product repo's CI checking out the ledger beside it;
   - moving documents that are already baselined from one repo to another;

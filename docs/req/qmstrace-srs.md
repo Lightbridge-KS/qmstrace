@@ -220,3 +220,17 @@ test's ID given without its repo may mean. The output says it read working trees
 - Verify-by: test
 - Change: CR-001
 
+### REQ-QMT-19 — A ledger that holds the documents is set up by the same command
+
+`qmstrace init`, run in a ledger repo, writes the ledger's own trace configuration when it has
+none — declaring requirements and design elements, with the schema beside it read by path —
+and, in every ledger, an agent guide's stanza that names `qmstrace ledger check --strict` as
+the gate and `ledger thread` and `ledger impact` as the walks. It never edits the trace
+schema; while `[repos]` does not list the ledger, it says which line to add. A product repo's
+stanza is unchanged.
+
+- Category: usability
+- Origin: AGR-5
+- Verify-by: test
+- Change: CR-002
+

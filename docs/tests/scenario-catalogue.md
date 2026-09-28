@@ -390,3 +390,14 @@ Each line is at least one test.
 | One unseen start among several | the whole impact request is refused, exit 2 |
 | `thread` and `impact` in one repo, after the renderers took a configuration and a graph | byte for byte the same as before |
 
+## M10c — `init` in a ledger
+
+| Scenario | Expected |
+|---|---|
+| `init` in a ledger with no `qmstrace.toml` | writes the ledger's own — requirements and design elements, `ledger = "."`, the schema by path — the ledger stanza and the skill; no pytest settings |
+| The same, run again | every file `unchanged` |
+| That ledger's `[repos]` does not list it | a `next:` line names `ledger = "."`; the schema is not edited |
+| `init` from a folder inside the ledger | the ledger is the root; nothing is written in the folder |
+| `init` in a traced ledger that lists itself | the stanza names `ledger check --strict`, `ledger thread`, `ledger impact`; no `next:` line |
+| `init` in a product repo of that project | the stanza names the product repo's own verbs, byte for byte as before |
+

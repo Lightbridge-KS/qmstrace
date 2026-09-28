@@ -11,7 +11,7 @@ import json
 import re
 import tomllib
 from dataclasses import dataclass
-from typing import Literal
+from typing import Final, Literal
 
 from qmstrace.core.config import (
     COPY_BEGIN,
@@ -34,8 +34,33 @@ CLAUDE_LINK_TARGET = "../../.agents/skills/qmstrace"  # relative to the link's f
 LEGACY_SKILL = ".qmstrace/skill/SKILL.md"  # the skill's home before M9c
 
 
-def stanza(template: str, config: TraceConfig) -> str:
+# The three stanza lines that name commands depend on where the agent works: a product repo is
+# judged by its own verbs; a ledger that holds the documents by the ledger's, because its own
+# `check --strict` fails on what only the product repos can meet (M10c, ADR-0001).
+_PRODUCT_LINES: Final = {
+    "walks": "- Use `qmstrace thread ID` and `qmstrace impact ID…` before changing connected "
+    "items.",
+    "gate": "- Run `qmstrace check` while authoring; `qmstrace check --strict` is the coverage "
+    "gate.",
+    "suspects": "- Suspects need review even after edits or passing tests; `qmstrace check` lists "
+    "every reason.",
+}
+_LEDGER_LINES: Final = {
+    "walks": "- Use `qmstrace ledger thread ID` and `qmstrace ledger impact ID…` before "
+    "changing connected items — they walk every repo of the project.",
+    "gate": "- Run `qmstrace ledger check` while authoring; `qmstrace ledger check --strict` is "
+    "the coverage gate. This repo's own `qmstrace check --strict` fails on what only the product "
+    "repos can meet.",
+    "suspects": "- Suspects need review even after edits or passing tests; `qmstrace ledger check` "
+    "lists every reason, in every repo.",
+}
+
+
+def stanza(template: str, config: TraceConfig, *, ledger: bool = False) -> str:
+    """The agent guide's generated block — a ledger that holds the documents names the ledger's
+    verbs, a product repo its own."""
     return template.format(
+        **(_LEDGER_LINES if ledger else _PRODUCT_LINES),
         skill=SKILL_FILE,
         project=config.project,
         subjects=", ".join(f"{s.name} ({s.key})" for s in config.subjects.values())

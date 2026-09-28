@@ -1,0 +1,21 @@
+# This ledger's own trace configuration: it holds the project's documents — the requirements
+# and the design — so it is traced like any repo of the project (ADR-0001), and it reads the
+# schema beside it by path, never as a copy. Review the ID patterns and paths before authoring.
+version = 1
+ledger  = "."                       # the agreement and the change requests are here
+
+[schema]
+path = "qmstrace.schema.toml"
+
+[subjects.__SUBJECT__]              # a named body of requirements; a baseline freezes a subject
+key = "__KEY__"                     # the key inside its item IDs
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-__KEY__-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]
+extractor  = "markdown"
+id_pattern = '^DSN-__KEY__-\d{2}$'
+files      = ["docs/design/*.md"]

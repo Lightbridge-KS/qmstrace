@@ -131,6 +131,9 @@ The 208 links are E4's trace-lock count.
 
 - `init` in the traced ledger works: it installs the stanza and the skill, and no pytest
   settings. But its stanza names `qmstrace check --strict` as the gate, where the ledger's
-  gate is `ledger check --strict`. This is the deferred *`init` in a ledger directory* item.
+  gate is `ledger check --strict` — filed as #30 and fixed in M10c. **Re-run with the M10c
+  engine (2026-09-29):** `init` in the ledger changed exactly the three command lines of its
+  stanza — the gate, the walks and the suspects now name the ledger's verbs (ledger `9d0663b`, committed
+  after the reshape); `init` in the gateway changed nothing.
 - The ledger's `id_pattern` needs alternatives (`^REQ-(BCN|BAG)-\d{2}$`) to hold two subjects.
   Its derived prefix `REQ-` covers both families, so #25 does not bite here.
