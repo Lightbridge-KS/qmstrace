@@ -74,8 +74,9 @@ runs of that case. Put tests in the configured level folders. IDs are never reus
    A configuration option changes the requirement even if its default leaves behavior alone.
 4. Run `check`; correct violations and explain gaps. Read each next move instead of hiding
    or deleting a marker to silence the finding.
-5. Break the relevant behavior in a disposable copy, run its tagged tests, and confirm failure.
-   Restore the source and rerun. A marker's existence cannot prove the test detects the defect.
+5. Break the relevant behavior in a disposable copy of the repo — never the checkout you work
+   in — run its tagged tests there, and confirm they fail; then delete the copy. A marker's
+   existence cannot prove the test detects the defect.
 6. Generate a pytest JUnit report and run `qmstrace results REPORT`. Inspect unmatched entries
    and missing results. The report's commit and freshness are not verified by this command.
 7. Run `check --strict`. Review every suspect against each upstream root and governing tag;

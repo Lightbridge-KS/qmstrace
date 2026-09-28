@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); next M10, the project-wide check, then M11 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); next the first real project, then M11 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,9 +8,10 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-28 · Slice 1, the product-repo half: landed.** Now: [real-world
-use](#now--real-world-use). Next: [M10 · the project-wide check](#next--m10--the-project-wide-check),
-then M11 · mentions. Commit hashes locate work. Verification claims refer to checks that were actually run.
+**Updated 2026-09-29 · Slice 1, the product-repo half: landed. M10, the project-wide check:
+landed.** Now: [real-world use](#now--real-world-use) — the first real project, in the layout of
+ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+that were actually run.
 
 ## Now — real-world use
 
@@ -27,7 +28,7 @@ The first real project is not yet chosen.
 The engine already supports this layout for authoring and for each repo's own check. The
 checks that need the whole project fail, and the ADR has the evidence.
 
-## Next — M10 · the project-wide check
+## Landed — M10 · the project-wide check
 
 Verbs run in the ledger repo: `qmstrace ledger check|thread|impact`. They read the working
 tree of every repo listed in `[repos]`, the ledger itself included, and judge them as one
@@ -73,8 +74,8 @@ project. This is the first half of the ledger's import at pins (D2). Planned 202
 - [x] **Decided 2026-09-29** (ask record *Two loose ends from M10*):
   - a gap's next move keeps naming the repos that declare the type, in the older layout too;
   - `init` in a ledger is fixed now, as M10c, before M11.
-- [ ] CR-002 drafted as `evaluated` in `qmstrace-ledger`; accepted by the developer
-- [x] **M10c**, a pull request ([#30](https://github.com/Lightbridge-KS/qmstrace/issues/30)):
+- [x] CR-002 drafted, then accepted by the developer — `qmstrace-ledger` `4af8f28`
+- [x] **M10c**, [#31](https://github.com/Lightbridge-KS/qmstrace/pull/31) · `d9b86d0`, closing [#30](https://github.com/Lightbridge-KS/qmstrace/issues/30):
   - `init` in a ledger: its own `qmstrace.toml` when it has none, and a stanza naming the
     ledger's verbs;
   - REQ-QMT-19; DSN-QMT-11 amended.
@@ -109,6 +110,7 @@ real-world use.
 | M9c | Skill at `.agents/skills/qmstrace/`; create-only `.claude/skills/` link | #23 · `02caed1` |
 | Gate green | E6 run A: 16 requirements ([SRS](../req/qmstrace-srs.md)), 13 design elements ([blueprint § 11](../structure/codebase-blueprint.md#11-design-elements--what-the-code-is-traced-to)), 26 modules, 83 tests | #24 · `9dbe29f` |
 | Baseline | `baseline/requirements/1` on `9dbe29f`: 16 frozen; `check --strict` exits 0 | tag |
+| M10 | The project-wide check: `ledger check`, `thread`, `impact` across repos; `copy-schema` skips the ledger; `init` in a ledger. REQ-QMT-17…19 under CR-001 and CR-002 | #27, #28, #29, #31 · `d9b86d0` |
 
 **Decided at the baseline:** CI does not run `check --strict` yet. Tags keep the form
 `baseline/requirements/<n>` until qmstrace cuts releases.
@@ -135,14 +137,9 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
     every run.
   - [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71).
 - **Not filed, from run A:**
-  - The stanza says to break behaviour in a "disposable test", but the skill says "disposable
-    copy". Agents followed the stanza and broke the live checkout. Aligning them rewrites every
-    traced `AGENTS.md`.
   - `check` repeats G06's fix once per module.
   - `results` prints about 42 KB and names no report location.
 - **Not filed, engine:**
-  - `ledger copy-schema` rewrites the ledger's own `qmstrace.toml` into a copy of its own schema
-    when `[repos]` lists `"."`. In M10's scope.
   - Recognise the same repo by its Git common dir.
   - Stale comments in the beacon test bed's configurations.
 - **Ledger side:**

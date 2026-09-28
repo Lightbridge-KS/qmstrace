@@ -6,7 +6,7 @@ This repo is traced for project **{project}**; subjects: {subjects}.
 {walks}
 {gate}
 - Frozen changes and controlled additions need a fresh accepted change request; inspect the governing baseline and request evidence before editing.
-- A marker states a fact. Break the behavior in a disposable test and confirm the tagged test fails; restore the source afterwards.
+- A marker states a fact. Break the behavior in a disposable copy of the repo — never the checkout you work in — and confirm its tagged test fails there; then delete the copy.
 {suspects}
 - Collect facts with tools; never invent dates, verdicts, test results or approvals. Keep unavailable-source notices visible.
 <!-- qmstrace:end -->

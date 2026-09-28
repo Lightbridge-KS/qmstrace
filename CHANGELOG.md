@@ -118,6 +118,10 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- The stanza and the skill say the same thing about checking a marker: break the behavior in a
+  disposable copy of the repo — never the checkout you work in — confirm its tagged test fails
+  there, then delete the copy. The stanza used to say "a disposable test", and an agent read it
+  as breaking the live checkout. `init` rewrites the stanza in every traced repo on its next run.
 - A gap that only another repo of the project can meet now points at `qmstrace ledger check`,
   run in the ledger, instead of the import; so does the footer of `qmstrace rules`.
 
