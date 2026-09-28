@@ -326,7 +326,7 @@ A repository holding project ledgers together with the sources of their controll
 _Avoid_: QMS repo, docs repo
 
 **Engine**:
-qmstrace itself — the tool. It holds no project data.
+qmstrace itself — the tool. It holds no other project's data: the one trace in its repo is its own.
 _Avoid_: platform, system
 
 **User Manual**:

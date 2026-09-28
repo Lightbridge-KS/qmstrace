@@ -103,13 +103,15 @@ tests/
   fixtures/mini/         the hand-made miniature project, plain files
   conftest.py            project (the fixture project as real Git repos) · alone (one repo as a
                          pipeline checks it out) · make_repo · git_env (a scrubbed environment)
-  test_architecture.py   the import matrix, enforced
-  test_catalogue.py      every command has a golden; every code has a fixture that emits it
-  test_manual.py         the user manual: a page per command, a TL;DR per page, every page in
+  meta/                  tests of the tool's own rules — a test's level is its folder here
+    test_architecture.py the import matrix, enforced
+    test_assets.py       package data is readable from the installed package
+    test_catalogue.py    every command has a golden; every code has a fixture that emits it
+    test_manual.py       the user manual: a page per command, a TL;DR per page, every page in
                          nav, includes only from tests/; the findings-table golden
+    test_skill_parity.py every marker example in the skill parses; every code has catalogue text
   cli/golden/            command output and help — the goldens the manual includes
   manual/findings.md     the findings table, rendered from core/findings.py
-  test_skill_parity.py   every marker example in the skill parses; every code has catalogue text
 ```
 
 Beside the package: `contents/` — the user manual, built by Zensical from `zensical.toml` and
@@ -163,7 +165,7 @@ the header says about that sibling.
 
 ## 6. The import matrix
 
-Rows may import columns. Enforced by `tests/test_architecture.py`, which walks each module's
+Rows may import columns. Enforced by `tests/meta/test_architecture.py`, which walks each module's
 `ast` — the pattern the developer's own tools already use — so it needs no new dependency.
 
 |  | core | extract | infra | render | workspace | cli | typer | stdlib |
@@ -272,13 +274,13 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | ★ A sibling's item is a node but never this repo's own item | `tests/unit/test_graph.py`; the `status` goldens |
 | ★ Every marker form a gap suggests round-trips through the extractor that reads it | `tests/unit/test_forms.py` |
 | ★ Gaps are judged on this repo's items; `Assumes` counts toward none; a gap whose link was refused names the violation | `tests/unit/test_judge.py` |
-| ★ Every finding, violation or gap, ends with a next move | `tests/test_catalogue.py` |
+| ★ Every finding, violation or gap, ends with a next move | `tests/meta/test_catalogue.py` |
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspect_assessment.py` |
 | ★ An item is its section: an edit under a sub-heading of a frozen item is a change | `tests/integration/test_baselines.py` |
 | ★ A schema copy reads as the schema by path, keeps every other byte, and a second copy changes nothing | `tests/unit/test_schema_copy.py` |
 | ★ The schema is copied into every named repo or none | `tests/integration/test_copy_into_repos.py`, `tests/integration/test_files.py` |
-| ★ A group's every verb has an output golden, a help golden and its help on the group's page | `tests/test_catalogue.py`, `tests/cli/test_help.py`, `tests/test_manual.py` |
+| ★ A group's every verb has an output golden, a help golden and its help on the group's page | `tests/meta/test_catalogue.py`, `tests/cli/test_help.py`, `tests/meta/test_manual.py` |
 | ★ A marker in a form the extractor does not read is reported — a stray named by its gap, or V16 — never silently dropped | `tests/unit/test_forms.py`, `tests/unit/test_graph.py` |
 | ★ An item with no sub-heading and no decorated heading keeps its title and digest across changes to the reading rules | `tests/unit/test_extract_markdown.py` § 7 |
 | ★ A near-miss (V16) never stops a baseline tag's tree being read; every other violation does | `tests/integration/test_baselines.py` |

@@ -79,7 +79,7 @@ Three kinds of repository, and what moves between them:
 
 ```mermaid
 flowchart TD
-    subgraph E["qmstrace — engine repo: the tool, no project data"]
+    subgraph E["qmstrace — engine repo: the tool, no other project's data"]
         pkg["package + skill + stanza template"]
     end
     subgraph P["Product repos — many per project"]
@@ -106,6 +106,15 @@ flowchart TD
 | **Engine repo** | The tool and what ships with it. Fixtures are a hand-made miniature — never a real project |
 | **Product repo** | Requirements, design elements, modules and tests, each declared where it is written, links at the downstream end (D1). Its check is local and fast; what it reads from a sibling is *not pinned* and says so |
 | **Ledger repo** | What belongs to the project and to no product repo: the agreement, change requests, the trace schema, the union of all repos at pins, the documents generated from it |
+
+**The engine repo is also a product repo of its own project** (decided 2026-09-27). qmstrace
+is traced by the project `QMT`, whose ledger repo sits beside it, so its markers and its copy
+of the schema live here. The constraint therefore reads *no other project's data*: fixtures
+stay a hand-made miniature, and nothing from a real project, whether names, patient data or
+site network facts, enters the repo.
+
+- **Rejected — trace a copy of the engine elsewhere.** A copy drifts from the code that
+  ships, and the trace would judge the copy, not the repo people change.
 
 ## 4. Components
 

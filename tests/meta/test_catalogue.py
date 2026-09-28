@@ -24,7 +24,7 @@ from qmstrace.core.model import Finding, Item
 from qmstrace.extract.base import REGISTRY
 from qmstrace.infra.globbing import matches
 
-GOLDEN = Path(__file__).parent / "cli" / "golden"
+GOLDEN = Path(__file__).parents[1] / "cli" / "golden"
 
 
 def test_every_command_has_a_golden(commands: list[str]) -> None:

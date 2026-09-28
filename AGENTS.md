@@ -31,7 +31,7 @@ product repos  (code, tests, repo memory + markers)     developer hat — daily,
 ledger repo    (the project's ledger, controlled-document sources, agreement, records)
       ▲                                                  manager hat — occasional
       │  installed into                                  ↔ the standard's project-management process
-qmstrace      (this repo: the tool — it holds no project data)
+qmstrace      (this repo: the tool — it holds no other project's data)
 ```
 
 ## Rules for working here
@@ -46,8 +46,9 @@ qmstrace      (this repo: the tool — it holds no project data)
 - **Update the tracker in the same change** as the work it describes.
 - **Verify, don't assert.** A claim in a results section was checked by whoever wrote it — not
   copied from an agent's report. Say what was verified and what was not.
-- **No project data in this repo**: no real names, signatures, patient data or site network
-  facts. `_examples/` and `_playground/` are local and gitignored — never commit from them.
+- **No other project's data in this repo**: no real names, signatures, patient data or site
+  network facts. The one trace it carries is its own. `_examples/` and `_playground/` are
+  local and gitignored — never commit from them.
 - **Attention markers.** 💡 marks the few spots that need the developer's judgement;
   `rg 💡` is the review checklist. Budget them.
 - **A milestone ships its manual pages.** The user manual (`contents/`, published) grows with
@@ -86,3 +87,16 @@ pull request per milestone, with the dry gate green — format, lint, types, tes
 pull request is what this product calls a verification record. **Docs-only changes to
 `docs/` may still go straight to `main`** — never `contents/`: the manual is published, so it
 goes through a pull request. Commit only when asked. The remote is a private repository.
+
+<!-- qmstrace:begin — generated; edit qmstrace.toml, not this block -->
+This repo is traced for project **QMT**; subjects: qmstrace (QMT).
+- Read `.qmstrace/skill/SKILL.md` before changing requirements, design or tests.
+- Local items: requirement `^REQ-QMT-\d{2}$` in `docs/req/*-srs.md`; design_element `^DSN-QMT-\d{2}$` in `docs/design/*.md`, `docs/structure/*.md`; component `python-module` in `src/**/*.py`; test_case `pytest` in `tests/**/test_*.py`. IDs are never renumbered or reused.
+- Start with `qmstrace status`; `qmstrace rules` prints the actual schema and coverage rules.
+- Use `qmstrace thread ID` and `qmstrace impact ID…` before changing connected items.
+- Run `qmstrace check` while authoring; `qmstrace check --strict` is the coverage gate.
+- Frozen changes and controlled additions need a fresh accepted change request; inspect the governing baseline and request evidence before editing.
+- A marker states a fact. Break the behavior in a disposable test and confirm the tagged test fails; restore the source afterwards.
+- Suspects need review even after edits or passing tests; `qmstrace check` lists every reason.
+- Collect facts with tools; never invent dates, verdicts, test results or approvals. Keep unavailable-source notices visible.
+<!-- qmstrace:end -->
