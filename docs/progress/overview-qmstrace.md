@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M9 landed, M9 being rich Markdown; next, dogfooding qmstrace as a traced product repo with a ledger repo beside it; then M10 mentions; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M9b landed, M9b being the schema copy; now qmstrace is traced by its own ledger and its gate is not green yet; then M10 mentions; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-27 · Slice 1: the product-repo half.** M0–M9 have landed.
+**Updated 2026-09-28 · Slice 1: the product-repo half.** M0–M9b have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
 including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
@@ -30,19 +30,47 @@ at `e7d38b6`: an item is its section, decorated ID headings declare, markers wri
 are not read are reported (strays, V16), and a fence closes on its own mark. See
 [M9](#m9--rich-markdown--landed) and *Latest verified evidence*.
 
-**Now: [M9b · the schema copy](#now--m9b--the-schema-copy)**, then [dogfooding](#next--dogfooding).
+**M9b · the schema copy** merged in [PR #18](https://github.com/Lightbridge-KS/qmstrace/pull/18)
+at `f4e770b`: `qmstrace ledger copy-schema` writes the project's schema into each product repo
+as a verified copy, so a baseline tag can be judged without the ledger beside it.
+
+**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)**, then
+[M10 · mentions](#later--m10--mentions).
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
 [earlier overview](../archive/progress/overview-qmstrace.md) preserves exploration history.
 Commit hashes locate work; verification claims below refer to checks actually run.
 
-## Now — M9b · the schema copy
+## Now — qmstrace, traced by its own ledger
 
-Planned 2026-09-27 on `feat/m9b-schema-copy`, before dogfooding. A product repo reading the
+qmstrace is a product repo of its own project, `QMT`. The ledger repo `qmstrace-ledger` sits
+beside it, private on GitHub, and holds the trace schema, the agreement and the change-request
+register. This repo carries the verified copy of the schema, the stanza and the skill. The
+engine repo's constraint now reads *no other project's data*; the decision and the option that
+lost are in the [system architecture](../design/system-architecture.md).
+
+- [x] The ledger repo: the schema (G01–G06; test levels `unit`, `integration`, `cli`, `meta`;
+  requirement baselines), agreement clauses AGR-1…15 and the change-request register — ledger
+  `a3faeab`.
+- [x] Meta-tests moved to `tests/meta/` `9f8b399`; the constraint amended `d259ac6`; the trace
+  configuration, schema copy and `init` `910208f`; the installed skill and stanza held to the
+  package by meta-tests `dd29899`.
+- [ ] The gate is not green yet: `qmstrace check` reports 26 gaps — no module implements a
+  design element, and no requirement or design element is declared.
+
+## Later — M10 · mentions
+
+Every token with a configured prefix in a scanned file — prose, table or Mermaid — must exist;
+a dangling one is a violation, like V03. Configured prefixes only: `SHA-256`, `UTF-8` and
+`ADR-0001` all fit the bare ID shape.
+
+## M9b · the schema copy — landed
+
+Planned 2026-09-27 on `feat/m9b-schema-copy`. A product repo reading the
 project's schema by path cannot be judged at a baseline tag — the tagged tree holds no ledger
 — and D9's generated, verified copy had no generator; the manual carried two *not built yet*
-notes about it. The developer chose to build the command before the experiment.
+notes about it. The developer chose to build the command before tracing qmstrace itself.
 
 - **Decided:** `qmstrace ledger copy-schema [REPO…]`, the `ledger` group's first verb, run in
   the ledger; the copy between `# qmstrace:begin` / `# qmstrace:end`, comments kept; first
@@ -68,25 +96,10 @@ Python tests at 99.07% coverage, four Node tests, strict types, wheel assets and
 manual build. With a wheel from the branch, in disposable clones of the beacon test bed:
 `ledger copy-schema` reported both products *layout only — rules unchanged*; each diff is
 exactly the two marker lines; `status` and `check --strict` are byte-identical before and
-after, and `m5b/requirements/2` is still read; a second run changes nothing. Merge, CI and
-the deploy preview remain.
+after, and `m5b/requirements/2` is still read; a second run changes nothing.
 
-## Next — dogfooding
-
-**Validation after M9 — dogfooding.** qmstrace itself becomes a traced product repo, with a
-sibling ledger repo beside it holding the schema, agreement and change requests. One
-fresh-agent run covers PRD success criteria 5/6 and lens-style authoring, with measures fixed
-in `docs/tests/` before the run; it replaces the separate criteria-5/6 run listed below.
-💡 Dogfooding puts markers into the engine repo, which the PRD constraints and the system
-architecture keep free of project data. Amend that to mean *no other project's data* before
-the first marker lands — or trace a copy elsewhere.
-
-The ledger repo sits beside this one and is published to GitHub; its name, visibility, keys
-and what is traced first are being decided before any marker lands.
-
-**Later — M10 · mentions.** Every token with a configured prefix in a scanned file — prose,
-table or Mermaid — must exist; a dangling one is a violation, like V03. Configured prefixes
-only: `SHA-256`, `UTF-8` and `ADR-0001` all fit the bare ID shape.
+- [x] Merged in #18 at `f4e770b` on 2026-09-28: the GitHub dry gate passed and the Netlify
+  deploy preview built.
 
 ## M9 · rich Markdown — landed
 
@@ -191,6 +204,7 @@ M6–M8 shipped together in PR #13 with the dry gate and their
 | Hover | Node titles on hover in the local browser | #14 · `ea253f0` |
 | UAT round 1 | `thread` help summary; refusal of an ID pattern no ID can match | #15 · `58fc525` |
 | M9 | Rich Markdown: sections, heading forms, strays, V16, fence closing; lens-style fixture and how-to | #17 · `e7d38b6` |
+| M9b | `ledger copy-schema`: the verified schema copy, written across repos with one rollback | #18 · `f4e770b` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
@@ -322,9 +336,6 @@ overlapping scopes, or the silent passes in the [scenario catalogue](../tests/sc
   trace lock is written; derived-ID renames; an optional accepted-request/agreement index
   in the generated schema copy for offline citation verification. See
   [PRD open questions](../req/qmstrace-prd.md#open-questions) and data architecture D7/D9.
-- **After the engine slice:** a fresh agent run against PRD success criteria 5/6,
-  replaying E3, followed by a person-launched test-bed session — now folded into the M9
-  dogfooding run above.
 - **E5:** five-step audit demo once the engine has a ledger.
 - **Repo hygiene:** validating tracker commit references remains agreed but unscheduled.
 - **Later capabilities:** machine-readable output, recorded-review suspect clearance,
