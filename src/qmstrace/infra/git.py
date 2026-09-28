@@ -3,6 +3,8 @@
 Every call runs in the directory it asks about, with the variables that would point Git at
 some other repository removed: inside a hook, `GIT_INDEX_FILE` or `GIT_DIR` would otherwise make
 a sibling's listing read this repo's index.
+
+Implements: DSN-QMT-07, DSN-QMT-10
 """
 
 from __future__ import annotations

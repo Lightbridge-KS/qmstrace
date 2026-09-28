@@ -2,6 +2,8 @@
 
 A command is: open the workspace → take its assessment → render → exit. Nothing here is
 computed on the way out; the renderer only arranges it.
+
+Implements: DSN-QMT-02
 """
 
 from __future__ import annotations

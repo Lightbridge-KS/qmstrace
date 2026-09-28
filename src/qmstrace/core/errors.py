@@ -1,4 +1,7 @@
-"""The one way a run says it could not judge."""
+"""The one way a run says it could not judge.
+
+Implements: DSN-QMT-01
+"""
 
 
 class CouldNotJudge(Exception):

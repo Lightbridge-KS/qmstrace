@@ -38,6 +38,7 @@ def refusal(local: str, schema: str | None = SCHEMA) -> CouldNotJudge:
 # ── 1. the examples parse, and the two parts merge ─────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-03")
 def test_the_example_parses_and_merges_the_projects_part_with_the_repos() -> None:
     config = TraceConfig.parse(SERVICE, SCHEMA)
 
@@ -122,6 +123,7 @@ def test_a_verified_copy_gives_the_same_configuration_as_the_path(embed: Embed) 
     assert copy.item_types.keys() == by_path.item_types.keys()
 
 
+@pytest.mark.verifies("DSN-QMT-03")
 def test_a_copy_edited_by_hand_is_refused(embed: Embed) -> None:
     tampered = embed(SERVICE, SCHEMA).replace("no test verifies it yet.", "fine as it is.", 1)
     stopped = refusal(tampered, None)
@@ -173,6 +175,7 @@ def test_a_digest_ignores_order_comments_and_layout() -> None:
 # ── 4. unknown keys, wrong types, versions ─────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-03")
 def test_an_unknown_key_in_the_repos_file_names_the_file_and_the_key() -> None:
     stopped = refusal(SERVICE.replace('files      = ["docs/req', 'fils      = ["docs/req', 1))
     assert "qmstrace.toml" in stopped.what
@@ -248,6 +251,7 @@ def test_an_id_pattern_with_no_literal_start_needs_a_prefix() -> None:
         (r"'^FR:\d{2}$'", "FR:"),  # a colon
     ],
 )
+@pytest.mark.verifies("DSN-QMT-03")
 def test_an_id_pattern_that_no_id_can_match_is_refused(pattern: str, start: str) -> None:
     stopped = refusal(SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern, 1))
     assert f"[items.requirement] starts with '{start}', which no ID can start with" in stopped.what
@@ -317,6 +321,7 @@ def test_an_extractor_that_cannot_read_its_type_is_refused(
     assert expected in refusal(SERVICE.replace(old, new, 1)).what
 
 
+@pytest.mark.verifies("DSN-QMT-03")
 def test_every_extractor_the_configuration_accepts_is_one_that_ships() -> None:
     from qmstrace.core.config import EXTRACTORS
     from qmstrace.extract.base import REGISTRY

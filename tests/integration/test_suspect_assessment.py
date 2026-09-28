@@ -47,6 +47,7 @@ def values(root):
     return {s.item.id: s for s in Workspace.open(root).assessment().suspects}
 
 
+@pytest.mark.verifies("REQ-QMT-09")
 def test_item_digests_comments_new_tests_and_passing_reports_do_not_clear(suspect_repo):
     root = suspect_repo
     change(root)
@@ -106,6 +107,7 @@ def test_withdrawal_and_reactivation_preserve_review(suspect_repo):
     assert len(values(root)) == 7
 
 
+@pytest.mark.verifies("DSN-QMT-08")
 def test_new_baseline_clears_its_chain(suspect_repo):
     change(suspect_repo)
     assert values(suspect_repo)

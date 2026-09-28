@@ -1,4 +1,7 @@
-"""Explicit outputs and reversible setup edits, separate from Git-filtered source reads."""
+"""Explicit outputs and reversible setup edits, separate from Git-filtered source reads.
+
+Implements: DSN-QMT-11, DSN-QMT-13
+"""
 
 from __future__ import annotations
 

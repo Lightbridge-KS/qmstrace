@@ -2,6 +2,8 @@
 
 A field whose name is a link marker *is* the link: its value is a comma-separated list of IDs,
 and anything else in it is reported, never dropped.
+
+Implements: DSN-QMT-04
 """
 
 from __future__ import annotations

@@ -12,6 +12,7 @@ The load-bearing claims, each pinned by a test:
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
@@ -26,12 +27,14 @@ def rules(root: Path) -> tuple[int, str]:
     return result.exit_code, result.output
 
 
+@pytest.mark.verifies("REQ-QMT-04")
 def test_rules_for_a_repo_that_reads_the_schema_by_path(project: Path, golden: Golden) -> None:
     code, output = rules(project / "service")
     assert code == 0
     golden(GOLDEN / "rules-service.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-04")
 def test_rules_for_a_repo_with_its_own_schema(project: Path, golden: Golden) -> None:
     code, output = rules(project / "solo")
     assert code == 0

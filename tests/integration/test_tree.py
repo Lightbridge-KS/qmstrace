@@ -37,6 +37,7 @@ def repo(tmp_path: Path, make_repo: MakeRepo) -> Path:
     return make_repo(root)
 
 
+@pytest.mark.verifies("REQ-QMT-11")
 def test_inside_git_the_files_are_what_a_commit_could_carry(repo: Path) -> None:
     write(repo / "docs" / "new.md")  # untracked, not ignored
     write(repo / "debug.log")  # ignored
@@ -45,6 +46,7 @@ def test_inside_git_the_files_are_what_a_commit_could_carry(repo: Path) -> None:
     assert tree.label == "working tree, not pinned"
 
 
+@pytest.mark.verifies("DSN-QMT-10")
 def test_a_file_deleted_but_still_in_the_index_is_not_listed(repo: Path) -> None:
     (repo / "src" / "app.py").unlink()
     assert "src/app.py" not in WorkingTree(repo).files()
@@ -54,6 +56,7 @@ def test_paths_are_relative_to_a_root_inside_a_repository(repo: Path) -> None:
     assert WorkingTree(repo / "docs").files() == ("req/a-srs.md",)
 
 
+@pytest.mark.verifies("DSN-QMT-10", "REQ-QMT-11")
 def test_a_variable_pointing_git_elsewhere_changes_nothing(
     repo: Path, tmp_path: Path, make_repo: MakeRepo, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -66,6 +69,7 @@ def test_a_variable_pointing_git_elsewhere_changes_nothing(
     assert tree.label == "working tree, not pinned"
 
 
+@pytest.mark.verifies("DSN-QMT-10")
 def test_outside_git_every_file_is_read_but_hidden_folders_and_caches(tmp_path: Path) -> None:
     root = tmp_path / "plain"
     for name in ["docs/a.md", ".venv/lib/x.py", "src/__pycache__/x.pyc", "node_modules/p/i.js"]:

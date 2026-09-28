@@ -13,6 +13,8 @@ repo was read, so it is known not to exist.
 A walk over the graph is a `Closure`: `forward` follows what hangs off some items, `backward`
 what they derive from. `thread` and `impact` render it, and so will the suspects — one
 traversal, several renderers.
+
+Implements: DSN-QMT-05
 """
 
 from __future__ import annotations

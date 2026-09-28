@@ -25,6 +25,7 @@ from qmstrace.extract.change_requests import read
         ),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-07")
 def test_preamble(text, valid):
     value, problem = read("CR-001.md", "CR-001", text)
     assert (value is not None) == valid

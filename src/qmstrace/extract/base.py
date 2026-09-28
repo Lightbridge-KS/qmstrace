@@ -4,6 +4,8 @@ An extractor is chosen by the name a trace configuration gives an item type, nev
 type's own name, so a second trace schema needs no engine change. It takes a file's text, so
 the same extractor reads the working tree, a tree at a baseline tag and a sibling. A problem
 in the text is a finding in what it returns; an extractor never raises for the user's repo.
+
+Implements: DSN-QMT-04
 """
 
 from __future__ import annotations

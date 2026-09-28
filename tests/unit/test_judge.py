@@ -14,6 +14,8 @@ The load-bearing claims, each pinned by a test:
 
 from pathlib import Path
 
+import pytest
+
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.judge import coverage
@@ -74,6 +76,7 @@ def gaps(found: list[Finding]) -> list[tuple[str, str | None]]:
 # ── 1. rules as data ───────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-06")
 def test_every_unmet_rule_is_a_gap(service: TraceConfig) -> None:
     assert gaps(judged(service)) == [
         ("G03", "DSN-SVC-02"),
@@ -82,6 +85,7 @@ def test_every_unmet_rule_is_a_gap(service: TraceConfig) -> None:
     ]
 
 
+@pytest.mark.verifies("DSN-QMT-06")
 def test_where_narrows_by_an_exact_value(service: TraceConfig) -> None:
     inspected = SRS.replace("- Verify-by: test\n", "- Verify-by: inspection\n")
     assert ("G02", "REQ-SVC-02") not in gaps(
@@ -164,6 +168,7 @@ def test_a_stray_marker_is_named_on_the_module_and_on_the_element(service: Trace
     assert "src/service/store.py:3" in fix_of(found, "G03", "DSN-SVC-02")
 
 
+@pytest.mark.verifies("DSN-QMT-06")
 def test_the_form_to_write_comes_from_the_extractor_that_reads_it(service: TraceConfig) -> None:
     fix = fix_of(judged(service), "G02", "REQ-SVC-02")
     assert 'on the test case, write `@pytest.mark.verifies("REQ-SVC-02")` on the test' in fix

@@ -19,6 +19,8 @@ declares nothing of this type is handed back as a lead for the graph to judge.
 A heading inside a code fence declares nothing; frontmatter is skipped. An item's text — what
 its digest covers — is its title and section, the `Change:` line left out, so citing a change
 request is not itself a change.
+
+Implements: DSN-QMT-04
 """
 
 from __future__ import annotations

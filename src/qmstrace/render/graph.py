@@ -1,4 +1,7 @@
-"""An offline presentation of one assessment; all reach comes from the shared core."""
+"""An offline presentation of one assessment; all reach comes from the shared core.
+
+Implements: DSN-QMT-13
+"""
 
 from __future__ import annotations
 

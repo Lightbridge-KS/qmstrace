@@ -4,6 +4,8 @@ Every finding that reaches an agent ends with what to do, and where the wrong mo
 tempting it says so. The wording lives here and nowhere else; the code that detects a problem
 calls one of these functions. `CODES` is the index a meta-test holds against the scenarios
 that emit each code.
+
+Implements: DSN-QMT-06
 """
 
 from __future__ import annotations

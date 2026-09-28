@@ -16,6 +16,7 @@ import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
@@ -33,12 +34,14 @@ def copy_schema(*words: str) -> tuple[int, str]:
 # ── 1. goldens ─────────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-13")
 def test_the_first_copy(project: Path, golden: Golden) -> None:
     code, output = copy_schema("-C", str(project / "ledger"), "ledger", "copy-schema")
     assert code == 0
     golden(GOLDEN / "ledger-copy-schema-first.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-13")
 def test_a_second_run_changes_nothing(project: Path, golden: Golden) -> None:
     ledger = str(project / "ledger")
     copy_schema("-C", ledger, "ledger", "copy-schema")

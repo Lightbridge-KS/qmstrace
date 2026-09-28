@@ -1,5 +1,8 @@
 """Pure edits for setup: managed guide blocks, existing pytest configuration, and the
-project's schema copied into a product repo's configuration."""
+project's schema copied into a product repo's configuration.
+
+Implements: DSN-QMT-11
+"""
 
 from __future__ import annotations
 

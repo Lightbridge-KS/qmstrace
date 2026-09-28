@@ -63,6 +63,7 @@ def comparison(config, before, after, root=1, *, commit="abc", state="changed", 
         ([(1, 2), (2, 1), (2, 2)], [(1, 2), (2, 1)], {2: (1, 1)}),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-08")
 def test_separate_walks_shortest_distances_and_cycles(service, old_edges, new_edges, expected):
     old, current = graph(service, old_edges), graph(service, new_edges, edited=(1,))
     result = suspects(current, [comparison(service, old, current)])
@@ -90,6 +91,7 @@ def test_deleted_root_uses_historical_graph(service):
 
 
 @pytest.mark.parametrize("state", ["new", "frozen"])
+@pytest.mark.verifies("DSN-QMT-08")
 def test_non_roots_do_not_produce_suspects(service, state):
     before = graph(service, [(1, 2)])
     assert not suspects(before, [comparison(service, before, before, state=state)])

@@ -28,6 +28,7 @@ CASES = [
 
 
 @pytest.mark.parametrize(("path", "pattern", "expected"), CASES)
+@pytest.mark.verifies("DSN-QMT-10")
 def test_a_pattern_from_the_test_bed(path: str, pattern: str, expected: bool) -> None:
     assert matches(path, [pattern]) is expected
 

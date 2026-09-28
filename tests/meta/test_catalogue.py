@@ -153,6 +153,7 @@ def test_each_scenario_emits_its_code(service: TraceConfig, code: str) -> None:
 
 
 @pytest.mark.parametrize("code", sorted(SCENARIOS))
+@pytest.mark.verifies("DSN-QMT-06")
 def test_every_finding_says_what_to_do_next(service: TraceConfig, code: str) -> None:
     for finding in SCENARIOS[code](service):
         assert finding.what and finding.next_move.startswith(("Fix:", "Review:")), finding

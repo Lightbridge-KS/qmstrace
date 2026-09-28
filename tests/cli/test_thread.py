@@ -41,6 +41,7 @@ def thread(root: Path, item_id: str) -> tuple[int, str]:
         ("thread-sibling", "client", "REQ-SVC-01"),
     ],
 )
+@pytest.mark.verifies("REQ-QMT-06")
 def test_thread_output(project: Path, golden: Golden, name: str, repo: str, item_id: str) -> None:
     code, output = thread(project / repo, item_id)
     assert code == 0
@@ -56,6 +57,7 @@ def test_thread_as_a_pipeline_sees_it(alone: Callable[[str], Path], golden: Gold
 # ── 2. each item once; nothing hidden ──────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-06")
 def test_each_item_is_shown_once(project: Path) -> None:
     output = thread(project / "service", "AGR-3")[1]
     assert output.count(f"{STORE_TEST} ") == 1
@@ -97,5 +99,6 @@ def test_in_a_pipeline_an_unseen_id_is_not_called_missing(alone: Callable[[str],
 # ── 4. determinism ─────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-15")
 def test_two_runs_give_the_same_bytes(project: Path) -> None:
     assert thread(project / "service", "REQ-SVC-01") == thread(project / "service", "REQ-SVC-01")

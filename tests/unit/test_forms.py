@@ -73,6 +73,7 @@ def keep():
 '''
 
 
+@pytest.mark.verifies("DSN-QMT-04")
 def test_a_marker_outside_the_module_docstring_is_a_stray(service: TraceConfig) -> None:
     found = REGISTRY["python-module"](
         "src/service/store.py", MODULE, service.item_types["component"], service

@@ -5,6 +5,7 @@ import re
 from dataclasses import replace
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
@@ -12,6 +13,7 @@ from qmstrace.render.graph import document, projection
 from qmstrace.workspace import Workspace
 
 
+@pytest.mark.verifies("DSN-QMT-13")
 def test_reach_and_evidence_match_shared_core(project: Path) -> None:
     for repo in ("service", "client", "solo"):
         a = Workspace.open(project / repo).assessment()
@@ -34,6 +36,7 @@ def test_reach_and_evidence_match_shared_core(project: Path) -> None:
         }
 
 
+@pytest.mark.verifies("DSN-QMT-13", "REQ-QMT-16")
 def test_standalone_html_escapes_hostile_text_and_is_deterministic(project: Path) -> None:
     a = Workspace.open(project / "service").assessment()
     hostile = '</script><script>alert("bad")</script>&\u2028'
@@ -53,6 +56,7 @@ def test_standalone_html_escapes_hostile_text_and_is_deterministic(project: Path
     assert "innerHTML" not in Path("src/qmstrace/assets/graph.js").read_text()
 
 
+@pytest.mark.verifies("REQ-QMT-16")
 def test_graph_cli_and_paths(project: Path, golden) -> None:
     root = project / "service"
     runner = CliRunner()

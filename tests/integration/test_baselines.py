@@ -63,6 +63,7 @@ def codes(root: Path) -> set[str]:
     return {f.code for f in Workspace.open(root).assessment().violations}
 
 
+@pytest.mark.verifies("DSN-QMT-07")
 def test_frozen_and_tree_contract(controlled):
     source = GitCli(controlled)
     revision = source.state()
@@ -88,6 +89,7 @@ def test_frozen_and_tree_contract(controlled):
         ("accepted", "REQ-SVC-01", None),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-07", "REQ-QMT-08")
 def test_request_judgment(controlled, state, impacts, expected):
     if state:
         request(controlled, state, impacts)
@@ -95,6 +97,7 @@ def test_request_judgment(controlled, state, impacts, expected):
     assert codes(controlled) == ({expected} if expected else set())
 
 
+@pytest.mark.verifies("DSN-QMT-07", "REQ-QMT-08")
 def test_missing_stale_and_multiple_citations(controlled):
     edit(controlled)
     assert codes(controlled) == {"V10"}
@@ -242,6 +245,7 @@ def test_pretrace_release_and_detached_head(controlled):
     assert any("before trace configuration" in n.text for n in assessment.notices)
 
 
+@pytest.mark.verifies("DSN-QMT-07")
 def test_latest_is_ancestry_not_tag_number_or_date(controlled, monkeypatch):
     monkeypatch.setenv("GIT_COMMITTER_DATE", "2020-01-01T00:00:00+00:00")
     (controlled / "note.md").write_text("later commit, older date")
@@ -277,6 +281,7 @@ def test_incomparable_tags_fail_after_merge(controlled, other_tag):
         Workspace.open(controlled).assessment()
 
 
+@pytest.mark.verifies("DSN-QMT-07")
 def test_shallow_and_excluded_tags_fail(controlled, tmp_path):
     clone = tmp_path / "shallow"
     git(tmp_path, "clone", "--depth=1", controlled.as_uri(), str(clone))

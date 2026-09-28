@@ -9,6 +9,8 @@ whether an item is covered across the project is the ledger's question.
 A gap's next move is built from data: the form of the marker to write comes from the extractor
 that reads it (`forms`), a violation that refused the needed link is named first, and a marker
 written where it is not read (a stray) is named when it is the reason.
+
+Implements: DSN-QMT-06, DSN-QMT-07, DSN-QMT-08
 """
 
 from __future__ import annotations

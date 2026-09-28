@@ -38,6 +38,7 @@ def baseline(project, embed):
         ("shallow", ["status"], 2),
     ],
 )
+@pytest.mark.verifies("REQ-QMT-08")
 def test_baseline_goldens(baseline, golden, case, command, exit_code):
     if case not in {"frozen", "shallow"}:
         srs = baseline / "docs/req/service-srs.md"
@@ -80,6 +81,7 @@ def test_baseline_goldens(baseline, golden, case, command, exit_code):
         (["check"], "historical"),
     ],
 )
+@pytest.mark.verifies("REQ-QMT-09")
 def test_suspects_are_informational_complete_and_deterministic(baseline, golden, command, case):
     root = baseline
     design = root / "docs/design/service-design.md"

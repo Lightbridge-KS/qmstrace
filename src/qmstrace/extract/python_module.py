@@ -4,6 +4,8 @@ A module states what it implements in its docstring: `Implements: DSN-SVC-01`. O
 docstring is read; the same words elsewhere — in a comment, in another string — are not a marker.
 They are returned as strays, so that a gap they leave open can say why. The digest covers the
 module's syntax tree, so layout and comments are not a change.
+
+Implements: DSN-QMT-04
 """
 
 from __future__ import annotations

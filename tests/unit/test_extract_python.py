@@ -43,6 +43,7 @@ def check(key: str) -> bool:
 '''
 
 
+@pytest.mark.verifies("DSN-QMT-04")
 def test_a_module_is_a_component_that_links_through_its_docstring(service: TraceConfig) -> None:
     found = module(service, KEYS)
     (item,) = found.items
@@ -106,6 +107,7 @@ def helper():
 """
 
 
+@pytest.mark.verifies("DSN-QMT-04")
 def test_a_test_function_is_a_test_case_named_by_its_node_id(service: TraceConfig) -> None:
     found = cases_in(service, TESTS)
     assert [(item.id, item.line, item.level) for item in found.items] == [
@@ -197,6 +199,7 @@ def test_a_test_outside_a_level_folder_is_v06(service: TraceConfig, path: str) -
         ),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-04")
 def test_a_marker_in_a_form_that_is_not_read_is_v15(
     service: TraceConfig, text: str, form: str
 ) -> None:

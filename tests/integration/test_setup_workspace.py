@@ -14,6 +14,7 @@ from qmstrace.core.errors import CouldNotJudge
 from qmstrace.workspace import Workspace
 
 
+@pytest.mark.verifies("REQ-QMT-12")
 def test_new_repo_is_idempotent_and_its_marker_runs(tmp_path: Path) -> None:
     first = Workspace.initialize(tmp_path, subject="service", key="SVC")
     assert all(s.startswith("updated:") for s in first)
@@ -192,6 +193,7 @@ def _occupy(root: Path, how: str) -> None:
 @pytest.mark.parametrize(
     "how", ["folder", "file", "dangling", "elsewhere", "outside", "skills-file"]
 )
+@pytest.mark.verifies("REQ-QMT-12")
 def test_what_setup_did_not_write_is_refused(tmp_path: Path, how: str) -> None:
     root = tmp_path / "repo"
     root.mkdir()
