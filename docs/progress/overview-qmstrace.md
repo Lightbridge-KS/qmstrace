@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — M0–M9b landed, M9b being the schema copy; now qmstrace is traced by its own ledger and its gate is not green yet; then M10 mentions; slice-1 acceptance and deferred ledger work.
+summary: The single active qmstrace tracker — M0–M9c landed, M9c being the skill's new home; now qmstrace is traced by its own ledger and its gate is not green yet; then M10 mentions; slice-1 acceptance and deferred ledger work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-09-28 · Slice 1: the product-repo half.** M0–M9b have landed.
+**Updated 2026-09-28 · Slice 1: the product-repo half.** M0–M9c have landed.
 M5b merged in [PR #12](https://github.com/Lightbridge-KS/qmstrace/pull/12) at `8ea7bda`,
 including tracker cleanup `0dc5c8c`. M6–M8 merged in
 [PR #13](https://github.com/Lightbridge-KS/qmstrace/pull/13) at `6fba9f8`, delivering
@@ -34,8 +34,12 @@ are not read are reported (strays, V16), and a fence closes on its own mark. See
 at `f4e770b`: `qmstrace ledger copy-schema` writes the project's schema into each product repo
 as a verified copy, so a baseline tag can be judged without the ledger beside it.
 
-**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)** — first
-[M9c · the skill's home](#m9c--the-skills-home) — then [M10 · mentions](#later--m10--mentions).
+**M9c · the skill's home** merged in [PR #23](https://github.com/Lightbridge-KS/qmstrace/pull/23)
+at `02caed1`: `init` installs the skill at `.agents/skills/qmstrace/`, where Codex lists it, and
+links it from `.claude/skills/qmstrace` when the repo has `.claude/`, so Claude Code does too.
+
+**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)**, then
+[M10 · mentions](#later--m10--mentions).
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -59,7 +63,7 @@ lost are in the [system architecture](../design/system-architecture.md).
 - [ ] The gate is not green yet: `qmstrace check` reports 26 gaps — no module implements a
   design element, and no requirement or design element is declared.
 
-### M9c · the skill's home
+### M9c · the skill's home — landed
 
 Planned 2026-09-28 on `feat/m9c-skill-home`. `init` installed the skill at
 `.qmstrace/skill/SKILL.md`, where no harness lists it and whose folder breaks the Agent Skills
@@ -82,7 +86,9 @@ Code lists it too; the stanza keeps pointing at it for every other agent.
   2.1.283 lists `qmstrace` (as a bare name — its listing drops some descriptions in a setup
   with many skills), and Codex 0.144.4's rendered prompt lists it with its description
   shortened to its skills budget. In a clone of `main` before the move, neither lists it.
-- [ ] Merge; the dry gate and the deploy preview on the pull request.
+- [x] Merged in #23 at `02caed1` on 2026-09-28: the GitHub dry gate passed and the Netlify
+  deploy preview built. Deferred and filed: #20 (files `init` creates are `0600`), #21
+  (rollback leaves the folders it created), #22 (`ux`: no symbolic links).
 
 **M9c evidence, 2026-09-28** (`feat/m9c-skill-home`, local): `just dry` passed with 746
 Python tests at 99.05% coverage, four Node tests, strict types, wheel assets and a strict
@@ -237,6 +243,7 @@ M6–M8 shipped together in PR #13 with the dry gate and their
 | UAT round 1 | `thread` help summary; refusal of an ID pattern no ID can match | #15 · `58fc525` |
 | M9 | Rich Markdown: sections, heading forms, strays, V16, fence closing; lens-style fixture and how-to | #17 · `e7d38b6` |
 | M9b | `ledger copy-schema`: the verified schema copy, written across repos with one rollback | #18 · `f4e770b` |
+| M9c | The skill at `.agents/skills/qmstrace/`; a create-only `.claude/skills/qmstrace` link | #23 · `02caed1` |
 
 The earlier exploration, E1/E3/E4 experiments and naming decisions are complete.
 Their settled outcomes live in the design docs; the
