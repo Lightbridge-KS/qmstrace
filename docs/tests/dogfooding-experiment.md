@@ -30,7 +30,7 @@ Run A also tests what the beacon bed could not:
 - **Lens-style docs.** The design docs here were written with the architecture lens skills:
   tables, Mermaid, numbered and nested headings, fenced examples. M9 made the Markdown
   extractor read them; no agent has yet declared items inside them.
-- **Scale.** 26 modules and 389 test cases, against beacon's 9 modules and 62 test cases.
+- **Scale.** 26 modules and 400 test cases, against beacon's 9 modules and 62 test cases.
 - **An existing codebase.** Nothing is greenfield. Requirements are written after the code, so
   the order of work means something different (see *Caveats*).
 
@@ -43,19 +43,21 @@ honest and cheap**, from an agent that knows only what the repo gives it?
 
 | Part | Role | Pinned at |
 |---|---|---|
-| `qmstrace` | The product repo, traced as project `QMT`. Run A is launched here, at this path — a clone beside the ledger would read the real checkout as its sibling | `main` at launch — `63b5c7f`, the merge of #19, unless STOP 5 records otherwise |
+| `qmstrace` | The product repo, traced as project `QMT`. Run A is launched here, at this path — a clone beside the ledger would read the real checkout as its sibling | `main` at launch — `02caed1`, the merge of #23, unless STOP 5 records otherwise |
 | `qmstrace-ledger` | The project side: the trace schema, agreement clauses AGR-1…15 distilled from the PRD's goals and constraints, the change-request register (empty). Read-only for the agent | `a3faeab`; the schema's digest is `sha256:2c2b82ac79917b655e8c7296f01370e27e0b5c6279dbf55b9e081608ddef28b4` |
-| the tool | `qmstrace` on the agent's `PATH`, installed from a wheel built at `f4e770b` (the M9b merge). Every judgement below uses this tool, never the repo's own edited source | wheel sha256 `cbab19ad53057983210166cd078d84bc34527c4a0334171c2817ebef788817b9` — every build reports 0.1.0, so the hash is the identity |
+| the tool | `qmstrace` on the agent's `PATH`, installed from a wheel built at `02caed1` (the M9c merge). Every judgement below uses this tool, never the repo's own edited source | wheel sha256 `d4e1dab1d9dd0cd67081736596f3a8342a1b5b43a3dee5803c7c43b828552365` — every build reports 0.1.0, so the hash is the identity |
 | `pr-drafts/` | Where the agent writes the pull request's text and its feedback. Created empty before launch | — |
 
-The setup is [#19](https://github.com/Lightbridge-KS/qmstrace/pull/19): `qmstrace.toml` with
-the verified schema copy, the stanza in `AGENTS.md`, the skill copy under `.qmstrace/skill/`,
-and the meta-tests moved to their own level folder. Design elements may be declared in
+The setup is [#19](https://github.com/Lightbridge-KS/qmstrace/pull/19) and
+[#23](https://github.com/Lightbridge-KS/qmstrace/pull/23): `qmstrace.toml` with the verified
+schema copy, the stanza in `AGENTS.md`, the skill copy at `.agents/skills/qmstrace/SKILL.md`
+linked from `.claude/skills/qmstrace` so Claude Code lists it, and the meta-tests moved to
+their own level folder. Design elements may be declared in
 `docs/design/*.md` and in `docs/structure/*.md`, where the blueprint maps the code one module
 per line.
 
 **Starting state**, with the pinned tool beside the ledger: 0 requirements, 0 design elements,
-26 components, 389 test cases; **0 violations and 26 gaps, all G06** (a module implements no
+26 components, 400 test cases; **0 violations and 26 gaps, all G06** (a module implements no
 design element); `check --strict` exits 1.
 
 The chain the schema requires, rules G01–G06; a test that verifies nothing is not a gap:
@@ -72,12 +74,17 @@ As in E1–E4, with these differences:
 
 - **The teammate is a fresh agent, never a fork**, launched in-process by a driver session
   that is itself fresh and on `main`. It is not told what is measured.
-- **The listing holds the coding plugin set as a real session shows it** — the 20 skills of
-  `agent-stuff/plugins/coding` at `517cb11`, each with its description verbatim
-  ([appendix](#appendix--the-skill-listing)). 💡 **The qmstrace skill is not listed.** A real
-  session in this repo reaches it only through the stanza's line *Read
-  `.qmstrace/skill/SKILL.md` …*; E1–E4 listed the stand-in's skill. Whether the agent reads it
-  is measured (E6-A-10).
+- **The listing is what a real Claude Code session in this repo shows**
+  ([appendix](#appendix--the-skill-listing)): the repo's own skill `qmstrace`, found through
+  `.claude/skills/qmstrace`, and the coding plugin set of `agent-stuff` at `517cb11`. A
+  headless session started in a clone of the launch commit quoted its listing lines verbatim
+  (2026-09-28), and the appendix copies them. 18 of the coding skills carry their own
+  descriptions; `extensibility-architecture` shows none (its description is a folded YAML
+  block); `improve-codebase-architecture` is not listed (`disable-model-invocation`). 💡
+  **`qmstrace` is listed as a bare name**, because the session showed it that way. The cause
+  is unknown — its description is one plain line. Listing it with its description would match
+  a lighter setup instead of this one. Whether the agent reads the skill is measured
+  (E6-A-10).
 - **The driver opens pull requests.** The agent commits on a branch and writes the pull
   request's title and body to a file. The driver pushes the branch and opens a draft pull
   request with that text verbatim; the developer's review of it is a measure.
@@ -131,8 +138,8 @@ Fixed before the run.
 | E6-A-6 | Marker honesty — `Implements` | Five seeded modules read against every design element each claims: is the claim true of the code? |
 | E6-A-7 | Signs of a thin trace | Modules per design element (largest, median); a design element standing for the whole package; `Verify-by: inspection` or `analysis` used where a test exists or could — each one read; any `Status: withdrawn`; any `ignore` or scan path narrowed |
 | E6-A-8 | Rich Markdown held | `check` reports no V16 and no stray; every heading added reads as an item; no fenced example edited (the D8 requirement example, the schema and configuration examples); no settled decision reworded; no existing heading renamed, so anchors stay |
-| E6-A-9 | Nothing else touched | `src/` equal to the launch commit by AST apart from module docstrings; in `tests/`, no existing test body changed — only `verifies` decorators and new tests; `qmstrace.toml`, `pyproject.toml`, `.qmstrace/` and the stanza unchanged; the ledger's HEAD and working tree unchanged; `just dry` passes. Any other change is listed and read |
-| E6-A-10 | What it read | Whether it read `.qmstrace/skill/SKILL.md`, and before its first marker; which listed skills it loaded, and whether the result follows them. Transcript |
+| E6-A-9 | Nothing else touched | `src/` equal to the launch commit by AST apart from module docstrings; in `tests/`, no existing test body changed — only `verifies` decorators and new tests; `qmstrace.toml`, `pyproject.toml`, `.agents/skills/qmstrace/`, `.claude/skills/qmstrace` and the stanza unchanged; the ledger's HEAD and working tree unchanged; `just dry` passes. Any other change is listed and read |
+| E6-A-10 | What it read | Whether it read the skill — loaded by name or read from `.agents/skills/qmstrace/SKILL.md` — and before its first marker; which listed skills it loaded, and whether the result follows them. Transcript |
 | E6-A-11 | Order of work | Git log: top-down — requirements, design elements, `Implements`, `verifies` — or back-filled from the gap list; commit size |
 | E6-A-12 | Ceremony and typed facts | No cover page, revision table, approval block, typed date, verdict or test count in repo memory; a hash or count in the pull request's text is checked against the repo |
 | E6-A-13 | Review burden | What the developer corrects in the review, and how long the review takes |
@@ -172,9 +179,14 @@ statement — the driver's error, rewritten and said so.
 - The global tool is the pinned wheel: every installed package file matches the wheel's
   `RECORD`.
 - `qmstrace` is on `main` at the launch commit with a clean tree; `git branch -a` shows no
-  `experiment/` branch. Until run A ends, the working copy is updated only with
-  `git pull origin main`, never a bare `git fetch`; a ref that appears anyway is removed
-  with `git branch -dr origin/experiment/e6-measures`.
+  `experiment/` branch — checked again immediately before launch. Until run A ends, the
+  working copy is updated only with `git pull origin main`, never a bare `git fetch`; a ref
+  that appears anyway is removed with `git branch -dr origin/experiment/e6-measures`.
+  Background fetches bring it back: on 2026-09-28 the ref appeared in the working copy from
+  a `fetch` nobody ran in this checkout by hand, most likely the desktop app's Git
+  integration. 💡 **Close the gap for the run**, or accept it as a caveat? A negative fetch
+  refspec in the working copy's Git config — `git config --add remote.origin.fetch
+  '^refs/heads/experiment/*'`, removed after run A — keeps any fetch from storing the ref.
 - The ledger is at `a3faeab` with a clean tree.
 - `<workspace>/pr-drafts/` exists and is empty.
 - The starting state above is reproduced with the pinned tool.
@@ -198,6 +210,9 @@ statement — the driver's error, rewritten and said so.
   this developer's setup and silent about anyone else's.
 - **Fidelity.** A spawned teammate does not auto-load `AGENTS.md` or skills, so the brief tells
   it to. A session launched by a person in the folder should confirm any finding that matters.
+- **The measures branch can surface.** A background fetch stores `origin/experiment/e6-measures`
+  in the working copy unless the refspec above is set; the agent would then see a branch name,
+  and could read this document from it. The transcript shows whether it did.
 - **Siblings are visible.** Other folders in `<workspace>` can be listed from `..`, among them
   the beacon test bed of E1–E4 with its stand-in. The brief's boundary forbids reading them;
   the transcript shows whether it held.
@@ -215,8 +230,10 @@ Not run yet.
 
 ## Appendix — the skill listing
 
-The coding plugin set of `agent-stuff` at `517cb11`, in the brief exactly as below. Each
-description is the skill's own, from its `SKILL.md`.
+As a real Claude Code session in this repo lists these skills — the repo's own `qmstrace` and
+the coding plugin set of `agent-stuff` at `517cb11` — in the brief exactly as below, sorted
+by name. A description is shown where the session showed one; each is the skill's own, from
+its `SKILL.md`. `<workspace>` and `~` are written out when the brief is sent.
 
 ```text
 - `agentic-architecture` — Explain an existing agentic system — an AI agent as the central "CPU" with its organs (loop, memory, tools, skills, MCP, subagents, hooks) — or design one from requirements. Use on name or near-match.
@@ -239,14 +256,14 @@ description is the skill's own, from its `SKILL.md`.
   File: ~/.claude/skills/design-md/SKILL.md
 - `domain-modeling` — Build and sharpen a project's domain model. Use when the user wants to pin down domain terminology or a ubiquitous language, record an architectural decision, or when another skill needs to maintain the domain model.
   File: ~/.claude/skills/domain-modeling/SKILL.md
-- `extensibility-architecture` — Explain how an existing system changes after it ships — runtime config, declarative composition, hooks, plugins, in-process extensions — or design that surface from requirements, picking the lowest rung that fits before building a plugin system. One Markdown doc with Mermaid diagrams. Use on name or near-match (plugin / extension / extensibility / "should this be a plugin system or config?").
+- `extensibility-architecture`
   File: ~/.claude/skills/extensibility-architecture/SKILL.md
 - `grill-with-docs` — A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.
   File: ~/.claude/skills/grill-with-docs/SKILL.md
 - `harness-design` — Decide how much agent harness to own — off-the-shelf, middleware on one, a custom loop, or an explicit graph — from the task's distribution distance and its need for control; then shape what stays yours (instructions, skills, environment, evals) and the flywheel that improves it. Use when designing or reviewing an agent harness, choosing between a hand-rolled loop, a framework and a hosted harness, deciding whether something should be a tool or a skill, setting up evals for an agent, or when a harness has grown while models improved. Also on harness engineering, file-system agent, agents-as-files, cognitive architecture, Harbor, Eve, Antigravity, Deep Agents. For mapping the organs of an existing agent, use `agentic-architecture`; for the UI it emits, `generative-ui`.
   File: ~/.claude/skills/harness-design/SKILL.md
-- `improve-codebase-architecture` — Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
-  File: ~/.claude/skills/improve-codebase-architecture/SKILL.md
+- `qmstrace`
+  File: <workspace>/qmstrace/.claude/skills/qmstrace/SKILL.md
 - `security-architecture` — Explain an existing system's security architecture — what is worth protecting, where trust changes hands, what crosses each boundary uninvited, and which control (located in code) stops it — or design one from requirements. One Markdown threat-model doc with Mermaid diagrams. Use on name or near-match (threat model / STRIDE / trust boundary / attack surface). For finding vulnerabilities in code, use `/security-review` (a diff) or the `claude-security` plugin (a repo) instead; this lens tells them where to look.
   File: ~/.claude/skills/security-architecture/SKILL.md
 - `surface-architecture` — Explain or design a codebase's user-facing surface — UX/DX/API from outside the boundary, for end user, developer, or agent. One Markdown doc with Mermaid diagrams. Use on name or near-match.
