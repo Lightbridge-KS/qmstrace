@@ -31,7 +31,7 @@ product repos  (code, tests, repo memory + markers)     developer hat — daily,
 ledger repo    (the project's ledger, controlled-document sources, agreement, records)
       ▲                                                  manager hat — occasional
       │  installed into                                  ↔ the standard's project-management process
-qmstrace      (this repo: the tool — it holds no project data)
+qmstrace      (this repo: the tool — it holds no other project's data)
 ```
 
 ## Rules for working here
@@ -46,8 +46,9 @@ qmstrace      (this repo: the tool — it holds no project data)
 - **Update the tracker in the same change** as the work it describes.
 - **Verify, don't assert.** A claim in a results section was checked by whoever wrote it — not
   copied from an agent's report. Say what was verified and what was not.
-- **No project data in this repo**: no real names, signatures, patient data or site network
-  facts. `_examples/` and `_playground/` are local and gitignored — never commit from them.
+- **No other project's data in this repo**: no real names, signatures, patient data or site
+  network facts. The one trace it carries is its own. `_examples/` and `_playground/` are
+  local and gitignored — never commit from them.
 - **Attention markers.** 💡 marks the few spots that need the developer's judgement;
   `rg 💡` is the review checklist. Budget them.
 - **A milestone ships its manual pages.** The user manual (`contents/`, published) grows with

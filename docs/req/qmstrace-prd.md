@@ -179,8 +179,8 @@ as its plan declares; nothing there changes mid-audit.
 - **IDs are immutable and never reused.**
 - **Reviewers install nothing.**
 - **Drafts only.** Nothing the engine emits can be mistaken for an issued revision.
-- **The engine repo holds no project data.** Fixtures are anonymised; no patient data, no
-  site network facts, no signatures.
+- **The engine repo holds no other project's data.** It is traced by its own project and
+  nothing else; fixtures are anonymised; no patient data, no site network facts, no signatures.
 - **Deterministic core.** Same inputs at the same pins give the same ledger, findings and
   tables.
 

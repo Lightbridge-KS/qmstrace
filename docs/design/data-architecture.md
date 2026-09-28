@@ -41,7 +41,7 @@ is also what makes a baseline reproducible.
 
 - **Rejected — a ledger inside each product repo.** No single place can answer whether a
   requirement implemented across two repos is covered, and project-level states have no home.
-- **Consequence:** three kinds of repository — the engine (tool, no project data), ledger
+- **Consequence:** three kinds of repository — the engine (tool, no other project's data), ledger
   repos (data and controlled-document sources), product repos (code, tests, markers).
 
 ### D3 — Prose edits on Word copies are reconciled; generated tables never are
