@@ -34,8 +34,8 @@ are not read are reported (strays, V16), and a fence closes on its own mark. See
 at `f4e770b`: `qmstrace ledger copy-schema` writes the project's schema into each product repo
 as a verified copy, so a baseline tag can be judged without the ledger beside it.
 
-**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)**, then
-[M10 · mentions](#later--m10--mentions).
+**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)** — first
+[M9c · the skill's home](#m9c--the-skills-home) — then [M10 · mentions](#later--m10--mentions).
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -58,6 +58,26 @@ lost are in the [system architecture](../design/system-architecture.md).
   package by meta-tests `dd29899`.
 - [ ] The gate is not green yet: `qmstrace check` reports 26 gaps — no module implements a
   design element, and no requirement or design element is declared.
+
+### M9c · the skill's home
+
+Planned 2026-09-28 on `feat/m9c-skill-home`. `init` installed the skill at
+`.qmstrace/skill/SKILL.md`, where no harness lists it and whose folder breaks the Agent Skills
+rule that a skill's name matches its folder. The location was never decided; it arrived with
+M6 (`918d79e`). The skill moves to `.agents/skills/qmstrace/SKILL.md`, where Codex lists it;
+`init` links it from `.claude/skills/qmstrace` when the repo already has `.claude/`, so Claude
+Code lists it too; the stanza keeps pointing at it for every other agent.
+
+- **Decided (developer, 2026-09-28):** the new home; the link only when `.claude/` exists;
+  the link is create-only — setup never replaces what it did not write; a copy in the old
+  home is refused with a next move, never deleted. The options that lost are recorded in the
+  surface doc.
+- [ ] `infra/files.py` writes a create-only link inside the one change with rollback;
+  `init`'s policy, the stanza's pointer, tests and goldens.
+- [ ] Surface doc, blueprint and glossary.
+- [ ] Manual: the `init` reference and the set-up how-to.
+- [ ] This repo moves its copy and gains the link.
+- [ ] Discovery end to end: in a fresh clone, Claude Code and Codex each list the skill.
 
 ## Later — M10 · mentions
 
