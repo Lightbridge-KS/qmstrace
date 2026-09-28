@@ -87,3 +87,16 @@ pull request per milestone, with the dry gate green — format, lint, types, tes
 pull request is what this product calls a verification record. **Docs-only changes to
 `docs/` may still go straight to `main`** — never `contents/`: the manual is published, so it
 goes through a pull request. Commit only when asked. The remote is a private repository.
+
+<!-- qmstrace:begin — generated; edit qmstrace.toml, not this block -->
+This repo is traced for project **QMT**; subjects: qmstrace (QMT).
+- Read `.qmstrace/skill/SKILL.md` before changing requirements, design or tests.
+- Local items: requirement `^REQ-QMT-\d{2}$` in `docs/req/*-srs.md`; design_element `^DSN-QMT-\d{2}$` in `docs/design/*.md`, `docs/structure/*.md`; component `python-module` in `src/**/*.py`; test_case `pytest` in `tests/**/test_*.py`. IDs are never renumbered or reused.
+- Start with `qmstrace status`; `qmstrace rules` prints the actual schema and coverage rules.
+- Use `qmstrace thread ID` and `qmstrace impact ID…` before changing connected items.
+- Run `qmstrace check` while authoring; `qmstrace check --strict` is the coverage gate.
+- Frozen changes and controlled additions need a fresh accepted change request; inspect the governing baseline and request evidence before editing.
+- A marker states a fact. Break the behavior in a disposable test and confirm the tagged test fails; restore the source afterwards.
+- Suspects need review even after edits or passing tests; `qmstrace check` lists every reason.
+- Collect facts with tools; never invent dates, verdicts, test results or approvals. Keep unavailable-source notices visible.
+<!-- qmstrace:end -->

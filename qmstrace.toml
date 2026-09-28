@@ -1,0 +1,130 @@
+# qmstrace's own TRACE CONFIGURATION — the engine repo is a product repo of the project QMT.
+# What is local to this repo lives here: its subject, which item types it declares, their ID
+# patterns and the files to read. The trace schema (link types, coverage rules, required
+# fields, the agreement, change requests, baselines) is the project's, kept in the ledger
+# repo: `qmstrace rules` prints what is in force and whose it is.
+#
+# What does NOT belong here: rules. If a rule seems wrong, tell the project side.
+
+version = 1
+ledger  = "../qmstrace-ledger"      # where the agreement and the change requests are. Without
+                                    # it — in a pipeline — they are reported as NOT VERIFIED.
+
+# qmstrace:begin — the QMT trace schema, generated in its ledger by `qmstrace ledger copy-schema`; edit it there, never here
+[schema]
+digest = "sha256:2c2b82ac79917b655e8c7296f01370e27e0b5c6279dbf55b9e081608ddef28b4"
+# The qmstrace project's TRACE SCHEMA — authored here, in the ledger, and copied into each
+# product repo by `qmstrace ledger copy-schema`. What a repo scans, its ID patterns and its
+# subjects live in that repo's qmstrace.toml. Paths here are relative to this folder.
+
+version = 1
+project = "QMT"
+
+# The project's product repos. The engine is traced by its own ledger.
+[schema.repos]
+qmstrace = "../qmstrace"
+
+# The item types the project knows, and what each must carry.
+[schema.item_types.requirement]
+required = ["Category", "Origin", "Verify-by"]
+
+[schema.item_types.requirement.values]
+Category    = ["functional-suitability", "performance-efficiency", "compatibility", "usability", "reliability",
+               "maintainability", "portability", "security", "design-constraint", "legal-regulatory"]
+"Verify-by" = ["test", "inspection", "analysis"]
+
+[schema.item_types.design_element]
+[schema.item_types.component]
+
+# A test's level is the folder it sits in under tests/.
+[schema.item_types.test_case]
+levels = ["unit", "integration", "cli", "meta"]
+
+# A field named after a marker IS the link. Every link type is many-to-many.
+[schema.links]
+Origin     = { from = ["requirement"],                   to = ["origin_clause"] }
+Satisfies  = { from = ["design_element"],                to = ["requirement"] }
+Implements = { from = ["component"],                     to = ["design_element"] }
+verifies   = { from = ["test_case"],                     to = ["requirement", "design_element"] }
+Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
+
+# Coverage rules. An unmet rule is a gap. A test that verifies nothing is not one: the suite
+# holds tests of the tool's own machinery that no requirement names.
+[[schema.rules]]
+code  = "G01"
+item  = "requirement"
+needs = "incoming:Satisfies"
+text  = "no design element satisfies it yet."
+
+[[schema.rules]]
+code  = "G02"
+item  = "requirement"
+where = { "Verify-by" = "test" }
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[schema.rules]]
+code  = "G03"
+item  = "design_element"
+needs = "incoming:Implements"
+text  = "no component implements it yet."
+
+[[schema.rules]]
+code  = "G04"
+item  = "design_element"
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[schema.rules]]
+code  = "G05"
+item  = "design_element"
+needs = "outgoing:Satisfies"
+text  = "satisfies no requirement — every design element points back to one."
+
+[[schema.rules]]
+code  = "G06"
+item  = "component"
+needs = "outgoing:Implements"
+text  = "implements no design element — every component points back to one."
+
+# Items declared outside any product repo: cited there, declared here.
+[schema.externals.agreement]
+item_type   = "origin_clause"
+prefix      = "AGR-"
+source      = "agreement.md"
+declared_as = '^\s*[-*]\s+\*\*(AGR-\d+)\*\*'
+
+[schema.change_requests]
+prefix   = "CR-"
+source   = "change-requests"
+accepted = "accepted"
+
+# Tags cut in the product repo — baseline/requirements/1, … — freeze its requirements.
+[schema.baselines.requirements]
+tag     = '^baseline/requirements/(?P<n>\d+)$'
+covers  = ["requirement"]
+subject = "*"
+# qmstrace:end
+
+[subjects.qmstrace]                 # a named body of requirements; a baseline freezes a subject
+key = "QMT"                         # the key inside its item IDs
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-QMT-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]              # the system from outside, and the code's own layout
+extractor  = "markdown"
+id_pattern = '^DSN-QMT-\d{2}$'
+files      = ["docs/design/*.md", "docs/structure/*.md"]
+
+[items.component]                   # ID = the module's path
+extractor = "python-module"
+files     = ["src/**/*.py"]
+ignore    = ["**/__init__.py"]
+
+[items.test_case]                   # ID = the test function's node id; level = its folder
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]
+ignore    = ["tests/fixtures/**"]   # the miniature project's own tests are data, not ours

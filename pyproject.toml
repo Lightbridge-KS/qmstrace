@@ -46,5 +46,6 @@ strict = true
 files = ["src"]
 
 [tool.pytest.ini_options]
+markers = ["verifies(*ids): trace the items this test actually verifies"]
 testpaths = ["tests"]
 addopts = "--strict-markers --cov=qmstrace --cov-report=term-missing:skip-covered --cov-fail-under=90"
