@@ -1,9 +1,10 @@
 ---
-summary: Codebase blueprint for engine slice 1 — the findings from reconciling the design docs with each other and with the framework actually chosen, the forks and where each was settled, the package tree with one line of ownership per file, the seams, the failure model, the import matrix and the test that enforces it, where a change lands, what is deliberately absent, and the invariants a tool checks.
+summary: Codebase blueprint for engine slice 1 — the findings from reconciling the design docs with each other and with the framework actually chosen, the forks and where each was settled, the package tree with one line of ownership per file, the seams, the failure model, the import matrix and the test that enforces it, where a change lands, what is deliberately absent, the invariants a tool checks, and the design elements (DSN-QMT-NN) the modules implement.
 read_when:
   - about to write or move engine code — find the one file a change belongs in
   - adding a module, an interface, or a dependency between packages
   - a design doc and the code seem to disagree — the decisions table says which wins
+  - adding a module, or deciding which design element a module or a test is traced to
 ---
 
 # qmstrace — Codebase Blueprint (slice 1)
@@ -324,3 +325,140 @@ Only validated current links enter the canvas. S01 text comes from the finding c
 with complete historical provenance even when no current connection exists. JSON escapes
 HTML delimiters and line separators, authored values enter the DOM through `textContent`,
 and a document CSP denies connections. No source archive or runtime server is introduced.
+
+## 11. Design elements — what the code is traced to
+
+qmstrace is a product repo of its own project, `QMT`. Each section below is one design
+element: the unit a module's docstring names with `Implements:` and a test names with
+`pytest.mark.verifies`. It states what the unit does and which modules carry it; the
+reasoning stays in the design doc it points to. The requirements are in the
+[SRS](../req/qmstrace-srs.md). A module may implement more than one element; the tree in §3
+remains the one line of ownership per file.
+
+💡 The elements live here, in the structure doc, rather than as IDs on the decision headings
+of the design docs (`D6 — …`): components implement a unit of the package, and the decision
+sections span several units each and are linked to by anchor.
+
+### DSN-QMT-01 — The command line: wiring only, and four exit codes
+
+`cli.py` turns options into plain values, opens the workspace, renders and returns an int.
+The `outcome` decorator maps a returned int to its exit code, `CouldNotJudge` (`core/errors.py`,
+carrying the next move) to 2, and anything else to 3 with one line and no traceback. The
+framework's own usage error is already 2. Reasoning: §1 F1, F2; surface architecture § 5.
+
+Satisfies: REQ-QMT-14
+
+### DSN-QMT-02 — One workspace sequences a run
+
+`Workspace.open(start)` walks up to the trace configuration and reads it;
+`assessment()` scans the working tree once, reads the ledger's external sources and the
+siblings, builds the graph, judges it, and returns one frozen `Assessment`
+(`core/assessment.py`). A command renders that value and never computes on the way out.
+What a run could not read or verify becomes a notice in the assessment, never a silence.
+Reasoning: §2 use-case ownership; §5.
+
+Satisfies: REQ-QMT-03, REQ-QMT-05
+
+### DSN-QMT-03 — The trace configuration is parsed and validated from text
+
+`core/config.py` parses the repo's trace configuration and the project's trace schema — by
+path, as a schema copy checked against its digest, or the repo's own — into one validated
+`TraceConfig` that records which part each rule came from. An unknown key, a pattern no ID
+can match or an extractor that does not ship is refused with the next move. Reasoning: data
+architecture § D4, D9; §1 F3–F6.
+
+Satisfies: REQ-QMT-01, REQ-QMT-04
+
+### DSN-QMT-04 — Extractors read markers from text, chosen by configured name
+
+`extract/base.py` registers an extractor per name the configuration gives an item type.
+`markdown.py` reads headings, sections and fields (`fields.py`), `python_module.py` the module
+docstring's `Implements:` line, `pytest_tests.py` test functions and their `verifies`
+decorators. Each takes text and never opens a file; a marker in a form it does not read is
+returned as a stray or a finding, never dropped. Reasoning: data architecture § Marker syntax
+v0; §4.
+
+Satisfies: REQ-QMT-01, REQ-QMT-02
+
+### DSN-QMT-05 — The trace graph admits only legal links, and walks them
+
+`core/graph.py` builds the graph from what the extractors found and what lies outside the
+repo; a link the schema does not allow is returned as a finding and never enters. `forward`
+and `backward` walk it into a `Closure` — each item once, nearest first, with the link that
+reached it — which `thread`, `impact` and the suspects all render. `core/model.py` holds the
+frozen values. Reasoning: data architecture § D4, D10; §9.
+
+Satisfies: REQ-QMT-03, REQ-QMT-06, REQ-QMT-07
+
+### DSN-QMT-06 — Coverage is judged from the schema's rules; each finding is catalogued once
+
+`core/judge.py` `coverage` turns each unmet coverage rule on this repo's items into a gap,
+whose next move names the marker form to write. `core/findings.py` holds every code's wording
+and next move once. Reasoning: surface architecture § The findings contract.
+
+Satisfies: REQ-QMT-03
+
+### DSN-QMT-07 — The baseline guard reads the tree at each governing tag
+
+`infra/git.py` lists the tags reachable from `HEAD` and reads files at a revision;
+`core/judge.py` `resolve_baselines` picks the topologically latest tag per scope, and `guard`
+compares item text with that snapshot (`core/baselines.py`) and judges each change against
+the change-request register, read by `infra/externals.py` and `extract/change_requests.py`.
+The workspace scans each tagged tree with its own configuration. Reasoning: data
+architecture § D6, D7.
+
+Satisfies: REQ-QMT-08
+
+### DSN-QMT-08 — Suspects are computed per changed root from item digests
+
+`core/judge.py` `suspects` walks forward from every item whose digest differs from its
+governing snapshot, in the historical and the current graph, and records each reason
+(`core/baselines.py` `Suspect`, `SuspectReason`). Only a new baseline clears one; an edit,
+a new test or a passing report does not. Reasoning: data architecture § D7.
+
+Satisfies: REQ-QMT-09
+
+### DSN-QMT-09 — Test results are matched to test cases by identity
+
+`extract/junit.py` reads JUnit XML bytes safely and trusts no summary count;
+`extract/pytest_tests.py` `report_identity` gives the identity a report entry must match;
+`core/results.py` matches entries to scanned test cases and gives a requirement the verdict of
+its direct `verifies` links only. `Workspace.results` reads the explicitly supplied report.
+Reasoning: surface architecture § Results contract — M4.
+
+Satisfies: REQ-QMT-10
+
+### DSN-QMT-10 — One source tree seam, one glob matcher
+
+`infra/tree.py` `WorkingTree` lists what a commit could carry — asked of Git through
+`infra/git.py`, with the variables that redirect Git removed — and walks the folder when there
+is no Git. `infra/globbing.py` is the one matcher for every tree. Reasoning: §1 F9; §4.
+
+Satisfies: REQ-QMT-11
+
+### DSN-QMT-11 — Setup plans every edit, then writes all or nothing
+
+`core/setup.py` computes the managed blocks — the stanza, the pytest marker, the schema copy —
+as pure string edits; `Workspace.initialize` and `Workspace.copy_schema` plan every file;
+`infra/files.py` writes them as one change with rollback, refuses a path it did not write, and
+creates a link only when its place is free. Reasoning: surface architecture § Setup contract —
+M6, § Schema copy contract — M9b.
+
+Satisfies: REQ-QMT-12, REQ-QMT-13
+
+### DSN-QMT-12 — Plain-text renderers, deterministic
+
+`render/text.py` turns an assessment into the bytes a reader sees: sorted, labelled counts,
+paths relative to the repo, nothing from the clock or the machine, and the notices in the
+header. Reasoning: surface architecture § 6.
+
+Satisfies: REQ-QMT-04, REQ-QMT-05, REQ-QMT-06, REQ-QMT-07, REQ-QMT-15
+
+### DSN-QMT-13 — A standalone HTML view of the judged graph
+
+`render/graph.py` projects the assessment — reach from the shared walks, findings from the
+catalogue — into one HTML document with its data, script and pinned library inline and a
+policy that denies connections; `infra/files.py` writes it only to a path that does not exist.
+Reasoning: the [local trace browser](../design/trace-browser.md).
+
+Satisfies: REQ-QMT-16
