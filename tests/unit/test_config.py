@@ -193,11 +193,17 @@ def test_an_unknown_key_in_the_schema_names_the_schema_file() -> None:
     assert stopped.what.startswith("qmstrace.schema.toml: unknown key 'projct'")
 
 
-def test_an_unknown_key_in_a_copy_names_the_repos_file(embed: Embed) -> None:
-    import tomllib
+def test_an_unknown_key_in_a_copy_names_the_repos_file() -> None:
+    from qmstrace.core import setup
 
     broken = SCHEMA.replace('project = "MINI"', 'project = "MINI"\nprojct = "x"')
-    stopped = refusal(embed(SERVICE, broken, digest=schema_digest(tomllib.loads(broken))), None)
+    held, lines = setup.held_schema(SERVICE), SERVICE.splitlines(keepends=True)
+    copy = (
+        "".join(lines[: held.start])
+        + setup.schema_block(broken, "MINI")
+        + "".join(lines[held.end :])
+    )  # written by hand: the transform itself refuses a schema the repo cannot load
+    stopped = refusal(copy, None)
     assert stopped.what.startswith("qmstrace.toml: unknown key 'schema.projct'")
 
 
@@ -398,3 +404,29 @@ def test_every_refusal_says_what_is_wrong_and_the_next_move(broken: str) -> None
     stopped = refusal(broken)
     assert stopped.what and stopped.next_move.startswith("Fix:")
     assert str(stopped) == f"{stopped.what} {stopped.next_move}"
+
+
+# ── 7. the schema copy's markers, and the ledger's file on its own ─────────────────────────
+
+
+def test_a_marked_copy_without_its_digest_is_refused() -> None:
+    from qmstrace.core import setup
+
+    copy = setup.copy_schema(
+        SERVICE, setup.held_schema(SERVICE), setup.schema_block(SCHEMA, "MINI")
+    )
+    assert TraceConfig.parse(copy).schema_form is SchemaForm.VERIFIED_COPY
+    undigested = re.sub(r'(?m)^digest = "sha256:[0-9a-f]+"\n', "", copy, count=1)
+    stopped = refusal(undigested, None)
+    assert "the qmstrace markers hold a generated copy" in stopped.what
+    assert "qmstrace ledger copy-schema" in stopped.next_move
+
+
+def test_the_ledgers_schema_is_read_on_its_own() -> None:
+    config = TraceConfig.of_schema(SCHEMA)
+    assert (config.project, config.repos) == (
+        "MINI",
+        {"service": "../service", "client": "../client"},
+    )
+    assert not any(t.declared_here for t in config.item_types.values())
+    assert config.schema_digest == TraceConfig.parse(SERVICE, SCHEMA).schema_digest

@@ -331,3 +331,29 @@ scenarios.
 | IDs mentioned in prose or diagrams, declared nowhere | nothing reported yet — M10 (T9) |
 | An item with no sub-heading and no decoration | its digest and title are unchanged by M9 |
 
+
+## M9b — the schema copy
+
+`qmstrace ledger copy-schema`, run in a ledger, writing into the product repos its schema
+names. Each line is at least one test.
+
+| Scenario | Expected |
+|---|---|
+| A product repo reading the schema by path | its `[schema]` becomes a marked, verified copy; every other byte kept; the parsed configuration equals the by-path one |
+| The same command run again | every repo `unchanged`; no byte written |
+| The ledger's rules changed since the last copy | the block is replaced; the line says *rules changed* with the old digest |
+| Only comments or layout changed in the ledger's schema | the block is replaced; *layout only — rules unchanged* |
+| An unmarked copy from before M9b (the beacon products) | the markers are added; the digest is unchanged |
+| A copy edited by hand (digest no longer matches) | replaced; the line says so |
+| `[subjects]` before `[schema]`, comments above the next table, CRLF line endings | the copy lands where `[schema]` was; the comment block stays with its table; line endings kept |
+| A `[` at the start of a line inside a multi-line array or string; `# [not a header]`; a quoted header `[ "schema" . links ]` | never taken for a header |
+| No repo names | every repo in `[repos]`; named repos: only those |
+| A name not in `[repos]`; a repo missing; no `qmstrace.toml` there | exit 2, naming each; nothing written in any repo |
+| A repo holding its own schema; a path to another schema; a copy of another project | exit 2 with the next move; nothing written |
+| Conflicting markers; schema tables split around other tables; `schema.x = …` at the root | exit 2; nothing written |
+| A copy whose begin marker is present but whose digest line was deleted | could not judge — a marked block is a copy (config) |
+| A second repo fails after the first was written | the first is restored; nothing is left half-written |
+| Run in a product repo | exit 2, naming the ledger; a product verb run in the ledger names the product repo |
+| `-C` before or after the command | the same bytes |
+| A product repo checked out alone after the copy | `check` judges it; external sources are *not verified* |
+| A baseline tag cut after the copy | the tagged configuration is read and judged; before the copy it could not be |

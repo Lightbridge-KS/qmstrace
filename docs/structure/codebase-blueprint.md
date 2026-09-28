@@ -67,7 +67,8 @@ src/qmstrace/
                          comparisons (M5a), suspect values and per-root reasons (M5b); no IO
     results.py           frozen report/result values; pure exact matching, run deduplication and
                          direct-verifies verdict aggregation (M4)
-    setup.py             pure managed-block and pytest-settings edits (M6)
+    setup.py             pure managed-block and pytest-settings edits (M6); the schema copy's
+                         block, what a configuration holds, and the proven replacement (M9b)
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned
   extract/               text in, items out — never a path, never a repo
@@ -87,7 +88,8 @@ src/qmstrace/
     externals.py         raw change-request directory reads (M5a). The agreement and siblings need
                          no module: they are read as WorkingTrees
     globbing.py          the one matcher, for every tree
-    files.py             contained setup writes with rollback; exclusive view output (M6/M7b)
+    files.py             contained setup writes with rollback, across several repos as one
+                         change (M9b); exclusive view output (M6/M7b)
   render/
     text.py              status, findings, rules, thread, impact, results; shared evidence text
     graph.py             deterministic assessment projection and standalone HTML (M7b)
@@ -215,6 +217,8 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | change which headings declare, or where an item ends | `extract/markdown.py` `_heading`, `_leading_id`, `_item_shaped` — and § Marker syntax v0 |
 | change how a baseline is chosen | `core/judge.py` `resolve_baselines` |
 | change what Git is asked | `infra/git.py` |
+| change how the project's schema is copied into a repo | `core/setup.py` `schema_block`, `held_schema`, `copy_schema` — `tests/unit/test_schema_copy.py`; which repos and refusals: `workspace.py` `Workspace.copy_schema` |
+| add a verb to a group (`ledger …`) | `cli.py` (the group's sub-app), `render/text.py`, goldens `<group>-<verb>-*.txt` and `help-<group>-<verb>.txt`, and the verb's help included in the group's page — the meta-tests fail without them |
 | change a command's output | `render/text.py` and its golden file — then `rg <golden> contents/` for the prose that frames it |
 | change which items a walk reaches, or in what order | `core/graph.py` `_walk` — `thread`, `impact` and suspects all render it; `tests/unit/test_graph.py` § walks pins the rules |
 | add a command | `cli.py` (wiring, and a `short_help` that fits the command list), `render/text.py`, goldens for its output and its help, a page in `contents/reference/commands/` — `test_catalogue.py`, `test_help.py` and `test_manual.py` fail without them |
@@ -231,6 +235,8 @@ deciding eligibility. The check failure predicate remains violations plus strict
   form exists, and findings are already data so that day is cheap.
 - **No fake Git.** A fake would encode assumptions about exactly the semantics under test.
 - **No database.** Until the ledger.
+- **No `Ledger` class.** `ledger copy-schema` is one classmethod on `Workspace`, like `init`;
+  a ledger-side object waits for the import, when the ledger holds state of its own.
 - **No plugin system.** Extractors are a registry by name inside the package until two exist
   outside it.
 - **No `utils.py`, no barrel re-exports.** `__init__.py` files are empty but for the version.
@@ -270,6 +276,9 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | ★ A citation this run cannot verify passes as *not verified here*; an ID of this repo's own pattern never does | `tests/unit/test_graph.py`, `tests/integration/test_workspace.py` |
 | ★ A suspect survives a touched file | `tests/integration/test_suspect_assessment.py` |
 | ★ An item is its section: an edit under a sub-heading of a frozen item is a change | `tests/integration/test_baselines.py` |
+| ★ A schema copy reads as the schema by path, keeps every other byte, and a second copy changes nothing | `tests/unit/test_schema_copy.py` |
+| ★ The schema is copied into every named repo or none | `tests/integration/test_copy_into_repos.py`, `tests/integration/test_files.py` |
+| ★ A group's every verb has an output golden, a help golden and its help on the group's page | `tests/test_catalogue.py`, `tests/cli/test_help.py`, `tests/test_manual.py` |
 | ★ A marker in a form the extractor does not read is reported — a stray named by its gap, or V16 — never silently dropped | `tests/unit/test_forms.py`, `tests/unit/test_graph.py` |
 | ★ An item with no sub-heading and no decorated heading keeps its title and digest across changes to the reading rules | `tests/unit/test_extract_markdown.py` § 7 |
 | ★ A near-miss (V16) never stops a baseline tag's tree being read; every other violation does | `tests/integration/test_baselines.py` |

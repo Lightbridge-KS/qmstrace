@@ -33,6 +33,16 @@ def test_every_command_has_a_golden(commands: list[str]) -> None:
     assert not missing, f"commands with no golden output in {GOLDEN}: {missing}"
 
 
+def test_every_verb_of_a_group_has_a_golden(subcommands: dict[str, list[str]]) -> None:
+    missing = [
+        f"{group} {verb}"
+        for group, verbs in subcommands.items()
+        for verb in verbs
+        if not list(GOLDEN.glob(f"{group}-{verb}-*.txt"))
+    ]
+    assert not missing, f"verbs with no golden output in {GOLDEN}: {missing}"
+
+
 # ── one scenario per code — the smallest text that emits it ────────────────────────────────
 
 REQ = "### REQ-SVC-01 — X\nStatement.\n- Category: security\n- Origin: AGR-1\n- Verify-by: test\n"

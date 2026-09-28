@@ -31,43 +31,57 @@ def contained(root: Path, relative: str) -> Path:
 
 def update_files(root: Path, edits: Mapping[str, str]) -> tuple[str, ...]:
     """Validate every destination first; restore earlier files if a write fails."""
-    paths = {name: contained(root, name) for name in edits}
+    return update_in({root: edits})[root]
+
+
+def update_in(changes: Mapping[Path, Mapping[str, str]]) -> dict[Path, tuple[str, ...]]:
+    """Several repos' files as one change: every destination in every root is validated
+    first, and a failed write restores every file already written — in any root."""
+    paths = {
+        (root, name): contained(root, name) for root, edits in changes.items() for name in edits
+    }
     if len(set(paths.values())) != len(paths):
         raise CouldNotJudge(
             "Setup targets resolve to the same file.", "Fix: give each managed file its own path."
         )
     try:
         original = {
-            name: path.read_bytes() if path.exists() else None for name, path in paths.items()
+            key: path.read_bytes() if path.exists() else None for key, path in paths.items()
         }
     except OSError as exc:
         raise CouldNotJudge(
             f"Cannot inspect setup destinations: {exc}", "Fix: restore readable regular files."
         ) from exc
-    changed = [name for name in edits if original[name] != edits[name].encode("utf-8")]
-    applied: list[str] = []
+    wanted = {(root, name): changes[root][name].encode("utf-8") for root, name in paths}
+    changed = [key for key in paths if original[key] != wanted[key]]
+    applied: list[tuple[Path, str]] = []
     try:
-        for name in changed:
-            _replace(paths[name], edits[name].encode("utf-8"))
-            applied.append(name)
+        for key in changed:
+            _replace(paths[key], wanted[key])
+            applied.append(key)
     except OSError as exc:
         failed = []
-        for name in reversed(applied):
+        for key in reversed(applied):
             try:
-                old = original[name]
+                old = original[key]
                 if old is None:
-                    paths[name].unlink()
+                    paths[key].unlink()
                 else:
-                    _replace(paths[name], old)
+                    _replace(paths[key], old)
             except OSError:
-                failed.append(name)
+                failed.append(str(paths[key]))
         raise CouldNotJudge(
             f"Setup could not write files: {exc}",
             "Fix: restore these files from version control: " + ", ".join(failed)
             if failed
             else "Fix: check destination permissions; previous files were restored.",
         ) from exc
-    return tuple(f"{'updated' if name in changed else 'unchanged'}: {name}" for name in edits)
+    return {
+        root: tuple(
+            f"{'updated' if (root, name) in changed else 'unchanged'}: {name}" for name in edits
+        )
+        for root, edits in changes.items()
+    }
 
 
 def write_new(path: Path, content: str) -> None:

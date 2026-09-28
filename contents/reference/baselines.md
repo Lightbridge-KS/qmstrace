@@ -36,8 +36,9 @@ The schema must be embedded or stored in the **same tagged Git tree**. A histori
 as `../ledger/qmstrace.schema.toml` cannot be resolved from today's ledger: that would substitute
 unverified rules for historical evidence. Such a baseline causes exit `2`.
 
-For future baselines, arrange a generated schema copy or a schema file in the product's Git
-tree before the tag is cut. Existing tags are not rewritten automatically. A project adopting
+For future baselines, give the product repo the project's schema before the tag is cut: run
+`qmstrace ledger copy-schema` in the ledger and commit the copy — see
+[share the project's schema](../how-to/share-the-schema.md). Existing tags are not rewritten automatically. A project adopting
 this arrangement establishes its next approved baseline under its normal review process;
 the tool does not retroactively certify older changes.
 

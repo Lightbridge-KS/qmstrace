@@ -17,6 +17,7 @@ Commands:
   rules    What check holds this repo to, and whose each rule is.
   init     Set up trace configuration, agent guidance and pytest markers.
   graph    Write an offline, interactive view of the local trace graph.
+  ledger   The project side's verbs — run them in the ledger repo.
 
   Exit codes:
     0  completed — informational views may include failures

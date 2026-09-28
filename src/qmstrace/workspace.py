@@ -14,8 +14,9 @@ from __future__ import annotations
 import os
 import posixpath
 import re
+import tomllib
 from collections import Counter
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, replace
 from importlib.resources import files
 from pathlib import Path
@@ -33,7 +34,7 @@ from qmstrace.extract import change_requests, junit
 from qmstrace.extract.base import FORMS, REGISTRY
 from qmstrace.extract.pytest_tests import report_identity
 from qmstrace.infra.externals import request_files
-from qmstrace.infra.files import contained, read_optional, update_files, write_new
+from qmstrace.infra.files import contained, read_optional, update_files, update_in, write_new
 from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.globbing import matches
 from qmstrace.infra.tree import GitTree, ISourceTree, WorkingTree
@@ -157,6 +158,76 @@ class Workspace:
                 section = "tool.pytest.ini_options" if source is not None else "pytest"
                 edits[name] = setup.register_marker(name, source or "", section)
         return update_files(root, edits)
+
+    @classmethod
+    def copy_schema(
+        cls, start: Path, names: Sequence[str] = ()
+    ) -> tuple[TraceConfig, tuple[setup.Copied, ...]]:
+        """In the ledger: write the project's schema into its product repos as a verified copy —
+        every named repo, or every repo in [repos]; all of them, or none (D9)."""
+        ledger = _find_ledger(start)
+        schema_text = read_optional(ledger / SCHEMA_FILE) or ""
+        config = TraceConfig.of_schema(schema_text)
+        if not config.repos:
+            raise CouldNotJudge(
+                f"{SCHEMA_FILE} names no product repos under [repos], so there is nowhere to "
+                "copy it.",
+                'Fix: add each product repo under [repos] — name = "../path" — then copy again.',
+            )
+        unknown = [name for name in names if name not in config.repos]
+        if unknown:
+            raise CouldNotJudge(
+                f"{', '.join(unknown)} {'is' if len(unknown) == 1 else 'are'} not in the "
+                f"schema's [repos] (it names: {', '.join(sorted(config.repos))}).",
+                "Fix: name a repo the schema lists, or add it under [repos] first — a repo the "
+                "project does not list cannot carry its rules.",
+            )
+        block = setup.schema_block(schema_text, config.project)
+        source = (ledger / SCHEMA_FILE).resolve()
+        problems: list[str] = []
+        planned: list[tuple[Path, str, setup.Copied]] = []
+        for name in dict.fromkeys(names) if names else sorted(config.repos):
+            place = config.repos[name]
+            root, shown = (ledger / place).resolve(), posixpath.join(place, CONFIG_FILE)
+            local = read_optional(root / CONFIG_FILE) if root.is_dir() else None
+            if local is None:
+                problems.append(f"{name}: there is no {shown}")
+                continue
+            try:
+                held = setup.held_schema(local, shown)
+                if held.kind == "own":
+                    problems.append(
+                        f"{name}: {shown} holds a schema of its own — replace its [schema] "
+                        f'with path = "…" to this ledger\'s {SCHEMA_FILE} first'
+                    )
+                    continue
+                if held.kind == "path" and (root / (held.path or "")).resolve() != source:
+                    problems.append(
+                        f"{name}: {shown} reads the schema at {held.path}, not this ledger's "
+                        f"{SCHEMA_FILE}"
+                    )
+                    continue
+                if held.kind == "copy" and held.project not in (None, config.project):
+                    problems.append(
+                        f"{name}: {shown} carries project {held.project}'s schema, not "
+                        f"{config.project}'s"
+                    )
+                    continue
+                updated = setup.copy_schema(local, held, block, shown)
+            except CouldNotJudge as stopped:
+                problems.append(f"{name}: {stopped.what} {stopped.next_move}")
+                continue
+            before = setup.before_copy(held, config.schema_digest)
+            planned.append((root, updated, setup.Copied(name, shown, updated != local, before)))
+        if problems:
+            raise CouldNotJudge(
+                "the schema could not be copied into every repo, so nothing was written — "
+                + "; ".join(problems)
+                + ".",
+                "Fix: deal with each repo named above, then run qmstrace ledger copy-schema again.",
+            )
+        update_in({root: {CONFIG_FILE: text} for root, text, _ in planned})
+        return config, tuple(copied for _, _, copied in planned)
 
     @staticmethod
     def save_view(path: Path, content: str) -> None:
@@ -468,12 +539,37 @@ def _find_root(start: Path) -> Path:
                 f"{folder} is a project's ledger repo — it holds {SCHEMA_FILE} — and this "
                 "command runs in a product repo.",
                 "Fix: run it in one of the project's product repos (the schema's [repos] names "
-                "them), or point at one with -C <path>.",
+                "them), or point at one with -C <path>; the ledger's own verbs are under "
+                "qmstrace ledger.",
             )
     raise CouldNotJudge(
         f"there is no {CONFIG_FILE} in {here} or any folder above it, so this is not a traced "
         "product repo.",
         "Fix: run qmstrace inside a product repo, or point at one with -C <path>.",
+    )
+
+
+def _find_ledger(start: Path) -> Path:
+    here = Path(os.path.abspath(start))
+    for folder in (here, *here.parents):
+        if (folder / SCHEMA_FILE).is_file():
+            return folder
+        if (folder / CONFIG_FILE).is_file():
+            try:
+                pointer = tomllib.loads((folder / CONFIG_FILE).read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, tomllib.TOMLDecodeError):
+                pointer = {}
+            ledger = pointer.get("ledger")
+            where = f" — its ledger is at {ledger}" if isinstance(ledger, str) else ""
+            raise CouldNotJudge(
+                f"{folder} is a product repo{where} — and this command runs in the project's "
+                "ledger repo.",
+                f"Fix: run it where {SCHEMA_FILE} is, or point there with -C <path>.",
+            )
+    raise CouldNotJudge(
+        f"there is no {SCHEMA_FILE} in {here} or any folder above it, so this is not a "
+        "project's ledger repo.",
+        "Fix: run qmstrace ledger inside the ledger repo, or point at it with -C <path>.",
     )
 
 

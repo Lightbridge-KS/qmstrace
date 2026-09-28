@@ -17,6 +17,7 @@ from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
 from qmstrace.core.graph import Closure, Direction, Home, Node, Step
 from qmstrace.core.model import Finding, Item
 from qmstrace.core.results import Results, TargetResult, TestResult
+from qmstrace.core.setup import Copied
 
 # `status` lists one item type line by line, and reads two of its fields by name. A known
 # hard-coding (codebase blueprint § 8): every trace schema so far calls them this.
@@ -807,6 +808,22 @@ def _result(assessment: Assessment, *, strict: bool) -> str:
     ) and not assessment.baseline_state.register.available:
         parts.append("change requests NOT VERIFIED")
     return " · ".join(parts)
+
+
+def schema_copies(config: TraceConfig, copies: Iterable[Copied]) -> str:
+    """What `ledger copy-schema` did: the schema it copied, then one line per repo."""
+    written = list(copies)
+    lines = [f"schema: {config.project} {config.schema_digest}"]
+    for copy in written:
+        if copy.changed:
+            lines.append(f"updated: {copy.repo} — {copy.file}, {copy.before}")
+        else:
+            lines.append(f"unchanged: {copy.repo} — {copy.file}")
+    if any(copy.changed for copy in written):
+        lines.append("Commit qmstrace.toml in each updated repo. Exit 0.")
+    else:
+        lines.append("Every repo already carries this schema. Exit 0.")
+    return "\n".join(lines)
 
 
 def evidence(assessment: Assessment) -> tuple[str, ...]:

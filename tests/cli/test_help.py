@@ -39,6 +39,14 @@ def test_every_command_has_a_help_golden(
         golden(GOLDEN / f"help-{name}.txt", help_of(name))
 
 
+def test_every_verb_of_a_group_has_a_help_golden(
+    subcommands: dict[str, list[str]], golden: Callable[[Path, str], None]
+) -> None:
+    for group, verbs in subcommands.items():
+        for verb in verbs:
+            golden(GOLDEN / f"help-{group}-{verb}.txt", help_of(group, verb))
+
+
 @pytest.mark.parametrize("code", [0, 1, 2, 3])
 def test_every_exit_code_is_explained(code: int) -> None:
     assert f"\n    {code}  " in help_of()

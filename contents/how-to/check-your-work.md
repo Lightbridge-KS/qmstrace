@@ -50,8 +50,9 @@ The gap stands until the repo declares that type, or the item is met in another 
 project and judged when the ledger imports it. Under `--strict` it fails, on purpose: the
 project's rules say so, and no exemption is hidden.
 
-!!! note "Not built yet"
+## In a pipeline
 
-    Running this gate in a pipeline needs a copy of the project's trace schema inside the repo,
-    generated and verified; nothing generates it yet. Until then the gate runs where the ledger
-    repo is checked out beside the product repo — on your machine.
+A pipeline checks out the product repo alone, so the repo must carry the project's trace schema
+itself — a generated, verified copy, made in the ledger by `qmstrace ledger copy-schema`. See
+[share the project's schema](share-the-schema.md). The agreement and change requests are then
+reported as *not verified*; they are judged at the ledger's import.

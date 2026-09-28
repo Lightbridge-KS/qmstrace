@@ -9,8 +9,9 @@
 1. In a new product root, run `qmstrace init --subject service --key SVC`.
    For an existing traced repo, run `qmstrace init` without subject options.
 2. Review `qmstrace.toml`. Match file patterns, test levels and required fields to the
-   repository. When joining a project, use its [trace schema](../reference/configuration.md)
-   rather than replacing its rules with the starter's defaults.
+   repository. When joining a project, point `[schema]` at its [trace schema](../reference/configuration.md)
+   by path rather than keeping the starter's defaults, then have the project side copy the
+   schema in — [share the project's schema](share-the-schema.md).
 3. Configure the actual origin sources, request register and baseline tag patterns when
    needed. Keep historical schemas recoverable from the tagged tree; see
    [baselines](../reference/baselines.md).

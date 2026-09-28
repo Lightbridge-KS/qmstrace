@@ -1,0 +1,4 @@
+schema: MINI sha256:be2233006ff50d90aebbe2db771dd6475ce858057b6d80eb951f3643cf022288
+unchanged: client — ../client/qmstrace.toml
+unchanged: service — ../service/qmstrace.toml
+Every repo already carries this schema. Exit 0.

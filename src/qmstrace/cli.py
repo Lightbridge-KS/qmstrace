@@ -239,6 +239,40 @@ def init(
     return EXIT_OK
 
 
+ledger = typer.Typer(
+    no_args_is_help=True,
+    add_completion=False,
+    rich_markup_mode=None,
+    help="The project side's verbs — run them in the ledger repo, where qmstrace.schema.toml is.",
+)
+app.add_typer(
+    ledger, name="ledger", short_help="The project side's verbs — run them in the ledger repo."
+)
+
+
+@ledger.command("copy-schema", short_help="Copy the project's trace schema into its product repos.")
+@outcome
+def copy_schema(
+    ctx: typer.Context,
+    repos: Annotated[
+        list[str] | None,
+        typer.Argument(
+            metavar="REPO…", help="Repos the schema names under [repos]; default: every one."
+        ),
+    ] = None,
+    directory: Directory = None,
+) -> int:
+    """Write the project's trace schema into each product repo as a generated, verified copy.
+
+    The copy sits between qmstrace markers in the repo's qmstrace.toml; every other byte is
+    kept. All the repos, or none: a problem in any names every problem and writes nothing.
+    A second run changes nothing. Commit the updated qmstrace.toml in each repo.
+    """
+    config, copies = Workspace.copy_schema(_directory(ctx, directory), repos or ())
+    typer.echo(text.schema_copies(config, copies))
+    return EXIT_OK
+
+
 @app.command(short_help="Write an offline, interactive view of the local trace graph.")
 @outcome
 def graph(
