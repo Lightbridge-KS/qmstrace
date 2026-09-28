@@ -40,8 +40,9 @@ must be edited explicitly; setup never renames existing item identities.
   `../../.agents/skills/qmstrace`, so Claude Code lists the skill as well. It is created once
   and then left alone; anything else at that path, or a `.claude/skills` that is a file, is
   refused before any write. No link is written when `.claude/skills` and `.agents/skills`
-  are already one folder, or when `.claude` or `.claude/skills` links elsewhere. No global
-  agent configuration is changed.
+  are already one folder, or when `.claude` or `.claude/skills` links elsewhere. Where
+  symbolic links cannot be created — some Windows setups — nothing at all is written. No
+  global agent configuration is changed.
 - The selected root pytest configuration: register `verifies` while preserving other settings.
   Selection follows pytest's root-file priority: `pytest.toml`, `.pytest.toml`, `pytest.ini`,
   `.pytest.ini`, configured `pyproject.toml`, `tox.ini`, `setup.cfg`. Otherwise add to an existing

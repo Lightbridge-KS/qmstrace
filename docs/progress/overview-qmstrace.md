@@ -72,12 +72,24 @@ Code lists it too; the stanza keeps pointing at it for every other agent.
   the link is create-only — setup never replaces what it did not write; a copy in the old
   home is refused with a next move, never deleted. The options that lost are recorded in the
   surface doc.
-- [ ] `infra/files.py` writes a create-only link inside the one change with rollback;
-  `init`'s policy, the stanza's pointer, tests and goldens.
-- [ ] Surface doc, blueprint and glossary.
-- [ ] Manual: the `init` reference and the set-up how-to.
-- [ ] This repo moves its copy and gains the link.
-- [ ] Discovery end to end: in a fresh clone, Claude Code and Codex each list the skill.
+- [x] `infra/files.py` writes a create-only link inside the one change with rollback;
+  `init`'s policy, the stanza's pointer, tests and goldens; this repo moves its copy and gains
+  the link, held by the own-trace meta-test. `874b189`
+- [x] Surface doc, with the decision and the options that lost; blueprint; glossary. `8308859`
+- [x] Manual: the `init` reference, with the output from a repo that has `.claude/`, and the
+  set-up how-to. `83c354c`
+- [x] Discovery end to end, in a fresh clone of the branch outside the workspace: Claude Code
+  2.1.283 lists `qmstrace` (as a bare name — its listing drops some descriptions in a setup
+  with many skills), and Codex 0.144.4's rendered prompt lists it with its description
+  shortened to its skills budget. In a clone of `main` before the move, neither lists it.
+- [ ] Merge; the dry gate and the deploy preview on the pull request.
+
+**M9c evidence, 2026-09-28** (`feat/m9c-skill-home`, local): `just dry` passed with 746
+Python tests at 99.05% coverage, four Node tests, strict types, wheel assets and a strict
+manual build; the built `init` page shows the new output. Four mutations each failed their
+test and were restored: the link's literal-target comparison, the old-home refusal, the alias
+check under a link, and the link's rollback. `qmstrace check` with the pinned tool: 0
+violations, 26 gaps, 426 items. Raw record: `_playground/2026-09-28_skill-location/` (local).
 
 ## Later — M10 · mentions
 

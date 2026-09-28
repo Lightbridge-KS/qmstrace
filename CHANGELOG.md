@@ -8,6 +8,9 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- `init` links `.claude/skills/qmstrace` to the installed skill when the repo already has a
+  `.claude/` folder, so Claude Code lists it. The link is created once and left alone;
+  anything else at that path is refused before any write.
 - `ledger copy-schema [REPO…]`, the first verb of the `ledger` group: run in the ledger, it
   writes the project's trace schema into each product repo as a generated, verified copy
   between `# qmstrace:begin` / `# qmstrace:end`, keeping every other byte. All repos or
@@ -103,8 +106,10 @@ All notable changes to this project are recorded here. The format follows
 - A second `Change:` line in an item names the first.
 - While the schema copy's begin marker stands, `[schema]` must carry its digest; an unmarked
   copy from before stays valid.
-- The shipped skill states these rules. A repo that installed the previous skill must remove
-  `.qmstrace/skill/SKILL.md` before `init` refreshes it.
+- The shipped skill states these rules.
+- `init` installs the skill at `.agents/skills/qmstrace/SKILL.md`, the folder a coding
+  agent's harness reads for a repo's skills; the stanza points there. A repo set up earlier
+  keeps a copy in `.qmstrace/skill/`, and `init` refuses until `.qmstrace/` is removed.
 
 ### Fixed
 
