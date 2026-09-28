@@ -1,0 +1,19 @@
+# This product repo's TRACE CONFIGURATION. It holds code and tests only: the requirements and
+# the design it implements are in the project's ledger, and its markers cite them by ID.
+#
+# What does NOT belong here: rules, or the documents. Both are the ledger's.
+
+version = 1
+ledger  = "../ledger"               # where the agreement, the change requests and the documents are
+
+[schema]                            # by path, as repos side by side read it
+path = "../ledger/qmstrace.schema.toml"
+
+[items.component]                   # ID = the module's path
+extractor = "python-module"
+files     = ["src/**/*.py"]
+ignore    = ["**/__init__.py"]
+
+[items.test_case]                   # ID = the test function's node id
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]

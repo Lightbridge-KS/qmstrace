@@ -21,6 +21,7 @@ from qmstrace.core.config import TraceConfig
 collect_ignore_glob = ["fixtures/*"]
 
 MINI = Path(__file__).parent / "fixtures" / "mini"
+SPLIT = Path(__file__).parent / "fixtures" / "split"
 
 
 def mini_text(*parts: str) -> str:
@@ -128,15 +129,27 @@ def make_repo(git_env: None) -> Callable[[Path], Path]:
     return _make_repo
 
 
+def _copied(source: Path, base: Path) -> Path:
+    """A fixture project copied into `base`, every top-level folder a real Git repository."""
+    shutil.copytree(source, base)
+    for repo in sorted(base.iterdir()):
+        _make_repo(repo)
+    return base
+
+
 @pytest.fixture
 def project(tmp_path: Path, git_env: None) -> Path:
     """The fixture project copied into a temporary folder — ledger, service, client and solo
     side by side, each a real Git repository. Returns the folder that holds them."""
-    base = tmp_path / "work"
-    shutil.copytree(MINI, base)
-    for repo in sorted(base.iterdir()):
-        _make_repo(repo)
-    return base
+    return _copied(MINI, tmp_path / "work")
+
+
+@pytest.fixture
+def split(tmp_path: Path, git_env: None) -> Path:
+    """The fixture project in the layout of ADR-0001 — a traced ledger holding the documents,
+    and product repos holding code and tests — copied and made Git repositories. Returns the
+    folder that holds them."""
+    return _copied(SPLIT, tmp_path / "split")
 
 
 @pytest.fixture

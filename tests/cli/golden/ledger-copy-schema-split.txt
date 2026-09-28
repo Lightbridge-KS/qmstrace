@@ -1,0 +1,5 @@
+schema: SPLIT sha256:8b0e04e900bfe56130658d17bd9197fc14414cea6e16300f7c107d32460a1ab4
+updated: client — ../client/qmstrace.toml, was by path
+skipped: ledger — the ledger itself; its qmstrace.toml reads qmstrace.schema.toml by path
+updated: service — ../service/qmstrace.toml, was by path
+Commit qmstrace.toml in each updated repo. Exit 0.

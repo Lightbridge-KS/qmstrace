@@ -23,7 +23,8 @@ ROOT = Path(__file__).parents[2]
 CONTENTS = ROOT / "contents"
 TESTS = ROOT / "tests"
 MANUAL_GOLDEN = TESTS / "manual"
-INCLUDABLE = ("cli/golden/", "manual/", "fixtures/mini/")  # relative to tests/, the base path
+# Relative to tests/, the base path.
+INCLUDABLE = ("cli/golden/", "manual/", "fixtures/mini/", "fixtures/split/")
 SNIPPET = re.compile(r'--8<--\s+"([^"]+)"')
 PAGES = sorted(p.relative_to(CONTENTS).as_posix() for p in CONTENTS.rglob("*.md"))
 

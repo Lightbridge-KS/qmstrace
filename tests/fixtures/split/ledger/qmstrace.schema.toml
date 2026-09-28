@@ -1,0 +1,102 @@
+# The project's TRACE SCHEMA — one project's declaration, authored here in the ledger repo and
+# shared by every repo of the project. A product repo either points at this file or carries a
+# generated, verified copy of it; this ledger reads it by path.
+#
+# The layout of ADR-0001: this ledger holds the documents — the requirements and the design —
+# and is traced itself, so it lists itself under [repos] as ".". The product repos hold the
+# code and the tests, and their markers cite the ledger's IDs.
+#
+# Paths in this file are relative to the ledger's root.
+
+version = 1
+project = "SPLIT"
+
+[repos]                             # every repo of this project — this ledger included
+ledger  = "."
+service = "../service"
+client  = "../client"
+
+# ── item types the project knows; a repo declares the ones it has ─────────────────────────
+[item_types.requirement]
+required = ["Category", "Origin", "Verify-by"]
+
+[item_types.requirement.values]     # allowed values of a field
+Category    = ["functional-suitability", "performance-efficiency", "compatibility", "usability", "reliability",
+               "maintainability", "portability", "security", "design-constraint", "legal-regulatory"]
+"Verify-by" = ["test", "inspection", "analysis"]
+
+[item_types.design_element]
+[item_types.component]
+
+[item_types.test_case]
+levels = ["unit", "integration", "system"]
+
+# ── link types — a field whose name is a link marker IS the link; all are many-to-many ────
+[links]
+Origin     = { from = ["requirement"],                   to = ["origin_clause"] }
+Satisfies  = { from = ["design_element"],                to = ["requirement"] }
+Implements = { from = ["component"],                     to = ["design_element"] }
+verifies   = { from = ["test_case"],                     to = ["requirement", "design_element"] }
+Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
+
+# ── coverage rules — an unmet rule is a gap ───────────────────────────────────────────────
+[[rules]]
+code  = "G01"
+item  = "requirement"
+needs = "incoming:Satisfies"
+text  = "no design element satisfies it yet."
+
+[[rules]]
+code  = "G02"
+item  = "requirement"
+where = { "Verify-by" = "test" }
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[rules]]
+code  = "G03"
+item  = "design_element"
+needs = "incoming:Implements"
+text  = "no component implements it yet."
+
+[[rules]]
+code  = "G04"
+item  = "design_element"
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[rules]]
+code  = "G05"
+item  = "design_element"
+needs = "outgoing:Satisfies"
+text  = "satisfies no requirement — every design element points back to one."
+
+[[rules]]
+code  = "G06"
+item  = "component"
+needs = "outgoing:Implements"
+text  = "implements no design element — every component points back to one."
+
+[[rules]]
+code  = "G07"
+item  = "test_case"
+needs = "outgoing:verifies"
+text  = "verifies nothing."
+
+# ── what is declared outside the traced items: cited, declared in this ledger ─────────────
+[externals.agreement]
+item_type   = "origin_clause"
+prefix      = "AGR-"
+source      = "agreement.md"
+declared_as = '^\s*[-*]\s+\*\*(AGR-\d+)\*\*'
+
+[change_requests]
+prefix   = "CR-"
+source   = "change-requests"        # one file per request: CR-NNN.md
+accepted = "accepted"
+
+# ── baselines — tags this ledger already cuts; they freeze the documents it holds ─────────
+[baselines.requirements]
+tag     = '^baseline/requirements/(?P<n>\d+)$'
+covers  = ["requirement", "design_element"]
+subject = "*"

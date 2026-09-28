@@ -357,3 +357,5 @@ names. Each line is at least one test.
 | `-C` before or after the command | the same bytes |
 | A product repo checked out alone after the copy | `check` judges it; external sources are *not verified* |
 | A baseline tag cut after the copy | the tagged configuration is read and judged; before the copy it could not be |
+| The ledger listed as itself (`ledger = "."`, ADR-0001) | skipped, never written or refused — its `qmstrace.toml` stays byte for byte; named alone, nothing is copied |
+| A ledger whose `qmstrace.toml` already holds a copy of its own schema | skipped; the line says to replace that `[schema]` with `path = "qmstrace.schema.toml"` |

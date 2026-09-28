@@ -9,6 +9,8 @@ The load-bearing claims, each pinned by a test:
 3. A repo that carries the copy is judged alone, with no ledger beside it.
 4. A baseline tag cut after the copy is read and judged; one cut while the repo read its
    schema by path cannot be — which is why the copy comes first.
+5. A ledger that holds the documents lists itself under [repos] as "."; it reads the schema it
+   holds by path, so the copy skips it — and says how to undo a copy an older run wrote there.
 """
 
 import shutil
@@ -165,3 +167,39 @@ def test_outside_any_ledger_it_says_where_to_run(tmp_path: Path) -> None:
     with pytest.raises(CouldNotJudge) as caught:
         Workspace.copy_schema(tmp_path)
     assert "is not a project's ledger repo" in caught.value.what
+
+
+# ── 5. the ledger listed as itself ─────────────────────────────────────────────────────────
+
+
+@pytest.mark.verifies("REQ-QMT-13")
+def test_the_ledger_listed_as_itself_is_skipped(split: Path) -> None:
+    own = (split / "ledger" / "qmstrace.toml").read_bytes()
+    _, copies = Workspace.copy_schema(split / "ledger")
+    assert [(c.repo, c.skipped, c.changed) for c in copies] == [
+        ("client", False, True),
+        ("ledger", True, False),
+        ("service", False, True),
+    ]
+    assert (split / "ledger" / "qmstrace.toml").read_bytes() == own
+    assert "# qmstrace:begin" in config_of(split, "service")
+
+
+def test_named_alone_the_ledger_is_skipped_and_nothing_is_written(split: Path) -> None:
+    before = {repo: config_of(split, repo) for repo in ("ledger", "service", "client")}
+    _, copies = Workspace.copy_schema(split / "ledger", ["ledger"])
+    assert [(c.repo, c.skipped) for c in copies] == [("ledger", True)]
+    assert {repo: config_of(split, repo) for repo in before} == before
+
+
+def test_a_ledger_holding_a_copy_of_its_own_schema_is_told_how_to_undo_it(
+    split: Path, embed
+) -> None:
+    ledger = split / "ledger"
+    schema = (ledger / "qmstrace.schema.toml").read_text(encoding="utf-8")
+    damaged = embed(config_of(split, "ledger"), schema)  # what an older copy-schema wrote here
+    (ledger / "qmstrace.toml").write_text(damaged, encoding="utf-8")
+    _, copies = Workspace.copy_schema(ledger, ["ledger"])
+    assert copies[0].skipped
+    assert 'replace that [schema] with path = "qmstrace.schema.toml"' in copies[0].before
+    assert config_of(split, "ledger") == damaged

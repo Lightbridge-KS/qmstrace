@@ -53,6 +53,16 @@ After the project's rules changed, for one repo:
 A repo's line says what it held before: *was by path*, *rules changed* with the old digest,
 *layout only — rules unchanged*, *replaced a copy edited by hand*, *was an empty [schema]*.
 
+**A ledger that holds the project's documents lists itself** under `[repos]` as `"."`: it is
+traced like its product repos, and reads the schema it holds by path. The copy skips it:
+
+``` text
+--8<-- "cli/golden/ledger-copy-schema-split.txt"
+```
+
+A ledger whose `qmstrace.toml` already holds a copy of its own schema is skipped too, and its
+line says to replace that `[schema]` with `path = "qmstrace.schema.toml"`.
+
 **Refused, and nothing written in any repo:** a repo that is missing or has no `qmstrace.toml`;
 one holding a schema of its own — replace its `[schema]` with a `path` to the ledger first; one
 reading another schema; one carrying another project's copy; conflicting markers, or schema

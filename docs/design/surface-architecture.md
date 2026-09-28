@@ -476,6 +476,13 @@ every repo's problem and writes nothing; the next move says what to change by ha
 repo holding its own schema, replace its `[schema]` with a `path` to the ledger first. The
 copy is written, never committed: the product repo's pull request carries the diff.
 
+**The ledger listed as itself (M10·0, ADR-0001).** A `[repos]` entry that resolves to the
+ledger — `ledger = "."` — is skipped, named or not, and never refused: the ledger reads the
+schema it holds by path. Its line is `skipped: ledger — the ledger itself; …`, saying either
+that its `qmstrace.toml` reads the schema by path, or — where an older run wrote a copy there —
+that its `[schema]` should be replaced with `path = "qmstrace.schema.toml"`. When nothing but
+the ledger was named, the closing line is `Nothing was copied. Exit 0.`
+
 **Rejected:** a `--check` mode before the ledger has a pipeline of its own; stamping the
 ledger's commit into the block, which would make every run a change.
 
