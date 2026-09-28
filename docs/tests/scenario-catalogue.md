@@ -328,7 +328,7 @@ scenarios.
 | A marker the item type does not carry, in its sub-section | V04 |
 | A fenced example holding a shorter fence of its own | the outer fence stays open until its own closing line |
 | A table and a Mermaid diagram inside an item; bold field keys; front matter; a field inside a fence | unchanged: item text; read; ignored; ignored (T1, T6b, T10, T11) |
-| IDs mentioned in prose or diagrams, declared nowhere | nothing reported yet — M10 (T9) |
+| IDs mentioned in prose or diagrams, declared nowhere | nothing reported yet — M11 (T9) |
 | An item with no sub-heading and no decoration | its digest and title are unchanged by M9 |
 
 

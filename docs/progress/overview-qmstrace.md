@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes; next M10 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); next M10, the project-wide check, then M11 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -9,16 +9,67 @@ read_when:
 # qmstrace — progress
 
 **Updated 2026-09-28 · Slice 1, the product-repo half: landed.** Now: [real-world
-use](#now--real-world-use). Next: [M10 · mentions](#next--m10--mentions). Commit hashes locate
-work. Verification claims refer to checks that were actually run.
+use](#now--real-world-use). Next: [M10 · the project-wide check](#next--m10--the-project-wide-check),
+then M11 · mentions. Commit hashes locate work. Verification claims refer to checks that were actually run.
 
 ## Now — real-world use
 
 qmstrace is applied to real development in the developer's own workflow, and reshaped by what
-that use finds. The first target is not yet chosen. Findings become issues, and changes to
-settled design go through the design docs.
+that use finds. Findings become issues, and changes to settled design go through the design docs.
+The first real project is not yet chosen.
 
-## Next — M10 · mentions
+**Target layout — [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md), 2026-09-28:**
+- **The ledger repo holds the documents:** the SRS and the design documents, beside the
+  agreement, the change requests and the schema. It is traced itself, and lists itself in
+  `[repos]` as `"."`.
+- **Product repos hold code and tests.** Their markers cite the ledger's IDs.
+
+The engine already supports this layout for authoring and for each repo's own check. The
+checks that need the whole project fail, and the ADR has the evidence.
+
+## Next — M10 · the project-wide check
+
+Verbs run in the ledger repo: `qmstrace ledger check|thread|impact`. They read the working
+tree of every repo listed in `[repos]`, the ledger itself included, and judge them as one
+project. This is the first half of the ledger's import at pins (D2). Planned 2026-09-28.
+
+**Decided:**
+- **Plain commands keep their scope.** `check`, `thread` and `impact` still mean "this repo".
+- **The ledger's gate is `ledger check --strict`.** Its own `check` is unchanged, and the fix
+  text of its G02–G04 points at `ledger check`.
+- **Derived IDs are qualified as `<repo>:<id>`** in the project view, e.g.
+  `gateway:tests/unit/test_config.py::test_x`. Authored IDs never are. Locations are paths as
+  seen from the ledger.
+- **Each repo is built against the others, then the parts are joined.** The checks that depend
+  on one repo's configuration stay per repo. Coverage, walks and suspects run on the union.
+- **Exit 2 if any listed repo cannot be read or holds rules other than the ledger's schema.** A
+  repo that was not read would make "0 violations" a false pass.
+- **Cross-repo suspects are reported, labelled *current reach only · not pinned*.** Whether a
+  cross-repo dependant was edited is unknown until pins exist.
+- **Requirements:** REQ-QMT-17 (the check, with suspects) and REQ-QMT-18 (the walks), both
+  under CR-001 in `qmstrace-ledger`, which the developer accepts. Design element DSN-QMT-14.
+- **Acceptance:** on the new test bed `<workspace>/_tests/beacon-split/`, cloned from
+  `beacon-engine` and never pushed back. The measures are fixed in
+  [beacon-split](../tests/beacon-split.md) before the run.
+
+**Checklist:**
+- [ ] CR-001 drafted as `evaluated`, then accepted by the developer
+- [ ] **M10·0**, a pull request:
+  - the fixture `tests/fixtures/split/`, in the ADR layout, with a colliding derived ID;
+  - `ledger copy-schema` skips `"."`.
+- [ ] **M10a**, a pull request:
+  - `ledger check [--strict] [--quiet]`: the union, coverage across repos, per-repo violations,
+    refusals and cross-repo suspects;
+  - the fix text;
+  - REQ-QMT-17 and DSN-QMT-14;
+  - the docs the ADR lists;
+  - the manual: the `ledger check` reference, `how-to/check-the-project.md`, and *Around the
+    repo* rewritten.
+- [ ] **M10b**, a pull request: `ledger thread` and `ledger impact` across repos, and
+  REQ-QMT-18.
+- [ ] Acceptance on beacon-split: A1–A9 and A11–A13 after M10a; A10 after M10b.
+
+## After — M11 · mentions
 
 Every token with a configured prefix in a scanned file (prose, table or Mermaid) must exist; a
 dangling one is a violation, like V03. Only configured prefixes count, since `SHA-256`, `UTF-8`
@@ -61,7 +112,8 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
 ## Open from landed work
 
 - **Not verified:** the M9 how-to page as deployed; the local browser opened from a file; the
-  manual's production deployment since M5a; `init` without symbolic links.
+  manual's production deployment since M5a; `init` without symbolic links; whether Claude Code
+  and Codex load `AGENTS.md` and skills from a folder added to a session (ADR-0001).
 - **Filed:**
   - #16 `init` should replace an unedited earlier skill copy. The issue's text still names the
     skill's old home.
@@ -79,6 +131,8 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
   - `check` repeats G06's fix once per module.
   - `results` prints about 42 KB and names no report location.
 - **Not filed, engine:**
+  - `ledger copy-schema` rewrites the ledger's own `qmstrace.toml` into a copy of its own schema
+    when `[repos]` lists `"."`. In M10's scope.
   - Recognise the same repo by its Git common dir.
   - Stale comments in the beacon test bed's configurations.
 - **Ledger side:**
@@ -100,6 +154,15 @@ the stand-in's defects returns ([scenario catalogue](../tests/scenario-catalogue
     recorded inspection basis, cross-repo questions.
   - Persistence: the AST digest format, derived-ID renames, an accepted-request index. See the
     [PRD open questions](../req/qmstrace-prd.md#open-questions) and D7/D9.
+- **After M10:**
+  - pins: `ledger import NAME@PIN`, the trace lock, and the edit state of cross-repo
+    dependants;
+  - `init` in a ledger directory, with a stanza that names `ledger check --strict` as the gate;
+  - `ledger status`, `ledger results` and `ledger graph`;
+  - a product repo's CI checking out the ledger beside it;
+  - moving documents that are already baselined from one repo to another;
+  - the remaining "judged at the ledger's import" phrases;
+  - moving qmstrace's own SRS into `qmstrace-ledger` (open in ADR-0001).
 - **E5:** an audit demo, once the engine has a ledger.
 - **Later:**
   - Output: machine-readable output; a conformance view.

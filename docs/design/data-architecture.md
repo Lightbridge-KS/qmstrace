@@ -80,6 +80,8 @@ products, states, conformance requirements) is likewise data.
 
 ### D5 — Author where the work happens; formalise in the ledger repo
 
+*Amended 2026-09-28 by [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md): the target layout for real-world use is option B's — the ledger repo holds the SRS and design, product repos hold code, tests and markers. Option A stays supported. The text below is D5 as first settled.*
+
 The developer launches the coding agent in the **product repo**, and the agent writes repo
 memory in a slightly stricter form. The ledger repo imports it at a pin and generates the
 formal documents. Content is authored; ceremony — cover, DocID, revision history, bilingual
@@ -615,6 +617,8 @@ files      = ["docs/req/*-srs.md"]
   generated and verified; the local part is written here (D9).
 
 ### Across repos (v0)
+
+*Amended 2026-09-28 by [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md): a requirement's one home may be the ledger repo, read by product repos as a sibling. Still to be rewritten, in the project-wide-check milestone.*
 
 Exercised once, with two product repos — see the fourth experiment.
 
