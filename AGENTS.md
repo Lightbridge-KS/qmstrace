@@ -90,7 +90,7 @@ goes through a pull request. Commit only when asked. The remote is a private rep
 
 <!-- qmstrace:begin — generated; edit qmstrace.toml, not this block -->
 This repo is traced for project **QMT**; subjects: qmstrace (QMT).
-- Read `.qmstrace/skill/SKILL.md` before changing requirements, design or tests.
+- Read `.agents/skills/qmstrace/SKILL.md` before changing requirements, design or tests.
 - Local items: requirement `^REQ-QMT-\d{2}$` in `docs/req/*-srs.md`; design_element `^DSN-QMT-\d{2}$` in `docs/design/*.md`, `docs/structure/*.md`; component `python-module` in `src/**/*.py`; test_case `pytest` in `tests/**/test_*.py`. IDs are never renumbered or reused.
 - Start with `qmstrace status`; `qmstrace rules` prints the actual schema and coverage rules.
 - Use `qmstrace thread ID` and `qmstrace impact ID…` before changing connected items.

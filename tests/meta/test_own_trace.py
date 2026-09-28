@@ -2,12 +2,14 @@
 
 The load-bearing claims, each pinned by a test:
 
-1. The skill copy under `.qmstrace/skill/` equals the packaged skill. A copy that drifts makes
-   `init` refuse, and an agent in this repo reads guidance the tool no longer gives.
-2. The block in `AGENTS.md` is the stanza this repo's configuration renders — running `init`
+1. The skill copy under `.agents/skills/qmstrace/` equals the packaged skill. A copy that drifts
+   makes `init` refuse, and an agent in this repo reads guidance the tool no longer gives.
+2. Claude Code finds that copy through the link `init` writes into `.claude/skills/`.
+3. The block in `AGENTS.md` is the stanza this repo's configuration renders — running `init`
    again would change nothing.
 """
 
+import os
 from importlib.resources import files
 from pathlib import Path
 
@@ -20,12 +22,18 @@ RERUN = "run `uv run qmstrace init` and commit what it changes."
 
 
 def test_the_installed_skill_is_the_packaged_one() -> None:
-    installed = (ROOT / ".qmstrace" / "skill" / "SKILL.md").read_text(encoding="utf-8")
+    installed = (ROOT / setup.SKILL_FILE).read_text(encoding="utf-8")
     packaged = ASSETS.joinpath("skill/SKILL.md").read_text(encoding="utf-8")
     assert installed == packaged, (
         "the skill copy differs from the packaged skill. "
-        f"Fix: keep any local edit elsewhere, remove .qmstrace/skill/SKILL.md, then {RERUN}"
+        f"Fix: keep any local edit elsewhere, remove {setup.SKILL_FILE}, then {RERUN}"
     )
+
+
+def test_claude_code_reaches_the_skill_through_its_link() -> None:
+    link = ROOT / setup.CLAUDE_LINK
+    assert os.path.lexists(link), f"{setup.CLAUDE_LINK} is missing. Fix: {RERUN}"
+    assert os.readlink(link) == setup.CLAUDE_LINK_TARGET
 
 
 def test_the_agent_guide_carries_the_current_stanza() -> None:

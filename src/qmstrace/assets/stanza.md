@@ -1,6 +1,6 @@
 <!-- qmstrace:begin — generated; edit qmstrace.toml, not this block -->
 This repo is traced for project **{project}**; subjects: {subjects}.
-- Read `.qmstrace/skill/SKILL.md` before changing requirements, design or tests.
+- Read `{skill}` before changing requirements, design or tests.
 - Local items: {items}. IDs are never renumbered or reused.
 - Start with `qmstrace status`; `qmstrace rules` prints the actual schema and coverage rules.
 - Use `qmstrace thread ID` and `qmstrace impact ID…` before changing connected items.

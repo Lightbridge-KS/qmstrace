@@ -23,9 +23,17 @@ BEGIN = "<!-- qmstrace:begin"
 END = "<!-- qmstrace:end -->"
 MARKER = "verifies(*ids): trace the items this test actually verifies"
 
+# Where the packaged skill is installed: the folder harnesses read for a repo's skills, named
+# after the skill. Claude Code reads its own folder, so it is linked there when the repo has one.
+SKILL_FILE = ".agents/skills/qmstrace/SKILL.md"
+CLAUDE_LINK = ".claude/skills/qmstrace"
+CLAUDE_LINK_TARGET = "../../.agents/skills/qmstrace"  # relative to the link's folder
+LEGACY_SKILL = ".qmstrace/skill/SKILL.md"  # the skill's home before M9c
+
 
 def stanza(template: str, config: TraceConfig) -> str:
     return template.format(
+        skill=SKILL_FILE,
         project=config.project,
         subjects=", ".join(f"{s.name} ({s.key})" for s in config.subjects.values())
         or "none declared",

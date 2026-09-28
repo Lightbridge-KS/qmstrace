@@ -1,5 +1,5 @@
 updated: qmstrace.toml
 updated: AGENTS.md
-updated: .qmstrace/skill/SKILL.md
+updated: .agents/skills/qmstrace/SKILL.md
 updated: pytest.ini
 Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0.

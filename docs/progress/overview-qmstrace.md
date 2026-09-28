@@ -34,8 +34,8 @@ are not read are reported (strays, V16), and a fence closes on its own mark. See
 at `f4e770b`: `qmstrace ledger copy-schema` writes the project's schema into each product repo
 as a verified copy, so a baseline tag can be judged without the ledger beside it.
 
-**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)**, then
-[M10 · mentions](#later--m10--mentions).
+**Now: [qmstrace, traced by its own ledger](#now--qmstrace-traced-by-its-own-ledger)** — first
+[M9c · the skill's home](#m9c--the-skills-home) — then [M10 · mentions](#later--m10--mentions).
 
 This is the single active tracker. Detailed milestone history and earlier planning are
 [archived](../archive/progress/slice-1-product-repo-half.md); the
@@ -58,6 +58,38 @@ lost are in the [system architecture](../design/system-architecture.md).
   package by meta-tests `dd29899`.
 - [ ] The gate is not green yet: `qmstrace check` reports 26 gaps — no module implements a
   design element, and no requirement or design element is declared.
+
+### M9c · the skill's home
+
+Planned 2026-09-28 on `feat/m9c-skill-home`. `init` installed the skill at
+`.qmstrace/skill/SKILL.md`, where no harness lists it and whose folder breaks the Agent Skills
+rule that a skill's name matches its folder. The location was never decided; it arrived with
+M6 (`918d79e`). The skill moves to `.agents/skills/qmstrace/SKILL.md`, where Codex lists it;
+`init` links it from `.claude/skills/qmstrace` when the repo already has `.claude/`, so Claude
+Code lists it too; the stanza keeps pointing at it for every other agent.
+
+- **Decided (developer, 2026-09-28):** the new home; the link only when `.claude/` exists;
+  the link is create-only — setup never replaces what it did not write; a copy in the old
+  home is refused with a next move, never deleted. The options that lost are recorded in the
+  surface doc.
+- [x] `infra/files.py` writes a create-only link inside the one change with rollback;
+  `init`'s policy, the stanza's pointer, tests and goldens; this repo moves its copy and gains
+  the link, held by the own-trace meta-test. `874b189`
+- [x] Surface doc, with the decision and the options that lost; blueprint; glossary. `8308859`
+- [x] Manual: the `init` reference, with the output from a repo that has `.claude/`, and the
+  set-up how-to. `83c354c`
+- [x] Discovery end to end, in a fresh clone of the branch outside the workspace: Claude Code
+  2.1.283 lists `qmstrace` (as a bare name — its listing drops some descriptions in a setup
+  with many skills), and Codex 0.144.4's rendered prompt lists it with its description
+  shortened to its skills budget. In a clone of `main` before the move, neither lists it.
+- [ ] Merge; the dry gate and the deploy preview on the pull request.
+
+**M9c evidence, 2026-09-28** (`feat/m9c-skill-home`, local): `just dry` passed with 746
+Python tests at 99.05% coverage, four Node tests, strict types, wheel assets and a strict
+manual build; the built `init` page shows the new output. Four mutations each failed their
+test and were restored: the link's literal-target comparison, the old-home refusal, the alias
+check under a link, and the link's rollback. `qmstrace check` with the pinned tool: 0
+violations, 26 gaps, 426 items. Raw record: `_playground/2026-09-28_skill-location/` (local).
 
 ## Later — M10 · mentions
 
