@@ -607,3 +607,62 @@ def test_with_every_repo_read_an_unknown_id_is_v03_never_unverified(service: Tra
     )
     assert codes(found) == ["V03"] and graph.unverified() == []
     assert "in any repo of the project" in found[0].what
+
+
+def test_compatibility_exports_are_the_original_objects() -> None:
+    from qmstrace.core import graph
+    from qmstrace.core.graph import _graph, _nodes
+
+    for owner, names in (
+        (_nodes, ("Home", "Node", "Surroundings")),
+        (_graph, ("Direction", "Step", "Closure", "TraceGraph")),
+    ):
+        for name in names:
+            assert getattr(graph, name) is getattr(owner, name)
+
+
+@pytest.mark.verifies("DSN-QMT-05", "DSN-QMT-14")
+def test_build_and_join_preserve_the_calling_class(service: TraceConfig) -> None:
+    class ProjectGraph(TraceGraph):
+        pass
+
+    graph, wrong = ProjectGraph.build(service, extracted(service, CLEAN), AGREEMENT)
+    assert wrong == []
+    assert type(graph) is ProjectGraph
+    joined = ProjectGraph.join(service, {"service": graph})
+    assert type(joined) is ProjectGraph
+    assert joined.items() == graph.items()
+    assert joined.links == graph.links
+    assert all(node.repo == "service" for node in joined.nodes.values() if node.item is not None)
+    assert list(joined.forward(["REQ-SVC-01"]).steps) == list(graph.forward(["REQ-SVC-01"]).steps)
+
+
+@pytest.mark.parametrize("populated", [False, True])
+@pytest.mark.verifies("DSN-QMT-05", "DSN-QMT-14")
+def test_build_and_join_keep_link_order_and_multiplicity(
+    service: TraceConfig, populated: bool
+) -> None:
+    parts = extracted(service, CLEAN) if populated else []
+    links = tuple(link for part in parts for link in part.links)
+    # A repeated authored link is retained in the graph; only walking deduplicates it.
+    repeated = links[:1] * 2
+    graph, wrong = TraceGraph.build(service, [*parts, Extracted(links=repeated)], AGREEMENT)
+    assert wrong == []
+    joined = TraceGraph.join(service, {"service": graph})
+    for result in (graph, joined):
+        assert result.links == links + repeated
+        for item_id in (*result.nodes, "unknown"):
+            for marker in (None, *service.links):
+                assert result.incoming(item_id, marker) == tuple(
+                    link
+                    for link in links + repeated
+                    if link.dst == item_id and marker in (None, link.marker)
+                )
+                assert result.outgoing(item_id, marker) == tuple(
+                    link
+                    for link in links + repeated
+                    if link.src == item_id and marker in (None, link.marker)
+                )
+    for start in graph.nodes:
+        assert list(joined.forward([start]).steps) == list(graph.forward([start]).steps)
+        assert list(joined.backward([start]).steps) == list(graph.backward([start]).steps)

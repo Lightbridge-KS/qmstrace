@@ -152,7 +152,7 @@ def test_historical_boundaries_never_read_current_sources(suspect_repo):
 
 
 def test_same_commit_scopes_scan_once_and_keep_aliases(suspect_repo, monkeypatch):
-    import qmstrace.workspace as workspace
+    import qmstrace.workspace._baselines as workspace
     from qmstrace.infra.tree import GitTree
 
     git(suspect_repo, "tag", "baseline/service/requirements/2")

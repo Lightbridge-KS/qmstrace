@@ -1,0 +1,61 @@
+default_install_hook_types: [pre-commit]
+default_stages: [pre-commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff lint and safe fixes
+        language: system
+        entry: uv run --locked ruff check --fix --force-exclude
+        types_or: [python, pyi]
+        require_serial: true
+
+      - id: ruff-format
+        name: Ruff format
+        language: system
+        entry: uv run --locked ruff format --force-exclude
+        types_or: [python, pyi]
+        require_serial: true
+
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        language: system
+        entry: uv run --locked trailing-whitespace-fixer
+        args: [--markdown-linebreak-ext=md]
+        types: [text]
+        exclude: ^tests/(fixtures/|cli/golden/|manual/)
+
+      - id: end-of-file-fixer
+        name: Fix final newline
+        language: system
+        entry: uv run --locked end-of-file-fixer
+        types: [text]
+        exclude: ^tests/(fixtures/|cli/golden/|manual/)
+
+      - id: check-yaml
+        name: Check YAML syntax
+        language: system
+        entry: uv run --locked check-yaml
+        types: [yaml]
+        exclude: ^tests/fixtures/
+
+      - id: check-toml
+        name: Check TOML syntax
+        language: system
+        entry: uv run --locked check-toml
+        types: [toml]
+        exclude: ^tests/fixtures/
+
+      - id: check-merge-conflict
+        name: Check merge conflict markers
+        language: system
+        entry: uv run --locked check-merge-conflict
+        types: [text]
+
+      - id: gitleaks
+        name: Scan staged changes for secrets
+        language: system
+        entry: gitleaks git --staged --redact --no-banner
+        pass_filenames: false
+        always_run: true

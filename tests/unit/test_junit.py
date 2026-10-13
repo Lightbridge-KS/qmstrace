@@ -3,7 +3,7 @@
 import pytest
 
 from qmstrace.extract import junit
-from qmstrace.extract.pytest_tests import report_identity
+from qmstrace.extract.python.pytest_tests import report_identity
 
 
 @pytest.mark.parametrize(

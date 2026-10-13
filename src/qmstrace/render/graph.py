@@ -11,7 +11,7 @@ from importlib.resources import files
 
 from qmstrace.core import findings
 from qmstrace.core.assessment import Assessment
-from qmstrace.render.text import evidence
+from qmstrace.render._evidence import evidence
 
 
 def projection(assessment: Assessment, selected: str | None = None) -> dict[str, object]:

@@ -506,3 +506,46 @@ def test_emphasis_that_does_not_wrap_the_id_declares_nothing(
     service: TraceConfig, heading: str
 ) -> None:
     assert read(service, heading + "\n").items == ()
+
+
+def test_mentions_keep_their_lines_across_other_sections_and_fences(service: TraceConfig) -> None:
+    text = (
+        "---\nsummary: REQ-SVC-09\n...\n"
+        "## DSN-SVC-01 — Related REQ-SVC-02\n"
+        "| **REQ-SVC-03** | Mention in another type's section |\n"
+        "Origin: AGR-9\n"
+        "````markdown\n### REQ-SVC-04 — Hidden\n| REQ-SVC-05 | Hidden |\n````\n"
+        "## Notes about REQ-SVC-06\n"
+        "| `REQ-SVC-07` | Visible |\n"
+    )
+    found = read(service, text)
+    assert not found.items and not found.links and not found.strays and not found.findings
+    assert [(lead.token, lead.line) for lead in found.leads] == [("DSN-SVC-01", 4)]
+    assert [(m.token, m.line, m.where) for m in found.mentions] == [
+        ("REQ-SVC-02", 4, "heading"),
+        ("REQ-SVC-03", 5, "row"),
+        ("REQ-SVC-06", 11, "heading"),
+        ("REQ-SVC-07", 12, "row"),
+    ]
+
+
+def test_duplicate_fields_keep_first_value_but_all_links_and_diagnostics(
+    service: TraceConfig,
+) -> None:
+    text = "### REQ-SVC-01 — X\nOrigin: AGR-1\nOrigin: AGR-2, TBD\nChange: CR-001\nChange: BAD\n"
+    found = read(service, text)
+    assert found.items[0].fields == {"Origin": "AGR-1", "Change": "CR-001"}
+    assert [(link.dst, link.line) for link in found.links] == [("AGR-1", 2), ("AGR-2", 3)]
+    assert [(f.code, f.line) for f in found.findings] == [("V14", 3), ("V14", 5), ("V08", 5)]
+    assert found.items[0].digest == digest_of(service, text.split("Change:")[0])
+
+
+def test_markdown_imports_and_registry_keep_the_implementation_objects() -> None:
+    from qmstrace.extract import markdown
+    from qmstrace.extract.base import FORMS, REGISTRY
+    from qmstrace.extract.markdown import _extract
+
+    assert markdown.extract is _extract.extract is REGISTRY["markdown"]
+    assert markdown.form is _extract.form is FORMS["markdown"]
+    assert markdown.CHANGE is _extract.CHANGE
+    assert markdown.CHANGE == "Change"
