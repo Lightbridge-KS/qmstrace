@@ -271,7 +271,7 @@ def test_an_id_pattern_in_the_shape_is_accepted(pattern: str) -> None:
 
 @pytest.mark.parametrize("item_id", ["REQ-SVC-01", "A-1", "R2D2-X-9", "CR-003"])
 def test_every_start_of_an_id_is_a_start_the_configuration_accepts(item_id: str) -> None:
-    from qmstrace.core.config import _ID_START
+    from qmstrace.core.config._sections import _ID_START
     from qmstrace.core.model import ID_TOKEN
 
     assert ID_TOKEN.fullmatch(item_id)  # keeps the two shapes in step
@@ -435,3 +435,75 @@ def test_the_ledgers_schema_is_read_on_its_own() -> None:
     )
     assert not any(t.declared_here for t in config.item_types.values())
     assert config.schema_digest == TraceConfig.parse(SERVICE, SCHEMA).schema_digest
+
+
+def test_compatibility_exports_are_the_original_objects() -> None:
+    from importlib import import_module
+
+    from qmstrace.core import config
+
+    exports = {
+        "_schema": (
+            "SchemaForm",
+            "ItemType",
+            "LinkType",
+            "CoverageRule",
+            "ExternalSource",
+            "ChangeRequests",
+            "BaselineScope",
+            "Subject",
+            "EXTRACTORS",
+        ),
+        "_parse": ("TraceConfig",),
+        "_copy": ("COPY_BEGIN", "COPY_END", "structural", "marked", "schema_digest"),
+        "_toml": ("SUPPORTED_VERSION",),
+    }
+    for module, names in exports.items():
+        implementation = import_module(f"qmstrace.core.config.{module}")
+        for name in names:
+            assert getattr(config, name) is getattr(implementation, name)
+
+
+def test_constructors_preserve_the_calling_class() -> None:
+    class ProjectConfig(TraceConfig):
+        pass
+
+    assert type(ProjectConfig.parse(SERVICE, SCHEMA)) is ProjectConfig
+    assert type(ProjectConfig.of_schema(SCHEMA)) is ProjectConfig
+
+
+@pytest.mark.parametrize(
+    ("local", "schema", "what", "next_move"),
+    [
+        (
+            SERVICE.replace("version = 1", "version = true", 1),
+            "not valid TOML =",
+            "local.toml: 'version' must be a whole number.",
+            "Fix: correct its value.",
+        ),
+        (
+            SERVICE.replace('key = "SVC"', 'key = "svc"'),
+            SCHEMA.replace('project = "MINI"', 'project = "MINI"\nunknown = 1'),
+            "local.toml: subject 'service' has key 'svc'.",
+            "Fix: a subject's key is capital letters and digits — it appears inside item "
+            "IDs, as in REQ-SVC-01.",
+        ),
+        (
+            SERVICE,
+            SCHEMA.replace('project = "MINI"', 'project = "MINI"\nzzz = 1\naaa = 2').replace(
+                'needs = "incoming:Satisfies"', 'needs = "incoming:Unknown"'
+            ),
+            "schema.toml: unknown key 'aaa' (known here: baselines, change_requests, "
+            "externals, item_types, links, project, repos, rules, version).",
+            "Fix: correct or remove the key — an unknown key is an error because a mistyped "
+            "one would be a rule nobody can see.",
+        ),
+    ],
+)
+@pytest.mark.verifies("DSN-QMT-03")
+def test_refusal_order_and_complete_diagnostics(
+    local: str, schema: str, what: str, next_move: str
+) -> None:
+    with pytest.raises(CouldNotJudge) as caught:
+        TraceConfig.parse(local, schema, local_name="local.toml", schema_name="schema.toml")
+    assert (caught.value.what, caught.value.next_move) == (what, next_move)

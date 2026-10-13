@@ -73,3 +73,39 @@ def test_ini_case_and_indentation_preserve_registration() -> None:
     assert "slow: expensive" in parser["pytest"]["markers"]
     assert MARKER in parser["pytest"]["markers"]
     assert register_marker("pytest.ini", result, "pytest") == result
+
+
+def test_compatibility_exports_are_the_original_objects() -> None:
+    from qmstrace.core import setup
+    from qmstrace.core.setup import _guide, _pytest, _schema_copy
+
+    for owner, names in (
+        (
+            _guide,
+            (
+                "BEGIN",
+                "END",
+                "SKILL_FILE",
+                "CLAUDE_LINK",
+                "CLAUDE_LINK_TARGET",
+                "LEGACY_SKILL",
+                "stanza",
+                "guide",
+            ),
+        ),
+        (_pytest, ("MARKER", "pytest_section", "register_marker")),
+        (
+            _schema_copy,
+            (
+                "Held",
+                "Copied",
+                "ledger_itself",
+                "before_copy",
+                "held_schema",
+                "schema_block",
+                "copy_schema",
+            ),
+        ),
+    ):
+        for name in names:
+            assert getattr(setup, name) is getattr(owner, name)

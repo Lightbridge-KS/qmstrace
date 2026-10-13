@@ -43,39 +43,13 @@ from qmstrace.core.model import (
     text_digest,
 )
 from qmstrace.extract.fields import FIELD, link_line
+from qmstrace.extract.markdown._headings import _heading, _item_shaped
+from qmstrace.extract.markdown._tables import _CELL_MARKS, _cells, _table_marker
 
 CHANGE: Final = "Change"
-_HEADING: Final = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
-_LEADING_ID: Final = re.compile(rf"({ID_TOKEN.pattern})(?![A-Za-z0-9-])\s*(.*)$")
-_SEPARATOR: Final = re.compile(r"^[\s\u2014\u2013:-]+")  # em dash, en dash, colon, hyphen
-# A fence: three or more backticks or tildes. It closes on a line of the same character, at
-# least as long, with nothing after it — so a fenced example can hold a shorter fence.
+# A fence closes on the same character, at least as long, with no trailing info string.
 _FENCE: Final = re.compile(r"(`{3,}|~{3,})(.*)$")
-_ATTRIBUTE: Final = re.compile(r"\s*\{[#.-][^{}]*\}\s*$")  # Pandoc: {#id}, {.class}, {-}
-_NUMBER: Final = re.compile(r"(?:\u00a7\s*)?(\d+(?:\.\d+)*)\.?\s+")  # 4.2, 4.2.1., § 4.2
-_WRAPS: Final = ("**", "__", "`", "*", "_")  # longest first: `**` before `*`
-_DELIMITER: Final = re.compile(r":?-+:?")  # a table's header rule, `|---|:--:|`
-_CELL_MARKS: Final = re.compile(r"[*_`\[\]]")  # emphasis, code and link marks in a cell
 _MENTION: Final = re.compile(rf"(?<![A-Za-z0-9-])({ID_TOKEN.pattern})(?![A-Za-z0-9-])")
-
-
-@dataclass(frozen=True, slots=True)
-class _Heading:
-    """One heading line, read: its level, its words, and the ID it starts with, if any."""
-
-    level: int
-    text: str  # the words, without the `#` marks and a trailing attribute
-    number: str | None  # a leading section number, `4.2`
-    bare: str  # the words without that number
-    token: str | None  # the ID the heading starts with
-    title: str  # the words after that ID and its separator
-
-    def in_item(self, number: str | None) -> str:
-        """The words this heading adds to an item's text: its number only when it is not a
-        continuation of the item's own — `4.2.1` under `4.2` is layout, `404` is text."""
-        if self.number and number and self.number.startswith(number + "."):
-            return self.bare
-        return self.text
 
 
 @dataclass
@@ -210,81 +184,6 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
 def form(marker: str, target: str) -> str:
     """How an item read by this extractor declares a link — for a gap's next move."""
     return f"`{marker}: {target}` under its heading"
-
-
-def _heading(raw: str) -> _Heading | None:
-    """A heading line, read — or `None` for any other line."""
-    found = _HEADING.match(raw)
-    if found is None:
-        return None
-    level, words = len(found.group(1)), _ATTRIBUTE.sub("", found.group(2))
-    numbered = _NUMBER.match(words)
-    number, bare = (numbered.group(1), words[numbered.end() :]) if numbered else (None, words)
-    token, title = _leading_id(bare)
-    return _Heading(level, words, number, bare, token, title if token else words)
-
-
-def _leading_id(words: str) -> tuple[str | None, str]:
-    """The ID a heading's words start with — bare, or wrapped in emphasis or backticks that
-    close right after it or at the end of the heading — and the title after it."""
-    for wrap in _WRAPS:
-        if not words.startswith(wrap):
-            continue
-        inner = words[len(wrap) :]
-        lead = _LEADING_ID.match(inner)
-        if lead is None:
-            continue
-        after = inner[lead.end(1) :]
-        if after.startswith(wrap):
-            after = after[len(wrap) :]
-        elif after.endswith(wrap):
-            after = after[: -len(wrap)]
-        else:
-            continue
-        return lead.group(1), _SEPARATOR.sub("", after).rstrip()
-    lead = _LEADING_ID.match(words)
-    if lead is None:
-        return None, words
-    return lead.group(1), _SEPARATOR.sub("", lead.group(2))
-
-
-def _cells(raw: str) -> list[str] | None:
-    """A table row's cells — none for a header rule — or `None` when the line is no row."""
-    line = raw.strip()
-    if not line.startswith("|"):
-        return None
-    cells = [cell.strip() for cell in line.strip("|").split("|")]
-    return [] if all(_DELIMITER.fullmatch(cell) for cell in cells) else cells
-
-
-def _table_marker(cells: list[str], carried: set[str]) -> tuple[str, tuple[str, ...]] | None:
-    """A link marker written as a table row — `| Satisfies | IDs |` or `| Satisfies: IDs |` —
-    with the IDs it names; `None` when the row names no marker this type carries, or no ID."""
-    if not cells:
-        return None
-    first = _CELL_MARKS.sub("", cells[0]).strip()
-    rest = " ".join(cells[1:])
-    written = FIELD.match(first)
-    if written is not None and written.group(1) in carried and written.group(2):
-        marker, rest = written.group(1), written.group(2) + " " + rest
-    elif first.rstrip(":").strip() in carried:
-        marker = first.rstrip(":").strip()
-    else:
-        return None
-    targets = tuple(ID_TOKEN.findall(rest))
-    return (marker, targets) if targets else None
-
-
-def _item_shaped(token: str, patterned: list[ItemType]) -> bool:
-    """Whether an ID is one of this repo's kinds: its pattern, or the prefix it starts with."""
-    stem = token.split("-", 1)[0]
-    for item_type in patterned:
-        pattern, prefix = item_type.id_pattern, item_type.id_prefix or ""
-        if (pattern is not None and pattern.fullmatch(token)) or (
-            prefix and (token.startswith(prefix) or stem == prefix.split("-", 1)[0])
-        ):
-            return True
-    return False
 
 
 def _closes(stripped: str, fence: str) -> bool:

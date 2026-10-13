@@ -16,7 +16,8 @@ import pytest
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.model import Extracted
-from qmstrace.extract import pytest_tests, python_module
+from qmstrace.extract.python import module as python_module
+from qmstrace.extract.python import pytest_tests
 
 
 def module(config: TraceConfig, text: str, path: str = "src/service/keys.py") -> Extracted:
@@ -262,3 +263,25 @@ def test_a_test_case_digest_covers_its_own_function_only(service: TraceConfig) -
     own = digests(cases_in(service, TESTS.replace("assert key is not None", "assert key")))
     assert neighbour == before  # an edit beside a test is not a change to it
     assert own[0] != before[0] and own[1:] == before[1:]
+
+
+@pytest.mark.parametrize(
+    ("legacy_name", "owner_name", "key", "names"),
+    [
+        ("python_module", "module", "python-module", ("extract", "form")),
+        ("pytest_tests", "pytest_tests", "pytest", ("extract", "form", "report_identity")),
+    ],
+)
+def test_python_compatibility_imports_keep_the_implementation_objects(
+    legacy_name: str, owner_name: str, key: str, names: tuple[str, ...]
+) -> None:
+    from importlib import import_module
+
+    from qmstrace.extract.base import FORMS, REGISTRY
+
+    legacy = import_module(f"qmstrace.extract.{legacy_name}")
+    owner = import_module(f"qmstrace.extract.python.{owner_name}")
+    for name in names:
+        assert getattr(legacy, name) is getattr(owner, name)
+    assert REGISTRY[key] is owner.extract
+    assert FORMS[key] is owner.form

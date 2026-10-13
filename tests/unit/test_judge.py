@@ -18,7 +18,8 @@ import pytest
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.judge import _fix, coverage
+from qmstrace.core.judge import coverage
+from qmstrace.core.judge._coverage import _fix
 from qmstrace.core.model import Extracted, Finding, Item
 from qmstrace.extract.base import FORMS, REGISTRY
 
@@ -225,3 +226,16 @@ def test_a_line_outside_every_section_is_named_on_the_files_items(service: Trace
     found = judged(service, {"docs/design/service-design.md": loose})
     assert "is outside every item's section" in fix_of(found, "G05", "DSN-SVC-01")
     assert "docs/design/service-design.md:1" in fix_of(found, "G01", "REQ-SVC-01")
+
+
+def test_compatibility_exports_are_the_original_objects() -> None:
+    from qmstrace.core import judge
+    from qmstrace.core.judge import _baselines, _coverage, _suspects
+
+    for owner, names in (
+        (_coverage, ("Form", "coverage")),
+        (_baselines, ("resolve_baselines", "guard")),
+        (_suspects, ("suspects",)),
+    ):
+        for name in names:
+            assert getattr(judge, name) is getattr(owner, name)

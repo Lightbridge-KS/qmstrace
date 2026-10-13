@@ -154,6 +154,47 @@ flowchart TD
     cli --> render
 ```
 
+Configuration is a package behind the existing `qmstrace.core.config` imports. Its internal
+owners separate strict TOML reading, configuration records, section policy, schema-copy
+fingerprints and final assembly. Judgment is also a package: coverage, baseline guards and
+suspects have independent owners. Graph node values and admission checks are separate from
+`TraceGraph`, which keeps construction, joining and traversal together. Build and join share
+one private assembly method for indexes and traversal metadata. Setup is a package with
+independent owners for guide edits, pytest registration and schema copying. All remain pure
+`core`; filesystem operations stay with the workspace and infrastructure.
+
+Markdown extraction is a package too: heading syntax and table syntax have private owners,
+while section state, fences/frontmatter and digest assembly stay together. Shared field parsing
+remains in `extract/fields.py`; every extractor still takes text without filesystem access.
+Python module extraction and pytest extraction live in `extract/python/` as independent
+owners. The registry uses them directly under the existing configured names; the previous
+module paths retain direct compatibility imports. Its initializer stays empty. Future
+languages can add sibling packages when implemented, with their own marker and identity
+contracts. Source extraction does not imply test-report support; results remain pytest-specific.
+
+Text rendering has five command owners under `render/text/`: status, walks, checks, results
+and schema output. Local and ledger variants remain together. Shared evidence and presentation
+live directly under `render/`, so the browser reads evidence without importing text commands.
+The move preserves output bytes and the existing traversal and judgment boundaries.
+
+Workspace orchestration is a package behind the unchanged `qmstrace.workspace.Workspace`
+interface. Local assessment and command sequencing remain together; project assessment and
+setup have private owners. Shared discovery, scanning, source evidence and historical-baseline
+reading flow downward without importing the public class. The same source-tree and Git
+injection points remain, as do subclass dispatch, read order, offline historical isolation
+and transactional writes. No service layer or mutable run cache is introduced.
+
+CLI wiring is also a package: the root app registers local handlers and the ledger sub-app,
+while shared invocation and outcome modules own `-C` and exit policy. Handlers retain their
+existing options, annotations and workspace/render calls. The installed `qmstrace.cli:app`
+entry point, public imports, command/help bytes and output channels remain unchanged; no
+factory or dynamic command discovery is introduced.
+
+Only config, judge, graph, setup, Markdown, text, workspace and CLI may expose their prior
+interfaces through explicit compatibility exports; all other subpackage initializers remain
+empty. Internal dependencies are one-way, and internal modules never import their own facade. See the
+[blueprint](../structure/codebase-blueprint.md#3-the-tree).
+
 `core` imports nothing from `infra` or `extract`. A command is *open → render → exit*; the
 assessment is computed once and every renderer reads it.
 
