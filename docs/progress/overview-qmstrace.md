@@ -178,6 +178,23 @@ the stand-in's defects returns ([scenario catalogue](../tests/scenario-catalogue
   - Other: a second profile; E2 option C; validating the commit references in this tracker.
 - **`VISION.md`:** waits until use supports durable invariants.
 
+## Landed — developer commit hooks
+
+Added 2026-10-13: local commit hooks run Ruff lint with safe fixes, Ruff formatting,
+whitespace and final-newline fixes, YAML/TOML syntax checks, merge-conflict checks and a
+redacted Gitleaks scan of staged changes. Python hook tools use the locked development
+dependencies; Gitleaks is an external prerequisite. Fixtures and golden output are protected
+from whitespace fixes. Types, tests, wheel checks and the manual build stay in the dry gate.
+
+Verification: the configuration validates and the hooks pass on the staged tooling files.
+In a disposable copy containing only the tooling changes, `just dry` passes: 794 Python
+tests, four browser tests, types, wheel validation and the manual build. A staged synthetic
+secret is rejected with redacted output; Ruff preserves an intentionally invalid fixture.
+A repository-wide run in a disposable copy found pre-existing extra final newlines in
+`docs/tests/scenario-catalogue.md`, `docs/structure/codebase-blueprint.md`,
+`docs/req/qmstrace-srs.md` and `contents/reference/commands/init.md`; those files were not
+changed by this tooling work.
+
 ## Standing design
 
 For contracts, read the design docs, not this tracker:

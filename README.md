@@ -64,3 +64,17 @@ just          # list every recipe
 ```
 
 A pull request must pass `just dry`; the pipeline runs the same steps.
+
+Install [prek](https://prek.j178.dev/) and [Gitleaks](https://github.com/gitleaks/gitleaks)
+on the development machine, then enable the commit hooks:
+
+```sh
+prek install
+prek run --all-files
+```
+
+The hooks run Ruff, file hygiene checks and a redacted secret scan of staged changes.
+Python hook tools come from the project's locked development dependencies; Gitleaks uses
+the installed binary. Fixtures and golden output are excluded from whitespace fixes.
+Even with `--all-files`, the Gitleaks hook scans only staged changes. Types, tests, wheel
+checks and the manual build remain in `just dry`.
