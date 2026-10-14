@@ -111,3 +111,28 @@ def test_a_gap_three_ways_can_meet_names_all_three_in_the_ledgers_check(cases: P
     ):
         assert way in g02, way
     assert any(gap.startswith("G08") and "TC-SVC-01.1" in gap for gap in gaps(output))
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
+def test_a_gaps_next_move_cites_only_its_own_tests_unread_marker(cases: Path) -> None:
+    """Many tests share a C# file: a test's gap points at a finding about that test, never at
+    the first one in its file."""
+    agent = cases / "agent"
+    config = agent / "qmstrace.toml"
+    text = config.read_text(encoding="utf-8")
+    old = 'files     = ["tests/Agent.Tests/**/*Tests.cs"]'
+    assert old in text
+    config.write_text(text.replace(old, 'files     = ["tests/Agent.Probe/**/*.cs"]'))
+    _, output = run("-C", str(agent), "check")
+    by_test = {gap.split("::")[-1].split(":")[0]: gap for gap in gaps(output) if "G07" in gap}
+    # A test with no DisplayName is told to write one; nothing else in the file is its reason.
+    assert "V15" not in by_test["NoDisplayName_Runs"]
+    assert '[Fact(DisplayName = "<' in by_test["NoDisplayName_Runs"]
+    # A test whose DisplayName is not read is sent to its own finding, on its own line.
+    concatenation = next(line for line in output.splitlines() if "ConstConcatenation_Runs" in line)
+    line = concatenation.split("Shapes.cs:")[1].split()[0]
+    assert (
+        f"first fix V15 at tests/Agent.Probe/Shapes.cs:{line} "
+        in by_test["ConstConcatenation_Runs"]
+    )
+    assert f"Shapes.cs:{line} " not in by_test["ConstInterpolation_Runs"]

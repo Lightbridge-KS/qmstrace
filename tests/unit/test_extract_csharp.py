@@ -177,6 +177,26 @@ def test_nothing_is_dropped_silently(agent: TraceConfig) -> None:
 
 
 @pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
+def test_an_unread_marker_names_the_one_test_it_was_meant_for(agent: TraceConfig) -> None:
+    """A test file holds many tests, so a finding about one must not be read as the reason
+    for another's gap — even where no item is made of the method it is about."""
+    _, found = shapes(agent)
+    meant = sorted(f.item.rsplit("::", 1)[-1] for f in found.findings if f.code == "V15" and f.item)
+    assert meant == [
+        "CompiledOut",
+        "ConstConcatenation_Runs",
+        "ConstInterpolation_Runs",
+        "CustomAttribute_Runs",
+        "WithTrait_Runs",
+    ]
+    # A commented-out attribute was written for the method below it.
+    (stray,) = found.strays
+    assert stray.item == "tests/Agent.Probe/Shapes.cs::Shapes::CommentedOut"
+    (alone,) = read_tests(agent, '// [Fact(DisplayName = "TC-SVC-01.1 x")]\n').strays
+    assert alone.item is not None and "::" in alone.item  # no method below: no item's
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
 def test_a_runs_identity_is_its_class_and_method(agent: TraceConfig) -> None:
     _, found = shapes(agent)
     by_title = {item.title: item for item in found.items}

@@ -476,7 +476,8 @@ least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
 | A literal, verbatim or raw `DisplayName` starting with an ID | the link, by the type's one link |
 | No `DisplayName` | an automated test with no link (G07 where the schema asks) |
 | A `DisplayName` that is not a literal; a `[Trait]` named after a link; `[SlowFact]`; a test in `#if` | V15 each, the fix naming the `DisplayName` form |
-| `// [Fact(DisplayName = "TC-…")]` | a stray of kind `comment` |
+| `// [Fact(DisplayName = "TC-…")]` | a stray of kind `comment`, meant for the method below it |
+| A test's gap in a file whose other tests have unread markers or strays | its next move cites only a finding about that test, never the first one in the file |
 | A malformed first word (`TC-SVC-01.1a`) | V14 |
 | A `[Fact]` on an abstract base, two concrete subclasses in the file | one automated test, two run identities |
 | A nested class's test | run identity `Ns.Outer+Inner` |

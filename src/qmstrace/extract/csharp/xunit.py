@@ -64,8 +64,13 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
     items: list[Item] = []
     links: list[Link] = []
     wrong: list[Finding] = []
+    starts: list[tuple[int, str]] = []  # each method's line and test ID, for the strays
     for declared in source.types:
         for method in declared.methods:
+            # A finding about one method names it, even where no item is made of it, so a gap
+            # of another test in the file is never sent to it.
+            test_id = "::".join([path, *declared.outer, declared.name, method.name])
+            starts.append((method.line, test_id))
             tests = [a for a in method.attributes if _simple(a.name) in _XUNIT]
             custom = [
                 a
@@ -80,6 +85,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                             attribute.line,
                             marker,
                             "written as a [Trait], which never reaches a test report",
+                            test_id,
                         )
                     )
             if method.conditional and (tests or custom):
@@ -90,6 +96,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                             method.line,
                             marker,
                             "on a test inside conditional compilation (#if)",
+                            test_id,
                         )
                     )
                 continue
@@ -101,10 +108,10 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                             custom[0].line,
                             marker,
                             f"on [{custom[0].name}], a test attribute this tool does not read",
+                            test_id,
                         )
                     )
                 continue
-            test_id = "::".join([path, *declared.outer, declared.name, method.name])
             item = Item(
                 test_id,
                 item_type.name,
@@ -130,6 +137,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                         display.line,
                         marker,
                         "given a DisplayName that is not a string literal",
+                        test_id,
                     )
                 )
                 continue
@@ -139,7 +147,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             elif _ID_LIKE.match(first):
                 wrong.append(findings.not_an_id(test_id, marker, first, path, display.line))
     strays = tuple(
-        Stray(marker, (found.group(1),), path, comment.line, "comment")
+        Stray(marker, (found.group(1),), path, comment.line, "comment", _below(comment, starts))
         for comment in source.comments
         if marker is not None
         for found in [_COMMENTED.search(comment.text)]
@@ -172,6 +180,13 @@ def _identities(
     return tuple((_class_name(c), method) for c in classes)
 
 
+def _below(comment: _syntax.Comment, starts: list[tuple[int, str]]) -> str:
+    """The test a commented-out attribute was written for: the method below it. With none below,
+    an ID that is no item's — the stray then explains only the gap of what it names."""
+    after = [test_id for line, test_id in sorted(starts) if line > comment.line]
+    return after[0] if after else f"{comment.line}::(no method below)"
+
+
 def _class_name(declared: _syntax.TypeDecl) -> str:
     nested = "+".join([*declared.outer, declared.name])
     return f"{declared.namespace}.{nested}" if declared.namespace else nested
@@ -187,5 +202,5 @@ def _trait_names(attribute: _syntax.Attribute, marker: str) -> bool:
     return first is not None and first.value == marker
 
 
-def _unread(path: str, line: int, marker: str, form: str) -> Finding:
-    return findings.unread_marker(path, line, marker, form, fix=_FIX)
+def _unread(path: str, line: int, marker: str, form: str, test_id: str) -> Finding:
+    return findings.unread_marker(path, line, marker, form, fix=_FIX, item=test_id)
