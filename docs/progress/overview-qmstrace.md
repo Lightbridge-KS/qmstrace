@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; the C# capability — decisions settled, its test bed beacon-dotnet built, the engine milestone next; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,9 +8,10 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-13 · Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-14 · Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed.** Now: [package refactors](#now--package-refactors). Next:
-[real-world use](#next--real-world-use), in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+[real-world use](#next--real-world-use), in the layout of ADR-0001, and
+[the C# capability](#next--the-c-capability), whose test bed is built. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
 ## Now — package refactors
@@ -362,6 +363,34 @@ items. The QMT ledger currently lists one repo; this check does not repeat beaco
 multi-repo acceptance. Remote-tag completeness and historical external evidence remain
 unverified. The handoff's 794-test dry-gate result and the acceptance records below are
 historical evidence; the later refactor verification is recorded above.
+
+## Next — the C# capability
+
+The first C# adopter writes xUnit `[Fact]`/`[Theory]` tests. Each `DisplayName` starts with a
+test-case ID from a register outside the code, and its IDs are dotted (`NN.m`).
+
+Settled 2026-10-14:
+- the `DisplayName` ID names a **test case in a register in the ledger**, and the entry says
+  what it verifies;
+- an ID may contain **dotted number segments**;
+- the code that runs a test case is an **automated test**.
+
+Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
+
+- [x] Build the test bed and record M0 on today's engine (2026-10-14). Bed: ledger `493fc47`
+  (tag `dotnet/requirements/1`), gateway `bac8d3f`, agent `76f610b`.
+  - 53 automated tests run 49 test cases, all passing.
+  - Parity with the Python agent's (level, target) pairs, checked by script.
+  - Seven mutation checks, each caught by the expected test cases.
+  - On today's engine, 49 V02 on the dotted register, which disappear in an undotted copy.
+- [ ] Fix measures C1–C11 before the run.
+- [ ] Engine milestone, on a branch with a draft PR:
+  - dotted IDs (ADR), including the fix for IDs cut short;
+  - the C# component and xUnit extractors, and the TRX reader;
+  - verdicts through a test case (ADR);
+  - *automated test* in `CONTEXT.md`;
+  - scenario-catalogue rows and manual pages.
+- [ ] Run the measures on beacon-dotnet.
 
 ## Landed — M10 · the project-wide check
 
