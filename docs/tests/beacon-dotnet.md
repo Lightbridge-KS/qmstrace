@@ -1,5 +1,5 @@
 ---
-summary: The beacon-dotnet test bed for the C# capability — beacon's field agent ported to C# (xUnit, FluentAssertions) under beacon-split's ledger, with a test specification in the ledger and test IDs at the start of each DisplayName. Built 2026-10-14 and verified on its own terms (parity with the Python agent, mutation checks); what the probes found about xUnit and TRX; what today's engine makes of it (M0); the measures C1–C13, fixed before the run on the C# milestone's engine, with their oracle from beacon-split.
+summary: The beacon-dotnet test bed for the C# capability — beacon's field agent ported to C# (xUnit, FluentAssertions) under beacon-split's ledger, with a test specification in the ledger and test IDs at the start of each DisplayName. Built 2026-10-14 and verified on its own terms (parity with the Python agent, mutation checks); what the probes found about xUnit and TRX; what today's engine makes of it (M0); the measures C1–C13, fixed before the run on the C# milestone's engine, with their oracle from beacon-split; the run (2026-10-14, engine a7a3807): 13 of 13 pass, after the run found and the milestone fixed a gap's next move citing another test's finding.
 read_when:
   - building or extending the C# extractor, the xUnit test extractor or the TRX reader
   - changing how a test case in a test specification relates to the automated tests that run it
@@ -8,8 +8,8 @@ read_when:
 
 # beacon-dotnet — the C# capability's test bed
 
-**Status: built 2026-10-14; measures C1–C13 fixed 2026-10-14; not yet run.** The run needs
-the C# milestone's engine. Bed commits: ledger `dd65081` (tag `dotnet/requirements/1` at `493fc47`),
+**Status: built 2026-10-14; measures C1–C13 fixed 2026-10-14; run 2026-10-14 — 13 of 13
+pass** (§ Results), after one defect the run found was fixed. Bed commits before the run: ledger `dd65081` (tag `dotnet/requirements/1` at `493fc47`),
 gateway `028bde5`, agent `c2520dd` — the build's (`493fc47`, `bac8d3f`, `76f610b`), reworded in
 M12-0.
 
@@ -361,8 +361,50 @@ allows neither.
 | `CommentedOut` | no automated test (amended in M12-0: its stray is pinned by the extractor's unit test) |
 | `Inherited_Runs` | both TRX rows (`FirstDerived`, `SecondDerived`) join an automated test: one test with two runs, or one test per subclass, as the milestone records |
 
-## Results
+## Results — run 2026-10-14
 
-Not yet run: the run needs the C# milestone's engine. The build was verified as recorded
-above. The TRX variants that C5 (b) and (c) need were produced once while the measures were
-being fixed, to confirm the bed yields them: 67 rows with one skipped, and 58 rows.
+**The engine:** a wheel built from qmstrace `a7a3807` — the stacked slices M12a–M12e, with the
+fix `e6e5133` merged in — sha256 `0f28a605c3ebbbdcadf0cf7fe9772e979eb29777bf7753ec503b6d5bf0d71d21`,
+installed in `beacon-dotnet/.engine-venv` with tree-sitter 0.26.0 and tree-sitter-c-sharp 0.23.5.
+The TRX files were written by `dotnet test` (SDK 10.0.105) during the run. A first pass on `e0ca5ce`
+(before the fix) found one defect (below); every measure was then rerun on `a7a3807`. C1, C2, C7
+and C8 gave byte-identical output on both wheels. C12 ran once, on the first wheel; on the
+second, `copy-schema` and `init` reported every file unchanged.
+
+**Verdict: 13 of 13 pass, as written.** End state tagged `m12r-end` in each bed repo (agent
+`87fb375`, C12's two commits; ledger and gateway unchanged).
+
+| # | Seen | Verdict |
+|---|---|---|
+| C1 | exit 0 · 226 items: agent 5 components · 53 automated tests; gateway 9 · 76; ledger 21 requirements · 13 design elements · 49 test cases · 0 violations, 0 gaps, 0 suspects · 21 frozen, 0 changed · links 58 + 93 + 106 = 257 · all 15 BAG requirements and design elements have a direct incoming `verifies` · 0.39 s wall | pass |
+| C2 | (a) no gap · (b) G07 on `AgentSettingsTests::FromEnv_TrailingSlash_IsDropped`, G09 on TC-BAG-01.5 · (c) one G08, TC-BAG-01.5 · (d) one G09, TC-BAG-01.7 · (e) G08 on TC-BAG-00.1, G02 on REQ-BAG-07, whose fix offers the gateway's pytest form, the agent's `DisplayName` form and the test case's `verifies:` line | pass |
+| C3 | five components, `AgentSettings`→DSN-BAG-01, `GatewayClient`→02, `WaitSchedule`→03, `ReportingCycle`→04, `Runner`→05, one link each · 53 automated tests (53 test attributes counted independently): 37 unit, 7 integration, 9 system · IDs `file::Class::Method`, all distinct · none from `Support/` or the probe; no level finding | pass |
+| C4 | the 49 items are the specification's 49 IDs exactly · two incoming links on TC-BAG-01.3, 02.1, 02.4, 03.4; one on each of the other 45 · TC-BAG-02.1, 02.10, 02.11 three items · no `TC-BAG-0N` item or link target · the ledger's own `check`: 0 V02 (M0: 49) | pass |
+| C5 | (a) 67 entries, 67 runs, 0 duplicates, 67 matched, 53/53, 0 unmatched; all 53 tests, 49 test cases, 10 requirements pass; REQ-BAG-09 via TC-BAG-00.7, 03.2, 04.6, 05.3 · (b) 66 passed, 1 skipped: that test, TC-BAG-04.7 and REQ-BAG-10 `skip`, 9 pass · (c) 58 rows: the 7 WaitSchedule tests, TC-BAG-03.1–03.6, REQ-BAG-02, 09, 10 `no-result`; 7 pass | pass |
+| C6 | (a) 4 failing tests: TC-BAG-00.8, 00.9, 04.7, 04.10 and REQ-BAG-10 fail; 9 pass · (b) TC-BAG-03.4's 2 tests fail, TC-BAG-03.4 fails, listed apart with `verifies DSN-BAG-03`; all 10 requirements pass | pass |
+| C7 | REQ-BAG-09: DSN-BAG-03, `agent:src/Beacon.Agent/WaitSchedule.cs`, 7 test cases (00.7, 03.2, 04.6, 05.3 directly; 03.4, 03.5, 03.6 under DSN-BAG-03), 8 `agent:` tests, 7 unit and 1 system; backward AGR-9 · TC-BAG-03.4: its 2 tests forward; DSN-BAG-03, REQ-BAG-02, 09, 10, AGR-7, AGR-9 backward | pass |
+| C8 | 1 design element, 1 component, 7 test cases, 8 automated tests · origin AGR-9 · `Impacts: REQ-BAG-09` | pass |
+| C9 | 14 automated tests (no `CompiledOut`, no `CommentedOut`) · 11 links to `TC-BAG-90.*`, each V03 · V15 for the two constant `DisplayName`s, the trait, `[SlowFact]` and `#if` · `NoDisplayName_Runs` G07 · TRX: 17 of 18 rows matched, `TC-BAG-90.13`'s row unmatched; `Skipped_IsNotRun` skip, `OneRowFails` fail; `MemberData_Runs` and `Inherited_Runs` 2 runs each; `Shapes+Nested` and the block namespace join · also seen: a V06 per probe test, since the probe folder is no level folder | pass |
+| C10 | nine commands, each run twice: identical bytes, exit 0 each; no `/Users/`, `/private/`, user or machine name in any output | pass |
+| C11 | beacon-split: `HEAD`, branches, tags and status identical to the snapshot before the build · beacon-dotnet: every repo clean; ledger `dd65081`, gateway `028bde5`, agent `87fb375` | pass |
+| C12 | `copy-schema` exit 0: `updated: agent — … was an empty [schema]`, `unchanged: gateway` · `init` exit 0: the stanza names `component csharp-file` in `src/**/*.cs` and `automated_test xunit` in `tests/Beacon.Agent.Tests/**/*Tests.cs`; no pytest settings · committed (`71a6669`, `87fb375`) | pass |
+| C13 | `ledger check --strict`, `ledger thread` and `ledger impact REQ-BAG-09` byte-identical to the oracle's · links 58 + 93 + 57 = 208 · gateway `check --strict` 85 items, agent 58, exit 0 | pass |
+
+**Found by the run.**
+- *A test's gap cited another test's finding* (first pass, C9). Every G07 in `Shapes.cs` said
+  "first fix V15 at Shapes.cs:15", because a V15 or a commented-out attribute's stray named no
+  item, and the judge read an itemless finding as one about every item of its file. C9 passed
+  as written — its lines name findings, not next moves — but the next move was wrong. Fixed in
+  M12d (`e6e5133`): each finding names its method; on the rerun every G07 cites its own test's
+  V03 or V15, and `NoDisplayName_Runs` is told to write a `DisplayName`.
+- *One TRX per test project* (confirmed here, found in M12e). On a copy of the agent's solution,
+  `dotnet test --logger trx` wrote two files (67 and 18 results); with a fixed `LogFileName`,
+  both projects wrote one file and only the probe's 18 results remained. Issue #40; the manual
+  warns of both.
+
+**Observed, not measured.** `NoDisplayName_Runs`'s G07 says "this repo declares no requirement
+or design element or test case for it to point at — write the design here", wording from M3
+that predates a ledger holding the documents (ADR-0001).
+
+**Not verified.** The bed's TRX came from xUnit 2.9.3 on .NET 10 only. Wall time is from one
+machine. Raw outputs: `_playground/2026-10-14_m12r-run/outputs/` (local, gitignored).
