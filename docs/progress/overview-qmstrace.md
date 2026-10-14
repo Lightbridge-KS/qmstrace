@@ -383,7 +383,10 @@ Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
   - Parity with the Python agent's (level, target) pairs, checked by script.
   - Seven mutation checks, each caught by the expected test cases.
   - On today's engine, 49 V02 on the dotted register, which disappear in an undotted copy.
-- [ ] Fix measures C1–C11 before the run.
+- [x] Fix the measures before the run (2026-10-14).
+  - C1–C13, with an oracle from beacon-split on `75ba627`: 177 items, 208 links.
+  - beacon-dotnet expects 226 items and 257 links.
+  - C6 is revised to the settled verdict rule. C12 (setup) and C13 (no regression) are new.
 - [ ] Engine milestone, on a branch with a draft PR:
   - dotted IDs (ADR), including the fix for IDs cut short;
   - the C# component and xUnit extractors, and the TRX reader;
