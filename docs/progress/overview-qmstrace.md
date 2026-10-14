@@ -395,7 +395,7 @@ Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
 CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
 `../qmstrace-ledger` before any SRS edit lands.
 
-- [ ] **M12-0** — decisions and vocabulary, in draft review on `docs/m12-0-decisions`:
+- [ ] **M12-0** — decisions and vocabulary, in draft review: [#34](https://github.com/Lightbridge-KS/qmstrace/pull/34) on `docs/m12-0-decisions`:
   - [x] S1: tree-sitter parses all 19 of the bed's files with no error node; each
     `DisplayName` form is its own node kind; mypy strict and a universal `uv lock` pass. C# 14
     extension blocks give error nodes, and a test after them is still read.
