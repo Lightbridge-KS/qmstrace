@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="ecb4070b-626b-43b0-9025-cadec9da45a9" name="@build-host 2026-10-14 22:12:46" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-14T22:12:46.3557000+07:00" queuing="2026-10-14T22:12:46.3557000+07:00" start="2026-10-14T22:12:45.9944360+07:00" finish="2026-10-14T22:12:46.3586140+07:00" />
+  <TestSettings name="default" id="6e422287-e165-4864-8466-e23cd33f16ce">
+    <Deployment runDeploymentRoot="_build-host_2026-10-14_22_12_46" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="2a1b1a9c-3abc-4b40-bc5e-39a2d678fd10" testId="6c5182f0-777f-4d31-b185-f668bc45b1c1" testName="TC-SVC-01.2 the key check decides before any handler(key: &quot;a-wrong-key&quot;, admitted: True)" computerName="build-host" duration="00:00:00.0339925" startTime="2026-10-14T22:12:46.2795470+07:00" endTime="2026-10-14T22:12:46.3105220+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2a1b1a9c-3abc-4b40-bc5e-39a2d678fd10">
+      <Output>
+        <ErrorInfo>
+          <Message>Expected KeyCheck.Admits(key, "the-key") to be True, but found False.</Message>
+          <StackTrace>   at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.BooleanAssertions`1.Be(Boolean expected, String because, Object[] becauseArgs)
+   at Agent.Tests.Unit.KeyCheckTests.Admits_AnyKey_DecidesAlone(String key, Boolean admitted) in /build/agent/tests/Agent.Tests/Unit/KeyCheckTests.cs:line 19
+   at InvokeStub_KeyCheckTests.Admits_AnyKey_DecidesAlone(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f4fe2b29-b8c9-4023-9cce-e74d68432289" testId="f7737348-5a5a-8432-2e16-e67f2a0eff0d" testName="TC-SVC-01.2 the key check decides before any handler(key: &quot;the-key&quot;, admitted: True)" computerName="build-host" duration="00:00:00.0069898" startTime="2026-10-14T22:12:46.2660350+07:00" endTime="2026-10-14T22:12:46.2754970+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f4fe2b29-b8c9-4023-9cce-e74d68432289" />
+    <UnitTestResult executionId="7146fe03-0e3c-44fd-b4a0-4eef44051e96" testId="df662282-a871-ace3-7088-806a41b5a58c" testName="TC-SVC-01.1 a call without a key is refused" computerName="build-host" duration="00:00:00.0010000" startTime="2026-10-14T22:12:46.3132190+07:00" endTime="2026-10-14T22:12:46.3133210+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7146fe03-0e3c-44fd-b4a0-4eef44051e96">
+      <Output>
+        <ErrorInfo>
+          <Message>the key store is offline</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="TC-SVC-01.2 the key check decides before any handler(key: &quot;the-key&quot;, admitted: True)" storage="/build/agent/tests/agent.tests/bin/debug/net10.0/agent.tests.dll" id="f7737348-5a5a-8432-2e16-e67f2a0eff0d">
+      <Execution id="f4fe2b29-b8c9-4023-9cce-e74d68432289" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Tests/bin/Debug/net10.0/Agent.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_AnyKey_DecidesAlone" />
+    </UnitTest>
+    <UnitTest name="TC-SVC-01.2 the key check decides before any handler(key: &quot;a-wrong-key&quot;, admitted: True)" storage="/build/agent/tests/agent.tests/bin/debug/net10.0/agent.tests.dll" id="6c5182f0-777f-4d31-b185-f668bc45b1c1">
+      <Execution id="2a1b1a9c-3abc-4b40-bc5e-39a2d678fd10" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Tests/bin/Debug/net10.0/Agent.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_AnyKey_DecidesAlone" />
+    </UnitTest>
+    <UnitTest name="TC-SVC-01.1 a call without a key is refused" storage="/build/agent/tests/agent.tests/bin/debug/net10.0/agent.tests.dll" id="df662282-a871-ace3-7088-806a41b5a58c">
+      <Execution id="7146fe03-0e3c-44fd-b4a0-4eef44051e96" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Tests/bin/Debug/net10.0/Agent.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_NoKey_IsFalse" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6c5182f0-777f-4d31-b185-f668bc45b1c1" executionId="2a1b1a9c-3abc-4b40-bc5e-39a2d678fd10" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f7737348-5a5a-8432-2e16-e67f2a0eff0d" executionId="f4fe2b29-b8c9-4023-9cce-e74d68432289" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="df662282-a871-ace3-7088-806a41b5a58c" executionId="7146fe03-0e3c-44fd-b4a0-4eef44051e96" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="2" passed="1" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.5)
+[xUnit.net 00:00:00.04]   Discovering: Agent.Tests
+[xUnit.net 00:00:00.06]   Discovered:  Agent.Tests
+[xUnit.net 00:00:00.08]   Starting:    Agent.Tests
+[xUnit.net 00:00:00.13]       Expected KeyCheck.Admits(key, "the-key") to be True, but found False.
+[xUnit.net 00:00:00.13]       Stack Trace:
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Primitives.BooleanAssertions`1.Be(Boolean expected, String because, Object[] becauseArgs)
+[xUnit.net 00:00:00.13]         /build/agent/tests/Agent.Tests/Unit/KeyCheckTests.cs(19,0): at Agent.Tests.Unit.KeyCheckTests.Admits_AnyKey_DecidesAlone(String key, Boolean admitted)
+[xUnit.net 00:00:00.13]            at InvokeStub_KeyCheckTests.Admits_AnyKey_DecidesAlone(Object, Span`1)
+[xUnit.net 00:00:00.13]            at System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:00.14]       the key store is offline
+[xUnit.net 00:00:00.14]   Finished:    Agent.Tests
+Test 'TC-SVC-01.1 a call without a key is refused' was skipped in the test run.
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="build-host" outcome="Error" timestamp="2026-10-14T22:12:46.3120650+07:00">
+        <Text>[xUnit.net 00:00:00.13]     TC-SVC-01.2 the key check decides before any handler(key: "a-wrong-key", admitted: True) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="build-host" outcome="Warning" timestamp="2026-10-14T22:12:46.3136260+07:00">
+        <Text>[xUnit.net 00:00:00.14]     TC-SVC-01.1 a call without a key is refused [SKIP]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

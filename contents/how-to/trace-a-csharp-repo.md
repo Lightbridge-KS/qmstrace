@@ -5,7 +5,8 @@
     Read the repo's `.cs` files with `csharp-file` and its xUnit tests with `xunit`. A file links
     to its design element with an `Implements:` line in its first type's `///` comment. A test
     names the test case it runs, or what it verifies, at the start of its `DisplayName`, as a
-    string literal. Then run `qmstrace check`.
+    string literal. Then run `qmstrace check`, and read a test run's verdicts from the TRX file
+    `dotnet test --logger trx` writes with `qmstrace results`.
 
 ## Steps
 
@@ -44,6 +45,29 @@
     ``` sh
     qmstrace check --strict
     ```
+
+5. **Read a test run's verdicts.** Write a TRX file, then read it as a separate command, so a
+   failing run does not skip it:
+
+    ``` sh
+    dotnet test tests/Agent.Tests --logger "trx;LogFileName=report.trx" --results-directory .
+    qmstrace results report.trx
+    ```
+
+    A run is matched by its class and method, never by its `DisplayName`, so rewording a test
+    keeps its results and renaming its method does not. Each row of a `[Theory]` is a run of
+    one automated test. Nothing of the file's build paths, machine or user names, or output is
+    shown. In this run one `[Fact]` was skipped and one `[Theory]` row failed:
+
+    ``` text
+    --8<-- "cli/golden/results-trx-mixed.txt"
+    ```
+
+    Name the test project, as above. `dotnet test` writes one TRX per test project, and
+    `results` reads one report, so a test in another project's file shows as `no-result`.
+    Given a solution and a fixed `LogFileName`, every project writes the same file and only the
+    last one's results remain, without warning
+    ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
 
 ## What is not read
 

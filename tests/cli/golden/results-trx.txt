@@ -1,0 +1,18 @@
+report: report.trx
+  3 XML entries · 3 reported runs (distinct full identities)
+  matched: 3 runs of 2 automated tests · scanned: 2 automated tests · unmatched: 0 run identities
+  matched against the current working tree — report commit NOT VERIFIED
+  a partial parameter set does not prove every possible variant ran
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+requirements — verdicts along verifies links, from automated tests directly or through test cases:
+  REQ-SVC-01  pass      via TC-SVC-01.1 · 1 automated tests · 1 runs — A call carries a key · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:5
+    via TC-SVC-01.1  pass · 1 automated tests
+
+test cases that reach no requirement — no requirement verdict inferred:
+  TC-SVC-01.2  pass · 1 automated tests · verifies DSN-SVC-01 — The key check runs before any handler
+    pass      tests/Agent.Tests/Unit/KeyCheckTests.cs::KeyCheckTests::Admits_AnyKey_DecidesAlone · 2 runs
+
+result: 2 matched automated tests · 3 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

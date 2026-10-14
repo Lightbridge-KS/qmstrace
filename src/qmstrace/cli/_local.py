@@ -68,14 +68,18 @@ def impact(
 @outcome
 def results(
     ctx: typer.Context,
-    report: Annotated[Path, typer.Argument(metavar="REPORT", help="A pytest JUnit XML report.")],
+    report: Annotated[
+        Path,
+        typer.Argument(metavar="REPORT", help="A pytest JUnit XML report or a TRX file."),
+    ],
     directory: Directory = None,
 ) -> int:
     """Match a report to scanned tests and their explicit verifies links.
 
-    Informational: failing tests and partial matches still exit 0. Unmatched entries are
-    listed; a report with no matches exits 2. Relative report paths start at -C or the current
-    directory, not the discovered repo root. The report's commit is not verified.
+    The report is pytest JUnit XML or a TRX file (dotnet test --logger trx); its root element
+    decides which. Informational: failing tests and partial matches still exit 0. Unmatched
+    entries are listed; a report with no matches exits 2. Relative report paths start at -C or
+    the current directory, not the discovered repo root. The report's commit is not verified.
     """
     start = _directory(ctx, directory)
     report_path = (start / report).resolve()

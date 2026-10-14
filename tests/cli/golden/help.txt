@@ -12,7 +12,7 @@ Commands:
   status   Where am I: what was read, and one line per requirement.
   thread   Trace one item: what it derives from, and what hangs off it.
   impact   What changing several items affects, with a candidate Impacts line.
-  results  Test verdicts per requirement, from a pytest JUnit report.
+  results  Test verdicts per requirement, from a JUnit or TRX report.
   check    What is wrong, and what is not done yet — the gate with --strict.
   rules    What check holds this repo to, and whose each rule is.
   init     Set up trace configuration, agent guidance and pytest markers.

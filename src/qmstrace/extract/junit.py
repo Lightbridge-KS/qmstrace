@@ -1,25 +1,21 @@
-"""Read pytest JUnit XML bytes, without opening files or trusting suite summary counts.
+"""Read pytest JUnit XML entries, without trusting suite summary counts.
 
 Implements: DSN-QMT-09
 """
 
-from defusedxml import ElementTree
-from defusedxml.common import DefusedXmlException
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from qmstrace.core.results import Report, ReportEntry, Verdict
 
+if TYPE_CHECKING:  # parsing happens in reports.py, through defusedxml only
+    from xml.etree.ElementTree import Element
 
-def read(payload: bytes) -> Report:
-    """Return entries or a parse diagnostic; XML declarations retain their encoding semantics."""
-    try:
-        root = ElementTree.fromstring(
-            payload, forbid_dtd=True, forbid_entities=True, forbid_external=True
-        )
-    except (ElementTree.ParseError, DefusedXmlException, ValueError, LookupError) as error:
-        return Report(problem=f"unreadable JUnit XML ({type(error).__name__}: {error})")
-    if _tag(root.tag) not in ("testsuite", "testsuites"):
-        return Report(problem="expected a testsuite or testsuites root")
-    entries = []
+
+def entries(root: Element) -> Report:
+    """Return the entries under a `testsuite` or `testsuites` root, or a diagnostic."""
+    found = []
     for case in root.iter():
         if _tag(case.tag) != "testcase":
             continue
@@ -44,14 +40,14 @@ def read(payload: bytes) -> Report:
         )
         name = case.get("name", "")
         # pytest's test name precedes the first '['; parameter IDs can contain more brackets.
-        entries.append(
+        found.append(
             ReportEntry(
                 case.get("classname", ""), name, verdict, kinds, details, name.partition("[")[0]
             )
         )
-    if not entries:
-        return Report(problem="the report contains no testcase entries")
-    return Report(tuple(entries))
+    if not found:
+        return Report(problem="the report contains no testcase entries", format="junit")
+    return Report(tuple(found), format="junit")
 
 
 def _tag(name: str) -> str:

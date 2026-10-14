@@ -162,6 +162,18 @@ nothing; an unreadable report is not judged.
 - Verify-by: test
 - Change: CR-003
 
+### REQ-QMT-22 — A TRX report is read as a JUnit one is
+
+`qmstrace results REPORT` also reads a TRX file, as `dotnet test --logger trx` writes it; the
+report's root element tells the two formats apart. A run is matched by the class and method the
+report names, never by its display name, and a Theory's rows are runs of one automated test.
+Nothing of the report's paths, machine or user names, output or stack traces is shown.
+
+- Category: functional-suitability
+- Origin: AGR-9
+- Verify-by: test
+- Change: CR-003
+
 ### REQ-QMT-11 — Only what a commit could carry is read
 
 In a Git repository the scan reads the files a commit could carry: an ignored file is never

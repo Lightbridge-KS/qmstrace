@@ -107,8 +107,9 @@ runs of it. Put tests in the configured level folders. IDs are never reused.
 5. Break the relevant behavior in a disposable copy of the repo — never the checkout you work
    in — run its tagged tests there, and confirm they fail; then delete the copy. A marker's
    existence cannot prove the test detects the defect.
-6. Generate a pytest JUnit report and run `qmstrace results REPORT`. Inspect unmatched entries
-   and missing results. The report's commit and freshness are not verified by this command.
+6. Generate a report — pytest `--junitxml=report.xml`, or `dotnet test --logger trx` — and run
+   `qmstrace results REPORT`. Inspect unmatched entries and missing results. The report's
+   commit and freshness are not verified by this command.
 7. Run `check --strict`. Review every suspect against each upstream root and governing tag;
    an edit, passing test or file touch cannot record review. Record review in the project's
    existing process. The engine has no automatic approval or review-clearance marker.

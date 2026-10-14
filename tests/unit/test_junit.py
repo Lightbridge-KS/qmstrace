@@ -2,14 +2,14 @@
 
 import pytest
 
-from qmstrace.extract import junit
+from qmstrace.extract import reports
 from qmstrace.extract.python.pytest_tests import report_identity
 
 
 @pytest.mark.parametrize(
     ("payload", "problem"),
     [
-        (b"not xml", "unreadable JUnit XML"),
+        (b"not xml", "unreadable XML"),
         (b"<other/>", "testsuite or testsuites"),
         (b"<testsuite/>", "no testcase entries"),
         (b"<!DOCTYPE x><testsuite/>", "DTDForbidden"),
@@ -19,14 +19,14 @@ from qmstrace.extract.python.pytest_tests import report_identity
 )
 @pytest.mark.verifies("DSN-QMT-09")
 def test_bad_payload_is_a_diagnostic(payload: bytes, problem: str) -> None:
-    report = junit.read(payload)
+    report = reports.read(payload)
     assert report.problem is not None and problem in report.problem
     assert not report.entries
 
 
 @pytest.mark.parametrize("namespace", ["", ' xmlns="urn:junit"'])
 def test_nested_suites_outcomes_and_missing_identity(namespace: str) -> None:
-    report = junit.read(
+    report = reports.read(
         f"""<testsuites{namespace}><testsuite tests="999"><testsuite>
       <testcase classname="tests.test_x" name="test_x[a[b]]"/>
       <testcase classname="tests.test_x" name="test_x[c]"><skipped type="pytest.xfail"/></testcase>
@@ -45,7 +45,7 @@ def test_xml_encoding_is_honored() -> None:
         '<?xml version="1.0" encoding="utf-16"?><testsuite>'
         '<testcase classname="tests.test_x" name="test_x[ไทย]"/></testsuite>'
     ).encode("utf-16")
-    assert junit.read(payload).entries[0].name == "test_x[ไทย]"
+    assert reports.read(payload).entries[0].name == "test_x[ไทย]"
 
 
 @pytest.mark.parametrize(

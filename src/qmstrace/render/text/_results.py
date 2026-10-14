@@ -5,9 +5,15 @@ Implements: DSN-QMT-12
 
 from __future__ import annotations
 
-from qmstrace.core.results import CaseResult, Results, TargetResult, TestResult
+from qmstrace.core.results import CaseResult, ReportFormat, Results, TargetResult, TestResult
 from qmstrace.render._evidence import _problems
 from qmstrace.render._presentation import _heading, _what
+
+_NAMES: dict[ReportFormat | None, str] = {
+    None: "use default pytest JUnit names.",
+    "junit": "use default pytest JUnit names.",
+    "trx": "a TRX run matches by the class and method dotnet test reports.",
+}
 
 
 def results(view: Results) -> str:
@@ -84,7 +90,7 @@ def results(view: Results) -> str:
                 f"{entry.run.entries} XML entries · {entry.reason}"
             )
         lines.append(
-            "  Fix: check report provenance and scan patterns; use default pytest JUnit names."
+            f"  Fix: check report provenance and scan patterns; {_NAMES[view.report_format]}"
         )
     lines += [
         "",

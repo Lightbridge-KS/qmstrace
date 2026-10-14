@@ -79,7 +79,7 @@ flowchart TD
 | `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation, each part labelled as the project's or the repo's; a rule this repo cannot meet, or that applies to nothing here, says so. *In the engine since M3* | ✔ |
 | `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
-| `qmstrace results <report>` | Matches one pytest JUnit report to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
+| `qmstrace results <report>` | Matches one pytest JUnit report or TRX file to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
 | `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers | ✔ |
 | `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
@@ -191,6 +191,18 @@ would discard recognized evidence). No gate, quiet or JSON option is added.
 Every view preserves unread-source notices and graph violations, states that it matches the
 current working tree, labels the report commit **NOT VERIFIED**, and ends with counts and
 exit code. M4 does not persist results, combine reports, verify freshness or reconstruct retries.
+
+*Amended 2026-10-14 ([ADR-0004](../adr/0004-reading-csharp.md)):* a report is also read as TRX,
+the file `dotnet test --logger trx` writes; the root element — `testsuite`/`testsuites` or
+TeamTest's `TestRun` — decides the format, and anything else is refused. A TRX run is matched
+exactly on the class and method its definition names (namespace-qualified, nested classes
+joined with `+`); its name is the result's `testName`, so a Theory's rows are separate runs, and
+entries that share a name but not a method stay apart. `Passed` is a pass, `NotExecuted` a skip,
+and any other outcome a failure that keeps the raw outcome. Only those fields and the first
+line of an error message are read: the file's paths, machine and user names, output, stack
+traces and attachments never reach the view. A report with no match, and an unmatched run,
+name the next move for the format given. **Rejected:** a JUnit logger package in the C# repo
+(every adopter would add one, and its names are the logger's, not the test framework's).
 
 ### The authoring surface
 

@@ -487,3 +487,33 @@ least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
 | The ledger's check with pytest in one repo and xUnit in another | a gap's next move names both, each with its repo |
 | A requirement three ways can meet | *write one of these*: agent (xUnit), service (pytest), ledger (test case) |
 | `init` in the C# repo | the stanza names `csharp-file` and `xunit`; no pytest settings written |
+
+## M12e — TRX reports
+
+ADR-0004: `results` reads TRX as well as JUnit, the root element deciding which. The fixtures in
+`tests/fixtures/trx/` are real `dotnet test --logger trx` output of the `cases` agent, sanitised
+(build paths → `/build/agent`, the machine name → `build-host`), plus a hand-written
+`sentinel.trx`. Each line is at least one test (`tests/unit/test_trx.py`,
+`tests/unit/test_junit.py`, `tests/integration/test_results_trx.py`).
+
+| Scenario | Expected |
+|---|---|
+| A TeamTest `TestRun` root; a `testsuite`/`testsuites` root | TRX; JUnit |
+| `<TestRun>` with no namespace, xUnit's own `<assemblies>`, any other root | refused, naming both formats |
+| A TRX with no results; a DTD | refused |
+| A captured TRX with its UTF-8 byte order mark | read |
+| A `[Theory]` with two rows | two runs of one automated test, each named by its `testName` |
+| A nested class's test; a test inherited by two subclasses | class `Ns.Outer+Inner`; one run per subclass |
+| A result whose definition is missing | kept, with no identity; unmatched |
+| `Passed`; `NotExecuted` | pass; skip |
+| `Failed`, `Error`, `Timeout`, `Aborted`, `Inconclusive`, `PassedButRunAborted`, none | fail, the raw outcome kept |
+| A multi-line error message | its first line only |
+| `SENTINEL` in every path, name, output, trace and attachment field, and a message's second line | in neither the report nor the output |
+| A summary count of 999 over three results | three entries |
+| Every run in the probe TRX | matches the identity its xUnit extractor recorded, but for the custom attribute's (V15) |
+| The agent's full run | REQ-SVC-01 pass via TC-SVC-01.1; TC-SVC-01.2 pass, 2 runs |
+| A skipped `[Fact]` and a failing `[Theory]` row | REQ-SVC-01 skip; TC-SVC-01.2 fail; the reasons' first lines shown |
+| A run filtered out | `no-result` |
+| Two methods sharing a `DisplayName` | two runs, one per method |
+| The probe TRX on the agent; a JUnit report on the agent; a TRX on the service | exit 2, the next move for the format given |
+| A test renamed since the run | unmatched, the TRX way to match named |

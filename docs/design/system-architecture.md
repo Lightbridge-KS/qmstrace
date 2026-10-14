@@ -286,8 +286,8 @@ sequenceDiagram
 
 The CLI resolves `REPORT` from the effective invocation directory. `Workspace.results`
 reads it explicitly, even outside the Git-filtered tree, and passes bytes to the pure safe
-JUnit reader. It builds one assessment, derives default report identities through the pytest
-extractor's convention, then calls `core.results.summarize`. The returned frozen view contains
+report reader, which picks JUnit or TRX by the root element. It builds one assessment, takes the
+report identities each automated test's extractor recorded, then calls `core.results.summarize`. The returned frozen view contains
 matched runs, unmatched identities and direct-link verdicts; the text renderer makes no
 aggregation decisions. Sibling node fields retain inspection/analysis methods, but only local
 tests contribute. No result is written back and no report commit is verified. Usable partial

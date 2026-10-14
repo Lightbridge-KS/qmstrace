@@ -649,8 +649,8 @@ WORKSPACE_IMPORTS: dict[str, set[str]] = {
         "qmstrace.core.results",
         "qmstrace.core.setup",
         "qmstrace.extract.base",
-        "qmstrace.extract.junit",
         "qmstrace.extract.python.pytest_tests",
+        "qmstrace.extract.reports",
         "qmstrace.infra.files",
         "qmstrace.infra.git",
         "qmstrace.infra.tree",
@@ -816,3 +816,13 @@ def test_only_the_csharp_syntax_module_imports_the_parser() -> None:
         if any(n.split(".")[0] in ("tree_sitter", "tree_sitter_c_sharp") for n in _imports(p))
     )
     assert users == ["extract/csharp/_syntax.py"]
+
+
+def test_only_the_report_reader_parses_xml() -> None:
+    """DSN-QMT-09: a report is parsed once, safely, where its format is decided."""
+    users = sorted(
+        p.relative_to(SRC).as_posix()
+        for p in SRC.rglob("*.py")
+        if any(n.split(".")[0] == "defusedxml" for n in _imports(p))
+    )
+    assert users == ["extract/reports.py"]
