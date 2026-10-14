@@ -137,13 +137,16 @@ them does not clear it.
 
 ### REQ-QMT-10 — Test results come from a report, never typed
 
-`qmstrace results REPORT` reads a pytest JUnit report and gives each requirement the verdict
-of the test cases that directly verify it. A test that verifies only a design element gives
-its requirement no verdict, and an unreadable report is not judged.
+`qmstrace results REPORT` reads a pytest JUnit report and gives each requirement the worst
+verdict of the automated tests that reach it along `verifies` links — directly, or through the
+test cases they run, each named with its own verdict. A test that reaches only a design element
+gives no requirement a verdict and is still shown; a test case no automated test runs adds
+nothing; an unreadable report is not judged.
 
 - Category: functional-suitability
 - Origin: AGR-9
 - Verify-by: test
+- Change: CR-003
 
 ### REQ-QMT-11 — Only what a commit could carry is read
 

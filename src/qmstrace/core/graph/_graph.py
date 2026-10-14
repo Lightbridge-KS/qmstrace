@@ -158,6 +158,7 @@ class TraceGraph:
                         title=item.title,
                         where=where,
                         fields=item.fields,
+                        declares=around.declared.get(item_id, ()),
                     ),
                 )
         for name, declared in sorted(around.externals.items()):

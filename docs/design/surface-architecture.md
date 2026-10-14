@@ -169,7 +169,13 @@ A linked test missing from the report is `no-result`. Requirement verdicts combi
 linked tests as `fail > no-result > skip > pass`; no linked tests means `untested`. A partial
 parameter set does not prove all possible variants ran.
 
-Only direct `verifies` links contribute. No verdict flows through a design element. Links are
+*Amended 2026-10-14 ([ADR-0003](../adr/0003-test-cases-and-automated-tests.md)):* a verdict
+follows `verifies` links — an item's verdict is the worst of every automated test that reaches
+it, directly or through the test cases they run, each case named with its own verdict. A
+sibling's own links (a ledger's test case, seen from a product repo) are read for this, and
+never counted or walked as the repo's. No verdict flows through a design element, which
+carries `Satisfies`; a test case no automated test runs adds nothing. Tests and test cases that
+reach no requirement are listed apart, so a failure only a design element sees stays visible. Links are
 deduplicated before counting, shared tests name other targets, and global counts count each
 case once even when requirement rows overlap. Sibling requirements verified by local tests
 are labelled with their owner and unpinned source; their declared verification method is

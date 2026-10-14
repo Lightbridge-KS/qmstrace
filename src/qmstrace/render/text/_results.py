@@ -5,7 +5,7 @@ Implements: DSN-QMT-12
 
 from __future__ import annotations
 
-from qmstrace.core.results import Results, TargetResult, TestResult
+from qmstrace.core.results import CaseResult, Results, TargetResult, TestResult
 from qmstrace.render._evidence import _problems
 from qmstrace.render._presentation import _heading, _what
 
@@ -16,8 +16,8 @@ def results(view: Results) -> str:
     lines = [
         f"report: {view.report_name}",
         f"  {view.entries} XML entries · {view.runs} reported runs (distinct full identities)",
-        f"  matched: {view.matched_runs} runs of {view.matched_cases} test cases · "
-        f"scanned: {view.scanned_cases} test cases · "
+        f"  matched: {view.matched_runs} runs of {view.matched_cases} automated tests · "
+        f"scanned: {view.scanned_cases} automated tests · "
         f"unmatched: {len(view.unmatched)} run identities",
         "  matched against the current working tree — report commit NOT VERIFIED",
         "  a partial parameter set does not prove every possible variant ran",
@@ -29,7 +29,14 @@ def results(view: Results) -> str:
             f"  {view.duplicates} duplicate XML entries combined by full identity; "
             "retry attempts are not inferred"
         )
-    lines += ["", "requirements — direct verifies links only:"]
+    through = view.through_cases
+    lines += [
+        "",
+        "requirements — verdicts along verifies links, from automated tests directly or through "
+        "test cases:"
+        if through
+        else "requirements — direct verifies links only:",
+    ]
     for target in view.requirements:
         lines += _result_target(target)
     if not view.requirements:
@@ -45,21 +52,27 @@ def results(view: Results) -> str:
             )
             if target.tests:
                 lines.append(
-                    f"    linked tests only: {target.verdict} · {len(target.tests)} test cases · "
-                    f"{target.runs} runs"
+                    f"    linked tests only: {target.verdict} · {len(target.tests)} automated "
+                    f"tests · {target.runs} runs"
                 )
                 for test in target.tests:
                     lines += _result_test(test, target.node.id, show_pass=True)
             else:
-                lines.append("    no directly linked test cases")
+                lines.append("    no linked automated tests")
     if view.unverified_targets:
         lines += ["", "unverified targets — type unknown, not requirement verdicts:"]
         for target in view.unverified_targets:
             lines += _result_target(target)
+    if view.other_cases:
+        lines += ["", "test cases that reach no requirement — no requirement verdict inferred:"]
+        for case in view.other_cases:
+            lines += _result_case(case, show_pass=True)
     if view.other_tests:
         lines += [
             "",
-            "tests without a direct requirement target — no requirement verdict inferred:",
+            "automated tests that reach no requirement — no requirement verdict inferred:"
+            if through
+            else "tests without a direct requirement target — no requirement verdict inferred:",
         ]
         for test in view.other_tests:
             lines += _result_test(test, show_pass=True)
@@ -75,7 +88,8 @@ def results(view: Results) -> str:
         )
     lines += [
         "",
-        f"result: {view.matched_cases} matched test cases · {view.matched_runs} matched runs · "
+        f"result: {view.matched_cases} matched automated tests · "
+        f"{view.matched_runs} matched runs · "
         f"{len(view.unmatched)} unmatched run identities · exit 0 (informational) — "
         "report commit NOT VERIFIED; this repo's tests only",
     ]
@@ -83,12 +97,35 @@ def results(view: Results) -> str:
 
 
 def _result_target(target: TargetResult) -> list[str]:
+    via = f"via {', '.join(c.node.id for c in target.via)} · " if target.via else ""
     lines = [
-        f"  {target.node.id}  {target.verdict:<9} {len(target.tests)} test cases · "
+        f"  {target.node.id}  {target.verdict:<9} {via}{len(target.tests)} automated tests · "
         f"{target.runs} runs — {target.node.title or target.node.id} · {_what(target.node)}"
     ]
+    through = {test.id for case in target.via for test in case.tests}
     for test in target.tests:
-        lines += _result_test(test, target.node.id)
+        if test.id not in through:  # a test through a case is listed under that case
+            lines += _result_test(test, target.node.id)
+    for case in target.via:
+        lines += _result_case(case)
+    return lines
+
+
+def _result_case(case: CaseResult, *, show_pass: bool = False) -> list[str]:
+    """A test case on a verdict's path — its verdict, and the automated tests that ran it."""
+    if case.verdict == "pass" and not show_pass:
+        return [f"    via {case.node.id}  pass · {len(case.tests)} automated tests"]
+    verifies = f" · verifies {', '.join(case.verifies)}" if case.verifies else ""
+    title = f" — {case.node.title}" if case.node.title else ""
+    # In its own section a case is a row like any other; on a requirement's path, a step under it.
+    lead, indent = ("  ", "") if show_pass else ("    via ", "  ")
+    lines = [
+        f"{lead}{case.node.id}  {case.verdict} · {len(case.tests)} automated tests{verifies}{title}"
+    ]
+    for test in case.tests:
+        lines += [
+            f"{indent}{line}" for line in _result_test(test, case.node.id, show_pass=show_pass)
+        ]
     return lines
 
 

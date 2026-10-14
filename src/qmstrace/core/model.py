@@ -52,12 +52,18 @@ def text_digest(text: str) -> str:
     return "sha256:" + hashlib.sha256(normal.encode("utf-8")).hexdigest()
 
 
+# One run's identity in a test report: the class and the test's name as the report gives them.
+Identity = tuple[str, str]
+
+
 @dataclass(frozen=True, slots=True)
 class Item:
     """One traceable unit, as declared in one file.
 
     `fields` holds the `Key: value` lines under a document-declared item — the first line of
-    each key; `level` is a test case's level, read from where it sits.
+    each key; `level` is an automated test's level, read from where it sits; `runs_as` is the
+    identities its runs carry in a test report — set by a test extractor, and what makes the
+    item an automated test whose results `results` reads (ADR-0003).
     """
 
     id: str
@@ -68,6 +74,7 @@ class Item:
     digest: str
     fields: Mapping[str, str] = field(default_factory=dict)
     level: str | None = None
+    runs_as: tuple[Identity, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

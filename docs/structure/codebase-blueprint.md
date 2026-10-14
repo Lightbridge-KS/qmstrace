@@ -608,9 +608,14 @@ Satisfies: REQ-QMT-09, REQ-QMT-17
 
 `extract/junit.py` reads JUnit XML bytes safely and trusts no summary count;
 `extract/python/pytest_tests.py` `report_identity` gives the identity a report entry must match;
-`core/results.py` matches entries to scanned test cases and gives a requirement the verdict of
-its direct `verifies` links only. `Workspace.results` reads the explicitly supplied report.
+`core/results.py` matches entries to scanned automated tests and gives a requirement the worst
+verdict of every automated test that reaches it. `Workspace.results` reads the explicitly
+supplied report.
 Reasoning: surface architecture § Results contract — M4.
+
+Each automated test carries the identities its runs report (`Item.runs_as`, set by its
+extractor), and a sibling node carries its own declared links (`Node.declares`); a
+verdict follows `verifies` links from the tests through any test cases (ADR-0003).
 
 Satisfies: REQ-QMT-10
 

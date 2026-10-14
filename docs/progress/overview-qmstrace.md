@@ -431,8 +431,17 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     no test runs); SKILL.md teaches the Test Specification; `status` says *one automated test*.
   - [x] REQ-QMT-02 edited under CR-003; 14 suspects downstream of it (informational, behaviour
     unchanged).
-- [ ] **M12c** — verdicts through test cases in `results`, on Python; sibling-declared links;
-  the per-test run identities. REQ-QMT-10.
+- [ ] **M12c** — verdicts through test cases, on `feat/m12c-verdicts` (stacked on M12b).
+  REQ-QMT-10.
+  - [x] A verdict follows `verifies` links from the automated tests a report ran — directly or
+    through test cases (`core/results.py`); a requirement names the cases on the way; test
+    cases that reach no requirement are listed apart; a test case nothing runs adds nothing.
+  - [x] Run identities move to the item (`Item.runs_as`, set by the pytest extractor); the
+    JUnit reader decides the matched name; a sibling's own links ride on its node
+    (`Node.declares`), read by `results` only.
+  - [x] Verified on real pytest output (`cases`), with a differential test: where no test case
+    stands between, every verdict equals the direct-link one. The output says *automated
+    tests* where it counted test functions.
 - [ ] **M12d** — C# source: `csharp-file` and `xunit` on tree-sitter; DSN-QMT-15; SKILL.md
   and the manual. REQ-QMT-21, REQ-QMT-12.
 - [ ] **M12e** — the TRX reader and report dispatch; no path or machine name ever shown.

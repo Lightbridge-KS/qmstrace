@@ -5,6 +5,7 @@ Implements: DSN-QMT-02, DSN-QMT-07, DSN-QMT-09, DSN-QMT-11, DSN-QMT-14
 
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,11 +16,10 @@ from qmstrace.core.baselines import BaselineState, Register
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.model import Finding, Item, Notice
+from qmstrace.core.model import Finding, Item, Link, Notice
 from qmstrace.core.results import Results
 from qmstrace.extract import junit
 from qmstrace.extract.base import FORMS
-from qmstrace.extract.python.pytest_tests import report_identity
 from qmstrace.infra.files import write_new
 from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.tree import ISourceTree, WorkingTree
@@ -97,10 +97,15 @@ class Workspace:
             for name in sorted(config.externals)
         ]
         siblings, located, listed = self._siblings(ledger)
+        declared: dict[str, list[Link]] = defaultdict(list)
+        for _, _, links in siblings:
+            for link in links:
+                declared[link.src].append(link)
         around = Surroundings(
-            siblings={s.name: items for s, items in siblings if items is not None},
-            every_sibling_read=located and all(items is not None for _, items in siblings),
+            siblings={s.name: items for s, items, _ in siblings if items is not None},
+            every_sibling_read=located and all(items is not None for _, items, _ in siblings),
             externals={state.name: declared for state, declared in externals},
+            declared={src: tuple(links) for src, links in declared.items()},
         )
         graph, violations = TraceGraph.build(
             config, scan.extracted, around, misplaced=scan.misplaced
@@ -188,7 +193,7 @@ class Workspace:
             violations=tuple(violations),
             gaps=tuple(gaps),
             externals=tuple(state for state, _ in externals),
-            siblings=tuple(state for state, _ in siblings),
+            siblings=tuple(state for state, _, _ in siblings),
             siblings_located=located,
             notices=tuple(notices),
             baseline_state=baseline_state,
@@ -324,11 +329,7 @@ class Workspace:
                 "Fix: supply a pytest JUnit report generated with --junitxml=report.xml.",
             )
         assessment = self.assessment()
-        identities = {
-            item.id: report_identity(item.id)
-            for item in assessment.graph.items()
-            if self.config.item_types[item.type].extractor == "pytest"
-        }
+        identities = {item.id: item.runs_as for item in assessment.graph.items() if item.runs_as}
         view = results.summarize(assessment, report, identities, label)
         if not view.matched_cases:
             unmatched = "\n".join(f"  {run.run.identity!r}: {run.reason}" for run in view.unmatched)
@@ -378,7 +379,7 @@ class Workspace:
 
     def _siblings(
         self, ledger: Path | None
-    ) -> tuple[list[tuple[SiblingState, dict[str, Item] | None]], bool, bool]:
-        """Each sibling with its items (None when not read); whether the siblings could be
-        located at all; whether this repo is among the project's repos."""
+    ) -> tuple[list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]], bool, bool]:
+        """Each sibling with its items (None when not read) and their own links; whether the
+        siblings could be located at all; whether this repo is among the project's repos."""
         return _read_siblings(self.root, self.config, self.trees, ledger)

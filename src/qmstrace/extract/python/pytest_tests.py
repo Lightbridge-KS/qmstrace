@@ -22,8 +22,7 @@ from dataclasses import dataclass, field
 
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Link, text_digest
-from qmstrace.core.results import Identity
+from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Identity, Item, Link, text_digest
 
 _Owner = ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
 
@@ -85,6 +84,7 @@ def _visit(
                 node.name,
                 text_digest(ast.dump(node)),
                 level=reading.level,
+                runs_as=(report_identity(test_id),),
             )
             reading.items.append(item)
             if reading.level is None and reading.item_type.levels:

@@ -1,6 +1,6 @@
 report: report.xml
   6 XML entries · 5 reported runs (distinct full identities)
-  matched: 4 runs of 3 test cases · scanned: 4 test cases · unmatched: 1 run identities
+  matched: 4 runs of 3 automated tests · scanned: 4 automated tests · unmatched: 1 run identities
   matched against the current working tree — report commit NOT VERIFIED
   a partial parameter set does not prove every possible variant ran
   baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
@@ -9,8 +9,8 @@ report: report.xml
   1 duplicate XML entries combined by full identity; retry attempts are not inferred
 
 requirements — direct verifies links only:
-  REQ-SVC-01  pass      1 test cases · 2 runs — A call carries a key · requirement · docs/req/service-srs.md:12
-  REQ-SVC-02  fail      2 test cases · 1 runs — Records survive a restart · requirement · docs/req/service-srs.md:21
+  REQ-SVC-01  pass      1 automated tests · 2 runs — A call carries a key · requirement · docs/req/service-srs.md:12
+  REQ-SVC-02  fail      2 automated tests · 1 runs — Records survive a restart · requirement · docs/req/service-srs.md:21
     fail      tests/integration/test_store.py::test_a_record_survives_a_restart · 1 runs · shared: also verifies DSN-SVC-02
       fail: test_a_record_survives_a_restart (error, failure)
         error: teardown could not close store
@@ -19,7 +19,7 @@ requirements — direct verifies links only:
 
 inspection / analysis — no verification or approval is established by this report:
   REQ-SVC-03 — The record format is written down · Verify-by: inspection · requirement · docs/req/service-srs.md:28
-    no directly linked test cases
+    no linked automated tests
 
 tests without a direct requirement target — no requirement verdict inferred:
     skip      tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler · 1 runs · verifies DSN-SVC-01
@@ -30,4 +30,4 @@ unmatched report entries:
   pass      ('tests.removed.test_old', 'test_old') · 1 XML entries · no scanned pytest test matches this identity
   Fix: check report provenance and scan patterns; use default pytest JUnit names.
 
-result: 3 matched test cases · 4 matched runs · 1 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only
+result: 3 matched automated tests · 4 matched runs · 1 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only
