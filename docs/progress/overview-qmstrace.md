@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; M12, the C# capability — its test bed beacon-dotnet built and measures fixed, slices M12-0 to M12e planned; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; M12, the C# capability — slices M12a–M12e in stacked draft PRs, the beacon-dotnet run 13 of 13 measures passing; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -452,6 +452,8 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     probes 18); the ledger's check across three repos names pytest and xUnit ways together.
   - [x] SKILL.md's C# examples; the manual's *Trace a C# repo*; issue
     [#38](https://github.com/Lightbridge-KS/qmstrace/issues/38) for a C# starter.
+  - [x] Fixed after the bed run found it (`e6e5133`): a test's gap cited the first unread-marker
+    finding or stray in its file; each now names its own method.
 - [ ] **M12e** — the TRX reader and report dispatch, on `feat/m12e-trx` (stacked on M12d).
   REQ-QMT-22.
   - [x] `extract/reports.py` parses once with defusedxml (now its only importer, pinned) and
@@ -466,7 +468,10 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Found: one TRX per test project, and a solution run with a fixed `LogFileName` keeps
     only the last project's results — issue
     [#40](https://github.com/Lightbridge-KS/qmstrace/issues/40); the manual warns of both.
-- [ ] **M12-R** — run C1–C13 on beacon-dotnet and record the results.
+- [x] **M12-R** — run C1–C13 on beacon-dotnet and record the results: **13 of 13 pass**
+  ([record](../tests/beacon-dotnet.md#results--run-2026-10-14), `979d69d` on `main`), on a wheel
+  from `a7a3807`; bed end state tagged `m12r-end`. The first pass found the gap-citation defect
+  fixed in M12d; the rerun gave the same output for C1, C2, C7 and C8.
 
 ## Landed — M10 · the project-wide check
 
