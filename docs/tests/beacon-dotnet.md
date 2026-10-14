@@ -1,16 +1,17 @@
 ---
-summary: The beacon-dotnet test bed for the C# capability — beacon's field agent ported to C# (xUnit, FluentAssertions) under beacon-split's ledger, with a test-case register in the ledger and test IDs at the start of each DisplayName. Built 2026-10-14 and verified on its own terms (parity with the Python agent, mutation checks); what the probes found about xUnit and TRX; what today's engine makes of it (M0); the measures C1–C13, fixed before the run on the C# milestone's engine, with their oracle from beacon-split.
+summary: The beacon-dotnet test bed for the C# capability — beacon's field agent ported to C# (xUnit, FluentAssertions) under beacon-split's ledger, with a test specification in the ledger and test IDs at the start of each DisplayName. Built 2026-10-14 and verified on its own terms (parity with the Python agent, mutation checks); what the probes found about xUnit and TRX; what today's engine makes of it (M0); the measures C1–C13, fixed before the run on the C# milestone's engine, with their oracle from beacon-split.
 read_when:
   - building or extending the C# extractor, the xUnit test extractor or the TRX reader
-  - changing how a test case in a register relates to the automated tests that run it
+  - changing how a test case in a test specification relates to the automated tests that run it
   - building, repeating or extending the beacon-dotnet test bed
 ---
 
 # beacon-dotnet — the C# capability's test bed
 
 **Status: built 2026-10-14; measures C1–C13 fixed 2026-10-14; not yet run.** The run needs
-the C# milestone's engine. Bed commits: ledger `493fc47` (tagged `dotnet/requirements/1`),
-gateway `bac8d3f`, agent `76f610b`.
+the C# milestone's engine. Bed commits: ledger `dd65081` (tag `dotnet/requirements/1` at `493fc47`),
+gateway `028bde5`, agent `c2520dd` — the build's (`493fc47`, `bac8d3f`, `76f610b`), reworded in
+M12-0.
 
 Fixing the measures revised the proposal in four ways:
 - every measure now names exact expected values;
@@ -19,12 +20,20 @@ Fixing the measures revised the proposal in four ways:
   it adds a break whose failure reaches a requirement through its test cases;
 - C12 (setup) and C13 (no regression on beacon-split) are new.
 
+**Amended 2026-10-14, in M12-0, before the run.** C9's `CommentedOut` row no longer expects a
+stray to be seen: a stray is printed only when a gap names it, and no gap in the probe copy
+names `TC-BAG-90.15`, so the run could not observe it. The stray is pinned by the C# extractor's
+unit test instead; C9 still requires that the method yields no automated test. The bed's
+wording "register" became "test specification".
+
 Settled 2026-10-14:
-- the ID at the start of a DisplayName names a **test case in a register** in the ledger;
+- the ID at the start of a DisplayName names a **test case in a test specification** in the ledger;
 - an ID may contain **dotted number segments** (`TC-BAG-03.1`, `DSN-XYZ-04.1`);
 - the C# tests model the gateway **in memory**;
 - test cases are numbered **`TC-BAG-NN.m`**;
-- the code that runs a test case is an **automated test**.
+- the code that runs a test case is an **automated test**;
+- the document that holds test cases is a **Test Specification** (the glossary keeps
+  *Register* for a generated listing).
 
 ## What is tested
 
@@ -33,7 +42,7 @@ repo's conventions are those of the first C# adopter:
 
 - xUnit `[Fact]` and `[Theory]` tests whose `DisplayName` starts with a test-case ID;
 - several tests sharing one test case, which passes only when all of them pass;
-- test cases planned in a register, a document that sits outside the code;
+- test cases planned in a test specification, a document that sits outside the code;
 - dotted IDs that encode a hierarchy, which the adopter never renumbers;
 - results reported as TRX, the format `dotnet test --logger trx` writes.
 
@@ -41,7 +50,7 @@ The new chain is **automated test → test case → design element / requirement
 
 ```mermaid
 flowchart LR
-  m1["WaitAfter_ManyFailures_StopsAtTheCeiling"] -->|verifies| tc["TC-BAG-03.4<br/>register entry"]
+  m1["WaitAfter_ManyFailures_StopsAtTheCeiling"] -->|verifies| tc["TC-BAG-03.4<br/>test case"]
   m2["WaitAfter_VeryLongAbsence_…"] -->|verifies| tc
   tc -->|verifies| d["DSN-BAG-03"] -->|Satisfies| r["REQ-BAG-09"]
 ```
@@ -55,7 +64,7 @@ flowchart LR
   IDs. A `ledger check` must therefore cover the same items and leave the same gaps as on
   beacon-split. That catches extractor mistakes without trusting the extractor.
 - **One ledger, two languages, both conventions.** The Python gateway keeps verifying
-  requirements directly; the C# agent verifies them through the register. The schema allows
+  requirements directly; the C# agent verifies them through the test specification. The schema allows
   both.
 - **No new requirements to write.** The agreement, the SRS, the design and the change
   requests come from beacon-split. beacon-split's tags are M10 evidence, so it is cloned,
@@ -65,7 +74,7 @@ flowchart LR
 
 ```
 beacon-dotnet/
-├── beacon-ledger/       from beacon-split, plus docs/test/field-agent-test-cases.md (the register)
+├── beacon-ledger/       from beacon-split, plus docs/test/field-agent-test-cases.md (the test specification)
 ├── beacon-gateway/      from beacon-split, Python and pytest; its tests are automated_test items
 └── beacon-agent-cs/     new
     ├── Beacon.Agent.sln, Directory.Packages.props, qmstrace.toml, AGENTS.md, README.md
@@ -126,7 +135,7 @@ public void WaitAfter_ManyFailures_StopsAtTheCeiling() { … }
 public async Task Heartbeat_AfterRegistering_IsAcceptedUnderTheSameClientId() { … }
 ```
 
-The register, in the ledger, plans each test case and says what it verifies. A group
+The test specification, in the ledger, plans each test case and says what it verifies. A group
 heading must not *start* with an ID: `## DSN-BAG-03 — Wait schedule` declares DSN-BAG-03 a
 second time and is reported (V07). The heading is `## Wait schedule (DSN-BAG-03)`:
 
@@ -161,7 +170,7 @@ namespace inside sibling namespaces. A `System.`-qualified name inside a namespa
 fails to compile, so the test project uses `using` directives instead.
 
 **The schema changes, from beacon-split:**
-- `test_case` becomes the register entry, and a new type `automated_test` (pytest functions
+- `test_case` becomes the test specification's entry, and a new type `automated_test` (pytest functions
   and xUnit methods) carries the levels.
 - `verifies` runs from `automated_test` and `test_case` to `requirement`, `design_element`
   and `test_case`. It is one link, so G02 and G04 stay as they are, satisfied directly or
@@ -173,8 +182,8 @@ fails to compile, so the test project uses `using` directives instead.
 - One looseness: a test case could verify another test case. Targets that depend on the
   source type would close that gap, and are left to the engine.
 
-The term **automated test** goes into `CONTEXT.md` with the engine milestone, in the same
-change that renames the item type in qmstrace's own schema. The glossary's **Test Case**
+The terms **automated test** and **test specification** entered `CONTEXT.md` in M12-0, with
+ADR-0003; qmstrace's own schema follows in M12b. The glossary's **Test Case**
 already means the planned entry: *the planned, baselined description of a test and what it
 verifies*.
 
@@ -210,11 +219,11 @@ verifies*.
 | gateway `check --strict` | exit 0, 85 items, 0 violations, 0 gaps: the rename to `automated_test` changed nothing |
 | `ledger copy-schema` | exit 2, nothing written: *agent … names the extractor 'csharp-file', which this qmstrace does not have*. `copy-schema gateway` alone succeeds |
 | `ledger check` | exit 2, refused: the agent's configuration has no schema block. It refuses rather than passing with a repo unread |
-| the ledger's own `check`, before the tag | exit 1: **49 V02, one per dotted register entry, each naming a cut-short ID** (*TC-BAG-00 does not match … ^TC-BAG-\d{2}\.\d+$*), and no test-case item read; plus beacon-split's 47 gaps (G02 21, G03 13, G04 13) |
+| the ledger's own `check`, before the tag | exit 1: **49 V02, one per dotted test case, each naming a cut-short ID** (*TC-BAG-00 does not match … ^TC-BAG-\d{2}\.\d+$*), and no test-case item read; plus beacon-split's 47 gaps (G02 21, G03 13, G04 13) |
 | the ledger's own `check`, after the tag `dotnet/requirements/1` | exit 2, refused: *Historical trace data at dotnet/requirements/1 … cannot form a reliable snapshot*. The tagged tree holds the same 49 misread headings, so it refuses rather than judge baselines on a snapshot it cannot read. The refusal lists all 49 V02 in one line of 6.7 KB. The gateway's `check --strict` still exits 0 |
-| the same, with the dots replaced by hyphens, in a disposable copy (before the tag) | exit 0, **0 violations, 49 test cases read**. G02 21 → 11 and G04 13 → 8, met through the register; 49 G09, because the C# repo cannot be read yet. `thread TC-BAG-03-4` walks through DSN-BAG-03 to REQ-BAG-02/09/10 and AGR-7/9 |
+| the same, with the dots replaced by hyphens, in a disposable copy (before the tag) | exit 0, **0 violations, 49 test cases read**. G02 21 → 11 and G04 13 → 8, met through the test specification; 49 G09, because the C# repo cannot be read yet. `thread TC-BAG-03-4` walks through DSN-BAG-03 to REQ-BAG-02/09/10 and AGR-7/9 |
 
-So the register works through configuration alone for the ledger's own commands. Today, the
+So the test specification works through configuration alone for the ledger's own commands. Today, the
 dot is the only thing in the way.
 
 ## What the probes found — verified 2026-10-14
@@ -257,8 +266,8 @@ blocks. Build and restore work inside it, offline from the NuGet cache.
   file per type would show G06 on every helper type's file. Decide whether a component is a
   file or a type that carries the marker.
 - **The G02 next move.** With `test_case` declared in the ledger, a gateway requirement's G02
-  says to write `verifies:` under a register entry. But the gateway verifies directly, from
-  pytest, with no register. The fix should name every way the link can be made.
+  says to write `verifies:` under a test case. But the gateway verifies directly, from
+  pytest, with no test specification. The fix should name every way the link can be made.
 - **Verdicts through a test case in `results`:** today only direct `verifies` links count.
   This amends `surface-architecture.md` and needs an ADR.
 - **Dotted IDs:** one pattern in `core/model.py`, read by every extractor. This amends marker
@@ -281,7 +290,7 @@ blocks. Build and restore work inside it, offline from the NuGet cache.
 3. Port the five modules and the 53 tests, each DisplayName starting with its test case's ID.
    Format with `csharpier format .`. Check parity and run the mutation checks.
 4. In the ledger:
-   - add the register;
+   - add the test specification;
    - apply the schema changes;
    - add `[items.test_case]` with `id_pattern = '^TC-BAG-\d{2}\.\d+$'`.
 5. In the gateway, rename `[items.test_case]` to `[items.automated_test]`. In the ledger, run
@@ -321,16 +330,16 @@ names, then C11.
 | # | Step | Passes when |
 |---|---|---|
 | C1 | `ledger check --strict` | exit 0 · **226 items** across 3 repos: agent 5 components · 53 automated tests; gateway 9 components · 76 automated tests; ledger 21 requirements · 13 design elements · 49 test cases · 0 violations, 0 gaps, 0 suspects · 21 frozen, 0 changed (tag `dotnet/requirements/1`) · links by each repo's `status`: agent 58, gateway 93, ledger 106 (**257**) · each of the 10 BAG requirements and 5 BAG design elements is reached by `verifies`, as on beacon-split · wall time recorded, informational |
-| C2 | `ledger check`, each break in its own copy | (a) the bed as built: no G07, G08 or G09 · (b) remove the ID from `TC-BAG-01.5`'s only test's `DisplayName`: exactly one G07 (that automated test) and one G09 (TC-BAG-01.5) · (c) delete TC-BAG-01.5's `verifies:` line: exactly one G08 · (d) add `TC-BAG-01.7`, with a `verifies:` line and no test: exactly one G09 · (e) delete TC-BAG-00.1's `verifies:` line: exactly one G08 (TC-BAG-00.1) and one G02 (REQ-BAG-07). The G02's fix offers both the register's `verifies:` line and the automated test's own form, never the register alone (M0's next move) |
+| C2 | `ledger check`, each break in its own copy | (a) the bed as built: no G07, G08 or G09 · (b) remove the ID from `TC-BAG-01.5`'s only test's `DisplayName`: exactly one G07 (that automated test) and one G09 (TC-BAG-01.5) · (c) delete TC-BAG-01.5's `verifies:` line: exactly one G08 · (d) add `TC-BAG-01.7`, with a `verifies:` line and no test: exactly one G09 · (e) delete TC-BAG-00.1's `verifies:` line: exactly one G08 (TC-BAG-00.1) and one G02 (REQ-BAG-07). The G02's fix offers both the test case's `verifies:` line and the automated test's own form, never the test case alone (M0's next move) |
 | C3 | the agent's `status` | components: its five `src/Beacon.Agent/*.cs` files, each with one `Implements` link (DSN-BAG-01…05 in turn) · automated tests: 53, one per method — 37 unit, 7 integration, 9 system; no item per Theory row, none from `Support/` or the probe project, no no-level finding · each ID is derived from the test's location, is distinct, and names its file, class and method |
-| C4 | `ledger check` and the ledger's `status` | the 49 test cases carry the register's IDs exactly · incoming links: TC-BAG-01.3, 02.1, 02.4 and 03.4 two each, every other test case one; TC-BAG-02.1, 02.10 and 02.11 are three items · no item and no link target `TC-BAG-00` … `TC-BAG-05` · M0's 49 V02 are gone |
+| C4 | `ledger check` and the ledger's `status` | the 49 test cases carry the test specification's IDs exactly · incoming links: TC-BAG-01.3, 02.1, 02.4 and 03.4 two each, every other test case one; TC-BAG-02.1, 02.10 and 02.11 are three items · no item and no link target `TC-BAG-00` … `TC-BAG-05` · M0's 49 V02 are gone |
 | C5 | the agent's `results`, on three TRX files | (a) the full run: 67 entries, 67 distinct runs, 0 duplicates, 67 matched, 53 of 53 automated tests matched, 0 unmatched. All 53 automated tests, 49 test cases and 10 BAG requirements pass, and REQ-BAG-09's verdict comes through TC-BAG-00.7, 03.2, 04.6 and 05.3 · (b) a copy with `Skip` on TC-BAG-04.7's only test (67 rows, 1 skipped): that test, TC-BAG-04.7 and REQ-BAG-10 are `skip`; the other 9 BAG requirements pass · (c) `--filter "FullyQualifiedName!~WaitScheduleTests"` (58 rows): the 7 WaitSchedule tests and TC-BAG-03.1–03.6 are `no-result`, and so are REQ-BAG-02, 09 and 10; the other 7 pass |
 | C6 | the agent's `results` after a break, each in its own copy | (a) the failure count never reset: TC-BAG-00.8, 00.9, 04.7 and 04.10 fail, and REQ-BAG-10 fails; the other 9 BAG requirements pass · (b) no ceiling in `WaitAfter`: both TC-BAG-03.4 tests fail, and TC-BAG-03.4 fails. All 10 BAG requirements pass, because no verdict flows through a design element. The failing test case is still shown, with what it verifies |
 | C7 | `ledger thread REQ-BAG-09`; `ledger thread TC-BAG-03.4` | REQ-BAG-09 forward: DSN-BAG-03; `agent:src/Beacon.Agent/WaitSchedule.cs`; 7 test cases (TC-BAG-00.7, 03.2, 04.6 and 05.3 directly; 03.4, 03.5 and 03.6 through DSN-BAG-03); 8 automated tests, all `agent:`-qualified, 7 unit and 1 system as on beacon-split. Backward: AGR-9 · TC-BAG-03.4 forward: its 2 automated tests. Backward: DSN-BAG-03; REQ-BAG-02, 09 and 10; AGR-7 and AGR-9 |
 | C8 | `ledger impact REQ-BAG-09` | downstream: 1 design element, 1 component, 7 test cases, 8 automated tests; upstream origin AGR-9; candidate `Impacts: REQ-BAG-09` |
-| C9 | the probes: in a copy of the agent whose automated tests are `tests/Beacon.Agent.Probe/**/*.cs`, run `check`, then `results` on the probe's TRX | each probe as in the table below · each of the 18 TRX rows is either matched or listed as unmatched · the links to `TC-BAG-90.*` are V03 (they are not in the register), as expected |
+| C9 | the probes: in a copy of the agent whose automated tests are `tests/Beacon.Agent.Probe/**/*.cs`, run `check`, then `results` on the probe's TRX | each probe as in the table below · each of the 18 TRX rows is either matched or listed as unmatched · the links to `TC-BAG-90.*` are V03 (they are not in the test specification), as expected |
 | C10 | `ledger check` (plain, `--strict`, `--quiet`); C7's two threads; C8's impact; the agent's `status`, `check --strict` and `results` (C5 a). Each run twice | identical bytes; no absolute home path in any output |
-| C11 | after the run | beacon-split: `HEAD`, branches, tags and `status --porcelain` unchanged since before the build · beacon-dotnet: every repo clean; each `HEAD` is the build's commit, or C12's in the agent |
+| C11 | after the run | beacon-split: `HEAD`, branches, tags and `status --porcelain` unchanged since before the build · beacon-dotnet: every repo clean; each `HEAD` is the one in the status line above, or C12's in the agent |
 | C12 | setup: `ledger copy-schema`, then `init` in the agent | `copy-schema` exits 0, with `updated: agent` and the gateway unchanged (at M0 it refused and wrote nothing) · `init`: the agent's stanza lists `component csharp-file` and `automated_test xunit` with their globs, and writes no pytest settings · both committed in the agent |
 | C13 | beacon-split, read by the milestone's engine | `ledger check --strict` matches the oracle: 177 items, 208 links, 0 violations, 0 gaps, 0 suspects, 21 frozen · `ledger thread` and `ledger impact REQ-BAG-09` reach the oracle's items · each product repo's `check --strict` exits 0 (gateway 85 items, agent 58): widening the ID shape changes nothing that had no dot |
 
@@ -349,7 +358,7 @@ allows neither.
 | `OneRowFails` | one automated test, linked to `TC-BAG-90.12`; `results`: `fail` |
 | `CustomAttribute_Runs` (`[SlowFact]`) | an unread-marker finding and its TRX row listed unmatched, or, if the milestone reads it, a link to `TC-BAG-90.13` and the row matched |
 | `CompiledOut` (`#if`) | a finding; no automated test |
-| `CommentedOut` | a stray; no automated test |
+| `CommentedOut` | no automated test (amended in M12-0: its stray is pinned by the extractor's unit test) |
 | `Inherited_Runs` | both TRX rows (`FirstDerived`, `SecondDerived`) join an automated test: one test with two runs, or one test per subclass, as the milestone records |
 
 ## Results

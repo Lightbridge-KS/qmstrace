@@ -40,7 +40,8 @@ qmstrace      (this repo: the tool — it holds no other project's data)
   putting a decision to the developer, define any coined term on first use and lead with a
   concrete example.
 - **Decisions are recorded inline** in the design doc they belong to, with the rejected
-  alternative and why. No ADRs yet; they start when a settled doc is amended.
+  alternative and why. A change that amends a settled doc gets an ADR in `docs/adr/`
+  (`NNNN-slug.md`, in ADR-0001's form), and the doc follows it within the milestone.
 - **A design doc holds what is settled.** Findings from an experiment graduate into
   `docs/design/`; they do not stay stranded in `docs/tests/` results.
 - **Update the tracker in the same change** as the work it describes.

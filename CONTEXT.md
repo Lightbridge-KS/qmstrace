@@ -107,7 +107,7 @@ _Avoid_: assessor (except when quoting that scheme), inspector, reviewer
 
 **Item**:
 A uniquely identified unit of engineering content that can be traced: an origin clause, a use
-case, a requirement, a design element, a component, a test case.
+case, a requirement, a design element, a component, a test case, an automated test.
 _Avoid_: node, entity, artifact, need
 
 **Subject**:
@@ -121,7 +121,7 @@ its status, not its ID.
 _Avoid_: key, number
 
 **Qualified ID**:
-A derived item ID — a module's path, a test's node ID — prefixed by its repo's name in
+A derived item ID — a module's path, an automated test's ID — prefixed by its repo's name in
 `[repos]` wherever the whole project is judged: `service:tests/unit/test_api.py::test_x`. Two
 repos may hold the same path; an authored ID is never qualified.
 _Avoid_: full ID, global ID, `../service/…` (that is a location, not an identity)
@@ -154,7 +154,8 @@ _Avoid_: depends-on, uses, requires
 
 **Marker**:
 An item or link declaration written in the place where the item itself is authored — a
-heading that starts with the item's ID, a line in the item's section, a tag on a test.
+heading that starts with the item's ID, a line in the item's section, a tag on an automated
+test, the start of its `DisplayName`.
 _Avoid_: annotation, tag (collides with a Git tag), comment
 
 **Stray**:
@@ -249,11 +250,27 @@ to evidence*.
 _Avoid_: trace (as a noun), path, lineage
 
 **Test Case**:
-The planned, baselined description of a test and what it verifies.
-_Avoid_: test (unqualified)
+The planned, baselined description of a test and what it verifies — an entry in a Test
+Specification, run by one or more automated tests, and passing only when all of them pass.
+`TC-BAG-03.4 — The wait stops growing at the ceiling`, run by two xUnit methods. Where a
+project has no Test Specification, its automated tests verify directly (ADR-0003).
+_Avoid_: test (unqualified), test function
+
+**Test Specification**:
+The document that holds a subject's test cases — the evidence form of the test-cases work
+product, as the requirements specification is of the requirements. A Markdown file in the
+ledger, `docs/test/<subject>-test-cases.md`, one heading per test case.
+_Avoid_: test-case register (a Register is generated), test plan
+
+**Automated Test**:
+The code that runs a test case, or verifies an item directly: a pytest function, an xUnit
+`[Fact]` or `[Theory]` method. Its ID is derived from where it is; a parametrised function or
+a Theory is one automated test that runs several times.
+_Avoid_: test case (for the code), test method, unit test (a level, not a kind)
 
 **Test Result**:
-The verdict of one test case in one run. Appended, never edited, never typed by hand.
+The verdict of one automated test in one run. Appended, never edited, never typed by hand. A
+test case's verdict is the worst of its automated tests' results.
 _Avoid_: test status, outcome
 
 **Gate**:
