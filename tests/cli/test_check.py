@@ -174,3 +174,18 @@ def test_an_empty_result_never_looks_clean(tmp_path: Path, project: Path) -> Non
         path.unlink()
     output = check(empty)[1]
     assert "read: no items" in output and "in 0 items" in output
+
+
+@pytest.mark.verifies("REQ-QMT-20")
+@pytest.mark.parametrize("word", ["REQ-SVC-04.1a", "REQ-SVC-03b"])
+def test_a_heading_that_starts_with_a_malformed_id_is_v02_naming_the_whole_word(
+    project: Path, word: str
+) -> None:
+    # ADR-0002: a malformed ID of this repo's kind is reported, never read as prose — and never
+    # cut short at its first dot.
+    srs = project / "service" / "docs" / "req" / "service-srs.md"
+    srs.write_text(srs.read_text(encoding="utf-8") + f"\n### {word} — A slip\n", encoding="utf-8")
+    code, output = check(project / "service")
+    assert code == 1
+    (line,) = [line for line in output.splitlines() if line.startswith("  V02  ")]
+    assert f"{word} does not match this repo's ID pattern" in line

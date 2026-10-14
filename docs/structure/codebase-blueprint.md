@@ -547,9 +547,12 @@ boundaries; `_tables.py` owns cells and table markers. Compatibility exports pre
 registry's function identities. Source lines, result ordering, findings and digest bytes
 remain unchanged by this ownership split. Python source and pytest extraction have separate
 owners under `python/`; the old module paths preserve function identity through direct
-compatibility imports. The registry chooses extractors by configured name. Reasoning: data architecture § Marker syntax v0; §4.
+compatibility imports. The registry chooses extractors by configured name. Every reader finds
+IDs with one shape, `model.ID_TOKEN`, whose number may carry dotted parts; in running text
+`model.id_tokens` reads an ID whole or not at all, and a heading that starts with a malformed
+ID is handed back as a lead (ADR-0002). Reasoning: data architecture § Marker syntax v0; §4.
 
-Satisfies: REQ-QMT-01, REQ-QMT-02
+Satisfies: REQ-QMT-01, REQ-QMT-02, REQ-QMT-20
 
 ### DSN-QMT-05 — The trace graph admits only legal links, and walks them
 

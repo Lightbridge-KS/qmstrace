@@ -13,7 +13,12 @@ from qmstrace.core.config import ItemType
 from qmstrace.core.model import ID_TOKEN
 
 _HEADING: Final = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
-_LEADING_ID: Final = re.compile(rf"({ID_TOKEN.pattern})(?![A-Za-z0-9-])\s*(.*)$")
+_LEADING_ID: Final = re.compile(rf"({ID_TOKEN.pattern})(?![A-Za-z0-9-]|\.\d)\s*(.*)$")
+# A first word that starts as an ID but runs on — `TC-SVC-03.1a`, `REQ-SVC-03b` — is a
+# malformed ID, not prose: handed back as a lead, so a slip of this repo's kind is reported.
+_MALFORMED_LEAD: Final = re.compile(
+    rf"({ID_TOKEN.pattern}(?:[A-Za-z0-9]|\.\d)+)(?![A-Za-z0-9-])\s*(.*)$"
+)
 _SEPARATOR: Final = re.compile(r"^[\s\u2014\u2013:-]+")  # em dash, en dash, colon, hyphen
 _ATTRIBUTE: Final = re.compile(r"\s*\{[#.-][^{}]*\}\s*$")  # Pandoc: {#id}, {.class}, {-}
 _NUMBER: Final = re.compile(r"(?:\u00a7\s*)?(\d+(?:\.\d+)*)\.?\s+")  # 4.2, 4.2.1., § 4.2
@@ -69,7 +74,7 @@ def _leading_id(words: str) -> tuple[str | None, str]:
         else:
             continue
         return lead.group(1), _SEPARATOR.sub("", after).rstrip()
-    lead = _LEADING_ID.match(words)
+    lead = _LEADING_ID.match(words) or _MALFORMED_LEAD.match(words)
     if lead is None:
         return None, words
     return lead.group(1), _SEPARATOR.sub("", lead.group(2))

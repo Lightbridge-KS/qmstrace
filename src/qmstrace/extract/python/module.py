@@ -14,7 +14,7 @@ import ast
 
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Link, Stray, text_digest
+from qmstrace.core.model import Extracted, Finding, Item, Link, Stray, id_tokens, text_digest
 from qmstrace.extract.fields import FIELD, link_line
 
 
@@ -67,7 +67,7 @@ def _strays(path: str, text: str, docstring: range, markers: set[str]) -> tuple[
         match = FIELD.match(line)
         if match is None or match.group(1) not in markers:
             continue
-        targets = tuple(ID_TOKEN.findall(match.group(2)))
+        targets = id_tokens(match.group(2))
         if targets:
             found.append(Stray(match.group(1), targets, path, number, "docstring"))
     return tuple(found)

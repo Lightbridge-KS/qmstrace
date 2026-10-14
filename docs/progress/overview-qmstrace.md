@@ -395,7 +395,7 @@ Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
 CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
 `../qmstrace-ledger` before any SRS edit lands.
 
-- [ ] **M12-0** — decisions and vocabulary, in draft review: [#34](https://github.com/Lightbridge-KS/qmstrace/pull/34) on `docs/m12-0-decisions`:
+- [x] **M12-0** — decisions and vocabulary, [#34](https://github.com/Lightbridge-KS/qmstrace/pull/34) · `5f8a1d1`; CR-003 accepted (ledger `7d75978`):
   - [x] S1: tree-sitter parses all 19 of the bed's files with no error node; each
     `DisplayName` form is its own node kind; mypy strict and a universal `uv lock` pass. C# 14
     extension blocks give error nodes, and a test after them is still read.
@@ -409,8 +409,16 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     before M12a's SRS edit.
   - [x] The bed's wording ("test specification"); measure C9 amended before the run, with its
     reason.
-- [ ] **M12a** — dotted IDs, engine-wide; nothing cut short; a malformed lead is reported;
-  the refusal at a baseline tag summarised. REQ-QMT-20.
+- [ ] **M12a** — dotted IDs, engine-wide, on `feat/m12a-dotted-ids`. REQ-QMT-20.
+  - [x] `ID_TOKEN` widened; `id_tokens` reads running text whole or not at all, in every
+    reader (headings, fields, tables, mentions, strays, pytest markers, change requests).
+  - [x] A heading that starts with a malformed ID (`REQ-SVC-04.1a`, `REQ-SVC-03b`) is a lead:
+    V02 names the whole word.
+  - [x] A dotted `id_prefix` accepted; listings sort dotted numbers as numbers; the refusal
+    at an unreadable baseline tag counts by code past three problems.
+  - [x] Verified: the 959 existing tests and every golden unchanged; on every fixture and
+    golden, undotted text reads exactly as before; four mutations in a disposable copy each
+    fail a REQ-QMT-20 test.
 - [ ] **M12b** — test cases in the trace:
   - `test_case` → `automated_test` in qmstrace's own schema and in the starter;
   - a G02 fix that names every way the link can be made;

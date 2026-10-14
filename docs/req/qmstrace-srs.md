@@ -43,6 +43,18 @@ IDs. A marker written in a form that is not read is reported, never silently dro
 - Origin: AGR-2
 - Verify-by: test
 
+### REQ-QMT-20 — An ID is read whole, dotted parts and all
+
+An ID's number may carry dotted parts — `TC-SVC-04.1-01`, `DSN-SVC-04.1`. An ID is read whole
+wherever it is written — a heading, a field, a table, prose, a marker in code, a change
+request — or not read as an ID at all; it is never cut short. A heading that starts with a
+malformed ID of the repo's kind is reported, not read as prose.
+
+- Category: functional-suitability
+- Origin: AGR-6, AGR-11
+- Verify-by: test
+- Change: CR-003
+
 ## Checking
 
 ### REQ-QMT-03 — One check reports every finding, and the gate fails on gaps
@@ -233,4 +245,3 @@ stanza is unchanged.
 - Origin: AGR-5
 - Verify-by: test
 - Change: CR-002
-

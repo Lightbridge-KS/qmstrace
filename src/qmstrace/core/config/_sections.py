@@ -23,11 +23,12 @@ from qmstrace.core.errors import CouldNotJudge
 
 _REGEX_META: Final = set("\\()[].*+?{|$")
 # Any start of the one shape every ID has (`model.ID_TOKEN`): capitals and digits in
-# hyphen-joined segments. A pattern or prefix that starts otherwise can never match an ID.
-_ID_START: Final = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]*)*")
+# hyphen-joined segments, a number with dotted parts. A pattern or prefix that starts otherwise
+# can never match an ID.
+_ID_START: Final = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]*(?:\.\d*)*)*")
 _ID_SHAPE: Final = (
-    "an ID is capital letters and digits in hyphen-joined segments, ending in a number, "
-    "such as REQ-SVC-01"
+    "an ID is capital letters and digits in hyphen-joined segments, ending in a number that "
+    "may carry dotted parts, such as REQ-SVC-01 or TC-SVC-04.1-01"
 )
 
 

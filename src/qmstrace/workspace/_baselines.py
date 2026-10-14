@@ -71,11 +71,10 @@ def _judged_baselines(
         problems = [f for f in found if f.code not in findings.SNAPSHOT_SAFE]
         if problems or misplaced or len({i.id for i in found_items}) != len(found_items):
             tags_here = ", ".join(t.name for t in tags if t.commit == commit)
-            details = "; ".join(f"{f.code} {f.file}:{f.line}: {f.what}" for f in problems)
             where = f" in {repo}" if repo is not None else ""
             raise CouldNotJudge(
                 f"Historical trace data at {tags_here} ({commit}){where} cannot form a reliable "
-                f"snapshot: {details}",
+                f"snapshot: {_problems(problems)}",
                 "Fix: inspect the tagged configuration and source; do not replace historical "
                 "data with today's tree or rewrite the baseline tag.",
             )
@@ -83,6 +82,27 @@ def _judged_baselines(
     baselines = judge.resolve_baselines(config, tags, snapshots, ancestry)
     comparisons, wrong = judge.guard(config, items, baselines, ancestry, register)
     return BaselineState(baselines, comparisons, register), wrong
+
+
+# Problems listed one by one in a refusal; past this, they are counted by code (ADR-0002).
+_SHOWN = 3
+
+
+def _problems(problems: list[Finding]) -> str:
+    """What makes a tagged snapshot unreadable — every problem when there are few, else a count
+    by code, the first few, and where to see the rest."""
+    listed = "; ".join(f"{f.code} {f.file}:{f.line}: {f.what}" for f in problems[:_SHOWN])
+    if len(problems) <= _SHOWN:
+        return listed
+    counts: dict[str, int] = {}
+    for finding in problems:
+        counts[finding.code] = counts.get(finding.code, 0) + 1
+    by_code = ", ".join(f"{n} {code}" for code, n in sorted(counts.items()))
+    rest = len(problems) - _SHOWN
+    return (
+        f"{len(problems)} findings ({by_code}), the first {_SHOWN}: {listed}; and {rest} more — "
+        "a check run in a checkout of the tag lists every one"
+    )
 
 
 def _baseline_notices(repo: str, state: BaselineState) -> list[Notice]:

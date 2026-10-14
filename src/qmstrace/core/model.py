@@ -19,9 +19,18 @@ from dataclasses import dataclass, field, replace
 from typing import Final, Literal
 
 # What an item ID looks like, whatever the project's own patterns: capitals and digits in
-# hyphenated parts, ending in a number — REQ-SVC-01, DSN-BCN-08, AGR-3, CR-001. A project's
-# patterns decide which of these are *its* items; this decides what reads as an ID at all.
-ID_TOKEN: Final = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d+")
+# hyphenated parts, ending in a number, where a number may carry dotted parts — REQ-SVC-01,
+# DSN-BCN-08, AGR-3, CR-001, TC-SVC-04.1-01. A project's patterns decide which of these are
+# *its* items; this decides what reads as an ID at all (ADR-0002).
+ID_TOKEN: Final = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+(?:\.\d+)*)*-\d+(?:\.\d+)*")
+# An ID in running text, bounded on both sides: `TC-SVC-03.1a` is no ID at all — never
+# `TC-SVC-03` — and the full stop that ends a sentence is not part of the ID before it.
+ID_IN_TEXT: Final = re.compile(rf"(?<![A-Za-z0-9-])({ID_TOKEN.pattern})(?![A-Za-z0-9-]|\.\d)")
+
+
+def id_tokens(text: str) -> tuple[str, ...]:
+    """Every whole ID in running text, in order — an ID is read whole or not at all."""
+    return tuple(found.group(1) for found in ID_IN_TEXT.finditer(text))
 
 
 def text_digest(text: str) -> str:
