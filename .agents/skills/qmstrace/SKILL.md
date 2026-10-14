@@ -60,6 +60,26 @@ the schema says — a test case is declared like any document item and names wha
 The automated tests then name the test case they run, `@pytest.mark.verifies("TC-SVC-01.1")`,
 and several may run one; `qmstrace rules` says which a project uses.
 
+```csharp
+/// <summary>Key checks.</summary>
+/// <remarks>
+/// Implements: DSN-SVC-01
+/// </remarks>
+public static class KeyCheck { }
+```
+
+```csharp
+public class KeyCheckTests
+{
+    [Fact(DisplayName = "TC-SVC-01.1 a call without a valid key is refused")]
+    public void Admits_NoKey_IsFalse() { }
+}
+```
+
+In a C# repo a file's link is a field line in its first type's leading `///` comment, and an
+xUnit `[Fact]` or `[Theory]` names the ID it verifies at the start of its `DisplayName`, as a
+string literal. A `[Trait]` never reaches a test report and is not read.
+
 A heading that starts with the item's ID, in a file its type is read from, declares a
 document item. The item is its section, down to the next heading at the same or a higher
 level: sub-sections, tables and diagrams inside it are its text, and its fields and links

@@ -115,6 +115,11 @@ src/qmstrace/
       __init__.py        empty; callers import the concrete owner
       module.py          module components, docstring markers, strays and syntax-tree digest
       pytest_tests.py    test collection, verifies markers, digest and report_identity(node_id)
+    csharp/              C# (ADR-0004): independent owners over one private parser
+      __init__.py        empty; callers import the concrete owner
+      _syntax.py         the only tree-sitter importer: types, methods, attributes, comments
+      component.py       csharp-file — a .cs file, its first type's /// field lines, strays
+      xunit.py           xunit — [Fact]/[Theory] methods, the DisplayName's ID, run identities
     python_module.py     compatibility imports of python.module extract and form only
     pytest_tests.py      compatibility imports of python.pytest_tests extract, form, report_identity
     junit.py             bytes -> Report entries or parse diagnostic; safe defusedxml, no files
@@ -229,7 +234,9 @@ Rows may import columns. Enforced by `tests/meta/test_architecture.py`, which wa
 | **workspace** | ✔ | ✔ | ✔ | — | ✔ | — | — | ✔ |
 | **cli** | ✔ | — | — | ✔ | ✔ | ✔ | ✔ | ✔ |
 
-`extract` also imports `defusedxml`, in `junit.py` only. Nothing imports `click`.
+`extract` also imports `defusedxml`, in `junit.py` only, and `tree_sitter` with
+`tree_sitter_c_sharp`, in `csharp/_syntax.py` only (ADR-0004; a test pins it). Nothing imports
+`click`.
 
 Within `core/judge`, coverage, baseline guards and suspects are independent policies; they
 share the public graph, configuration and evidence values without importing one another.
@@ -260,12 +267,13 @@ block. `base.py` registers these concrete owners under the unchanged `python-mod
 forward their supported functions, without wrappers; production callers use the canonical
 owners. `python/__init__.py` remains empty. Architecture and wheel gates pin these boundaries.
 
-Future language packages sit alongside Python when their first extractor is implemented.
-They continue to implement `IExtractor` and register explicit names; language dispatch by
-extension and a generic language base class are not introduced. Component granularity,
-marker syntax and test-framework identities must be chosen for each language. Reading a
-new language's source does not establish support for its test reports: `results` still matches
-pytest identities, even though the XML format reader remains outside the language package.
+Language packages sit side by side — `python/`, and `csharp/` since M12d — each implementing
+`IExtractor` under explicit names; language dispatch by extension and a generic language base
+class are not introduced. Component granularity, marker syntax and test-framework identities
+are chosen per language: for C#, a component is a file and an xUnit test's report identity is
+its namespace-qualified class and method (ADR-0004). A test extractor records each item's run
+identities (`Item.runs_as`), so `results` matches any language's tests without importing it;
+reading a report format stays outside the language packages.
 
 Within `render/text`, command owners do not import one another or the compatibility facade.
 They import `_evidence` and `_presentation` from `render/` when needed. Shared evidence
@@ -392,8 +400,8 @@ deciding eligibility. The check failure predicate remains violations plus strict
   initializers, exact exports, each package's dependency direction and callers' public imports.
   The two legacy Python extractor modules also permit only exact forwarding imports;
   `extract/python/__init__.py` stays empty and canonical callers import its concrete owners.
-- **No pydantic, no rich.** Dataclasses and plain text; the tool installs with Typer and
-  `defusedxml`.
+- **No pydantic, no rich.** Dataclasses and plain text; the tool installs with Typer,
+  `defusedxml` and, for C#, tree-sitter with its C# grammar (prebuilt wheels; ADR-0004).
 - **No use of the framework's private modules.** Typer's vendored click is not ours to import.
 - **No second item type named in `status`.** It lists `requirement` items and reads `Category`
   and `Verify-by` by name — a known hard-coding in `render/text/_status.py`, since every trace schema so
@@ -681,3 +689,17 @@ configuration and a graph, not one repo's assessment. Reasoning:
 *Project-wide check contract — M10a*.
 
 Satisfies: REQ-QMT-17, REQ-QMT-18
+
+### DSN-QMT-15 — C# is read from one parse, by two extractors
+
+`extract/csharp/_syntax.py` parses a file once with tree-sitter into frozen values — types with
+their namespace, enclosing types, bases and leading `///` lines; methods with their attributes
+and arguments; comments — and reports a parse error only inside something read.
+`component.py` (`csharp-file`) makes one component per file and reads its first type's doc
+comment; `xunit.py` (`xunit`) makes one automated test per `[Fact]` or `[Theory]` method, links
+it by the ID that starts a literal `DisplayName` — the one link its type carries, which the
+configuration checks — and records its report identities, an abstract base's tests as each
+concrete subclass in the file. Every unread form is V15, a commented-out test attribute a
+stray. Reasoning: [ADR-0004](../adr/0004-reading-csharp.md).
+
+Satisfies: REQ-QMT-21

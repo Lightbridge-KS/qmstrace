@@ -375,14 +375,19 @@ def removed_frozen(item: Item, baseline: str) -> Finding:
     )
 
 
-def unread_marker(file: str, line: int, marker: str, form: str) -> Finding:
+def unread_marker(file: str, line: int, marker: str, form: str, fix: str | None = None) -> Finding:
+    """A marker written in a form its extractor does not read; `fix` names the form it does —
+    pytest's by default."""
     return Finding(
         "V15",
         file,
         line,
         f"a '{marker}' marker {form} — this tool does not read that form, so it links nothing.",
-        f'Fix: write @pytest.mark.{marker}("ID", …) with literal IDs, directly on a test '
-        "function or on its test class.",
+        fix
+        or (
+            f'Fix: write @pytest.mark.{marker}("ID", …) with literal IDs, directly on a test '
+            "function or on its test class."
+        ),
         marker=marker,
     )
 
@@ -412,6 +417,16 @@ def fix_stray(stray: Stray) -> str:
         return (
             f"the '{marker}' table row at {where} is not read — a table declares nothing; "
             f"write `{marker}: …` as a line in the item's section."
+        )
+    if stray.kind == "doccomment":
+        return (
+            f"the '{marker}:' line at {where} is not in the first type's leading `///` doc "
+            "comment, so it is not read — move it there."
+        )
+    if stray.kind == "comment":
+        return (
+            f"the test attribute at {where} is in a comment, so it is not read — a commented-out "
+            "test links nothing; restore the attribute or remove the comment."
         )
     if stray.kind == "outside":
         return (

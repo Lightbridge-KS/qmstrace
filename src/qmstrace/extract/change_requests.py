@@ -42,7 +42,7 @@ def read(file: str, request_id: str, text: str) -> tuple[ChangeRequest | None, s
         return None, "request metadata needs State and Impacts before its prose sections"
     impacts = [s.strip() for s in fields["Impacts"].split(",")]
     if any(
-        not (ID_TOKEN.fullmatch(s) or re.fullmatch(r"[^\s,:]+\.py(?:::[^\s,]+)?", s))
+        not (ID_TOKEN.fullmatch(s) or re.fullmatch(r"[^\s,:]+\.(?:py|cs)(?:::[^\s,]+)?", s))
         for s in impacts
     ):
         return None, "Impacts must be a nonempty comma-separated list of item IDs"

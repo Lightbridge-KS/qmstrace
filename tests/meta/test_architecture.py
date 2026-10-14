@@ -21,13 +21,27 @@ SRC = Path(__file__).parents[2] / "src" / "qmstrace"
 # rows may import columns — third-party and first-party only; the standard library is free
 ALLOWED: dict[str, set[str]] = {
     "core": {"qmstrace.core"},
-    "extract": {"qmstrace.core", "qmstrace.extract", "defusedxml"},
+    "extract": {
+        "qmstrace.core",
+        "qmstrace.extract",
+        "defusedxml",
+        "tree_sitter",
+        "tree_sitter_c_sharp",
+    },
     "infra": {"qmstrace.core", "qmstrace.infra"},
     "render": {"qmstrace.core", "qmstrace.render"},
     "workspace": {"qmstrace.core", "qmstrace.extract", "qmstrace.infra", "qmstrace.workspace"},
     "cli": {"qmstrace", "qmstrace.core", "qmstrace.render", "qmstrace.workspace", "typer"},
 }
-FIRST_OR_THIRD_PARTY = ("qmstrace", "typer", "click", "defusedxml", "pytest")
+FIRST_OR_THIRD_PARTY = (
+    "qmstrace",
+    "typer",
+    "click",
+    "defusedxml",
+    "pytest",
+    "tree_sitter",
+    "tree_sitter_c_sharp",
+)
 
 
 def _imports(path: Path) -> set[str]:
@@ -165,6 +179,22 @@ PYTHON_IMPORTS: dict[str, set[str]] = {
         "qmstrace.core.results",
     },
 }
+CSHARP_IMPORTS: dict[str, set[str]] = {
+    "_syntax": {"tree_sitter", "tree_sitter_c_sharp"},
+    "component": {
+        "qmstrace.core.findings",
+        "qmstrace.core.config",
+        "qmstrace.core.model",
+        "qmstrace.extract.csharp._syntax",
+        "qmstrace.extract.fields",
+    },
+    "xunit": {
+        "qmstrace.core.findings",
+        "qmstrace.core.config",
+        "qmstrace.core.model",
+        "qmstrace.extract.csharp._syntax",
+    },
+}
 PYTHON_COMPATIBILITY = {
     "python_module": {"qmstrace.extract.python.module": {"extract", "form"}},
     "pytest_tests": {
@@ -218,10 +248,15 @@ PACKAGE_IMPORTS = {
     "setup": SETUP_IMPORTS,
     "markdown": MARKDOWN_IMPORTS,
     "python": PYTHON_IMPORTS,
+    "csharp": CSHARP_IMPORTS,
     "text": TEXT_IMPORTS,
 }
 PACKAGE_AREAS = {
-    name: "extract" if name in {"markdown", "python"} else "render" if name == "text" else "core"
+    name: "extract"
+    if name in {"markdown", "python", "csharp"}
+    else "render"
+    if name == "text"
+    else "core"
     for name in PACKAGE_IMPORTS
 }
 EXPORTS: dict[str, dict[str, set[str]]] = {
@@ -393,9 +428,9 @@ def test_package_dependencies_are_one_way_and_callers_use_the_public_interface(n
     for path in package.glob("*.py"):
         if path.name != "__init__.py":
             _check_dependencies(name, path)
-    # Python exposes concrete owner modules; the other packages expose only their facade.
+    # The language packages expose concrete owner modules; the others only their facade.
     for path in SRC.rglob("*.py"):
-        if name != "python" and path.parent != package:
+        if name not in ("python", "csharp") and path.parent != package:
             assert not any(
                 n.startswith(f"qmstrace.{PACKAGE_AREAS[name]}.{name}.") for n in _imports(path)
             )
@@ -771,3 +806,13 @@ def test_cli_dependency_gate_rejects_back_edges(tmp_path: Path, owner: str, sour
     path.write_text(source + "\n")
     with pytest.raises(AssertionError):
         _check_cli_dependencies(path)
+
+
+def test_only_the_csharp_syntax_module_imports_the_parser() -> None:
+    """ADR-0004: tree-sitter is a runtime dependency of one module, so it can be replaced there."""
+    users = sorted(
+        p.relative_to(SRC).as_posix()
+        for p in SRC.rglob("*.py")
+        if any(n.split(".")[0] in ("tree_sitter", "tree_sitter_c_sharp") for n in _imports(p))
+    )
+    assert users == ["extract/csharp/_syntax.py"]

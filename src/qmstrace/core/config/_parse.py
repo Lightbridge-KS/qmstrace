@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 from qmstrace.core.config._copy import marked, schema_digest
 from qmstrace.core.config._schema import (
+    ONE_LINK,
     BaselineScope,
     ChangeRequests,
     CoverageRule,
@@ -186,6 +187,19 @@ def _cross_check(config: TraceConfig, schema_file: str) -> None:
         for name in (*link.sources, *link.targets):
             if name not in known:
                 raise unknown_type(f"link '{link.marker}'", name)
+    for item_type in config.item_types.values():
+        if item_type.extractor not in ONE_LINK or not item_type.declared_here:
+            continue
+        carried = [m for m, link in config.links.items() if item_type.name in link.sources]
+        if len(carried) != 1:
+            said = ", ".join(carried) if carried else "none"
+            raise CouldNotJudge(
+                f"[items.{item_type.name}] is read by '{item_type.extractor}', whose marker — the "
+                "ID that starts a test's DisplayName — names no link of its own; the schema gives "
+                f"{item_type.name} {len(carried)} links to choose from ({said}).",
+                f"Fix: give {item_type.name} exactly one link in the schema's [links], or read "
+                "it with another extractor.",
+            )
 
     codes: set[str] = set()
     for rule in config.rules:

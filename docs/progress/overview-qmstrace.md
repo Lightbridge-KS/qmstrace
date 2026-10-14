@@ -442,8 +442,15 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Verified on real pytest output (`cases`), with a differential test: where no test case
     stands between, every verdict equals the direct-link one. The output says *automated
     tests* where it counted test functions.
-- [ ] **M12d** — C# source: `csharp-file` and `xunit` on tree-sitter; DSN-QMT-15; SKILL.md
-  and the manual. REQ-QMT-21, REQ-QMT-12.
+- [ ] **M12d** — C# source, on `feat/m12d-csharp` (stacked on M12c). REQ-QMT-21, REQ-QMT-12.
+  - [x] `extract/csharp/`: `_syntax.py` (the only tree-sitter importer), `component.py`
+    (`csharp-file`), `xunit.py` (`xunit`); DSN-QMT-15. Runtime dependencies tree-sitter 0.26
+    and tree-sitter-c-sharp 0.23.5, confined by an architecture test.
+  - [x] Every probe shape from the bed reads as measure C9 expects; nothing dropped silently.
+  - [x] Fixture `tests/fixtures/cases/agent` — a real .NET project (built and run: 3 results,
+    probes 18); the ledger's check across three repos names pytest and xUnit ways together.
+  - [x] SKILL.md's C# examples; the manual's *Trace a C# repo*; issue
+    [#38](https://github.com/Lightbridge-KS/qmstrace/issues/38) for a C# starter.
 - [ ] **M12e** — the TRX reader and report dispatch; no path or machine name ever shown.
   REQ-QMT-22.
 - [ ] **M12-R** — run C1–C13 on beacon-dotnet and record the results.

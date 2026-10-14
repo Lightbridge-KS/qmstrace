@@ -540,7 +540,8 @@ told it whether it was done.
 
 *Amended 2026-09-24 (M9): sections, heading forms, near-misses — below the table. Amended
 2026-10-14 ([ADR-0002](../adr/0002-dotted-ids.md)): the ID shape, dotted numbers; and
-([ADR-0003](../adr/0003-test-cases-and-automated-tests.md)): test cases and automated tests.*
+([ADR-0003](../adr/0003-test-cases-and-automated-tests.md)): test cases and automated tests; and
+([ADR-0004](../adr/0004-reading-csharp.md)): C# components and xUnit tests.*
 
 | Item | Declared as | Its ID | Link marker |
 |---|---|---|---|
@@ -548,6 +549,8 @@ told it whether it was done.
 | Design element | a heading `## <ID> — <title>` in a design document | authored | `Satisfies: <requirement>[, …]` |
 | Component | a source module | derived — the module's path | `Implements: <design element>` in the module docstring |
 | Test case | a heading `### <ID> — <title>` in a Test Specification | authored | `verifies: <requirement or design element>[, …]` |
+| Component, in C# | a `.cs` file | derived — the file's path | `Implements: <design element>` in the first type's leading `///` doc comment |
+| Automated test, in C# | an xUnit `[Fact]` or `[Theory]` method | derived — `path::Class::Method` | the ID at the start of its `DisplayName`, a string literal: the one link its type carries |
 | Automated test | a test function | derived — the test runner's own identifier for it | the test framework's own tagging, e.g. `@pytest.mark.verifies("<ID>")`, on the function or its class — naming the test case it runs, or what it verifies directly |
 
 - **One ID shape for every project**: capital letters and digits in hyphen-joined segments,

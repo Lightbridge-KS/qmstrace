@@ -22,6 +22,7 @@ nav = [
   { "How-to guides" = [
     { "Explore a trace" = "how-to/explore-a-trace.md" },
     { "Set up a repo" = "how-to/set-up-a-repo.md" },
+    { "Trace a C# repo" = "how-to/trace-a-csharp-repo.md" },
     { "Check your work" = "how-to/check-your-work.md" },
     { "Share the project's schema" = "how-to/share-the-schema.md" },
     { "Check the whole project" = "how-to/check-the-project.md" },

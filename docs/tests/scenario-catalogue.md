@@ -459,3 +459,31 @@ through the test cases they run. Real pytest output on the `cases` fixture
 | A product repo's local view of the ledger's test cases | their links read for verdicts; `status` still counts only the repo's own links, and `thread` does not walk them |
 | No test case between tests and requirements (every older fixture) | every verdict is what direct links alone give; the old section headings |
 | The counts | *automated tests*, not *test cases* |
+
+## M12d — C# source
+
+ADR-0004: `csharp-file` and `xunit` on tree-sitter. The fixture `tests/fixtures/cases/agent` is a
+real .NET project, with the beacon-dotnet bed's probe file beside it, untraced. Each line is at
+least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
+`tests/cli/test_test_cases.py`, `tests/integration/test_setup_workspace.py`).
+
+| Scenario | Expected |
+|---|---|
+| A `.cs` file whose first type's `///` comment has `Implements: DSN-…` | one component, ID its path, one link; XML tags around the line allowed |
+| The same line in another comment | a stray of kind `doccomment` |
+| `(REQ-…)` in prose | nothing |
+| `[Fact]`, `[Theory]`, `[Xunit.FactAttribute]`, async, nested, block namespace | one automated test each, `path::Outer::Inner::Method` |
+| A literal, verbatim or raw `DisplayName` starting with an ID | the link, by the type's one link |
+| No `DisplayName` | an automated test with no link (G07 where the schema asks) |
+| A `DisplayName` that is not a literal; a `[Trait]` named after a link; `[SlowFact]`; a test in `#if` | V15 each, the fix naming the `DisplayName` form |
+| `// [Fact(DisplayName = "TC-…")]` | a stray of kind `comment` |
+| A malformed first word (`TC-SVC-01.1a`) | V14 |
+| A `[Fact]` on an abstract base, two concrete subclasses in the file | one automated test, two run identities |
+| A nested class's test | run identity `Ns.Outer+Inner` |
+| A folder `Unit/` | level `unit` |
+| C# 14 syntax outside what is read | the file is read |
+| A parse error inside a test attribute | V08 |
+| A schema giving the xunit type two links | refused, naming them |
+| The ledger's check with pytest in one repo and xUnit in another | a gap's next move names both, each with its repo |
+| A requirement three ways can meet | *write one of these*: agent (xUnit), service (pytest), ledger (test case) |
+| `init` in the C# repo | the stanza names `csharp-file` and `xunit`; no pytest settings written |

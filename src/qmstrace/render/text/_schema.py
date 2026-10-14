@@ -11,7 +11,12 @@ from typing import Final
 from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
 from qmstrace.core.setup import Copied
 
-_DERIVED: Final = {"python-module": "ID: the module's path", "pytest": "ID: the test's node ID"}
+_DERIVED: Final = {
+    "python-module": "ID: the module's path",
+    "pytest": "ID: the test's node ID",
+    "csharp-file": "ID: the file's path",
+    "xunit": "ID: path::Class::Method",
+}
 
 
 def rules(config: TraceConfig) -> str:

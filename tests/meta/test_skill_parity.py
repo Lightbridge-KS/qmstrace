@@ -11,11 +11,15 @@ from qmstrace.extract.base import REGISTRY
 
 def test_all_shipped_marker_examples_parse(service) -> None:
     skill = files("qmstrace").joinpath("assets/skill/SKILL.md").read_text()
-    blocks = re.findall(r"```(markdown|python)\n(.*?)\n```", skill, re.S)
-    assert len(blocks) == 5
+    blocks = re.findall(r"```(markdown|python|csharp)\n(.*?)\n```", skill, re.S)
+    assert len(blocks) == 7
     cases = Path(__file__).parents[1] / "fixtures" / "cases" / "ledger"
     ledger = TraceConfig.parse(
         (cases / "qmstrace.toml").read_text("utf-8"),
+        (cases / "qmstrace.schema.toml").read_text("utf-8"),
+    )
+    agent = TraceConfig.parse(
+        (cases.parent / "agent" / "qmstrace.toml").read_text("utf-8"),
         (cases / "qmstrace.schema.toml").read_text("utf-8"),
     )
     for (_, source), (config, kind), path in zip(
@@ -26,6 +30,8 @@ def test_all_shipped_marker_examples_parse(service) -> None:
             (service, "component"),
             (service, "test_case"),
             (ledger, "test_case"),  # an entry in a Test Specification (ADR-0003)
+            (agent, "component"),  # a C# file (ADR-0004)
+            (agent, "automated_test"),  # an xUnit method
         ],
         [
             "docs/req/service-srs.md",
@@ -33,6 +39,8 @@ def test_all_shipped_marker_examples_parse(service) -> None:
             "src/service.py",
             "tests/unit/test_service.py",
             "docs/test/service-test-cases.md",
+            "src/Agent/KeyCheck.cs",
+            "tests/Agent.Tests/Unit/KeyCheckTests.cs",
         ],
         strict=True,
     ):

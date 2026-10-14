@@ -15,6 +15,7 @@ project = "CASES"
 [repos]                             # every repo of this project — this ledger included
 ledger  = "."
 service = "../service"
+agent   = "../agent"
 
 # ── item types the project knows; a repo declares the ones it has ─────────────────────────
 [item_types.requirement]

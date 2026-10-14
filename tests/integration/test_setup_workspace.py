@@ -273,3 +273,19 @@ def test_a_product_repos_stanza_keeps_its_own_verbs(split: Path) -> None:
     guide = (split / "service" / "AGENTS.md").read_text()
     assert "`qmstrace check --strict` is the coverage gate" in guide
     assert "ledger check" not in guide
+
+
+@pytest.mark.verifies("REQ-QMT-12", "REQ-QMT-21")
+def test_init_in_a_csharp_repo_writes_no_pytest_settings(cases: Path) -> None:
+    agent = cases / "agent"
+    before = sorted(p.name for p in agent.iterdir())
+    result = CliRunner().invoke(app, ["-C", str(agent), "init"])
+    assert result.exit_code == 0, result.output
+    after = sorted(p.name for p in agent.iterdir())
+    assert (
+        {".agents", "AGENTS.md"} <= set(after) - set(before) <= {".agents", ".claude", "AGENTS.md"}
+    )
+    assert not (agent / "pytest.ini").exists() and not (agent / "pyproject.toml").exists()
+    stanza = (agent / "AGENTS.md").read_text(encoding="utf-8")
+    assert "component `csharp-file` in `src/**/*.cs`" in stanza
+    assert "automated_test `xunit` in `tests/Agent.Tests/**/*Tests.cs`" in stanza

@@ -80,6 +80,8 @@ def _scanned(assessment: Assessment) -> list[str]:
             line += ", ".join(s.ignore)
         if item_type.extractor == "pytest":
             line += " · test functions: a parametrised function is one automated test"
+        elif item_type.extractor == "xunit":
+            line += " · [Fact]/[Theory] methods: a Theory is one automated test"
         lines.append(line)
     return lines
 

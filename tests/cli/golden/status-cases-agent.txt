@@ -1,0 +1,19 @@
+schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo's qmstrace.toml
+scanned (working tree, not pinned):
+  requirement     known to the project, not scanned here
+  design_element  known to the project, not scanned here
+  component         1 item  in  1 file   src/**/*.cs
+  test_case       known to the project, not scanned here
+  automated_test    2 items in  1 file   tests/Agent.Tests/**/*Tests.cs · [Fact]/[Theory] methods: a Theory is one automated test
+links: 3
+external AGR-*: verified against ../ledger/agreement.md (3 declared)
+sibling ledger: 2 requirement, 2 design_element, 4 test_case — read from ../ledger's working tree, not pinned; cite its items by ID
+sibling service: nothing declared — read from ../service's working tree, not pinned; cite its items by ID
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines: no matching reachable local tag — nothing frozen locally
+change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+suspects: 0 — informational; this repo only
+
+0 violations · 0 gaps
