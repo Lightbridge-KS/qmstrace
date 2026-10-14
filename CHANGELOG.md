@@ -144,6 +144,10 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- The refusals of `ledger copy-schema` and `ledger check` — and so of `ledger thread` and
+  `ledger impact` — no longer end a repo's reason in two full stops when that reason closes
+  its own sentence: `… Fix: use one of those.. Fix: …` reads `… Fix: use one of those. Fix: …`,
+  and two such reasons are joined by `; ` alone.
 - `ledger copy-schema` no longer rewrites the ledger's own `qmstrace.toml` when the ledger
   lists itself under `[repos]` as `"."`: that entry is skipped, and its line says why — or,
   where an older run wrote a copy there, how to restore the path.

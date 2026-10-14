@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-13 · Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-14 · Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed.** Now: [package refactors](#now--package-refactors). Next:
 [real-world use](#next--real-world-use), in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
@@ -349,6 +349,12 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
    [project how-to](../../contents/how-to/check-the-project.md).
 5. Record observed friction as issues; choose fixes from that evidence before expanding to
    M11. Baseline only after the IDs, trace and review are ready.
+
+**Fixed from use:**
+- [x] 2026-10-14, seen at `75ba627`: the refusals of `ledger copy-schema` and `ledger check`
+  (so `ledger thread` and `ledger impact`) ended a reason that closes its own sentence in two
+  full stops — `… Fix: use one of those.. Fix: …`. Each reason now gives up its own stop
+  before the join. A regression test per command; no golden held a doubled stop.
 
 **Reconciled 2026-10-13:** the September 29 onboarding handoff names `94fd827`, still both
 local and remote `main`. M10 PRs #27–#29 and #31 are merged; #30 is closed. Issues #16,

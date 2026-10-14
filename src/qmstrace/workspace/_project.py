@@ -94,9 +94,13 @@ def _members(ledger: Path, config: TraceConfig, trees: TreeFactory) -> list[_Mem
             'ledger = "." under [repos], or the documents it holds are not judged'
         )
     if problems:
+        # A refusal passed on whole closes its own sentence ("… is missing."); it gives up that
+        # stop, so the joined reasons end in one.
         raise CouldNotJudge(
             "the project cannot be judged as a whole, because not every repo can be read with "
-            "the ledger's rules — " + "; ".join(problems) + ".",
+            "the ledger's rules — "
+            + "; ".join(problem.removesuffix(".") for problem in problems)
+            + ".",
             "Fix: deal with each repo named above, then run qmstrace ledger check again — a "
             "repo left unread would make a clean result a false one.",
         )
