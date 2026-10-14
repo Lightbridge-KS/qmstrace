@@ -375,9 +375,17 @@ def removed_frozen(item: Item, baseline: str) -> Finding:
     )
 
 
-def unread_marker(file: str, line: int, marker: str, form: str, fix: str | None = None) -> Finding:
+def unread_marker(
+    file: str,
+    line: int,
+    marker: str,
+    form: str,
+    fix: str | None = None,
+    item: str | None = None,
+) -> Finding:
     """A marker written in a form its extractor does not read; `fix` names the form it does —
-    pytest's by default."""
+    pytest's by default. `item` is the one item the marker was meant for, when it was meant for
+    one; without it, the finding concerns every item of its file."""
     return Finding(
         "V15",
         file,
@@ -388,6 +396,7 @@ def unread_marker(file: str, line: int, marker: str, form: str, fix: str | None 
             f'Fix: write @pytest.mark.{marker}("ID", …) with literal IDs, directly on a test '
             "function or on its test class."
         ),
+        item=item,
         marker=marker,
     )
 
