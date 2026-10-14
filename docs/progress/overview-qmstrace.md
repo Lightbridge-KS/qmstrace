@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; the C# capability — decisions settled, its test bed beacon-dotnet built, the engine milestone next; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; M12, the C# capability — its test bed beacon-dotnet built and measures fixed, slices M12-0 to M12e planned; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -11,7 +11,7 @@ read_when:
 **Updated 2026-10-14 · Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed.** Now: [package refactors](#now--package-refactors). Next:
 [real-world use](#next--real-world-use), in the layout of ADR-0001, and
-[the C# capability](#next--the-c-capability), whose test bed is built. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+[M12 · the C# capability](#next--m12--the-c-capability), whose test bed is built. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
 ## Now — package refactors
@@ -364,16 +364,19 @@ multi-repo acceptance. Remote-tag completeness and historical external evidence 
 unverified. The handoff's 794-test dry-gate result and the acceptance records below are
 historical evidence; the later refactor verification is recorded above.
 
-## Next — the C# capability
+## Next — M12 · the C# capability
 
-The first C# adopter writes xUnit `[Fact]`/`[Theory]` tests. Each `DisplayName` starts with a
-test-case ID from a register outside the code, and its IDs are dotted (`NN.m`).
+The first C# adopter writes xUnit `[Fact]`/`[Theory]` tests. Each `DisplayName` starts with the
+ID of a test case planned in a document outside the code, and its IDs are dotted (`NN.m`).
 
 Settled 2026-10-14:
-- the `DisplayName` ID names a **test case in a register in the ledger**, and the entry says
-  what it verifies;
-- an ID may contain **dotted number segments**;
-- the code that runs a test case is an **automated test**.
+- the `DisplayName` ID names a **test case** in a **Test Specification**, a Markdown document in
+  the ledger, whose `verifies:` line says what it verifies;
+- the code that runs a test case is an **automated test**;
+- an ID may contain **dotted number segments**, read whole or reported;
+- C# is parsed with **tree-sitter** (0.26 + tree-sitter-c-sharp 0.23.5), behind one private
+  module;
+- results are read from **TRX**, joined on class and method.
 
 Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
 
@@ -387,13 +390,32 @@ Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
   - C1–C13, with an oracle from beacon-split on `75ba627`: 177 items, 208 links.
   - beacon-dotnet expects 226 items and 257 links.
   - C6 is revised to the settled verdict rule. C12 (setup) and C13 (no regression) are new.
-- [ ] Engine milestone, on a branch with a draft PR:
-  - dotted IDs (ADR), including the fix for IDs cut short;
-  - the C# component and xUnit extractors, and the TRX reader;
-  - verdicts through a test case (ADR);
-  - *automated test* in `CONTEXT.md`;
-  - scenario-catalogue rows and manual pages.
-- [ ] Run the measures on beacon-dotnet.
+
+**Slices** — each a branch and a draft PR, as M10 was. Each changed or added requirement cites
+CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
+`../qmstrace-ledger` before any SRS edit lands.
+
+- [ ] **M12-0** — decisions and vocabulary:
+  - spikes S1 (tree-sitter parses the whole bed) and S2 (TRX captures, sanitised);
+  - ADR-0002 (dotted IDs), ADR-0003 (test cases and automated tests; verdicts through a test
+    case) and ADR-0004 (reading C#);
+  - *Automated Test* and *Test Specification* in `CONTEXT.md`; the ADR rule in `AGENTS.md`;
+  - CR-003 drafted;
+  - the bed's wording, and measure C9 amended before the run.
+- [ ] **M12a** — dotted IDs, engine-wide; nothing cut short; a malformed lead is reported;
+  the refusal at a baseline tag summarised. REQ-QMT-20.
+- [ ] **M12b** — test cases in the trace:
+  - `test_case` → `automated_test` in qmstrace's own schema and in the starter;
+  - a G02 fix that names every way the link can be made;
+  - the ledger forms bug fixed.
+  REQ-QMT-02.
+- [ ] **M12c** — verdicts through test cases in `results`, on Python; sibling-declared links;
+  the per-test run identities. REQ-QMT-10.
+- [ ] **M12d** — C# source: `csharp-file` and `xunit` on tree-sitter; DSN-QMT-15; SKILL.md
+  and the manual. REQ-QMT-21, REQ-QMT-12.
+- [ ] **M12e** — the TRX reader and report dispatch; no path or machine name ever shown.
+  REQ-QMT-22.
+- [ ] **M12-R** — run C1–C13 on beacon-dotnet and record the results.
 
 ## Landed — M10 · the project-wide check
 
