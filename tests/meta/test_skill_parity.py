@@ -2,7 +2,9 @@
 
 import re
 from importlib.resources import files
+from pathlib import Path
 
+from qmstrace.core.config import TraceConfig
 from qmstrace.core.findings import CODES
 from qmstrace.extract.base import REGISTRY
 
@@ -10,20 +12,32 @@ from qmstrace.extract.base import REGISTRY
 def test_all_shipped_marker_examples_parse(service) -> None:
     skill = files("qmstrace").joinpath("assets/skill/SKILL.md").read_text()
     blocks = re.findall(r"```(markdown|python)\n(.*?)\n```", skill, re.S)
-    assert len(blocks) == 4
-    for (_, source), kind, path in zip(
+    assert len(blocks) == 5
+    cases = Path(__file__).parents[1] / "fixtures" / "cases" / "ledger"
+    ledger = TraceConfig.parse(
+        (cases / "qmstrace.toml").read_text("utf-8"),
+        (cases / "qmstrace.schema.toml").read_text("utf-8"),
+    )
+    for (_, source), (config, kind), path in zip(
         blocks,
-        ["requirement", "design_element", "component", "test_case"],
+        [
+            (service, "requirement"),
+            (service, "design_element"),
+            (service, "component"),
+            (service, "test_case"),
+            (ledger, "test_case"),  # an entry in a Test Specification (ADR-0003)
+        ],
         [
             "docs/req/service-srs.md",
             "docs/design/service.md",
             "src/service.py",
             "tests/unit/test_service.py",
+            "docs/test/service-test-cases.md",
         ],
         strict=True,
     ):
-        spec = service.item_types[kind]
-        extracted = REGISTRY[spec.extractor](path, source, spec, service)
+        spec = config.item_types[kind]
+        extracted = REGISTRY[spec.extractor](path, source, spec, config)
         assert len(extracted.items) == 1 and not extracted.findings
         assert extracted.links
     for heading in re.findall(r"`(#{1,6} [^`]+)`", skill):  # inline heading examples

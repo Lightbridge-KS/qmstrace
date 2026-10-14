@@ -34,14 +34,17 @@ engine.
 
 ### REQ-QMT-02 — Markers are read where they are authored
 
-A requirement or design element is declared by a Markdown heading that starts with its ID,
-and its links by `Key: value` lines in its section; a component's links by `Implements:` in
-its module docstring; a test case's links by a `pytest.mark.verifies` decorator with literal
-IDs. A marker written in a form that is not read is reported, never silently dropped.
+A requirement, a design element or a test case in a Test Specification is declared by a
+Markdown heading that starts with its ID, and its links by `Key: value` lines in its section; a
+component's links by `Implements:` in its module docstring; an automated test's links by a
+`pytest.mark.verifies` decorator with literal IDs, naming the test case it runs or what it
+verifies directly. A marker written in a form that is not read is reported, never silently
+dropped.
 
 - Category: functional-suitability
 - Origin: AGR-2
 - Verify-by: test
+- Change: CR-003
 
 ### REQ-QMT-20 — An ID is read whole, dotted parts and all
 

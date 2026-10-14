@@ -105,13 +105,13 @@ class Workspace:
         graph, violations = TraceGraph.build(
             config, scan.extracted, around, misplaced=scan.misplaced
         )
-        forms = {
-            t.name: FORMS[t.extractor]
+        ways = {
+            t.name: (judge.Way(FORMS[t.extractor]),)
             for t in config.item_types.values()
             if t.declared_here and t.extractor is not None
         }
         strays = [stray for part in scan.extracted for stray in part.strays]
-        gaps = judge.coverage(config, graph, violations, strays, forms)
+        gaps = judge.coverage(config, graph, violations, strays, ways)
         register = _register(self.root, ledger, config)
         baseline_state, guard_findings = self._baselines(graph, register)
         violations += [*register.findings, *guard_findings]

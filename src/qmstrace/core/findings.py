@@ -445,6 +445,20 @@ def fix_write(form: str, fact: str, on: str | None = None) -> str:
     return f"{where} {form} — only if it is true: the link states that {fact}."
 
 
+def fix_write_any(options: list[tuple[str, str]], fact: str) -> str:
+    """Several ways to write one link — on each kind of item, in each repo that holds it."""
+    ways = "; ".join(f"on the {on}, {form}" for on, form in options)
+    return f"write one of these — {ways} — only if it is true: the link states that {fact}."
+
+
+def fix_elsewhere(kinds: str, subject: str) -> str:
+    """What a repo's own check adds when another repo may hold the link's source."""
+    return (
+        f" Or another repo of the project meets {subject} with a link from its {kinds}: qmstrace "
+        "ledger check, run in the ledger, judges that."
+    )
+
+
 def fix_no_target(kinds: str, form: str, *, whole_project: bool = False) -> str:
     if whole_project:
         return (

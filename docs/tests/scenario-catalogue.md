@@ -424,3 +424,21 @@ cases in `tests/cli/test_check.py` and `tests/integration/test_baselines.py`).
 | `id_prefix = "REQ-SVC-04.1-"` | accepted |
 | A listing of `AGR-1.10`, `AGR-1.2`, `AGR-10` | sorted as numbers: `AGR-1.2`, `AGR-1.10`, `AGR-10` |
 | A baseline tag whose snapshot has more than three problems | exit 2: the count by code, the first three, *and N more*, where to see them all |
+
+## M12b — test cases in the trace
+
+ADR-0003: a test case is an entry in a Test Specification, run by automated tests. The fixture
+`tests/fixtures/cases` holds a ledger with a Test Specification (dotted `TC-SVC-NN.m`) and a
+service whose pytest tests name the test case they run, or a requirement directly. Each line is
+at least one test (`tests/cli/test_test_cases.py`, `tests/unit/test_judge.py`).
+
+| Scenario | Expected |
+|---|---|
+| The ledger's check of the `cases` project | 4 test cases and 5 automated tests read; one gap, G09 on the planned `TC-SVC-02.2`, its fix naming the pytest form *on the automated test in service* |
+| A test case's gap | never suggests another test case — the item's own type is not offered while another source can make the link |
+| The ledger's own check, its automated tests in another repo | every G09 says *this repo declares no automated test* and names `qmstrace ledger check` |
+| A requirement two ways can meet in the ledger's check | *write one of these*, each way with its repos: an automated test per extractor, a test case in the ledger |
+| A requirement one repo can meet only partly | its own way, then *Or another repo of the project meets … with a link from its automated test* |
+| An item's own gap (G07) in the ledger's check | written the way its own repo's extractor reads it |
+| One way only, as in every fixture before | the next move is byte for byte what it was |
+| `status` on a pytest type | *a parametrised function is one automated test* |

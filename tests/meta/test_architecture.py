@@ -273,7 +273,7 @@ EXPORTS: dict[str, dict[str, set[str]]] = {
         "_toml": {"SUPPORTED_VERSION"},
     },
     "judge": {
-        "_coverage": {"Form", "coverage"},
+        "_coverage": {"Form", "Way", "coverage"},
         "_baselines": {"guard", "resolve_baselines"},
         "_suspects": {"suspects"},
     },

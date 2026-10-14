@@ -90,9 +90,14 @@ def test_on_every_fixture_and_golden_text_without_a_dot_reads_as_before() -> Non
     texts = [*FIXTURES.rglob("*"), *(FIXTURES.parent / "cli" / "golden").glob("*.txt")]
     files = [p for p in texts if p.is_file() and p.suffix in {".md", ".py", ".toml", ".txt"}]
     assert len(files) > 100
-    for path in files:
-        text = path.read_text(encoding="utf-8")
-        assert id_tokens(text) == tuple(NARROW.findall(text)), path
+    undotted = [
+        (path, line)
+        for path in files
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if not re.search(r"\d\.\d", line)  # the cases fixture writes dotted IDs on purpose
+    ]
+    for path, line in undotted:
+        assert id_tokens(line) == tuple(NARROW.findall(line)), (path, line)
 
 
 # ── 3. every reader agrees ─────────────────────────────────────────────────────────────────

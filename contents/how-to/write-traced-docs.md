@@ -41,7 +41,16 @@
    between elements. They link nothing. An ID of this repo's kind that nothing declares, later in
    a heading or at the start of a table row, is reported: it was probably meant as a declaration.
 
-5. **Check.**
+5. **Plan test cases the same way, where the project keeps a Test Specification.** A test
+   case is a heading with its ID and a `verifies:` line; the automated tests that run it name
+   its ID, not the requirement:
+
+    ``` markdown
+    ## TC-SVC-01.1 — A call without a valid key is refused
+    verifies: REQ-SVC-01
+    ```
+
+6. **Check.**
 
     ``` sh
     qmstrace check --strict

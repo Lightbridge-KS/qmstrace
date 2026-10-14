@@ -576,6 +576,10 @@ Satisfies: REQ-QMT-03, REQ-QMT-06, REQ-QMT-07
 whose next move names the marker form to write. `core/findings.py` holds every code's wording
 and next move once. Reasoning: surface architecture § The findings contract.
 
+A gap's next move names every way its link can be made — one `Way` per item type and
+extractor, with the repos that read it in the ledger's check — and an item's own gap is
+written the way its own repo reads it (ADR-0003).
+
 Satisfies: REQ-QMT-03
 
 ### DSN-QMT-07 — The baseline guard reads the tree at each governing tag

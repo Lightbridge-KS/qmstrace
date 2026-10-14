@@ -1,0 +1,13 @@
+read — each repo's working tree, not pinned:
+  ledger   .           2 requirements · 2 design elements · 4 test cases
+  service  ../service  2 components · 5 automated tests
+  external AGR-*: verified against agreement.md (3 declared)
+  controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+  baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines in ledger: no matching reachable local tag — nothing frozen
+  change requests: change-requests (1 readable; 0 malformed) — working tree, not pinned
+
+gaps — coverage not met yet; only the gate (qmstrace ledger check --strict) fails on them:
+  G09  docs/test/service-test-cases.md:22  TC-SVC-02.2: no automated test runs it yet. Fix: on the automated test in service, write `@pytest.mark.verifies("TC-SVC-02.2")` on the test — only if it is true: the link states that the automated test verifies TC-SVC-02.2.
+
+result: 0 violations, 1 gap in 15 items across 2 repos · 0 suspects (informational) · exit 1 · gate: gaps fail · working trees, not pinned · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

@@ -419,11 +419,18 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Verified: the 959 existing tests and every golden unchanged; on every fixture and
     golden, undotted text reads exactly as before; four mutations in a disposable copy each
     fail a REQ-QMT-20 test.
-- [ ] **M12b** — test cases in the trace:
-  - `test_case` → `automated_test` in qmstrace's own schema and in the starter;
-  - a G02 fix that names every way the link can be made;
-  - the ledger forms bug fixed.
-  REQ-QMT-02.
+- [ ] **M12b** — test cases in the trace, on `feat/m12b-test-cases` (stacked on M12a), with
+  `qmstrace-ledger` branch `m12b-automated-test` merged just before it. REQ-QMT-02.
+  - [x] `test_case` → `automated_test` in qmstrace's own schema (the ledger) and in the starter;
+    both trace gates still 0 violations, 0 gaps, 0 suspects after the rename.
+  - [x] A gap's next move names every way the link can be made (`judge.Way`, one per type and
+    extractor, with its repos); a single way keeps today's text byte for byte; an item's own
+    gap is written the way its own repo reads it; a test case is never told to verify a test
+    case. The ledger check's last-repo-wins forms bug is gone.
+  - [x] Fixture `tests/fixtures/cases` (a Test Specification, dotted IDs, one planned test case
+    no test runs); SKILL.md teaches the Test Specification; `status` says *one automated test*.
+  - [x] REQ-QMT-02 edited under CR-003; 14 suspects downstream of it (informational, behaviour
+    unchanged).
 - [ ] **M12c** — verdicts through test cases in `results`, on Python; sibling-declared links;
   the per-test run identities. REQ-QMT-10.
 - [ ] **M12d** — C# source: `csharp-file` and `xunit` on tree-sitter; DSN-QMT-15; SKILL.md
