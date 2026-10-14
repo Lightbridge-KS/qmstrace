@@ -395,13 +395,20 @@ Test bed: [beacon-dotnet](../tests/beacon-dotnet.md).
 CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
 `../qmstrace-ledger` before any SRS edit lands.
 
-- [ ] **M12-0** — decisions and vocabulary:
-  - spikes S1 (tree-sitter parses the whole bed) and S2 (TRX captures, sanitised);
-  - ADR-0002 (dotted IDs), ADR-0003 (test cases and automated tests; verdicts through a test
-    case) and ADR-0004 (reading C#);
-  - *Automated Test* and *Test Specification* in `CONTEXT.md`; the ADR rule in `AGENTS.md`;
-  - CR-003 drafted;
-  - the bed's wording, and measure C9 amended before the run.
+- [ ] **M12-0** — decisions and vocabulary, in draft review: [#34](https://github.com/Lightbridge-KS/qmstrace/pull/34) on `docs/m12-0-decisions`:
+  - [x] S1: tree-sitter parses all 19 of the bed's files with no error node; each
+    `DisplayName` form is its own node kind; mypy strict and a universal `uv lock` pass. C# 14
+    extension blocks give error nodes, and a test after them is still read.
+  - [x] S2: four TRX captures from the bed, sanitised (no path, user or host name; gitleaks
+    clean), kept for M12e's fixtures.
+  - [x] [ADR-0002](../adr/0002-dotted-ids.md), [ADR-0003](../adr/0003-test-cases-and-automated-tests.md)
+    and [ADR-0004](../adr/0004-reading-csharp.md), accepted 2026-10-14.
+  - [x] *Test Specification* and *Automated Test* in `CONTEXT.md`; *Test Case*, *Test Result*,
+    *Item*, *Marker* and *Qualified ID* follow; the ADR rule in `AGENTS.md`.
+  - [x] CR-003 drafted in `../qmstrace-ledger` as `evaluated`. **The developer accepts it**
+    before M12a's SRS edit.
+  - [x] The bed's wording ("test specification"); measure C9 amended before the run, with its
+    reason.
 - [ ] **M12a** — dotted IDs, engine-wide; nothing cut short; a malformed lead is reported;
   the refusal at a baseline tag summarised. REQ-QMT-20.
 - [ ] **M12b** — test cases in the trace:
