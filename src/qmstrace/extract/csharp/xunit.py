@@ -45,6 +45,12 @@ _DISPLAY: Final = "DisplayName"
 _ID_LIKE: Final = re.compile(r"[A-Z][A-Z0-9]*-\S*\d")
 # A test attribute written in a comment: `// [Fact(DisplayName = "TC-SVC-01.1 …")]`.
 _COMMENTED: Final = re.compile(r'\[\s*(?:\w+\.)*\w+\s*\(\s*DisplayName\s*=\s*@?"(\S+)')
+# V14's next move: the first word of the DisplayName must be the whole ID.
+_NOT_AN_ID_FIX: Final = (
+    "Fix: start the test's DisplayName with one whole ID, then a space: [Fact(DisplayName = "
+    '"ID …")]; anything after the ID, a suffix included, goes after the space. If nothing real '
+    "fits, leave the ID out and tell the developer what is missing — never invent an ID."
+)
 _FIX: Final = (
     "Fix: start the test's DisplayName with the ID, as a string literal: [Fact(DisplayName = \"ID "
     '…")] on an xUnit [Fact] or [Theory] method.'
@@ -145,7 +151,9 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
             if ID_TOKEN.fullmatch(first):
                 links.append(Link(test_id, first, marker, path, display.line))
             elif _ID_LIKE.match(first):
-                wrong.append(findings.not_an_id(test_id, marker, first, path, display.line))
+                wrong.append(
+                    findings.not_an_id(test_id, marker, first, path, display.line, _NOT_AN_ID_FIX)
+                )
     strays = tuple(
         Stray(marker, (found.group(1),), path, comment.line, "comment", _below(comment, starts))
         for comment in source.comments

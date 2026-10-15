@@ -46,6 +46,7 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | A marker under the wrong kind of item — `Satisfies:` under a requirement | V04, naming who may carry it; the stand-in dropped it as an unknown field |
 | `Implements:` outside the module docstring | not a marker (M2); if that leaves the module unlinked, the gap says why (M3) |
 | `verifies` with a non-literal argument, through `pytestmark`, inside `pytest.param(marks=…)`, with no IDs, as a bare decorator, under another name, on something pytest does not collect | V15 — every `mark.<link marker>` in a test module is either read or reported |
+| `@pytest.mark.verifies("TBD")`; `("REQ-SVC-01, REQ-SVC-02")`, two IDs in one argument | V14, its next move naming one whole ID per argument — never *comma-separated*, which is this very slip |
 | A module with a syntax error | V08, as a test file is |
 | An ignore pattern that hides a file with logic in it | `status` shows ignored-file counts per item type |
 | A configuration key that is not known | a configuration error — a mistyped `requird` is a hidden rule |
@@ -480,7 +481,7 @@ least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
 | A `DisplayName` that is not a literal; a `[Trait]` named after a link; `[SlowFact]`; a test in `#if` | V15 each, the fix naming the `DisplayName` form |
 | `// [Fact(DisplayName = "TC-…")]` | a stray of kind `comment`, meant for the method below it |
 | A test's gap in a file whose other tests have unread markers or strays | its next move cites only a finding about that test, never the first one in the file |
-| A malformed first word (`TC-SVC-01.1a`) | V14 |
+| A malformed first word (`TC-SVC-01.1a`, `TC-SVC-01.1/O03`) | V14, its next move naming the `DisplayName` form: one whole ID, then a space |
 | A `[Fact]` on an abstract base, two concrete subclasses in the file | one automated test, two run identities |
 | A nested class's test | run identity `Ns.Outer+Inner` |
 | A folder `Unit/` | level `unit` |

@@ -6,6 +6,13 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `V14` names the form its marker is written in. On an xUnit `DisplayName` it asks for one
+  whole ID, then a space; on a pytest marker, one whole ID per argument. Both used to say
+  *the 'verifies' line holds IDs only, comma-separated*: C# has no such line, and in pytest
+  two IDs in one argument is the slip that raises `V14`. Markdown's next move is unchanged.
+
 ## [0.1.0] - 2026-10-15
 
 ### Added
