@@ -6,11 +6,6 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
-### Fixed
-
-- A next move that says no repo declares an item type gives it its article:
-  `no repo of the project declares an automated test`, where it read `declares a automated test`.
-
 ## [0.1.0] - 2026-10-15
 
 ### Added
@@ -189,6 +184,8 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- A next move that says no repo declares an item type gives it its article:
+  `no repo of the project declares an automated test`, where it read `declares a automated test`.
 - `ledger check` no longer lets the last repo read decide how an item type is written, when two
   repos read it with different extractors.
 - A test's gap cites only a finding about that test, never the first one in its file.
