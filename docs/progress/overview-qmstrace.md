@@ -328,8 +328,10 @@ The first real project is a C# repo, chosen 2026-10-15.
 
 **Release 0.1.0** — the engine the project installs, pinned by a tag
 ([releasing](../dev/releasing.md)):
-- [ ] CHANGELOG section, install pages in the README and the manual, the release workflow and
-  its runbook — pull request.
+- [x] CHANGELOG section, install pages in the README and the manual, the release workflow and
+  its runbook — #44 (`80eef1d`).
+- [ ] The MIT License — #45. The first `v0.1.0` tag, on `80eef1d`, was never published; it is
+  re-cut on #45's merge commit, so the first release carries the license.
 - [ ] Tag `v0.1.0` on the merge commit; the workflow drafts the release; publish it.
 - [ ] `main` moves on to `0.2.0.dev0`.
 
