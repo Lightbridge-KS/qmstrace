@@ -131,7 +131,7 @@ assert [s.targets for s in component.strays] == [('DSN-SVC-02',)]
 source = ('@pytest.mark.verifies("REQ-SVC-01")\nclass TestKey:\n'
           '    def test_valid(self): pass\n')
 read = pytest_tests.extract('tests/unit/test_key.py', source,
-                           by_path.item_types['test_case'], by_path)
+                           by_path.item_types['automated_test'], by_path)
 assert not read.findings
 assert [i.id for i in read.items] == ['tests/unit/test_key.py::TestKey::test_valid']
 assert [link.dst for link in read.links] == ['REQ-SVC-01']

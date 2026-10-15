@@ -28,7 +28,7 @@ def test_all_shipped_marker_examples_parse(service) -> None:
             (service, "requirement"),
             (service, "design_element"),
             (service, "component"),
-            (service, "test_case"),
+            (service, "automated_test"),
             (ledger, "test_case"),  # an entry in a Test Specification (ADR-0003)
             (agent, "component"),  # a C# file (ADR-0004)
             (agent, "automated_test"),  # an xUnit method

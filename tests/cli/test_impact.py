@@ -65,7 +65,7 @@ def test_union_and_configured_candidate(project: Path) -> None:
     code, output = impact(project / "service", *STARTS)
     assert code == 0
     assert candidate(output) == {*STARTS, "DSN-SVC-01", "DSN-SVC-02"}
-    assert "downstream: 2 design elements, 2 components, 4 test cases" in output
+    assert "downstream: 2 design elements, 2 components, 4 automated tests" in output
     assert "upstream origins: 3" in output
     assert output.count("tests/integration/test_store.py::test_a_record_survives_a_restart ·") == 1
     assert "not a claim of edits or frozen state" in output
@@ -130,7 +130,7 @@ def test_origin_start_and_no_dependants(project: Path) -> None:
     assert candidate(output) == {"REQ-SVC-03"}
 
 
-@pytest.mark.parametrize("covers", [(), ("requirement",), ("component", "test_case")])
+@pytest.mark.parametrize("covers", [(), ("requirement",), ("component", "automated_test")])
 @pytest.mark.verifies("REQ-QMT-01")
 def test_candidate_types_are_configuration(project: Path, covers: tuple[str, ...]) -> None:
     assessment = Workspace.open(project / "service").assessment()

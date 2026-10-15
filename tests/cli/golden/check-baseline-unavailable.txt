@@ -1,4 +1,4 @@
-baseline requirements (service): baseline/service/requirements/1 @ b70cf39b425a
+baseline requirements (service): baseline/service/requirements/1 @ f5cb96739aa2
   baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
 controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn
 baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches

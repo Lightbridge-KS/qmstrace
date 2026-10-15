@@ -8,8 +8,8 @@ forward — what hangs off it, nearest first:
   Origin      REQ-SVC-02 — Records survive a restart · requirement · docs/req/service-srs.md:21
     Satisfies   DSN-SVC-02 — Record store · design element · docs/design/service-design.md:13
       Implements  src/service/store.py · component
-    verifies    tests/integration/test_store.py::test_a_record_survives_a_restart · test case, integration · also verifies DSN-SVC-02
-    verifies    tests/integration/test_store.py::test_a_restart_loses_no_accepted_record · test case, integration
+    verifies    tests/integration/test_store.py::test_a_record_survives_a_restart · automated test, integration · also verifies DSN-SVC-02
+    verifies    tests/integration/test_store.py::test_a_restart_loses_no_accepted_record · automated test, integration
   Origin      REQ-SVC-03 — The record format is written down · requirement · docs/req/service-srs.md:28
 
-forward: 2 requirements, 1 design element, 1 component, 2 test cases · backward: nothing — this repo only
+forward: 2 requirements, 1 design element, 1 component, 2 automated tests · backward: nothing — this repo only

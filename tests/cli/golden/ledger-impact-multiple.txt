@@ -10,9 +10,9 @@ downstream — grouped by item type:
   component (2):
     client:src/client/api.py · component, in client
     service:src/service/store.py · component, in service
-  test case (2):
-    client:tests/unit/test_api.py::test_every_call_carries_the_key · test case, in client, unit · also verifies DSN-CLT-01
-    service:tests/integration/test_store.py::test_a_record_survives_a_restart · test case, in service, integration
+  automated test (2):
+    client:tests/unit/test_api.py::test_every_call_carries_the_key · automated test, in client, unit · also verifies DSN-CLT-01
+    service:tests/integration/test_store.py::test_a_record_survives_a_restart · automated test, in service, integration
 
 upstream origins — of the starting items:
   AGR-2 · origin clause, in the agreement
@@ -21,4 +21,4 @@ upstream origins — of the starting items:
 candidate for review — configured baseline types, not a claim of edits or frozen state:
 Impacts: DSN-CLT-01, DSN-SVC-02, REQ-CLT-01
 
-starts: 2 · downstream: 1 design element, 2 components, 2 test cases · upstream origins: 2 — the project's 3 repos, working trees, not pinned
+starts: 2 · downstream: 1 design element, 2 components, 2 automated tests · upstream origins: 2 — the project's 3 repos, working trees, not pinned

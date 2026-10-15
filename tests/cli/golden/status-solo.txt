@@ -1,14 +1,14 @@
 schema: this repo's own, under [schema] in qmstrace.toml — no ledger
 scanned (working tree, not pinned):
-  requirement    1 item  in  1 file   docs/req/*-srs.md
-  test_case      1 item  in  1 file   tests/**/test_*.py · test functions: a parametrised function is one automated test
+  requirement       1 item  in  1 file   docs/req/*-srs.md
+  automated_test    1 item  in  1 file   tests/**/test_*.py · test functions: a parametrised function is one automated test
 links: 2
 external BRF-*: verified against docs/brief.md (2 declared)
 controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
 baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
 baselines: no matching reachable local tag — nothing frozen locally
 
-  REQ-APP-01  origin BRF-1  test cases 1 (unit 1)  — A greeting
+  REQ-APP-01  origin BRF-1  automated tests 1 (unit 1)  — A greeting
 
 suspects: 0 — informational; this repo only
 

@@ -174,7 +174,7 @@ def test_a_stray_marker_is_named_on_the_module_and_on_the_element(service: Trace
 @pytest.mark.verifies("DSN-QMT-06")
 def test_the_form_to_write_comes_from_the_extractor_that_reads_it(service: TraceConfig) -> None:
     fix = fix_of(judged(service), "G02", "REQ-SVC-02")
-    assert 'on the test case, write `@pytest.mark.verifies("REQ-SVC-02")` on the test' in fix
+    assert 'on the automated test, write `@pytest.mark.verifies("REQ-SVC-02")` on the test' in fix
     assert "only if it is true" in fix
 
 
@@ -184,16 +184,16 @@ def test_in_the_ledgers_check_a_next_move_names_the_repos_to_write_in(
 ) -> None:
     rule = next(r for r in service.rules if r.code == "G02")
     requirement = Item("REQ-SVC-01", "requirement", "docs/req/srs.md", 1, "r", "d")
-    homes = {"test_case": ("client", "service"), "requirement": ("ledger",)}
+    homes = {"automated_test": ("client", "service"), "requirement": ("ledger",)}
     ways = {
         t.name: (Way(FORMS[t.extractor], homes.get(t.name, ())),)
         for t in service.item_types.values()
         if t.extractor
     }
     said = _fix(service, rule, requirement, [], [], ways, whole_project=True)
-    assert said.startswith("on the test case in client or service, write")
+    assert said.startswith("on the automated test in client or service, write")
     nobody = _fix(service, rule, requirement, [], [], {}, whole_project=True)
-    assert nobody.startswith("no repo of the project declares a test case")
+    assert nobody.startswith("no repo of the project declares an automated test")
 
 
 def test_a_rule_no_type_here_can_meet_says_so(project: Path) -> None:

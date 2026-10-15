@@ -46,7 +46,7 @@ In a pipeline, where only this repo is checked out:
 | `controlled document items:` | frozen, changed, new, removed and withdrawn counts; changed/removed are subsets of frozen |
 | `change requests:` | the register's availability, readable requests and malformed files |
 | `suspects:` | unique local items needing review; distance-one items listed, farther items counted by distance; [check](check.md) lists all reasons |
-| one line per requirement | its category, what it points back at, what hangs off it — design elements, test cases by level — and its title |
+| one line per requirement | its category, what it points back at, what hangs off it — design elements, the test cases of a Test Specification, automated tests by level — and its title |
 | `verified by …` | requirements verified by inspection or analysis, listed apart: nothing records their basis yet |
 | last line | violations and gaps, each counted by code — see [Findings](../findings.md). [`qmstrace check`](check.md) lists every one, with its next move |
 

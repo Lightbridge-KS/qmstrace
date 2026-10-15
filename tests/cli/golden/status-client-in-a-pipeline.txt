@@ -3,7 +3,7 @@ scanned (working tree, not pinned):
   requirement       1 item  in  1 file   docs/req/*-srs.md
   design_element  known to the project, not scanned here
   component         1 item  in  1 file   src/**/*.py
-  test_case         2 items in  1 file   tests/**/test_*.py · test functions: a parametrised function is one automated test
+  automated_test    2 items in  1 file   tests/**/test_*.py · test functions: a parametrised function is one automated test
 links: 3
 external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
 sibling service: NOT REACHABLE at ../service
@@ -13,7 +13,7 @@ baselines: judged from reachable local tags — remote-tag completeness NOT VERI
 baselines: no matching reachable local tag — nothing frozen locally
 change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
-  REQ-CLT-01  security  origin AGR-1  design elements 0  test cases 1 (unit 1)  — The client sends its key on every call
+  REQ-CLT-01  security  origin AGR-1  design elements 0  automated tests 1 (unit 1)  — The client sends its key on every call
 
 categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, reliability, maintainability, portability, design-constraint, legal-regulatory
   (a prompt, not a gap — not every product needs one under every category)
