@@ -328,8 +328,10 @@ The first real project is a C# repo, chosen 2026-10-15.
 
 **Release 0.1.0** — the engine the project installs, pinned by a tag
 ([releasing](../dev/releasing.md)):
-- [ ] CHANGELOG section, install pages in the README and the manual, the release workflow and
-  its runbook — pull request.
+- [x] CHANGELOG section, install pages in the README and the manual, the release workflow and
+  its runbook — #44 (`80eef1d`).
+- [ ] The MIT License — #45. The first `v0.1.0` tag, on `80eef1d`, was never published; it is
+  re-cut on #45's merge commit, so the first release carries the license.
 - [ ] Tag `v0.1.0` on the merge commit; the workflow drafts the release; publish it.
 - [ ] `main` moves on to `0.2.0.dev0`.
 
@@ -634,6 +636,15 @@ the stand-in's defects returns ([scenario catalogue](../tests/scenario-catalogue
 
 ## Deferred
 
+- **A public repository.** The code is MIT-licensed (`LICENSE`); the repository stays private
+  until a review clears its history and content:
+  - the full Git history scanned for secrets, home paths, machine names and other projects'
+    data, not only the staged changes the commit hook scans;
+  - third-party text: `docs/references/` (an ISO/IEC 29110 cheat sheet, paraphrased) and
+    any quoted standard text in `docs/`;
+  - ownership of the code confirmed before it is published;
+  - then: the manual's `repo_url` in `zensical.toml`, the *private* wording in the README,
+    *Set up a repo*, *A first look* and the release notes, and whether to publish to PyPI.
 - **Slice 2, the ledger.**
   - Design: event shape, states for non-document work products, the signature loop, the
     recorded inspection basis, cross-repo questions.

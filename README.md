@@ -86,3 +86,8 @@ Python hook tools come from the project's locked development dependencies; Gitle
 the installed binary. Fixtures and golden output are excluded from whitespace fixes.
 Even with `--all-files`, the Gitleaks hook scans only staged changes. Types, tests, wheel
 checks and the manual build remain in `just dry`.
+
+## License
+
+[MIT](LICENSE). The offline trace browser bundles vis-network under its own MIT license,
+kept beside it in `src/qmstrace/assets/vendor/`.
