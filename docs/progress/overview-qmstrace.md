@@ -472,6 +472,10 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   ([record](../tests/beacon-dotnet.md#results--run-2026-10-14), `979d69d` on `main`), on a wheel
   from `a7a3807`; bed end state tagged `m12r-end`. The first pass found the gap-citation defect
   fixed in M12d; the rerun gave the same output for C1, C2, C7 and C8.
+- [x] **After M12-R** — a gap whose link has nothing to point at in this repo names the sibling
+  that declares its targets (`fix/gap-wording-sibling-targets`, stacked on M12e): the run's C#
+  agent was told to *write the design here*, wording from M3 that predates ADR-0001. Where no
+  sibling declares one, the text is unchanged; no golden moved.
 
 ## Landed — M10 · the project-wide check
 

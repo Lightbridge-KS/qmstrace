@@ -441,6 +441,8 @@ at least one test (`tests/cli/test_test_cases.py`, `tests/unit/test_judge.py`).
 | A requirement one repo can meet only partly | its own way, then *Or another repo of the project meets … with a link from its automated test* |
 | An item's own gap (G07) in the ledger's check | written the way its own repo's extractor reads it |
 | One way only, as in every fixture before | the next move is byte for byte what it was |
+| An outgoing gap whose targets no type here declares, while a sibling does (the agent and its ledger; the mini client and its service) | *this repo declares no … for it to point at, but ledger does: write …, citing an item of ledger — only if it is true* |
+| The same with no sibling declaring one, or none read | *write the design here … or cite another repo's only if this item really serves it*, byte for byte |
 | `status` on a pytest type | *a parametrised function is one automated test* |
 
 ## M12c — verdicts through test cases
