@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; release 0.1.0 published, 0.1.1 (the V14 fix) prepared; now the first real project, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; release 0.1.1 (the V14 fix) published; now the first real project, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-15 · Release 0.1.0 published; 0.1.1, the V14 fix, prepared. Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-15 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
 capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
 on a C# repo, in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
@@ -342,10 +342,13 @@ The first real project is a C# repo, chosen 2026-10-15.
 patch path says. Nothing else on `main` since `v0.1.0` changes what ships. The packaged skill
 and setup are unchanged since `v0.1.0` (`git diff --stat v0.1.0..HEAD -- src/qmstrace/assets
 src/qmstrace/core/setup` is empty), so `init` after the upgrade changes nothing:
-- [ ] Version `0.1.1`, its CHANGELOG section, the install pins in the README and the manual,
-  and the runbook's patch path — pull request.
-- [ ] Tag `v0.1.1` on the merge commit; the workflow drafts the release; publish it.
-- [ ] `main` moves back to `0.2.0.dev0`, with `uv lock`.
+- [x] Version `0.1.1`, its CHANGELOG section, the install pins in the README and the manual,
+  and the runbook's patch path — #51 (`91f7b37`).
+- [x] `v0.1.1`, annotated, on `91f7b37`; the workflow drafted the release with the wheel, and it
+  was published 2026-10-15. Installed here from the tag as a uv tool, both trace gates pass
+  with the installed binary: 657 items, 0 violations, 0 gaps. `init` with it in this repo
+  reports every file unchanged.
+- [x] `main` moves back to `0.2.0.dev0`, with `uv lock`.
 
 **Target layout — [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md), 2026-09-28:**
 - **The ledger repo holds the documents:** the SRS and the design documents, beside the
