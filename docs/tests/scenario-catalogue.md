@@ -401,3 +401,26 @@ Each line is at least one test.
 | `init` in a traced ledger that lists itself | the stanza names `ledger check --strict`, `ledger thread`, `ledger impact`; no `next:` line |
 | `init` in a product repo of that project | the stanza names the product repo's own verbs, byte for byte as before |
 
+## M12a — dotted IDs
+
+ADR-0002: an ID's number may carry dotted parts, and every reader takes an ID whole or not at
+all. Each line is at least one test (`tests/unit/test_dotted_ids.py`, and the V02 and refusal
+cases in `tests/cli/test_check.py` and `tests/integration/test_baselines.py`).
+
+| Scenario | Expected |
+|---|---|
+| `TC-SVC-04.1-01`, `DSN-SVC-04.1`, `REQ-SVC-1.2.3` | IDs |
+| `TC-SVC-04.`, `TC-SVC-.1`, `TC-SVC-04..1`, `REQ-SVC-01a` | not IDs |
+| An ID in prose followed by a full stop that ends the sentence | the ID, without the stop |
+| `TC-BAG-03.1a` in prose, a table, a stray | no ID at all — never `TC-BAG-03` |
+| Every fixture file and CLI golden, read with the dotted shape | the same IDs the narrow shape read |
+| A heading `### REQ-SVC-04.1 — …` with a dotted `id_pattern` | the item `REQ-SVC-04.1`, its title whole |
+| `Satisfies: REQ-SVC-04.1, REQ-SVC-04.10` | two links, both whole and distinct |
+| A dotted ID later in a heading, or as a table row's first cell | a mention of the whole ID |
+| `# Implements: DSN-SVC-04.1` outside a module docstring | a stray naming the whole ID |
+| `@pytest.mark.verifies("REQ-SVC-04.1")` | a link, no finding |
+| `Impacts: REQ-SVC-04.1, DSN-SVC-04.2` in a change request | both read |
+| A heading that starts with `REQ-SVC-04.1a` or `REQ-SVC-03b` | a lead; in `check`, V02 naming the whole word |
+| `id_prefix = "REQ-SVC-04.1-"` | accepted |
+| A listing of `AGR-1.10`, `AGR-1.2`, `AGR-10` | sorted as numbers: `AGR-1.2`, `AGR-1.10`, `AGR-10` |
+| A baseline tag whose snapshot has more than three problems | exit 2: the count by code, the first three, *and N more*, where to see them all |

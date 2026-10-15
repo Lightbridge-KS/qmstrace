@@ -529,7 +529,8 @@ told it whether it was done.
 
 ### Marker syntax v0
 
-*Amended 2026-09-24 (M9): sections, heading forms, near-misses — below the table.*
+*Amended 2026-09-24 (M9): sections, heading forms, near-misses — below the table. Amended
+2026-10-14 ([ADR-0002](../adr/0002-dotted-ids.md)): the ID shape, dotted numbers.*
 
 | Item | Declared as | Its ID | Link marker |
 |---|---|---|---|
@@ -538,6 +539,10 @@ told it whether it was done.
 | Component | a source module | derived — the module's path | `Implements: <design element>` in the module docstring |
 | Test case | a test function | derived — the test runner's own identifier for it | the test framework's own tagging, e.g. `@pytest.mark.verifies("<ID>")`, on the function or its class |
 
+- **One ID shape for every project**: capital letters and digits in hyphen-joined segments,
+  ending in a number that may carry dotted parts — `REQ-SVC-01`, `TC-SVC-04.1-01`. An ID is
+  read whole wherever it is written, or not at all; it is never cut short. A heading that
+  starts with a malformed ID of this repo's kind is a lead, reported as V02 (ADR-0002).
 - **A field whose name is a link marker *is* the link.** `Origin` is at once a required field
   of a requirement and its link to the clause; nothing else declares it.
 - Fields are `- Key: value` lines in the item's section; bold keys are accepted. Several

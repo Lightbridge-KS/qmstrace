@@ -131,7 +131,7 @@ def _stem(text: str) -> str:
     return text.split("-", 1)[0]
 
 
-def _numbered(item_id: str) -> tuple[int, str]:
-    """Sort key: AGR-2 before AGR-10."""
-    number = re.search(r"\d+$", item_id)
-    return (int(number.group()) if number else 0, item_id)
+def _numbered(item_id: str) -> tuple[tuple[int, ...], str]:
+    """Sort key: AGR-2 before AGR-10, TC-4.2 before TC-4.10."""
+    number = re.search(r"\d+(?:\.\d+)*$", item_id)
+    return (tuple(int(n) for n in number.group().split(".")) if number else (), item_id)

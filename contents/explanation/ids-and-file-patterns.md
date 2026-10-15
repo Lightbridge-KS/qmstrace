@@ -4,8 +4,9 @@
 
     The project decides what its own IDs and names look like, and each repo decides what its
     items' IDs look like and where its documents live. qmstrace fixes only the general shape of
-    every ID: capital letters and digits in hyphen-joined segments, ending in a number, such as
-    `REQ-SVC-01`. An ID pattern can narrow that shape but never widen it. Documents can move at
+    every ID: capital letters and digits in hyphen-joined segments, ending in a number that may
+    carry dotted parts, such as `REQ-SVC-01` or `TC-SVC-04.1-01`. An ID pattern can narrow that
+    shape but never widen it. Documents can move at
     any time. An ID frozen by a baseline cannot change.
 
 ## Who decides what
@@ -46,16 +47,19 @@ fixture project's service repo:
 Every ID, of any type and from any source, has one shape:
 
 ``` text
-[A-Z][A-Z0-9]*(-[A-Z0-9]+)*-[0-9]+
+[A-Z][A-Z0-9]*(-[A-Z0-9]+(\.[0-9]+)*)*-[0-9]+(\.[0-9]+)*
 ```
 
 | Written | An ID? |
 |---|---|
 | `REQ-SVC-01`, `SWR-GW-001`, `SRS-FR-12`, `AGR-7`, `CR-003` | yes |
+| `TC-SVC-04.1-01`, `DSN-SVC-04.1` | yes: a number may carry dotted parts |
+| `REQ-SVC-01.` at the end of a sentence | `REQ-SVC-01`: the full stop is not part of it |
+| `TC-SVC-03.1a` | no — and never `TC-SVC-03`: an ID is read whole or not at all |
 | `REQ-SVC-01A` | no: a letter after the number |
 | `REQ_SVC_01` | no: underscores |
 | `req-svc-01` | no: lower case |
-| `3.2.1`, `FR.12` | no: dotted numbers |
+| `3.2.1`, `FR.12` | no: no hyphen-joined segments |
 
 **Why the shape is fixed.** A repo meets many IDs it has no pattern for:
 
@@ -95,7 +99,9 @@ flowchart LR
   kind -- no --> prose["an ordinary heading<br/>IEC-62304 …"]
 ```
 
-"Starts like" means it has the same literal start, or the same first segment (`REQ`).
+"Starts like" means it has the same literal start, or the same first segment (`REQ`). A first
+word that starts as an ID and runs on, such as `REQ-SVC-03b` or `REQ-SVC-04.1a`, counts as a
+malformed ID too: `V02` names the whole word.
 
 Some patterns have no literal start to read, such as one that begins with a group like
 `^(REQ)-SVC-\d{2}$`. For those, qmstrace refuses the configuration until the type names its

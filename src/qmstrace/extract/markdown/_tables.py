@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from typing import Final
 
-from qmstrace.core.model import ID_TOKEN
+from qmstrace.core.model import id_tokens
 from qmstrace.extract.fields import FIELD
 
 _DELIMITER: Final = re.compile(r":?-+:?")  # a table's header rule, `|---|:--:|`
@@ -38,5 +38,5 @@ def _table_marker(cells: list[str], carried: set[str]) -> tuple[str, tuple[str, 
         marker = first.rstrip(":").strip()
     else:
         return None
-    targets = tuple(ID_TOKEN.findall(rest))
+    targets = id_tokens(rest)
     return (marker, targets) if targets else None

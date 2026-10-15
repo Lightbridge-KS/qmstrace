@@ -490,3 +490,22 @@ def test_a_near_miss_in_a_tagged_tree_does_not_block_the_snapshot(controlled):
     commit(controlled, "a plan")
     git(controlled, "tag", "-a", "baseline/service/requirements/2", "-m", "with a plan")
     assert codes(controlled) == {"V16"}
+
+
+@pytest.mark.verifies("REQ-QMT-20")
+def test_a_snapshot_with_many_problems_is_refused_with_a_count_and_the_first_few(controlled):
+    # ADR-0002: the refusal at a tag that cannot be read counts its problems by code, shows the
+    # first few and says where to see them all — never one line per problem without end.
+    srs = controlled / REQ
+    original = srs.read_text()
+    srs.write_text(original + "".join(f"\n### REQ-SVC-{n} — slip {n}\n" for n in range(3, 8)))
+    commit(controlled)
+    git(controlled, "tag", "baseline/service/requirements/2")
+    srs.write_text(original)
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.open(controlled).assessment()
+    what = caught.value.what
+    assert "cannot form a reliable snapshot: 5 findings (5 V02), the first 3: V02 " in what
+    assert what.count("V02 docs/req/service-srs.md:") == 3
+    assert what.endswith("and 2 more — a check run in a checkout of the tag lists every one")
+    assert "rewrite the baseline tag" in caught.value.next_move

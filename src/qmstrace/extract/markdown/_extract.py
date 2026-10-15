@@ -32,6 +32,7 @@ from typing import Final
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import (
+    ID_IN_TEXT,
     ID_TOKEN,
     Extracted,
     Finding,
@@ -40,6 +41,7 @@ from qmstrace.core.model import (
     Link,
     Mention,
     Stray,
+    id_tokens,
     text_digest,
 )
 from qmstrace.extract.fields import FIELD, link_line
@@ -49,7 +51,7 @@ from qmstrace.extract.markdown._tables import _CELL_MARKS, _cells, _table_marker
 CHANGE: Final = "Change"
 # A fence closes on the same character, at least as long, with no trailing info string.
 _FENCE: Final = re.compile(r"(`{3,}|~{3,})(.*)$")
-_MENTION: Final = re.compile(rf"(?<![A-Za-z0-9-])({ID_TOKEN.pattern})(?![A-Za-z0-9-])")
+_MENTION: Final = ID_IN_TEXT
 
 
 @dataclass
@@ -145,7 +147,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
         key = found.group(1) if found else None
         if current is None:
             if found is not None and key in carried:
-                targets = tuple(ID_TOKEN.findall(found.group(2)))
+                targets = id_tokens(found.group(2))
                 if targets:
                     strays.append(Stray(found.group(1), targets, path, number, "outside"))
             continue
