@@ -436,7 +436,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     before M12a's SRS edit.
   - [x] The bed's wording ("test specification"); measure C9 amended before the run, with its
     reason.
-- [ ] **M12a** — dotted IDs, engine-wide, on `feat/m12a-dotted-ids`, [#35](https://github.com/Lightbridge-KS/qmstrace/pull/35). REQ-QMT-20.
+- [x] **M12a** — dotted IDs, engine-wide, [#35](https://github.com/Lightbridge-KS/qmstrace/pull/35), merged `6e8dbe5`. REQ-QMT-20.
   - [x] `ID_TOKEN` widened; `id_tokens` reads running text whole or not at all, in every
     reader (headings, fields, tables, mentions, strays, pytest markers, change requests).
   - [x] A heading that starts with a malformed ID (`REQ-SVC-04.1a`, `REQ-SVC-03b`) is a lead:
@@ -446,7 +446,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Verified: the 959 existing tests and every golden unchanged; on every fixture and
     golden, undotted text reads exactly as before; four mutations in a disposable copy each
     fail a REQ-QMT-20 test.
-- [ ] **M12b** — test cases in the trace, on `feat/m12b-test-cases`, [#36](https://github.com/Lightbridge-KS/qmstrace/pull/36) (stacked on M12a), with
+- [x] **M12b** — test cases in the trace, [#36](https://github.com/Lightbridge-KS/qmstrace/pull/36), merged `d39aa68` (stacked on M12a), with
   `qmstrace-ledger` branch `m12b-automated-test` merged just before it. REQ-QMT-02.
   - [x] `test_case` → `automated_test` in qmstrace's own schema (the ledger) and in the starter;
     both trace gates still 0 violations, 0 gaps, 0 suspects after the rename.
@@ -458,7 +458,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     no test runs); SKILL.md teaches the Test Specification; `status` says *one automated test*.
   - [x] REQ-QMT-02 edited under CR-003; 14 suspects downstream of it (informational, behaviour
     unchanged).
-- [ ] **M12c** — verdicts through test cases, on `feat/m12c-verdicts`, [#37](https://github.com/Lightbridge-KS/qmstrace/pull/37) (stacked on M12b).
+- [x] **M12c** — verdicts through test cases, [#37](https://github.com/Lightbridge-KS/qmstrace/pull/37), merged `058fe71` (stacked on M12b).
   REQ-QMT-10.
   - [x] A verdict follows `verifies` links from the automated tests a report ran — directly or
     through test cases (`core/results.py`); a requirement names the cases on the way; test
@@ -469,7 +469,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Verified on real pytest output (`cases`), with a differential test: where no test case
     stands between, every verdict equals the direct-link one. The output says *automated
     tests* where it counted test functions.
-- [ ] **M12d** — C# source, on `feat/m12d-csharp`, [#39](https://github.com/Lightbridge-KS/qmstrace/pull/39) (stacked on M12c). REQ-QMT-21,
+- [x] **M12d** — C# source, [#39](https://github.com/Lightbridge-KS/qmstrace/pull/39), merged `688f1db` (stacked on M12c). REQ-QMT-21,
   REQ-QMT-12.
   - [x] `extract/csharp/`: `_syntax.py` (the only tree-sitter importer), `component.py`
     (`csharp-file`), `xunit.py` (`xunit`); DSN-QMT-15. Runtime dependencies tree-sitter 0.26
@@ -481,7 +481,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     [#38](https://github.com/Lightbridge-KS/qmstrace/issues/38) for a C# starter.
   - [x] Fixed after the bed run found it (`e6e5133`): a test's gap cited the first unread-marker
     finding or stray in its file; each now names its own method.
-- [ ] **M12e** — the TRX reader and report dispatch, on `feat/m12e-trx` (stacked on M12d).
+- [x] **M12e** — the TRX reader and report dispatch, [#41](https://github.com/Lightbridge-KS/qmstrace/pull/41), merged `64f99b3` (stacked on M12d).
   REQ-QMT-22.
   - [x] `extract/reports.py` parses once with defusedxml (now its only importer, pinned) and
     the root picks `junit.py` or the new `trx.py`; anything else is refused naming both.
