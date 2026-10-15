@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
 
-from qmstrace.core.model import Item
+from qmstrace.core.model import Item, Link
 
 
 class Home(Enum):
@@ -38,6 +38,9 @@ class Node:
     title: str | None = None
     where: str | None = None
     fields: Mapping[str, str] = field(default_factory=dict)
+    # A sibling item's own links, as its repo declares them: read by `results` to follow a
+    # verdict through a sibling's test case, never counted or walked as this repo's links.
+    declares: tuple[Link, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,3 +58,6 @@ class Surroundings:
     every_sibling_read: bool = True
     externals: Mapping[str, frozenset[str] | None] = field(default_factory=dict)
     whole_project: bool = False  # every repo of the project is read — the ledger's check
+    # Each read sibling item's own links, by its ID (ADR-0003): a test case's `verifies:` line
+    # in the ledger, seen from a product repo.
+    declared: Mapping[str, tuple[Link, ...]] = field(default_factory=dict)

@@ -36,14 +36,17 @@ The miniature service illustrates a partial report with failed and missing resul
 
 ## Follow up on incomplete evidence
 
-1. Check the matched test-case and run counts. A parameterized function counts as one test
-   case and can contribute several runs. Repeated XML entries are combined, not counted as
+1. Check the matched automated-test and run counts. A parameterized function counts as one
+   automated test and can contribute several runs. Repeated XML entries are combined, not counted as
    retry attempts.
-2. Inspect `fail` and `skip` details. Shared tests name other affected items. A test linked
-   only to a design element does not supply a requirement verdict.
+2. Inspect `fail` and `skip` details. Shared tests name other affected items. Where the
+   project keeps a Test Specification, a requirement's row names the test cases its verdict
+   came through, each with its own verdict. A test or a test case that reaches only a design
+   element does not supply a requirement verdict; it is listed apart, so its failure still
+   shows.
 3. For `no-result`, run the missing test or explain why this report selected only part of
-   the suite. For `untested`, add the intended direct test link or review the requirement's
-   verification method. A few reported parameter variants do not establish a complete set.
+   the suite. For `untested`, add the intended test link — on the automated test, or on the
+   test case it runs — or review the requirement's verification method. A few reported parameter variants do not establish a complete set.
 4. Resolve unmatched entries by checking report provenance, scan patterns and default pytest
    names. Zero matched tests is an error; a partly matched report still shows recognized results.
 5. Review inspection and analysis requirements through their own verification process. Linked

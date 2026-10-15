@@ -1,0 +1,21 @@
+report: report.xml
+  5 XML entries · 5 reported runs (distinct full identities)
+  matched: 5 runs of 5 automated tests · scanned: 5 automated tests · unmatched: 0 run identities
+  matched against the current working tree — report commit NOT VERIFIED
+  a partial parameter set does not prove every possible variant ran
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+requirements — verdicts along verifies links, from automated tests directly or through test cases:
+  REQ-SVC-01  pass      via TC-SVC-01.1 · 2 automated tests · 2 runs — A call carries a key · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:5
+    via TC-SVC-01.1  pass · 2 automated tests
+  REQ-SVC-02  pass      1 automated tests · 1 runs — Records survive a restart · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:12
+
+test cases that reach no requirement — no requirement verdict inferred:
+  TC-SVC-01.2  pass · 1 automated tests · verifies DSN-SVC-01 — The key check runs before any handler
+    pass      tests/unit/test_api.py::test_the_key_check_runs_before_any_handler · 1 runs
+  TC-SVC-02.1  pass · 1 automated tests · verifies DSN-SVC-02 — A restart keeps every field of a record
+    pass      tests/integration/test_store.py::test_a_restart_keeps_every_field · 1 runs
+
+result: 5 matched automated tests · 5 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

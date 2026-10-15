@@ -1,6 +1,6 @@
 report: report.xml
   1 XML entries · 1 reported runs (distinct full identities)
-  matched: 1 runs of 1 test cases · scanned: 2 test cases · unmatched: 0 run identities
+  matched: 1 runs of 1 automated tests · scanned: 2 automated tests · unmatched: 0 run identities
   matched against the current working tree — report commit NOT VERIFIED
   a partial parameter set does not prove every possible variant ran
   external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
@@ -10,10 +10,10 @@ report: report.xml
   change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
 requirements — direct verifies links only:
-  REQ-CLT-01  no-result 1 test cases · 0 runs — The client sends its key on every call · requirement · docs/req/client-srs.md:3
+  REQ-CLT-01  no-result 1 automated tests · 0 runs — The client sends its key on every call · requirement · docs/req/client-srs.md:3
     no-result tests/unit/test_api.py::test_every_call_carries_the_key · 0 runs
 
 unverified targets — type unknown, not requirement verdicts:
-  REQ-SVC-01  pass      1 test cases · 1 runs — REQ-SVC-01 · not verified here — judged at the ledger's import
+  REQ-SVC-01  pass      1 automated tests · 1 runs — REQ-SVC-01 · not verified here — judged at the ledger's import
 
-result: 1 matched test cases · 1 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only
+result: 1 matched automated tests · 1 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

@@ -2,9 +2,10 @@
 
 !!! abstract "TL;DR"
 
-    `qmstrace results REPORT` matches one pytest JUnit report to scanned test cases and their
-    direct `verifies` links. It shows requirement verdicts, missing results, shared tests and
-    unmatched entries. Exit `0` means a results view was produced, even if tests failed.
+    `qmstrace results REPORT` matches one pytest JUnit report to scanned automated tests, and
+    follows their `verifies` links to requirements — directly, or through the test cases they
+    run. It shows requirement verdicts, the test cases on the way, missing results, shared tests
+    and unmatched entries. Exit `0` means a results view was produced, even if tests failed.
     The report's commit is not verified.
 
 ## Synopsis
@@ -29,11 +30,12 @@ one scanned pytest test. Class methods retain their class names. Parameter IDs m
 brackets. Custom class-name prefixes, identity collisions and entries with missing identity
 attributes are reported; qmstrace does not guess a match.
 
-A **test case** is a scanned test function. A **reported run** is a distinct full
+An **automated test** is a scanned test function. A **reported run** is a distinct full
 `(classname, name)` identity, including parameters. Duplicate XML entries for the same full
 identity are combined using the worst verdict and counted explicitly. This includes pytest's
 separate entries for a body failure and teardown error. Duplicate entries do not establish
-retry history. Global counts count each test case once, even when requirement rows overlap.
+retry history. Global counts count each automated test once, even when requirement rows
+overlap.
 
 A partial set of parameter variants does not prove every possible variant ran.
 
@@ -41,17 +43,21 @@ A partial set of parameter variants does not prove every possible variant ran.
 
 | Subject | Rule |
 |---|---|
-| Test case with reported runs | Worst of `fail`, `skip`, `pass`, in that order |
-| Test case absent from the report | `no-result` |
-| Requirement with directly linked test cases | Worst of `fail`, `no-result`, `skip`, `pass` |
-| Requirement with no directly linked test cases | `untested` |
+| Automated test with reported runs | Worst of `fail`, `skip`, `pass`, in that order |
+| Automated test absent from the report | `no-result` |
+| Test case, or requirement, that automated tests reach | Worst of their verdicts: `fail`, `no-result`, `skip`, `pass` |
+| Test case, or requirement, that no automated test reaches | `untested` |
 
 XML `error` and `failure` both mean `fail`. Expected failures and unexpected passes follow
 pytest's XML representation: qmstrace adds no separate xfail policy.
 
-Only direct `verifies` links count. A test of a design element does not implicitly verify
-that design element's requirements. Nonpassing test details name the affected runs and show
-outcome messages. A shared test names the other items it verifies.
+A verdict follows `verifies` links: from an automated test to what it verifies, and on
+through a test case to what the test case verifies. A requirement's row names the test cases
+its verdict came through. A test case no automated test runs adds nothing: it neither passes a
+requirement nor holds one back. A design element carries `Satisfies`, not `verifies`, so a test
+of a design element does not imply a verdict for its requirements; such tests and test cases are
+listed apart. Nonpassing test details name the affected runs and show outcome messages. A shared
+test names the other items it verifies.
 
 Inspection and analysis requirements appear separately. Their linked test results, if any,
 do not change their verification method or establish approval.
@@ -67,6 +73,16 @@ teardown error, an absent test, and an entry that no longer matches a scanned te
 
 A partial report retains recognized results and lists unmatched identities. A requirement
 with a known failure remains `fail` even when another directly linked test has no result.
+
+## Through test cases
+
+In a project with a Test Specification, the automated tests name the test case they run, and
+the test case names what it verifies. Run from the product repo, the view reads the ledger's
+test cases with their own links — read for verdicts only, never counted as this repo's links:
+
+``` text
+--8<-- "cli/golden/results-cases.txt"
+```
 
 ## Repository boundary
 

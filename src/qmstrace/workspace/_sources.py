@@ -15,7 +15,7 @@ from qmstrace.core.assessment import ExternalState, SiblingState
 from qmstrace.core.baselines import Register
 from qmstrace.core.config import ExternalSource, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
-from qmstrace.core.model import ID_TOKEN, Item
+from qmstrace.core.model import ID_TOKEN, Item, Link
 from qmstrace.extract import change_requests
 from qmstrace.infra.externals import request_files
 from qmstrace.workspace._discovery import (
@@ -71,12 +71,13 @@ def _external(
 
 def _siblings(
     root: Path, config: TraceConfig, trees: TreeFactory, ledger: Path | None
-) -> tuple[list[tuple[SiblingState, dict[str, Item] | None]], bool, bool]:
-    """Each sibling with its items (None when not read); whether the siblings could be
-    located at all; whether this repo is among the project's repos."""
+) -> tuple[list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]], bool, bool]:
+    """Each sibling with its items (None when not read) and the links those items declare;
+    whether the siblings could be located at all; whether this repo is among the project's
+    repos."""
     if ledger is None:
         return [], not config.repos, False
-    found: list[tuple[SiblingState, dict[str, Item] | None]] = []
+    found: list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]] = []
     listed = False
     for name, relative in sorted(config.repos.items()):
         path = ledger / relative
@@ -85,14 +86,14 @@ def _siblings(
             listed = True
             continue
         if not (path / CONFIG_FILE).is_file():
-            found.append((SiblingState(name, location, None, "not reachable"), None))
+            found.append((SiblingState(name, location, None, "not reachable"), None, ()))
             continue
         try:
             tree = trees(path)
             config = _configuration(path, tree)
         except CouldNotJudge as stopped:
             problem = f"its configuration could not be read — {stopped.what}"
-            found.append((SiblingState(name, location, None, problem), None))
+            found.append((SiblingState(name, location, None, problem), None, ()))
             continue
         authored = [t for t in config.item_types.values() if t.id_pattern is not None]
         scan = _scan(tree, config, authored, with_misplaced=False)
@@ -102,7 +103,13 @@ def _siblings(
             for part in scan.extracted
             for i in part.items
         }
+        links = tuple(
+            replace(link, file=posixpath.join(location, link.file))
+            for part in scan.extracted
+            for link in part.links
+            if link.src in items
+        )
         counts = Counter(item.type for item in items.values())
         declares = {t.name: counts[t.name] for t in authored if counts[t.name]}
-        found.append((SiblingState(name, location, declares), items))
+        found.append((SiblingState(name, location, declares), items, links))
     return found, True, listed

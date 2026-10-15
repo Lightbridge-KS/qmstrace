@@ -442,3 +442,20 @@ at least one test (`tests/cli/test_test_cases.py`, `tests/unit/test_judge.py`).
 | An item's own gap (G07) in the ledger's check | written the way its own repo's extractor reads it |
 | One way only, as in every fixture before | the next move is byte for byte what it was |
 | `status` on a pytest type | *a parametrised function is one automated test* |
+
+## M12c — verdicts through test cases
+
+ADR-0003: a verdict follows `verifies` links from the automated tests a report ran, directly or
+through the test cases they run. Real pytest output on the `cases` fixture
+(`tests/integration/test_results_cases.py`).
+
+| Scenario | Expected |
+|---|---|
+| Two automated tests run one test case that verifies a requirement | the requirement's verdict is theirs, *via* the test case, which shows its own verdict |
+| One of them fails | the test case and the requirement fail |
+| A test case verifies only a design element, and its test fails | no requirement's verdict changes; the test case is listed under *test cases that reach no requirement*, failing |
+| A requirement verified directly and by a test case nothing runs | the direct test's verdict alone — the planned test case adds no `no-result` and masks no failure |
+| A chain of test cases, and a cycle among them | followed; each reaching test counted once; the walk ends |
+| A product repo's local view of the ledger's test cases | their links read for verdicts; `status` still counts only the repo's own links, and `thread` does not walk them |
+| No test case between tests and requirements (every older fixture) | every verdict is what direct links alone give; the old section headings |
+| The counts | *automated tests*, not *test cases* |

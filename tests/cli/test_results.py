@@ -44,7 +44,7 @@ def test_partial_failure_golden(project: Path, golden: Callable[[Path, str], Non
     result = runner.invoke(app, ["-C", str(root), "results", "report.xml"])
     assert result.exit_code == 0, result.output
     assert "6 XML entries · 5 reported runs" in result.output
-    assert "matched: 4 runs of 3 test cases" in result.output
+    assert "matched: 4 runs of 3 automated tests" in result.output
     assert "shared: also verifies DSN-SVC-02" in result.output
     assert "record missing after restart" in result.output
     assert "no-result" in result.output and "unmatched report entries" in result.output

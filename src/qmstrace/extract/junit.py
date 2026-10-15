@@ -42,8 +42,12 @@ def read(payload: bytes) -> Report:
                 }
             )
         )
+        name = case.get("name", "")
+        # pytest's test name precedes the first '['; parameter IDs can contain more brackets.
         entries.append(
-            ReportEntry(case.get("classname", ""), case.get("name", ""), verdict, kinds, details)
+            ReportEntry(
+                case.get("classname", ""), name, verdict, kinds, details, name.partition("[")[0]
+            )
         )
     if not entries:
         return Report(problem="the report contains no testcase entries")
