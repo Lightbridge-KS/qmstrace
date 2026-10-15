@@ -132,8 +132,9 @@ def make_repo(git_env: None) -> Callable[[Path], Path]:
 
 def _copied(source: Path, base: Path) -> Path:
     """A fixture project copied into `base`, every top-level folder a real Git repository —
-    hidden folders, such as an editor's or an agent harness's state, left out."""
-    shutil.copytree(source, base, ignore=shutil.ignore_patterns(".*"))
+    hidden folders, such as an editor's or an agent harness's state, and the `bin/` and `obj/`
+    a .NET build or an editor leaves in the C# fixture, left out."""
+    shutil.copytree(source, base, ignore=shutil.ignore_patterns(".*", "bin", "obj"))
     for repo in sorted(base.iterdir()):
         _make_repo(repo)
     return base

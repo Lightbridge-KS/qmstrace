@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; M12, the C# capability — slices M12a–M12e in stacked draft PRs, the beacon-dotnet run 13 of 13 measures passing; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; now release 0.1.0 and the first real project, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -9,14 +9,14 @@ read_when:
 # qmstrace — progress
 
 **Updated 2026-10-15 · Slice 1, the product-repo half: landed. M10, the project-wide check:
-landed.** Now: [package refactors](#now--package-refactors). Next:
-[real-world use](#next--real-world-use), in the layout of ADR-0001, and
-[M12 · the C# capability](#next--m12--the-c-capability), whose test bed is built. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
+capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use),
+starting with release 0.1.0 and a C# repo, in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## Now — package refactors
+## Landed — package refactors
 
-The accumulated refactors are ready for draft review on `codex/config-package`.
+The accumulated refactors on `codex/config-package` merged as #32 (`75ba627`, 2026-10-13).
 The verification records below describe each extraction; no refactoring ADRs were added.
 
 ### CLI package
@@ -320,11 +320,18 @@ approved narrow compatibility-export exception. Real-project onboarding remains 
   16 frozen, 0 changed, 3 new, 0 removed. Four extra modules and six extra test functions
   account for the increase from the pre-refactor trace. Existing evidence limits remain.
 
-## Next — real-world use
+## Now — real-world use
 
 qmstrace is applied to real development in the developer's own workflow, and reshaped by what
 that use finds. Findings become issues, and changes to settled design go through the design docs.
-The first real project is not yet chosen.
+The first real project is a C# repo, chosen 2026-10-15.
+
+**Release 0.1.0** — the engine the project installs, pinned by a tag
+([releasing](../dev/releasing.md)):
+- [ ] CHANGELOG section, install pages in the README and the manual, the release workflow and
+  its runbook — pull request.
+- [ ] Tag `v0.1.0` on the merge commit; the workflow drafts the release; publish it.
+- [ ] `main` moves on to `0.2.0.dev0`.
 
 **Target layout — [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md), 2026-09-28:**
 - **The ledger repo holds the documents:** the SRS and the design documents, beside the
@@ -336,18 +343,22 @@ M10 supports this layout through `ledger check`, `ledger thread` and `ledger imp
 working trees. The ADR's failed checks describe the pre-M10 probe, not the current engine.
 Pinned imports and historical cross-repo edit comparisons remain deferred.
 
-**Next onboarding steps** (project selection still open):
+**Next onboarding steps:**
 
-1. Choose a project, its ledger and product repos, and one small feature to trace end to end.
-2. Build and install the current engine; confirm `ledger --help` lists `check`, `thread`
-   and `impact` before onboarding with it.
+1. Choose a project — a C# repo — its ledger and product repos, and one small feature to
+   trace end to end.
+2. Install release 0.1.0 as a uv tool, as the README says; confirm `qmstrace --version` and
+   that `ledger --help` lists `check`, `thread` and `impact` before onboarding with it.
 3. Settle subjects and ID patterns before authoring and before the first baseline. Review
    #25 and #26: malformed IDs can escape detection, and unknown subject ownership can make
    a frozen snapshot unusable.
 4. Set up the ledger and code/test repos, then trace the feature and run the project gate.
    Product `init` still generates a repo-owned starter; joining an existing ledger needs
    configuration edits followed by `ledger copy-schema`. See the
-   [project how-to](../../contents/how-to/check-the-project.md).
+   [project how-to](../../contents/how-to/check-the-project.md). In a C# repo, `init` writes
+   the Python starter and a `pytest.ini` (#38): edit `[items]` as
+   [*Trace a C# repo*](../../contents/how-to/trace-a-csharp-repo.md) says, and delete the
+   `pytest.ini`.
 5. Record observed friction as issues; choose fixes from that evidence before expanding to
    M11. Baseline only after the IDs, trace and review are ready.
 
@@ -370,7 +381,12 @@ multi-repo acceptance. Remote-tag completeness and historical external evidence 
 unverified. The handoff's 794-test dry-gate result and the acceptance records below are
 historical evidence; the later refactor verification is recorded above.
 
-## Next — M12 · the C# capability
+## Landed — M12 · the C# capability
+
+Merged 2026-10-15: M12a #35 (`6e8dbe5`), M12b #36 (`d39aa68`), M12c #37 (`058fe71`), M12d #39
+(`688f1db`), M12e #41 (`64f99b3`), with the gap wording of #42 (`977e82d`) merged into M12e's
+branch. `main` then failed one test, which used `csharp-file` as an extractor qmstrace did not
+have; #43 (`b6c8b87`) gave it a misspelt name instead.
 
 The first C# adopter writes xUnit `[Fact]`/`[Theory]` tests. Each `DisplayName` starts with the
 ID of a test case planned in a document outside the code, and its IDs are dotted (`NN.m`).
@@ -576,9 +592,13 @@ real-world use.
 | Gate green | E6 run A: 16 requirements ([SRS](../req/qmstrace-srs.md)), 13 design elements ([blueprint § 11](../structure/codebase-blueprint.md#11-design-elements--what-the-code-is-traced-to)), 26 modules, 83 tests | #24 · `9dbe29f` |
 | Baseline | `baseline/requirements/1` on `9dbe29f`: 16 frozen; `check --strict` exits 0 | tag |
 | M10 | The project-wide check: `ledger check`, `thread`, `impact` across repos; `copy-schema` skips the ledger; `init` in a ledger. REQ-QMT-17…19 under CR-001 and CR-002 | #27, #28, #29, #31 · `d9b86d0` |
+| Refactors | Configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI packages, public interfaces preserved | #32 · `75ba627` |
+| M12 | The C# capability: dotted IDs, test cases and automated tests, verdicts through test cases, `csharp-file` and `xunit`, TRX. REQ-QMT-20…22 under CR-003; beacon-dotnet 13 of 13 | #35–#43 · `b6c8b87` |
 
 **Decided at the baseline:** CI does not run `check --strict` yet. Tags keep the form
 `baseline/requirements/<n>` until qmstrace cuts releases.
+**Decided at 0.1.0 (2026-10-15):** release tags `vX.Y.Z` are not baselines and keep their own
+form; a release freezes no requirement ([releasing](../dev/releasing.md)).
 
 Each milestone's merge SHA, decisions and evidence are archived:
 [M5a–M9c](../archive/progress/landed-m5a-m9c.md), [slice 1 through

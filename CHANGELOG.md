@@ -6,7 +6,41 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- A next move that says no repo declares an item type gives it its article:
+  `no repo of the project declares an automated test`, where it read `declares a automated test`.
+
+## [0.1.0] - 2026-10-15
+
 ### Added
+
+- C# repos are traced (ADR-0004). `csharp-file` reads one component per `.cs` file, its ID the
+  path, linked by a field line in the first type's leading `///` comment. `xunit` reads one
+  automated test per `[Fact]` or `[Theory]` method, linked by the ID that starts a literal
+  `DisplayName`; a Theory is one automated test, its rows its runs. A form it does not read is
+  reported, never skipped: a non-literal `DisplayName`, a `[Trait]` named after a link, a
+  custom test attribute and a test inside `#if` are `V15`, and a commented-out test attribute
+  is a stray. Newer syntax outside what is read, such as C# 14 extension blocks, does not stop
+  a file being read. A how-to, *Trace a C# repo*.
+- `results` reads the TRX file `dotnet test --logger trx` writes, as well as JUnit XML; the
+  root element picks the reader. A run is matched by its class and method, so a Theory's rows
+  are runs of one test. `Passed` is a pass, `NotExecuted` a skip, and any other outcome a
+  failure that keeps the raw outcome. Only the first line of an error message is read; paths,
+  machine and user names, output and stack traces never are. One report per run: a solution
+  with several test projects writes one TRX file each ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
+- Test cases and automated tests (ADR-0003). A test case is planned, an entry in a Test
+  Specification; an automated test is the code that runs it and names it. `results` follows
+  `verifies` links through test cases: a requirement's verdict is the worst of every automated
+  test that reaches it, and its row names the test cases on the way, each with its own verdict.
+  A test case nothing runs adds nothing. Test cases and tests that reach no requirement are
+  listed apart.
+- Dotted IDs (ADR-0002): a number may carry dotted parts, `TC-FLT-04.1-01`. An ID is read
+  whole or not at all — `TC-BAG-03.1a` is no ID, never `TC-BAG-03` — and a heading whose
+  first word starts as this repo's kind of ID and runs on is `V02`. Listings sort dotted
+  numbers as numbers: `AGR-1.2` before `AGR-1.10`.
+- An incoming gap's next move lists every way to meet it — each item type that can make the
+  link, the form its extractor reads, and the repos that read it.
 
 - `ledger check [--strict] [--quiet]`, run in the ledger: every repo the schema lists under
   `[repos]` — the ledger too, when it lists itself as `"."` — is read from its working tree
@@ -118,6 +152,16 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- The starter calls tests `automated_test`, not `test_case`; `status` and `results` count
+  *automated tests*. A schema that calls them `test_case` keeps working: item type names are
+  data.
+- `init` registers pytest's `verifies` marker only where the repo's tests are pytest.
+- A baseline tag whose snapshot has more than three problems is refused with a count by code,
+  the first three, and where to see the rest, instead of one line per problem.
+- An outgoing gap whose targets this repo declares none of, while a sibling repo does, names
+  that sibling: *this repo declares no … for it to point at, but ledger does*. It no longer
+  says to write the design here.
+
 - The stanza and the skill say the same thing about checking a marker: break the behavior in a
   disposable copy of the repo — never the checkout you work in — confirm its tagged test fails
   there, then delete the copy. The stanza used to say "a disposable test", and an agent read it
@@ -144,8 +188,10 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
-- A next move that says no repo declares an item type gives it its article:
-  `no repo of the project declares an automated test`, where it read `declares a automated test`.
+- `ledger check` no longer lets the last repo read decide how an item type is written, when two
+  repos read it with different extractors.
+- A test's gap cites only a finding about that test, never the first one in its file.
+
 - The refusals of `ledger copy-schema` and `ledger check` — and so of `ledger thread` and
   `ledger impact` — no longer end a repo's reason in two full stops when that reason closes
   its own sentence: `… Fix: use one of those.. Fix: …` reads `… Fix: use one of those. Fix: …`,
@@ -159,3 +205,6 @@ All notable changes to this project are recorded here. The format follows
 - An ID pattern, `id_prefix`, agreement prefix or change-request prefix that no ID can start
   with — underscores, lower case, a space — is refused with the ID shape and the next move,
   instead of being accepted and silently matching nothing.
+
+[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Lightbridge-KS/qmstrace/releases/tag/v0.1.0
