@@ -459,7 +459,7 @@ def fix_none_here(kinds: str, subject: str) -> str:
 
 def fix_none_in_project(kinds: str, subject: str) -> str:
     return (
-        f"no repo of the project declares a {kinds} — declare the type in the qmstrace.toml of "
+        f"no repo of the project declares {_a(kinds)} — declare the type in the qmstrace.toml of "
         f"the repo that holds them, then write the link to {subject} there."
     )
 
@@ -498,7 +498,7 @@ def fix_cite_sibling(kinds: str, form: str, fact: str, repos: list[str]) -> str:
 def fix_no_target(kinds: str, form: str, *, whole_project: bool = False) -> str:
     if whole_project:
         return (
-            f"no repo of the project declares a {kinds} for it to point at — declare the type "
+            f"no repo of the project declares {_a(kinds)} for it to point at — declare the type "
             f"where the design is kept, then add {form}."
         )
     return (

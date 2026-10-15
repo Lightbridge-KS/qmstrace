@@ -144,6 +144,8 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- A next move that says no repo declares an item type gives it its article:
+  `no repo of the project declares an automated test`, where it read `declares a automated test`.
 - The refusals of `ledger copy-schema` and `ledger check` — and so of `ledger thread` and
   `ledger impact` — no longer end a repo's reason in two full stops when that reason closes
   its own sentence: `… Fix: use one of those.. Fix: …` reads `… Fix: use one of those. Fix: …`,
