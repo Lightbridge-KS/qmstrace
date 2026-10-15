@@ -380,6 +380,13 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
    M11. Baseline only after the IDs, trace and review are ready.
 
 **Fixed from use:**
+- [x] 2026-10-15, seen in the first C# adopter's tests (#50): a `DisplayName` whose ID is
+  followed directly by a suffix — `TC-…-01/O03`, an observation number — was `V14` and linked
+  nothing, because the first whole word had to be an ID. The leading ID now ends at the
+  boundary prose uses (`ID_IN_TEXT`), so prose and `DisplayName` read the same words alike;
+  a commented-out test follows the same rule. The packaged skill is unchanged, so `init`
+  after an upgrade still changes nothing (#16). A parametrised test pins the issue's table;
+  restoring the whole-word rule in a disposable copy fails its five suffix rows and the stray.
 - [x] 2026-10-15, seen while the first C# adopter's ledger was designed: `V14` on an xUnit
   `DisplayName` or a pytest marker named a field line neither has — *the 'verifies' line holds
   IDs only, comma-separated*. A C# agent goes looking for that line, and in pytest, two IDs in

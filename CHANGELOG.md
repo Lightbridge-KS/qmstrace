@@ -6,6 +6,15 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- An xUnit `DisplayName`'s leading ID ends where an ID in prose ends, so a suffix written
+  straight after it no longer hides it: `TC-SVC-01.1-01/O03 …` and `TC-SVC-01.1: …` link
+  `TC-SVC-01.1-01` and `TC-SVC-01.1`, where they were `V14` and linked nothing. A letter,
+  digit, hyphen or dotted number straight after the ID still makes it no ID
+  (`TC-SVC-01.1a`). `V14`'s xUnit next move says what may follow the ID
+  ([#50](https://github.com/Lightbridge-KS/qmstrace/issues/50)).
+
 ## [0.1.1] - 2026-10-15
 
 ### Fixed

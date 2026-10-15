@@ -481,7 +481,10 @@ least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
 | A `DisplayName` that is not a literal; a `[Trait]` named after a link; `[SlowFact]`; a test in `#if` | V15 each, the fix naming the `DisplayName` form |
 | `// [Fact(DisplayName = "TC-…")]` | a stray of kind `comment`, meant for the method below it |
 | A test's gap in a file whose other tests have unread markers or strays | its next move cites only a finding about that test, never the first one in the file |
-| A malformed first word (`TC-SVC-01.1a`, `TC-SVC-01.1/O03`) | V14, its next move naming the `DisplayName` form: one whole ID, then a space |
+| An ID followed straight by a mark (`TC-SVC-01.1/O03`, `TC-SVC-01.1:`, `REQ-SVC-01—x`) | the link, the ID ended where an ID in prose ends (#50) |
+| Two IDs joined (`TC-SVC-01.1/TC-SVC-01.2`) | the first ID's link only, as after a space: a test carries one link |
+| A malformed first word (`TC-SVC-01.1a`, `TC-SVC-01.1.2x`) | V14, its next move naming the `DisplayName` form and what may follow the ID |
+| `// [Fact(DisplayName = "TC-SVC-01.1/O03 …")]` | a stray naming `TC-SVC-01.1` |
 | A `[Fact]` on an abstract base, two concrete subclasses in the file | one automated test, two run identities |
 | A nested class's test | run identity `Ns.Outer+Inner` |
 | A folder `Unit/` | level `unit` |

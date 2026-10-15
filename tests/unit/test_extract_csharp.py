@@ -224,21 +224,44 @@ def test_the_agents_tests_read_whole_at_their_level(agent: TraceConfig) -> None:
 
 
 @pytest.mark.verifies("REQ-QMT-21")
-@pytest.mark.parametrize("first", ["TC-SVC-01.1a", "TC-SVC-01.1/O03"])
-def test_a_malformed_first_word_is_not_an_id(agent: TraceConfig, first: str) -> None:
+@pytest.mark.parametrize(
+    ("display", "link"),
+    [
+        ("TC-SVC-01.1 refused", "TC-SVC-01.1"),
+        ("TC-SVC-01.1/O03 refused", "TC-SVC-01.1"),
+        ("TC-SVC-01.1-01/O03 refused", "TC-SVC-01.1-01"),
+        ("TC-SVC-01.1a refused", None),
+        ("TC-SVC-01.1.2x refused", None),
+        ("TC-SVC-01.1: refused", "TC-SVC-01.1"),
+        ("REQ-SVC-01—x", "REQ-SVC-01"),
+        # a test carries one link: a second ID is prose, as it is after a space
+        ("TC-SVC-01.1/TC-SVC-01.2 refused", "TC-SVC-01.1"),
+    ],
+)
+def test_the_leading_id_ends_where_an_id_in_prose_ends(
+    agent: TraceConfig, display: str, link: str | None
+) -> None:
     text = (
-        f'public class T\n{{\n    [Fact(DisplayName = "{first} refused")]\n'
+        f'public class T\n{{\n    [Fact(DisplayName = "{display}")]\n'
         "    public void M() { }\n}\n"
     )
     found = read_tests(agent, text, "tests/Agent.Tests/Unit/TTests.cs")
+    if link is not None:
+        assert [found_link.dst for found_link in found.links] == [link]
+        assert found.findings == ()
+        return
     assert found.links == ()
     assert [f.code for f in found.findings] == ["V14"]
     # its next move names the DisplayName, never a field line C# does not have
-    assert (
-        "start the test's DisplayName with one whole ID, then a space"
-        in found.findings[0].next_move
-    )
+    assert "start the test's DisplayName with one whole ID" in found.findings[0].next_move
+    assert "'/' or ':' may follow the ID directly" in found.findings[0].next_move
     assert "line" not in found.findings[0].next_move
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+def test_a_commented_out_test_whose_id_carries_a_suffix_is_a_stray(agent: TraceConfig) -> None:
+    (stray,) = read_tests(agent, '// [Fact(DisplayName = "TC-SVC-01.1/O03 x")]\n').strays
+    assert (stray.targets, stray.kind) == (("TC-SVC-01.1",), "comment")
 
 
 # ── 5. syntax the grammar does not read ────────────────────────────────────────────────────

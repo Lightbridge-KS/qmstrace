@@ -39,7 +39,10 @@
     --8<-- "fixtures/cases/agent/tests/Agent.Tests/Unit/KeyCheckTests.cs"
     ```
 
-    The level comes from the folder the file sits in — `Unit/` is the level `unit`.
+    The ID ends where an ID in prose ends: `TC-SVC-01.1/O03 …` and `TC-SVC-01.1: …` both
+    link `TC-SVC-01.1`. A letter, digit, hyphen or dotted number straight after it makes it no
+    ID — `TC-SVC-01.1a …` is reported as `V14`. The level comes from the folder the file sits
+    in — `Unit/` is the level `unit`.
 
 4. **Check.**
 
