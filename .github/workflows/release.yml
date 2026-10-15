@@ -1,0 +1,58 @@
+name: release
+
+# Pushing an annotated tag vX.Y.Z is the one human release act. This workflow runs the dry
+# gate on the tagged commit, then drafts a GitHub release with the CHANGELOG's section for
+# X.Y.Z and the wheel attached. A maintainer reviews the draft and publishes it.
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  gate:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  draft:
+    needs: gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to create the draft release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Tag matches the version in pyproject.toml
+        id: version
+        run: |
+          version=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Notes from the CHANGELOG
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v head="## [$VERSION]" '
+            index($0, head) == 1 { on = 1; next }
+            on && (/^## \[/ || /^\[[^]]+\]: /) { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::CHANGELOG.md has no section [$VERSION]"
+            exit 1
+          fi
+      - name: Wheel carries the package data
+        run: |
+          uv build --wheel --quiet
+          uv run --locked python tests/check_wheel.py
+      - name: Draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag \
+            --title "qmstrace $VERSION" --notes-file notes.md \
+            "dist/qmstrace-$VERSION-py3-none-any.whl"

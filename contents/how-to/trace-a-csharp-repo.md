@@ -20,8 +20,9 @@
     The type the tests are read into must carry exactly one link in the project's schema —
     `verifies` — because a `DisplayName` names an ID, not a link. A schema that gives it two is
     refused, and says so. `qmstrace init` on a repo with no configuration still writes the
-    Python starter ([#38](https://github.com/Lightbridge-KS/qmstrace/issues/38)); edit `[items]`
-    as above.
+    Python starter ([#38](https://github.com/Lightbridge-KS/qmstrace/issues/38)), and a
+    `pytest.ini` that registers the `verifies` marker: edit `[items]` as above, and delete the
+    `pytest.ini`.
 
 2. **Mark each component in its first type's leading doc comment.** A field line, with XML tags
    around it if you like; the same line in any other comment is not read, and is reported:
