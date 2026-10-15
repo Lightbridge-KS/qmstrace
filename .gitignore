@@ -24,3 +24,7 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# .NET build output — the C# fixture is a real project that dotnet and editors build
+bin/
+obj/
