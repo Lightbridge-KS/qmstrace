@@ -27,7 +27,7 @@ tests without a direct requirement target — no requirement verdict inferred:
         skipped: handler fixture unavailable
 
 unmatched report entries:
-  pass      ('tests.removed.test_old', 'test_old') · 1 XML entries · no scanned pytest test matches this identity
+  pass      ('tests.removed.test_old', 'test_old') · 1 XML entries · no scanned automated test matches this identity
   Fix: check report provenance and scan patterns; use default pytest JUnit names.
 
 result: 3 matched automated tests · 4 matched runs · 1 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

@@ -18,7 +18,7 @@ from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.model import Finding, Item, Link, Notice
 from qmstrace.core.results import Results
-from qmstrace.extract import junit
+from qmstrace.extract import reports
 from qmstrace.extract.base import FORMS
 from qmstrace.infra.files import write_new
 from qmstrace.infra.git import GitCli, IGit
@@ -32,6 +32,14 @@ from qmstrace.workspace._setup import copy_schema as _copy_schema
 from qmstrace.workspace._setup import initialize as _initialize
 from qmstrace.workspace._sources import _external, _register
 from qmstrace.workspace._sources import _siblings as _read_siblings
+
+_GENERATE = "pytest --junitxml=report.xml, or dotnet test --logger trx"
+_MATCHING: dict[results.ReportFormat, str] = {
+    "junit": "use a report for this repo and its scanned tests, with default pytest JUnit class "
+    "names (no --junit-prefix).",
+    "trx": "use a TRX file from this repo's test projects. A run matches by the class and method "
+    "dotnet test reports, so a test renamed or moved since the run does not match.",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -320,13 +328,13 @@ class Workspace:
         except OSError as error:
             raise CouldNotJudge(
                 f"Cannot read report {label} ({error.strerror}).",
-                "Fix: check the path, or generate it with pytest --junitxml=report.xml.",
+                f"Fix: check the path, or generate a report: {_GENERATE}.",
             ) from None
-        report = junit.read(payload)
+        report = reports.read(payload)
         if report.problem:
             raise CouldNotJudge(
                 f"{label}: {report.problem}.",
-                "Fix: supply a pytest JUnit report generated with --junitxml=report.xml.",
+                f"Fix: supply a pytest JUnit report or a TRX file: {_GENERATE}.",
             )
         assessment = self.assessment()
         identities = {item.id: item.runs_as for item in assessment.graph.items() if item.runs_as}
@@ -334,10 +342,10 @@ class Workspace:
         if not view.matched_cases:
             unmatched = "\n".join(f"  {run.run.identity!r}: {run.reason}" for run in view.unmatched)
             raise CouldNotJudge(
-                f"{label}: no report entries match the {view.scanned_cases} scanned pytest test "
-                f"cases.\n{unmatched}",
-                "Fix: use a report for this repo and its scanned tests, with default pytest "
-                "JUnit class names (no --junit-prefix). No requirement verdicts were produced.",
+                f"{label}: no report entries match the {view.scanned_cases} scanned automated "
+                f"tests.\n{unmatched}",
+                f"Fix: {_MATCHING[report.format or 'junit']} "
+                "No requirement verdicts were produced.",
             )
         return view
 

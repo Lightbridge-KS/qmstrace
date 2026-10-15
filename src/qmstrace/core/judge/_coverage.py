@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from qmstrace.core import findings
 from qmstrace.core.config import CoverageRule, TraceConfig
-from qmstrace.core.graph import TraceGraph
+from qmstrace.core.graph import Home, TraceGraph
 from qmstrace.core.model import Finding, Item, Stray
 
 Form = Callable[[str, str], str]
@@ -52,6 +52,10 @@ def coverage(
     """
     refused = list(violations)
     stray_list = list(strays)
+    held: dict[str, set[str]] = {}  # an item type's siblings that declare items of it
+    for seen in graph.nodes.values():
+        if seen.home is Home.SIBLING and seen.type is not None and seen.repo is not None:
+            held.setdefault(seen.type, set()).add(seen.repo)
     gaps: list[Finding] = []
     for rule in config.rules:
         for item in graph.items(rule.item_type):
@@ -75,7 +79,9 @@ def coverage(
             if not active:
                 node = graph.nodes.get(item.id)
                 repo = node.repo if node is not None else None
-                fix = _fix(config, rule, item, refused, stray_list, ways or {}, whole_project, repo)
+                fix = _fix(
+                    config, rule, item, refused, stray_list, ways or {}, whole_project, repo, held
+                )
                 gaps.append(findings.unmet_rule(rule.code, item, rule.text, fix))
     return sorted(gaps, key=lambda f: (f.file, f.line, f.code))
 
@@ -89,9 +95,10 @@ def _fix(
     ways: Mapping[str, tuple[Way, ...]],
     whole_project: bool = False,
     repo: str | None = None,
+    held: Mapping[str, set[str]] | None = None,
 ) -> str:
     """The next move for one gap — the most specific reason first, then every way the missing
-    link can be written."""
+    link can be written. `held` names, per item type, the siblings that declare items of it."""
     link = config.links[rule.marker]
     incoming = rule.direction == "incoming"
     for violation in refused:
@@ -144,6 +151,10 @@ def _fix(
     way = next((w for w in its_ways if repo in w.repos), its_ways[0] if its_ways else None)
     written = way.form(rule.marker, f"<{target} ID>") if way else f"'{rule.marker}: <{target} ID>'"
     if not any(t in ways for t in link.targets):
+        declaring = sorted({r for t in link.targets for r in (held or {}).get(t, ())})
+        if declaring and not whole_project:
+            fact = f"this {words} {rule.marker.lower()} that {target}"
+            return findings.fix_cite_sibling(target, written, fact, declaring)
         return findings.fix_no_target(target, written, whole_project=whole_project)
     return findings.fix_write(written, f"this {words} {rule.marker.lower()} that {target}")
 

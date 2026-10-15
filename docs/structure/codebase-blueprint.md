@@ -122,7 +122,9 @@ src/qmstrace/
       xunit.py           xunit — [Fact]/[Theory] methods, the DisplayName's ID, run identities
     python_module.py     compatibility imports of python.module extract and form only
     pytest_tests.py      compatibility imports of python.pytest_tests extract, form, report_identity
-    junit.py             bytes -> Report entries or parse diagnostic; safe defusedxml, no files
+    reports.py           bytes -> Report: one safe defusedxml parse; the root picks the reader
+    junit.py             pytest JUnit XML root -> Report entries; no summary count trusted
+    trx.py               TRX root -> Report entries by class and method; no path, name or output
     change_requests.py   request text preamble -> metadata or diagnostic; no IO, no approval
                          inferred from examples or prose
   infra/                 everything that touches the world
@@ -234,8 +236,8 @@ Rows may import columns. Enforced by `tests/meta/test_architecture.py`, which wa
 | **workspace** | ✔ | ✔ | ✔ | — | ✔ | — | — | ✔ |
 | **cli** | ✔ | — | — | ✔ | ✔ | ✔ | ✔ | ✔ |
 
-`extract` also imports `defusedxml`, in `junit.py` only, and `tree_sitter` with
-`tree_sitter_c_sharp`, in `csharp/_syntax.py` only (ADR-0004; a test pins it). Nothing imports
+`extract` also imports `defusedxml`, in `reports.py` only, and `tree_sitter` with
+`tree_sitter_c_sharp`, in `csharp/_syntax.py` only (ADR-0004); a test pins each. Nothing imports
 `click`.
 
 Within `core/judge`, coverage, baseline guards and suspects are independent policies; they
@@ -612,20 +614,27 @@ was edited is left unknown, never guessed. Reasoning: data architecture § D7.
 
 Satisfies: REQ-QMT-09, REQ-QMT-17
 
-### DSN-QMT-09 — Test results are matched to test cases by identity
+### DSN-QMT-09 — Test results are matched to automated tests by identity
 
-`extract/junit.py` reads JUnit XML bytes safely and trusts no summary count;
-`extract/python/pytest_tests.py` `report_identity` gives the identity a report entry must match;
-`core/results.py` matches entries to scanned automated tests and gives a requirement the worst
-verdict of every automated test that reaches it. `Workspace.results` reads the explicitly
-supplied report.
+`extract/reports.py` parses a report's bytes once, safely, and its root element picks the
+reader: `extract/junit.py` for pytest JUnit XML, `extract/trx.py` for TRX. Neither trusts a
+summary count. `extract/python/pytest_tests.py` `report_identity` gives the identity a pytest
+entry must match; `core/results.py` matches entries to scanned automated tests and gives a
+requirement the worst verdict of every automated test that reaches it. `Workspace.results`
+reads the explicitly supplied report.
 Reasoning: surface architecture § Results contract — M4.
 
 Each automated test carries the identities its runs report (`Item.runs_as`, set by its
 extractor), and a sibling node carries its own declared links (`Node.declares`); a
 verdict follows `verifies` links from the tests through any test cases (ADR-0003).
 
-Satisfies: REQ-QMT-10
+A TRX run is matched by the class and method its definition names, and its name is the
+result's `testName`, so a Theory's rows stay separate runs; entries that share a name but not a
+method are separate runs too. The TRX reader takes only those fields, the outcome and the first
+line of an error message — never a path, a machine or user name, output or a stack trace
+(ADR-0004).
+
+Satisfies: REQ-QMT-10, REQ-QMT-22
 
 ### DSN-QMT-10 — One source tree seam, one glob matcher
 

@@ -21,6 +21,7 @@ from qmstrace.core.graph import Node
 from qmstrace.core.model import Identity
 
 Verdict = Literal["pass", "skip", "no-result", "fail", "untested"]
+ReportFormat = Literal["junit", "trx"]
 _RANK = {"untested": 0, "pass": 1, "skip": 2, "no-result": 3, "fail": 4}
 _VERIFIES = "verifies"
 
@@ -40,10 +41,12 @@ class ReportEntry:
 
 @dataclass(frozen=True, slots=True)
 class Report:
-    """The reader's entries, or an explanation of why the payload could not be read."""
+    """The reader's entries, or an explanation of why the payload could not be read; `format`
+    is the report format the reader recognised, when it recognised one."""
 
     entries: tuple[ReportEntry, ...] = ()
     problem: str | None = None
+    format: ReportFormat | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,6 +120,7 @@ class Results:
     other_tests: tuple[TestResult, ...]
     unmatched: tuple[UnmatchedRun, ...]
     other_cases: tuple[CaseResult, ...] = ()  # test cases that reach no requirement
+    report_format: ReportFormat | None = None
 
     @property
     def through_cases(self) -> bool:
@@ -141,26 +145,27 @@ def summarize(
     for test_id, keys in sorted(identities.items()):
         for key in keys:
             index[key].append(test_id)
-    grouped: dict[Identity, list[ReportEntry]] = defaultdict(list)
+    # A run is one full identity of the test it matches by: two methods that share a display
+    # name are two runs, never one.
+    grouped: dict[tuple[str, str, str], list[ReportEntry]] = defaultdict(list)
     for entry in report.entries:
-        grouped[(entry.classname, entry.name)].append(entry)
+        grouped[(entry.classname, entry.name, entry.test or entry.name)].append(entry)
 
     matched: dict[str, list[RunResult]] = defaultdict(list)
     unmatched: list[UnmatchedRun] = []
-    for identity, entries in sorted(grouped.items()):
+    for (classname, name, test), entries in sorted(grouped.items()):
         run = RunResult(
-            identity,
+            (classname, name),
             _worst(tuple(e.verdict for e in entries)),
             len(entries),
             tuple(sorted({kind for e in entries for kind in e.kinds})),
             tuple(sorted({detail for e in entries for detail in e.details})),
         )
-        classname, name = identity
-        matches = index.get((classname, entries[0].test or name), [])
+        matches = index.get((classname, test), [])
         if not classname or not name:
             reason = "missing classname or name"
         elif not matches:
-            reason = "no scanned pytest test matches this identity"
+            reason = "no scanned automated test matches this identity"
         elif len(matches) > 1:
             reason = f"ambiguous identity: {', '.join(matches)}"
         else:
@@ -284,6 +289,7 @@ def summarize(
         other_tests=tuple(t for t in tests.values() if t.id not in shown_tests),
         unmatched=tuple(unmatched),
         other_cases=other_cases,
+        report_format=report.format,
     )
 
 

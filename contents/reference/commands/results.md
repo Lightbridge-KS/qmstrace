@@ -2,8 +2,8 @@
 
 !!! abstract "TL;DR"
 
-    `qmstrace results REPORT` matches one pytest JUnit report to scanned automated tests, and
-    follows their `verifies` links to requirements — directly, or through the test cases they
+    `qmstrace results REPORT` matches one pytest JUnit report, or one TRX file, to scanned
+    automated tests, and follows their `verifies` links to requirements — directly, or through the test cases they
     run. It shows requirement verdicts, the test cases on the way, missing results, shared tests
     and unmatched entries. Exit `0` means a results view was produced, even if tests failed.
     The report's commit is not verified.
@@ -21,17 +21,30 @@ the repository.
 
 ## Matching and counts
 
-The reader accepts pytest's default JUnit output in either `xunit1` or `xunit2` format,
-including nested suites and XML namespaces. The report must have a `testsuite` or `testsuites`
-root. DTDs, entities and external references are refused.
+The report's root element decides how it is read: `testsuite` or `testsuites` is pytest JUnit
+XML, and TeamTest's `TestRun` is a TRX file. Any other root is refused, as are DTDs, entities
+and external references.
 
-Matching is exact: the report's `classname` and test name without parameters must identify
-one scanned pytest test. Class methods retain their class names. Parameter IDs may contain
-brackets. Custom class-name prefixes, identity collisions and entries with missing identity
-attributes are reported; qmstrace does not guess a match.
+**JUnit.** The reader accepts pytest's default output in either `xunit1` or `xunit2` format,
+including nested suites and XML namespaces. Matching is exact: the report's `classname` and
+test name without parameters must identify one scanned pytest test. Class methods retain their
+class names. Parameter IDs may contain brackets.
 
-An **automated test** is a scanned test function. A **reported run** is a distinct full
-`(classname, name)` identity, including parameters. Duplicate XML entries for the same full
+**TRX**, as `dotnet test --logger trx` writes it. Matching is exact on the class and method
+the result's test definition names: the class namespace-qualified, a nested class joined to
+its outer class with `+`. The `DisplayName` plays no part in matching, so rewording a test does
+not unmatch it; renaming or moving its method does. A result's name is its `testName`, so each
+row of a `[Theory]` is a run of one automated test. Only the class, the method, the name, the
+outcome and the first line of an error message are read: a TRX file's paths, machine and user
+names, output, stack traces and attachments are never shown. One file is one report; with
+several test projects, `dotnet test` writes a TRX for each, and a test in another project's
+file shows as `no-result` ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
+
+Custom class-name prefixes, identity collisions and entries with missing identity attributes
+are reported; qmstrace does not guess a match.
+
+An **automated test** is a scanned test function or test method. A **reported run** is a
+distinct full `(classname, name)` identity, including parameters. Duplicate XML entries for the same full
 identity are combined using the worst verdict and counted explicitly. This includes pytest's
 separate entries for a body failure and teardown error. Duplicate entries do not establish
 retry history. Global counts count each automated test once, even when requirement rows
@@ -49,7 +62,9 @@ A partial set of parameter variants does not prove every possible variant ran.
 | Test case, or requirement, that no automated test reaches | `untested` |
 
 XML `error` and `failure` both mean `fail`. Expected failures and unexpected passes follow
-pytest's XML representation: qmstrace adds no separate xfail policy.
+pytest's XML representation: qmstrace adds no separate xfail policy. In a TRX file, `Passed`
+means `pass` and `NotExecuted` means `skip`; any other outcome — `Failed`, `Timeout`,
+`Aborted`, `Inconclusive` — or none means `fail`, and the outcome is shown beside the run.
 
 A verdict follows `verifies` links: from an automated test to what it verifies, and on
 through a test case to what the test case verifies. A requirement's row names the test cases
@@ -84,6 +99,16 @@ test cases with their own links — read for verdicts only, never counted as thi
 --8<-- "cli/golden/results-cases.txt"
 ```
 
+## From a TRX file
+
+The fixture project's C# agent runs the same test cases from xUnit. In this TRX file one
+`[Fact]` was skipped and one row of a `[Theory]` failed; each run is shown by its `testName`,
+with its outcome and the first line of its message:
+
+``` text
+--8<-- "cli/golden/results-trx-mixed.txt"
+```
+
 ## Repository boundary
 
 Local tests can verify a sibling's requirement. The output labels its owner and the unpinned
@@ -112,5 +137,7 @@ combined across reports.
   unsafe, empty, unsupported, or matched no scanned tests. The diagnostic suggests a next step.
 - `3`: an internal fault.
 
-Use pytest's exit code to gate test success and [check](check.md) to gate traceability.
-See [Generate and interpret a pytest report](../../how-to/read-test-results.md) for the workflow.
+Use the test runner's exit code — pytest's, or `dotnet test`'s — to gate test success and
+[check](check.md) to gate traceability. See
+[Generate and interpret a pytest report](../../how-to/read-test-results.md) and
+[Trace a C# repo](../../how-to/trace-a-csharp-repo.md) for the workflows.

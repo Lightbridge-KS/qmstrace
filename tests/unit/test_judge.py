@@ -8,7 +8,9 @@ The load-bearing claims, each pinned by a test:
 2. A link to an item not verified here counts; an `Assumes` link counts toward nothing; only this
    repo's items are judged.
 3. A gap's next move is specific: the violation that refused the link first, then a stray marker,
-   then — when no item type here can carry the marker — that, else the marker's own form.
+   then — when no item type here can carry the marker — that, else the marker's own form. A link
+   no item here can be the target of names the siblings that declare one, if any — still only
+   if it is true; with none, it says to write the design here.
 4. Gaps come back sorted by file, line and code.
 """
 
@@ -202,7 +204,37 @@ def test_a_rule_no_type_here_can_meet_says_so(project: Path) -> None:
     ways = {t.name: (Way(FORMS[t.extractor]),) for t in config.item_types.values() if t.extractor}
     client_gaps = coverage(config, graph, found.violations, (), ways)
     assert "this repo declares no design element" in fix_of(client_gaps, "G01", "REQ-CLT-01")
-    assert "for it to point at" in fix_of(client_gaps, "G06", "src/client/api.py")
+    # The service, beside it, declares design elements: the next move names it, hedged.
+    assert fix_of(client_gaps, "G06", "src/client/api.py") == (
+        "Fix: this repo declares no design element for it to point at, but service does: write "
+        "`Implements: <design element ID>` in its docstring, citing an item of service — only if "
+        "it is true: the link states that this component implements that design element. If "
+        "none is, declare the right one where the project keeps them, then write the link."
+    )
+
+
+@pytest.mark.verifies("DSN-QMT-06")
+def test_a_link_no_repo_read_can_point_at_keeps_the_write_it_here_move(project: Path) -> None:
+    """With no sibling declaring a target, the move is today's, byte for byte."""
+    from qmstrace.workspace import Workspace
+
+    found = Workspace.open(project / "client").assessment()
+    config = found.config
+    rule = next(r for r in config.rules if r.code == "G06")
+    module = next(i for i in found.graph.items("component"))
+    ways = {t.name: (Way(FORMS[t.extractor]),) for t in config.item_types.values() if t.extractor}
+    alone = _fix(config, rule, module, [], [], ways)
+    assert alone == (
+        "this repo declares no design element for it to point at — write the design here and "
+        "add `Implements: <design element ID>` in its docstring, or cite another repo's only if "
+        "this item really serves it."
+    )
+    # Siblings that hold other types only change nothing; two that hold the type are both named.
+    assert _fix(config, rule, module, [], [], ways, held={"requirement": {"service"}}) == alone
+    both = _fix(config, rule, module, [], [], ways, held={"design_element": {"service", "ledger"}})
+    assert (
+        "but ledger and service do: write" in both and "citing an item of ledger or service" in both
+    )
 
 
 # ── 4. order ───────────────────────────────────────────────────────────────────────────────

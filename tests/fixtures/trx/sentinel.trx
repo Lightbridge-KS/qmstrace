@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Every field qmstrace must never read carries SENTINEL: paths, machine and user names,
+     output, stack traces, attachments, and every line of an error message after the first.
+     The runs are the cases agent's, so a results run over it renders all of them. -->
+<TestRun id="00000000-0000-0000-0000-000000000001" name="SENTINEL@SENTINEL-host 2026-10-14 22:12:46" runUser="SENTINEL\user" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-14T22:12:46.0000000+07:00" start="2026-10-14T22:12:46.0000000+07:00" finish="2026-10-14T22:12:47.0000000+07:00" />
+  <TestSettings name="SENTINEL-settings" id="00000000-0000-0000-0000-000000000002">
+    <Deployment runDeploymentRoot="/SENTINEL/deployment" userDeploymentRoot="/SENTINEL/user" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="00000000-0000-0000-0000-0000000000a1" testId="00000000-0000-0000-0000-0000000000b1" testName="TC-SVC-01.2 the key check decides before any handler(key: &quot;a-wrong-key&quot;, admitted: True)" computerName="SENTINEL-host" outcome="Failed" testListId="00000000-0000-0000-0000-000000000003" relativeResultsDirectory="/SENTINEL/results">
+      <Output>
+        <StdOut>SENTINEL standard output /SENTINEL/out</StdOut>
+        <StdErr>SENTINEL standard error</StdErr>
+        <DebugTrace>SENTINEL debug trace</DebugTrace>
+        <ErrorInfo>
+          <Message>Expected KeyCheck.Admits(key, "the-key") to be True, but found False.
+SENTINEL on the second line of the message</Message>
+          <StackTrace>   at Agent.Tests.Unit.KeyCheckTests.Admits_AnyKey_DecidesAlone() in /SENTINEL/KeyCheckTests.cs:line 19</StackTrace>
+        </ErrorInfo>
+      </Output>
+      <ResultFiles>
+        <ResultFile path="/SENTINEL/attachment.png" />
+      </ResultFiles>
+    </UnitTestResult>
+    <UnitTestResult executionId="00000000-0000-0000-0000-0000000000a2" testId="00000000-0000-0000-0000-0000000000b2" testName="TC-SVC-01.2 the key check decides before any handler(key: &quot;the-key&quot;, admitted: True)" computerName="SENTINEL-host" outcome="Passed" testListId="00000000-0000-0000-0000-000000000003" relativeResultsDirectory="/SENTINEL/results">
+      <Output>
+        <StdOut>SENTINEL output of a passing run</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="00000000-0000-0000-0000-0000000000a3" testId="00000000-0000-0000-0000-0000000000b3" testName="TC-SVC-01.1 a call without a key is refused" computerName="SENTINEL-host" outcome="NotExecuted" testListId="00000000-0000-0000-0000-000000000003" relativeResultsDirectory="/SENTINEL/results">
+      <Output>
+        <ErrorInfo>
+          <Message>the key store is offline
+SENTINEL on the second line of a skip reason</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="TC-SVC-01.2 the key check decides before any handler(key: &quot;a-wrong-key&quot;, admitted: True)" storage="/SENTINEL/agent.tests.dll" id="00000000-0000-0000-0000-0000000000b1">
+      <Execution id="00000000-0000-0000-0000-0000000000a1" />
+      <TestMethod codeBase="/SENTINEL/Agent.Tests.dll" adapterTypeName="executor://SENTINEL/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_AnyKey_DecidesAlone" />
+    </UnitTest>
+    <UnitTest name="TC-SVC-01.2 the key check decides before any handler(key: &quot;the-key&quot;, admitted: True)" storage="/SENTINEL/agent.tests.dll" id="00000000-0000-0000-0000-0000000000b2">
+      <Execution id="00000000-0000-0000-0000-0000000000a2" />
+      <TestMethod codeBase="/SENTINEL/Agent.Tests.dll" adapterTypeName="executor://SENTINEL/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_AnyKey_DecidesAlone" />
+    </UnitTest>
+    <UnitTest name="TC-SVC-01.1 a call without a key is refused" storage="/SENTINEL/agent.tests.dll" id="00000000-0000-0000-0000-0000000000b3">
+      <Execution id="00000000-0000-0000-0000-0000000000a3" />
+      <TestMethod codeBase="/SENTINEL/Agent.Tests.dll" adapterTypeName="executor://SENTINEL/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_NoKey_IsFalse" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="00000000-0000-0000-0000-0000000000b1" executionId="00000000-0000-0000-0000-0000000000a1" testListId="00000000-0000-0000-0000-000000000003" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="SENTINEL list" id="00000000-0000-0000-0000-000000000003" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="999" executed="999" passed="0" failed="999" />
+    <RunInfos>
+      <RunInfo computerName="SENTINEL-host" outcome="Warning" timestamp="2026-10-14T22:12:46.0000000+07:00">
+        <Text>SENTINEL run information /SENTINEL/path</Text>
+      </RunInfo>
+    </RunInfos>
+    <Output>
+      <StdOut>SENTINEL summary output</StdOut>
+    </Output>
+    <CollectorDataEntries>
+      <Collector agentName="SENTINEL-host" uri="datacollector://SENTINEL" collectorDisplayName="SENTINEL">
+        <UriAttachments>
+          <UriAttachment>
+            <A href="SENTINEL-host/coverage.xml">/SENTINEL/coverage.xml</A>
+          </UriAttachment>
+        </UriAttachments>
+      </Collector>
+    </CollectorDataEntries>
+  </ResultSummary>
+</TestRun>

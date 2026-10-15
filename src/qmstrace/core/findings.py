@@ -483,6 +483,18 @@ def fix_elsewhere(kinds: str, subject: str) -> str:
     )
 
 
+def fix_cite_sibling(kinds: str, form: str, fact: str, repos: list[str]) -> str:
+    """A link whose targets this repo declares none of, while a sibling it reads declares some —
+    a ledger that holds the documents (ADR-0001), or another product repo."""
+    who, which = " and ".join(repos), " or ".join(repos)
+    return (
+        f"this repo declares no {kinds} for it to point at, but {who} "
+        f"{'does' if len(repos) == 1 else 'do'}: write {form}, citing an item of {which} — only if "
+        f"it is true: the link states that {fact}. If none is, declare the right one where the "
+        "project keeps them, then write the link."
+    )
+
+
 def fix_no_target(kinds: str, form: str, *, whole_project: bool = False) -> str:
     if whole_project:
         return (

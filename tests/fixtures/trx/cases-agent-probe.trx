@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2cecc59e-11d3-4283-86d0-a10c71275d31" name="@build-host 2026-10-14 21:56:56" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-14T21:56:56.4419390+07:00" queuing="2026-10-14T21:56:56.4419390+07:00" start="2026-10-14T21:56:56.1479810+07:00" finish="2026-10-14T21:56:56.4890050+07:00" />
+  <TestSettings name="default" id="f5ab8fe0-2f86-433b-b8da-9d7fdc0d7891">
+    <Deployment runDeploymentRoot="_build-host_2026-10-14_21_56_56" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="4f00f9ae-f8f5-441e-8950-04e18e3ad7e1" testId="43b0ce83-6add-c736-d650-64a7f9f53577" testName="TC-BAG-90.17 declared on an abstract base" computerName="build-host" duration="00:00:00.0064212" startTime="2026-10-14T21:56:56.4068260+07:00" endTime="2026-10-14T21:56:56.4171030+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f00f9ae-f8f5-441e-8950-04e18e3ad7e1" />
+    <UnitTestResult executionId="b8dd4083-3ad3-4e8b-91bd-2c33c937e3fe" testId="9ca37d23-c94b-1e53-b1b2-f876a5d443f7" testName="TC-BAG-90.4 from a constant interpolated string" computerName="build-host" duration="00:00:00.0064052" startTime="2026-10-14T21:56:56.4068110+07:00" endTime="2026-10-14T21:56:56.4155760+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b8dd4083-3ad3-4e8b-91bd-2c33c937e3fe" />
+    <UnitTestResult executionId="8aafd945-6a10-44d2-82f0-b64483b6f28a" testId="bd61919e-b803-fe48-0d4e-0e17673350bf" testName="TC-BAG-90.11 member data(value: 1, label: &quot;one&quot;)" computerName="build-host" duration="00:00:00.0002625" startTime="2026-10-14T21:56:56.4202600+07:00" endTime="2026-10-14T21:56:56.4202870+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8aafd945-6a10-44d2-82f0-b64483b6f28a" />
+    <UnitTestResult executionId="e402b8ce-916f-4cac-bc68-8d9ae2ed233f" testId="2dea2338-4e1e-dfa7-e7a2-e8f1a17e4f59" testName="TC-BAG-90.8 async" computerName="build-host" duration="00:00:00.0014099" startTime="2026-10-14T21:56:56.4506970+07:00" endTime="2026-10-14T21:56:56.4515190+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e402b8ce-916f-4cac-bc68-8d9ae2ed233f" />
+    <UnitTestResult executionId="ec379e93-564f-409a-aac5-0388804cdab3" testId="f421cf91-3d27-0d6d-51ae-74eabc9d4b4f" testName="TC-BAG-90.12 one row fails(value: 1)" computerName="build-host" duration="00:00:00.0003122" startTime="2026-10-14T21:56:56.4204820+07:00" endTime="2026-10-14T21:56:56.4207820+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec379e93-564f-409a-aac5-0388804cdab3" />
+    <UnitTestResult executionId="8085dbdc-7ff8-4d30-9916-aa2ca2af5d61" testId="6fd08cab-3e99-8442-ed0f-2c4990a928d3" testName="TC-BAG-90.4 from a const and a concatenation" computerName="build-host" duration="00:00:00.0000313" startTime="2026-10-14T21:56:56.4204070+07:00" endTime="2026-10-14T21:56:56.4204290+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8085dbdc-7ff8-4d30-9916-aa2ca2af5d61" />
+    <UnitTestResult executionId="67ea4d6d-8dac-4ce7-97a6-454daf307023" testId="d2eb6a48-01ef-1049-11d3-619e66285f16" testName="TC-BAG-90.6 from a verbatim &quot;quoted&quot; string" computerName="build-host" duration="00:00:00.0000256" startTime="2026-10-14T21:56:56.4523590+07:00" endTime="2026-10-14T21:56:56.4523780+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="67ea4d6d-8dac-4ce7-97a6-454daf307023" />
+    <UnitTestResult executionId="974405e6-0a45-497e-bba9-dad8d88d52d3" testId="3800a117-2781-9c63-835a-e8c5e95c0ca6" testName="TC-BAG-90.17 declared on an abstract base" computerName="build-host" duration="00:00:00.0064057" startTime="2026-10-14T21:56:56.4061680+07:00" endTime="2026-10-14T21:56:56.4171380+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="974405e6-0a45-497e-bba9-dad8d88d52d3" />
+    <UnitTestResult executionId="b35fd2f1-399e-4e46-ba55-495d6136788a" testId="cd4be589-2931-af2f-10bf-6c8850b31657" testName="TC-BAG-90.9 with a trait" computerName="build-host" duration="00:00:00.0000316" startTime="2026-10-14T21:56:56.4522820+07:00" endTime="2026-10-14T21:56:56.4523070+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b35fd2f1-399e-4e46-ba55-495d6136788a" />
+    <UnitTestResult executionId="e6d827e1-2c8a-4558-8613-15a3e2b5a15e" testId="97f42f72-51f0-308f-699e-130d1b916b8e" testName="TC-BAG-90.12 one row fails(value: 2)" computerName="build-host" duration="00:00:00.0309729" startTime="2026-10-14T21:56:56.4253980+07:00" endTime="2026-10-14T21:56:56.4484190+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6d827e1-2c8a-4558-8613-15a3e2b5a15e">
+      <Output>
+        <ErrorInfo>
+          <Message>Expected value to be 1, but found 2.</Message>
+          <StackTrace>   at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Numeric.NumericAssertions`2.Be(T expected, String because, Object[] becauseArgs)
+   at Agent.Probe.Shapes.OneRowFails(Int32 value) in /build/agent/tests/Agent.Probe/Shapes.cs:line 54
+   at InvokeStub_Shapes.OneRowFails(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a450cc08-9ee9-4756-b3e8-9d1703a6a0b0" testId="c7738b09-621e-709c-1e38-ead9a1e8d528" testName="TC-BAG-90.18 block-scoped namespace" computerName="build-host" duration="00:00:00.0064505" startTime="2026-10-14T21:56:56.4067950+07:00" endTime="2026-10-14T21:56:56.4171520+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a450cc08-9ee9-4756-b3e8-9d1703a6a0b0" />
+    <UnitTestResult executionId="6613b20a-f3ae-4250-b294-41e0f3b07050" testId="dc5b0c3a-24d1-8fd6-e6c2-0ae3f55bd8ac" testName="TC-BAG-90.13 custom fact attribute" computerName="build-host" duration="00:00:00.0000239" startTime="2026-10-14T21:56:56.4524260+07:00" endTime="2026-10-14T21:56:56.4524460+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6613b20a-f3ae-4250-b294-41e0f3b07050" />
+    <UnitTestResult executionId="b17c1ce2-085b-4fc7-bb97-5fba970c4431" testId="110060f8-e8aa-984e-d190-3a6fad059be0" testName="Agent.Probe.Shapes.NoDisplayName_Runs" computerName="build-host" duration="00:00:00.0000254" startTime="2026-10-14T21:56:56.4506230+07:00" endTime="2026-10-14T21:56:56.4506450+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b17c1ce2-085b-4fc7-bb97-5fba970c4431" />
+    <UnitTestResult executionId="fba886b6-627f-4f7b-9178-ab6873682cda" testId="8fa933fb-36e5-dfe1-414d-c6cf202d69ac" testName="TC-BAG-90.5 from a raw string literal" computerName="build-host" duration="00:00:00.0000229" startTime="2026-10-14T21:56:56.4531150+07:00" endTime="2026-10-14T21:56:56.4531410+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fba886b6-627f-4f7b-9178-ab6873682cda" />
+    <UnitTestResult executionId="6bf98797-8b57-44aa-bdab-f0ccfc57e6fe" testId="2a8c0d73-fb6b-2cd2-9ebf-6f162e2d5cbd" testName="TC-BAG-90.7 skipped" computerName="build-host" duration="00:00:00.0010000" startTime="2026-10-14T21:56:56.4524940+07:00" endTime="2026-10-14T21:56:56.4526170+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6bf98797-8b57-44aa-bdab-f0ccfc57e6fe">
+      <Output>
+        <ErrorInfo>
+          <Message>probe: how a skip is reported</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="992b9166-51c6-48f6-8db9-8f43991f34f9" testId="5ebbd38f-6f03-0901-4149-cdc20e45b065" testName="TC-BAG-90.10 fully qualified attribute" computerName="build-host" duration="00:00:00.0000383" startTime="2026-10-14T21:56:56.4505300+07:00" endTime="2026-10-14T21:56:56.4505570+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="992b9166-51c6-48f6-8db9-8f43991f34f9" />
+    <UnitTestResult executionId="9031948e-7e6d-40c5-b451-5f91b5ab8e6f" testId="aa50e105-6642-9541-767d-133ee705fa9e" testName="TC-BAG-90.16 nested class" computerName="build-host" duration="00:00:00.0063749" startTime="2026-10-14T21:56:56.4068400+07:00" endTime="2026-10-14T21:56:56.4171610+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9031948e-7e6d-40c5-b451-5f91b5ab8e6f" />
+    <UnitTestResult executionId="9fd87855-aaaa-4ce6-b66b-5462d8cb3661" testId="6160d566-d6c0-f916-083b-248a64661586" testName="TC-BAG-90.11 member data(value: 2, label: &quot;two, with a comma&quot;)" computerName="build-host" duration="00:00:00.0000815" startTime="2026-10-14T21:56:56.4203290+07:00" endTime="2026-10-14T21:56:56.4203480+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9fd87855-aaaa-4ce6-b66b-5462d8cb3661" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="TC-BAG-90.13 custom fact attribute" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="dc5b0c3a-24d1-8fd6-e6c2-0ae3f55bd8ac">
+      <Execution id="6613b20a-f3ae-4250-b294-41e0f3b07050" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="CustomAttribute_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.17 declared on an abstract base" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="3800a117-2781-9c63-835a-e8c5e95c0ca6">
+      <Execution id="974405e6-0a45-497e-bba9-dad8d88d52d3" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.FirstDerived" name="Inherited_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.11 member data(value: 2, label: &quot;two, with a comma&quot;)" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="6160d566-d6c0-f916-083b-248a64661586">
+      <Execution id="9fd87855-aaaa-4ce6-b66b-5462d8cb3661" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="MemberData_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.5 from a raw string literal" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="8fa933fb-36e5-dfe1-414d-c6cf202d69ac">
+      <Execution id="fba886b6-627f-4f7b-9178-ab6873682cda" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="RawString_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.10 fully qualified attribute" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="5ebbd38f-6f03-0901-4149-cdc20e45b065">
+      <Execution id="992b9166-51c6-48f6-8db9-8f43991f34f9" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="FullyQualified_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.11 member data(value: 1, label: &quot;one&quot;)" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="bd61919e-b803-fe48-0d4e-0e17673350bf">
+      <Execution id="8aafd945-6a10-44d2-82f0-b64483b6f28a" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="MemberData_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.4 from a constant interpolated string" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="9ca37d23-c94b-1e53-b1b2-f876a5d443f7">
+      <Execution id="b8dd4083-3ad3-4e8b-91bd-2c33c937e3fe" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="ConstInterpolation_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.16 nested class" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="aa50e105-6642-9541-767d-133ee705fa9e">
+      <Execution id="9031948e-7e6d-40c5-b451-5f91b5ab8e6f" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes+Nested" name="Nested_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.18 block-scoped namespace" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="c7738b09-621e-709c-1e38-ead9a1e8d528">
+      <Execution id="a450cc08-9ee9-4756-b3e8-9d1703a6a0b0" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Blocks.InABlockNamespace" name="Block_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.8 async" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="2dea2338-4e1e-dfa7-e7a2-e8f1a17e4f59">
+      <Execution id="e402b8ce-916f-4cac-bc68-8d9ae2ed233f" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="Async_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.9 with a trait" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="cd4be589-2931-af2f-10bf-6c8850b31657">
+      <Execution id="b35fd2f1-399e-4e46-ba55-495d6136788a" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="WithTrait_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.4 from a const and a concatenation" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="6fd08cab-3e99-8442-ed0f-2c4990a928d3">
+      <Execution id="8085dbdc-7ff8-4d30-9916-aa2ca2af5d61" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="ConstConcatenation_Runs" />
+    </UnitTest>
+    <UnitTest name="Agent.Probe.Shapes.NoDisplayName_Runs" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="110060f8-e8aa-984e-d190-3a6fad059be0">
+      <Execution id="b17c1ce2-085b-4fc7-bb97-5fba970c4431" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="NoDisplayName_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.12 one row fails(value: 1)" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="f421cf91-3d27-0d6d-51ae-74eabc9d4b4f">
+      <Execution id="ec379e93-564f-409a-aac5-0388804cdab3" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="OneRowFails" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.7 skipped" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="2a8c0d73-fb6b-2cd2-9ebf-6f162e2d5cbd">
+      <Execution id="6bf98797-8b57-44aa-bdab-f0ccfc57e6fe" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="Skipped_IsNotRun" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.12 one row fails(value: 2)" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="97f42f72-51f0-308f-699e-130d1b916b8e">
+      <Execution id="e6d827e1-2c8a-4558-8613-15a3e2b5a15e" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="OneRowFails" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.6 from a verbatim &quot;quoted&quot; string" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="d2eb6a48-01ef-1049-11d3-619e66285f16">
+      <Execution id="67ea4d6d-8dac-4ce7-97a6-454daf307023" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.Shapes" name="VerbatimString_Runs" />
+    </UnitTest>
+    <UnitTest name="TC-BAG-90.17 declared on an abstract base" storage="/build/agent/tests/agent.probe/bin/debug/net10.0/agent.probe.dll" id="43b0ce83-6add-c736-d650-64a7f9f53577">
+      <Execution id="4f00f9ae-f8f5-441e-8950-04e18e3ad7e1" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Probe/bin/Debug/net10.0/Agent.Probe.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Probe.SecondDerived" name="Inherited_Runs" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="43b0ce83-6add-c736-d650-64a7f9f53577" executionId="4f00f9ae-f8f5-441e-8950-04e18e3ad7e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9ca37d23-c94b-1e53-b1b2-f876a5d443f7" executionId="b8dd4083-3ad3-4e8b-91bd-2c33c937e3fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bd61919e-b803-fe48-0d4e-0e17673350bf" executionId="8aafd945-6a10-44d2-82f0-b64483b6f28a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2dea2338-4e1e-dfa7-e7a2-e8f1a17e4f59" executionId="e402b8ce-916f-4cac-bc68-8d9ae2ed233f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f421cf91-3d27-0d6d-51ae-74eabc9d4b4f" executionId="ec379e93-564f-409a-aac5-0388804cdab3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6fd08cab-3e99-8442-ed0f-2c4990a928d3" executionId="8085dbdc-7ff8-4d30-9916-aa2ca2af5d61" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d2eb6a48-01ef-1049-11d3-619e66285f16" executionId="67ea4d6d-8dac-4ce7-97a6-454daf307023" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3800a117-2781-9c63-835a-e8c5e95c0ca6" executionId="974405e6-0a45-497e-bba9-dad8d88d52d3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cd4be589-2931-af2f-10bf-6c8850b31657" executionId="b35fd2f1-399e-4e46-ba55-495d6136788a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="97f42f72-51f0-308f-699e-130d1b916b8e" executionId="e6d827e1-2c8a-4558-8613-15a3e2b5a15e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c7738b09-621e-709c-1e38-ead9a1e8d528" executionId="a450cc08-9ee9-4756-b3e8-9d1703a6a0b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dc5b0c3a-24d1-8fd6-e6c2-0ae3f55bd8ac" executionId="6613b20a-f3ae-4250-b294-41e0f3b07050" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="110060f8-e8aa-984e-d190-3a6fad059be0" executionId="b17c1ce2-085b-4fc7-bb97-5fba970c4431" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8fa933fb-36e5-dfe1-414d-c6cf202d69ac" executionId="fba886b6-627f-4f7b-9178-ab6873682cda" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2a8c0d73-fb6b-2cd2-9ebf-6f162e2d5cbd" executionId="6bf98797-8b57-44aa-bdab-f0ccfc57e6fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5ebbd38f-6f03-0901-4149-cdc20e45b065" executionId="992b9166-51c6-48f6-8db9-8f43991f34f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="aa50e105-6642-9541-767d-133ee705fa9e" executionId="9031948e-7e6d-40c5-b451-5f91b5ab8e6f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6160d566-d6c0-f916-083b-248a64661586" executionId="9fd87855-aaaa-4ce6-b66b-5462d8cb3661" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="18" executed="17" passed="16" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.5)
+[xUnit.net 00:00:00.04]   Discovering: Agent.Probe
+[xUnit.net 00:00:00.06]   Discovered:  Agent.Probe
+[xUnit.net 00:00:00.08]   Starting:    Agent.Probe
+[xUnit.net 00:00:00.13]       Expected value to be 1, but found 2.
+[xUnit.net 00:00:00.13]       Stack Trace:
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+[xUnit.net 00:00:00.13]            at FluentAssertions.Numeric.NumericAssertions`2.Be(T expected, String because, Object[] becauseArgs)
+[xUnit.net 00:00:00.13]         /build/agent/tests/Agent.Probe/Shapes.cs(54,0): at Agent.Probe.Shapes.OneRowFails(Int32 value)
+[xUnit.net 00:00:00.13]            at InvokeStub_Shapes.OneRowFails(Object, Span`1)
+[xUnit.net 00:00:00.13]            at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:00.13]       probe: how a skip is reported
+[xUnit.net 00:00:00.13]   Finished:    Agent.Probe
+Test 'TC-BAG-90.7 skipped' was skipped in the test run.
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="build-host" outcome="Error" timestamp="2026-10-14T21:56:56.4497350+07:00">
+        <Text>[xUnit.net 00:00:00.13]     TC-BAG-90.12 one row fails(value: 2) [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="build-host" outcome="Warning" timestamp="2026-10-14T21:56:56.4529590+07:00">
+        <Text>[xUnit.net 00:00:00.13]     TC-BAG-90.7 skipped [SKIP]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

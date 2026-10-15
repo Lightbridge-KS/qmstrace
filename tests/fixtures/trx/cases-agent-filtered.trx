@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="351868a6-b462-42fb-8b7d-41ccd6108dc1" name="@build-host 2026-10-14 22:12:53" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-14T22:12:53.9510970+07:00" queuing="2026-10-14T22:12:53.9510970+07:00" start="2026-10-14T22:12:53.6617530+07:00" finish="2026-10-14T22:12:53.9533040+07:00" />
+  <TestSettings name="default" id="ee37bb20-7430-45d2-b6c7-cdb4e5596139">
+    <Deployment runDeploymentRoot="_build-host_2026-10-14_22_12_53" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="e2e75f81-3d34-424b-92e4-f19ddb4c2318" testId="7c899403-da0e-16a6-e304-ccfdca266eb0" testName="TC-SVC-01.2 the key check decides before any handler(key: &quot;a-wrong-key&quot;, admitted: False)" computerName="build-host" duration="00:00:00.0000651" startTime="2026-10-14T22:12:53.9139820+07:00" endTime="2026-10-14T22:12:53.9140130+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e2e75f81-3d34-424b-92e4-f19ddb4c2318" />
+    <UnitTestResult executionId="297f08ef-d0fe-40ea-9abe-c05df222fe64" testId="f7737348-5a5a-8432-2e16-e67f2a0eff0d" testName="TC-SVC-01.2 the key check decides before any handler(key: &quot;the-key&quot;, admitted: True)" computerName="build-host" duration="00:00:00.0041799" startTime="2026-10-14T22:12:53.9039540+07:00" endTime="2026-10-14T22:12:53.9104450+07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="297f08ef-d0fe-40ea-9abe-c05df222fe64" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="TC-SVC-01.2 the key check decides before any handler(key: &quot;a-wrong-key&quot;, admitted: False)" storage="/build/agent/tests/agent.tests/bin/debug/net10.0/agent.tests.dll" id="7c899403-da0e-16a6-e304-ccfdca266eb0">
+      <Execution id="e2e75f81-3d34-424b-92e4-f19ddb4c2318" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Tests/bin/Debug/net10.0/Agent.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_AnyKey_DecidesAlone" />
+    </UnitTest>
+    <UnitTest name="TC-SVC-01.2 the key check decides before any handler(key: &quot;the-key&quot;, admitted: True)" storage="/build/agent/tests/agent.tests/bin/debug/net10.0/agent.tests.dll" id="f7737348-5a5a-8432-2e16-e67f2a0eff0d">
+      <Execution id="297f08ef-d0fe-40ea-9abe-c05df222fe64" />
+      <TestMethod codeBase="/build/agent/tests/Agent.Tests/bin/Debug/net10.0/Agent.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Agent.Tests.Unit.KeyCheckTests" name="Admits_AnyKey_DecidesAlone" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="7c899403-da0e-16a6-e304-ccfdca266eb0" executionId="e2e75f81-3d34-424b-92e4-f19ddb4c2318" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f7737348-5a5a-8432-2e16-e67f2a0eff0d" executionId="297f08ef-d0fe-40ea-9abe-c05df222fe64" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.0+05679a7ab5 (64-bit .NET 10.0.5)
+[xUnit.net 00:00:00.03]   Discovering: Agent.Tests
+[xUnit.net 00:00:00.05]   Discovered:  Agent.Tests
+[xUnit.net 00:00:00.07]   Starting:    Agent.Tests
+[xUnit.net 00:00:00.09]   Finished:    Agent.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

@@ -51,7 +51,7 @@ app.command(short_help="Trace one item: what it derives from, and what hangs off
 app.command(short_help="What changing several items affects, with a candidate Impacts line.")(
     impact
 )
-app.command(short_help="Test verdicts per requirement, from a pytest JUnit report.")(results)
+app.command(short_help="Test verdicts per requirement, from a JUnit or TRX report.")(results)
 app.command(short_help="What is wrong, and what is not done yet — the gate with --strict.")(check)
 app.command(short_help="What check holds this repo to, and whose each rule is.")(rules)
 app.command(short_help="Set up trace configuration, agent guidance and pytest markers.")(init)

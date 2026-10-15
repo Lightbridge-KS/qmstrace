@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; M12, the C# capability — its test bed beacon-dotnet built and measures fixed, slices M12-0 to M12e planned; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; E6 dogfooding cancelled after run A; now qmstrace applied in real development and shaped as it goes, targeting the layout where the ledger holds the documents (ADR-0001); M10, the project-wide check, landed (ledger check, thread, impact; init in a ledger); configuration, judge, graph, setup, Markdown, Python extractor, text renderer, workspace and CLI package refactors plus shared graph assembly verified and awaiting draft review, then the first real project and M11 mentions; M12, the C# capability — slices M12a–M12e in stacked draft PRs, the beacon-dotnet run 13 of 13 measures passing; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -415,7 +415,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     before M12a's SRS edit.
   - [x] The bed's wording ("test specification"); measure C9 amended before the run, with its
     reason.
-- [ ] **M12a** — dotted IDs, engine-wide, on `feat/m12a-dotted-ids`. REQ-QMT-20.
+- [ ] **M12a** — dotted IDs, engine-wide, on `feat/m12a-dotted-ids`, [#35](https://github.com/Lightbridge-KS/qmstrace/pull/35). REQ-QMT-20.
   - [x] `ID_TOKEN` widened; `id_tokens` reads running text whole or not at all, in every
     reader (headings, fields, tables, mentions, strays, pytest markers, change requests).
   - [x] A heading that starts with a malformed ID (`REQ-SVC-04.1a`, `REQ-SVC-03b`) is a lead:
@@ -425,7 +425,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Verified: the 959 existing tests and every golden unchanged; on every fixture and
     golden, undotted text reads exactly as before; four mutations in a disposable copy each
     fail a REQ-QMT-20 test.
-- [ ] **M12b** — test cases in the trace, on `feat/m12b-test-cases` (stacked on M12a), with
+- [ ] **M12b** — test cases in the trace, on `feat/m12b-test-cases`, [#36](https://github.com/Lightbridge-KS/qmstrace/pull/36) (stacked on M12a), with
   `qmstrace-ledger` branch `m12b-automated-test` merged just before it. REQ-QMT-02.
   - [x] `test_case` → `automated_test` in qmstrace's own schema (the ledger) and in the starter;
     both trace gates still 0 violations, 0 gaps, 0 suspects after the rename.
@@ -437,7 +437,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     no test runs); SKILL.md teaches the Test Specification; `status` says *one automated test*.
   - [x] REQ-QMT-02 edited under CR-003; 14 suspects downstream of it (informational, behaviour
     unchanged).
-- [ ] **M12c** — verdicts through test cases, on `feat/m12c-verdicts` (stacked on M12b).
+- [ ] **M12c** — verdicts through test cases, on `feat/m12c-verdicts`, [#37](https://github.com/Lightbridge-KS/qmstrace/pull/37) (stacked on M12b).
   REQ-QMT-10.
   - [x] A verdict follows `verifies` links from the automated tests a report ran — directly or
     through test cases (`core/results.py`); a requirement names the cases on the way; test
@@ -448,7 +448,8 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Verified on real pytest output (`cases`), with a differential test: where no test case
     stands between, every verdict equals the direct-link one. The output says *automated
     tests* where it counted test functions.
-- [ ] **M12d** — C# source, on `feat/m12d-csharp` (stacked on M12c). REQ-QMT-21, REQ-QMT-12.
+- [ ] **M12d** — C# source, on `feat/m12d-csharp`, [#39](https://github.com/Lightbridge-KS/qmstrace/pull/39) (stacked on M12c). REQ-QMT-21,
+  REQ-QMT-12.
   - [x] `extract/csharp/`: `_syntax.py` (the only tree-sitter importer), `component.py`
     (`csharp-file`), `xunit.py` (`xunit`); DSN-QMT-15. Runtime dependencies tree-sitter 0.26
     and tree-sitter-c-sharp 0.23.5, confined by an architecture test.
@@ -457,9 +458,30 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
     probes 18); the ledger's check across three repos names pytest and xUnit ways together.
   - [x] SKILL.md's C# examples; the manual's *Trace a C# repo*; issue
     [#38](https://github.com/Lightbridge-KS/qmstrace/issues/38) for a C# starter.
-- [ ] **M12e** — the TRX reader and report dispatch; no path or machine name ever shown.
+  - [x] Fixed after the bed run found it (`e6e5133`): a test's gap cited the first unread-marker
+    finding or stray in its file; each now names its own method.
+- [ ] **M12e** — the TRX reader and report dispatch, on `feat/m12e-trx` (stacked on M12d).
   REQ-QMT-22.
-- [ ] **M12-R** — run C1–C13 on beacon-dotnet and record the results.
+  - [x] `extract/reports.py` parses once with defusedxml (now its only importer, pinned) and
+    the root picks `junit.py` or the new `trx.py`; anything else is refused naming both.
+  - [x] A TRX run is matched by class and method, named by `testName`; `Passed` pass,
+    `NotExecuted` skip, any other outcome fail with the outcome kept; the first line of the
+    message only. Entries that share a name but not a method are two runs.
+  - [x] Fixtures: four real captures of the `cases` agent (full, a skip and a failing row,
+    filtered, the probes), sanitised; a sentinel TRX proves no path, name, output or trace
+    reaches the report or the output. Every probe run matches its extractor's identity.
+  - [x] Messages and the manual name the format given; REQ-QMT-22, DSN-QMT-09 amended.
+  - [x] Found: one TRX per test project, and a solution run with a fixed `LogFileName` keeps
+    only the last project's results — issue
+    [#40](https://github.com/Lightbridge-KS/qmstrace/issues/40); the manual warns of both.
+- [x] **M12-R** — run C1–C13 on beacon-dotnet and record the results: **13 of 13 pass**
+  ([record](../tests/beacon-dotnet.md#results--run-2026-10-14), `979d69d` on `main`), on a wheel
+  from `a7a3807`; bed end state tagged `m12r-end`. The first pass found the gap-citation defect
+  fixed in M12d; the rerun gave the same output for C1, C2, C7 and C8.
+- [x] **After M12-R** — a gap whose link has nothing to point at in this repo names the sibling
+  that declares its targets (`fix/gap-wording-sibling-targets`, stacked on M12e): the run's C#
+  agent was told to *write the design here*, wording from M3 that predates ADR-0001. Where no
+  sibling declares one, the text is unchanged; no golden moved.
 
 ## Landed — M10 · the project-wide check
 
