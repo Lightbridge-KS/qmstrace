@@ -50,6 +50,16 @@ def test_a_call_without_a_valid_key_is_refused():
     assert True  # syntax example only; replace with a real behavioral assertion
 ```
 
+```markdown
+### TC-SVC-01.1 — A call without a valid key is refused
+verifies: REQ-SVC-01
+```
+
+In a project with a Test Specification — a Markdown file of test cases in the ledger, read as
+the schema says — a test case is declared like any document item and names what it verifies.
+The automated tests then name the test case they run, `@pytest.mark.verifies("TC-SVC-01.1")`,
+and several may run one; `qmstrace rules` says which a project uses.
+
 A heading that starts with the item's ID, in a file its type is read from, declares a
 document item. The item is its section, down to the next heading at the same or a higher
 level: sub-sections, tables and diagrams inside it are its text, and its fields and links
@@ -59,8 +69,8 @@ the ID and a trailing attribute are layout:
 prose may name IDs but declare nothing: never write a link as a table cell, and never
 declare an item as a table row. Module links belong in the module docstring, never an
 ordinary comment. Tests use a direct `pytest.mark.verifies`
-decorator with literal IDs. Test cases have function identities; parameter variants are
-runs of that case. Put tests in the configured level folders. IDs are never reused.
+decorator with literal IDs. An automated test is a test function; parameter variants are
+runs of it. Put tests in the configured level folders. IDs are never reused.
 
 ## Authoring and change loop
 

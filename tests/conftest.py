@@ -22,6 +22,7 @@ collect_ignore_glob = ["fixtures/*"]
 
 MINI = Path(__file__).parent / "fixtures" / "mini"
 SPLIT = Path(__file__).parent / "fixtures" / "split"
+CASES = Path(__file__).parent / "fixtures" / "cases"
 
 
 def mini_text(*parts: str) -> str:
@@ -130,8 +131,9 @@ def make_repo(git_env: None) -> Callable[[Path], Path]:
 
 
 def _copied(source: Path, base: Path) -> Path:
-    """A fixture project copied into `base`, every top-level folder a real Git repository."""
-    shutil.copytree(source, base)
+    """A fixture project copied into `base`, every top-level folder a real Git repository —
+    hidden folders, such as an editor's or an agent harness's state, left out."""
+    shutil.copytree(source, base, ignore=shutil.ignore_patterns(".*"))
     for repo in sorted(base.iterdir()):
         _make_repo(repo)
     return base
@@ -150,6 +152,14 @@ def split(tmp_path: Path, git_env: None) -> Path:
     and product repos holding code and tests — copied and made Git repositories. Returns the
     folder that holds them."""
     return _copied(SPLIT, tmp_path / "split")
+
+
+@pytest.fixture
+def cases(tmp_path: Path, git_env: None) -> Path:
+    """A project with a Test Specification (ADR-0003): a traced ledger holding the documents and
+    the test cases, dotted `TC-SVC-NN.m`, and a service whose automated tests name the test case
+    they run — or a requirement directly. Copied and made Git repositories; returns the folder."""
+    return _copied(CASES, tmp_path / "cases")
 
 
 @pytest.fixture

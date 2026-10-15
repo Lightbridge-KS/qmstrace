@@ -1,0 +1,15 @@
+read: 2 requirements, 2 design elements, 4 test cases
+  controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: change-requests (1 readable; 0 malformed) — current working tree, not pinned
+
+gaps — coverage not met yet; only the gate (qmstrace check --strict) fails on them:
+  G03  docs/design/service-design.md:3  DSN-SVC-01: no component implements it yet. Fix: this repo declares no component — declare the type in qmstrace.toml and write it here, or DSN-SVC-01 is met in another repo of the project: qmstrace ledger check, run in the ledger, judges that.
+  G03  docs/design/service-design.md:8  DSN-SVC-02: no component implements it yet. Fix: this repo declares no component — declare the type in qmstrace.toml and write it here, or DSN-SVC-02 is met in another repo of the project: qmstrace ledger check, run in the ledger, judges that.
+  G09  docs/test/service-test-cases.md:7  TC-SVC-01.1: no automated test runs it yet. Fix: this repo declares no automated test — declare the type in qmstrace.toml and write it here, or TC-SVC-01.1 is met in another repo of the project: qmstrace ledger check, run in the ledger, judges that.
+  G09  docs/test/service-test-cases.md:12  TC-SVC-01.2: no automated test runs it yet. Fix: this repo declares no automated test — declare the type in qmstrace.toml and write it here, or TC-SVC-01.2 is met in another repo of the project: qmstrace ledger check, run in the ledger, judges that.
+  G09  docs/test/service-test-cases.md:17  TC-SVC-02.1: no automated test runs it yet. Fix: this repo declares no automated test — declare the type in qmstrace.toml and write it here, or TC-SVC-02.1 is met in another repo of the project: qmstrace ledger check, run in the ledger, judges that.
+  G09  docs/test/service-test-cases.md:22  TC-SVC-02.2: no automated test runs it yet. Fix: this repo declares no automated test — declare the type in qmstrace.toml and write it here, or TC-SVC-02.2 is met in another repo of the project: qmstrace ledger check, run in the ledger, judges that.
+
+result: 0 violations, 6 gaps in 8 items · 0 suspects (informational) · exit 1 · gate: gaps fail · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

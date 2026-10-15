@@ -17,14 +17,14 @@ Category    = ["functional-suitability", "performance-efficiency", "compatibilit
 [schema.item_types.design_element]
 [schema.item_types.component]
 
-[schema.item_types.test_case]
+[schema.item_types.automated_test]   # the code that runs a test
 levels = ["unit", "integration", "system"]
 
 # ── link types — a field whose name is a link marker IS the link; all are many-to-many ────
 [schema.links]
 Satisfies  = { from = ["design_element"],                to = ["requirement"] }
 Implements = { from = ["component"],                     to = ["design_element"] }
-verifies   = { from = ["test_case"],                     to = ["requirement", "design_element"] }
+verifies   = { from = ["automated_test"],                to = ["requirement", "design_element"] }
 Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
 # coverage = false: the link carries suspicion and impact, and no coverage rule may need it
 
@@ -68,7 +68,7 @@ text  = "implements no design element — every component points back to one."
 
 [[schema.rules]]
 code  = "G07"
-item  = "test_case"
+item  = "automated_test"
 needs = "outgoing:verifies"
 text  = "verifies nothing."
 
@@ -91,6 +91,6 @@ extractor = "python-module"
 files     = ["src/**/*.py"]
 ignore    = ["**/__init__.py"]
 
-[items.test_case]                   # ID = the test function's node id
+[items.automated_test]              # ID = the test function's node id
 extractor = "pytest"
 files     = ["tests/**/test_*.py"]

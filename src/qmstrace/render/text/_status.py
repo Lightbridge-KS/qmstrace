@@ -79,7 +79,7 @@ def _scanned(assessment: Assessment) -> list[str]:
             line += f" · {s.ignored} {_noun(s.ignored, 'file', 'files')} ignored by "
             line += ", ".join(s.ignore)
         if item_type.extractor == "pytest":
-            line += " · test functions: a parametrised function is one test case"
+            line += " · test functions: a parametrised function is one automated test"
         lines.append(line)
     return lines
 

@@ -3,7 +3,7 @@ scanned (working tree, not pinned):
   requirement       1 item  in  1 file   docs/req/*-srs.md
   design_element  known to the project, not scanned here
   component         1 item  in  1 file   src/**/*.py
-  test_case         2 items in  1 file   tests/**/test_*.py · test functions: a parametrised function is one test case
+  test_case         2 items in  1 file   tests/**/test_*.py · test functions: a parametrised function is one automated test
 links: 3
 external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
 sibling service: NOT REACHABLE at ../service

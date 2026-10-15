@@ -190,8 +190,7 @@ def project(
 
     graphs: dict[str, TraceGraph] = {}
     violations: list[Finding] = []
-    forms: dict[str, judge.Form] = {}
-    homes: dict[str, list[str]] = {}
+    readers: dict[tuple[str, str], list[str]] = {}  # (type, extractor) -> the repos read so
     for name, (member, _, extracted, misplaced) in parts.items():
         around = Surroundings(
             siblings={other: items for other, items in authored.items() if other != name},
@@ -205,18 +204,14 @@ def project(
         violations += found
         for t in member.config.item_types.values():
             if t.declared_here and t.extractor is not None:
-                forms[t.name] = FORMS[t.extractor]
-                homes.setdefault(t.name, []).append(name)
+                readers.setdefault((t.name, t.extractor), []).append(name)
     union = TraceGraph.join(config, graphs)
     strays = [s for _, _, extracted, _ in parts.values() for p in extracted for s in p.strays]
-    gaps = judge.coverage(
-        config,
-        union,
-        violations,
-        strays,
-        forms,
-        homes={t: tuple(sorted(names)) for t, names in homes.items()},
-    )
+    ways: dict[str, tuple[judge.Way, ...]] = {}
+    for (item_type, extractor), names in sorted(readers.items()):
+        way = judge.Way(FORMS[extractor], tuple(sorted(names)))
+        ways[item_type] = (*ways.get(item_type, ()), way)
+    gaps = judge.coverage(config, union, violations, strays, ways, whole_project=True)
 
     register = _register(ledger, ledger, config)
     covered = {t for scope in config.baselines.values() for t in scope.covers}

@@ -18,7 +18,7 @@ import pytest
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.judge import coverage
+from qmstrace.core.judge import Way, coverage
 from qmstrace.core.judge._coverage import _fix
 from qmstrace.core.model import Extracted, Finding, Item
 from qmstrace.extract.base import FORMS, REGISTRY
@@ -66,8 +66,8 @@ def judged(
         parts.append(REGISTRY[item_type.extractor](path, text, item_type, config))
     graph, violations = TraceGraph.build(config, parts, around)
     strays = [s for part in parts for s in part.strays]
-    forms = {t.name: FORMS[t.extractor] for t in config.item_types.values() if t.extractor}
-    return violations + coverage(config, graph, violations, strays, forms)
+    ways = {t.name: (Way(FORMS[t.extractor]),) for t in config.item_types.values() if t.extractor}
+    return violations + coverage(config, graph, violations, strays, ways)
 
 
 def gaps(found: list[Finding]) -> list[tuple[str, str | None]]:
@@ -182,11 +182,15 @@ def test_in_the_ledgers_check_a_next_move_names_the_repos_to_write_in(
 ) -> None:
     rule = next(r for r in service.rules if r.code == "G02")
     requirement = Item("REQ-SVC-01", "requirement", "docs/req/srs.md", 1, "r", "d")
-    forms = {t.name: FORMS[t.extractor] for t in service.item_types.values() if t.extractor}
     homes = {"test_case": ("client", "service"), "requirement": ("ledger",)}
-    said = _fix(service, rule, requirement, [], [], forms, homes)
+    ways = {
+        t.name: (Way(FORMS[t.extractor], homes.get(t.name, ())),)
+        for t in service.item_types.values()
+        if t.extractor
+    }
+    said = _fix(service, rule, requirement, [], [], ways, whole_project=True)
     assert said.startswith("on the test case in client or service, write")
-    nobody = _fix(service, rule, requirement, [], [], {}, {})
+    nobody = _fix(service, rule, requirement, [], [], {}, whole_project=True)
     assert nobody.startswith("no repo of the project declares a test case")
 
 
@@ -195,8 +199,8 @@ def test_a_rule_no_type_here_can_meet_says_so(project: Path) -> None:
 
     found = Workspace.open(project / "client").assessment()
     graph, config = found.graph, found.config
-    forms = {t.name: FORMS[t.extractor] for t in config.item_types.values() if t.extractor}
-    client_gaps = coverage(config, graph, found.violations, (), forms)
+    ways = {t.name: (Way(FORMS[t.extractor]),) for t in config.item_types.values() if t.extractor}
+    client_gaps = coverage(config, graph, found.violations, (), ways)
     assert "this repo declares no design element" in fix_of(client_gaps, "G01", "REQ-CLT-01")
     assert "for it to point at" in fix_of(client_gaps, "G06", "src/client/api.py")
 
@@ -239,3 +243,66 @@ def test_compatibility_exports_are_the_original_objects() -> None:
     ):
         for name in names:
             assert getattr(judge, name) is getattr(owner, name)
+
+
+# ── every way a link can be made (ADR-0003) ────────────────────────────────────────────────
+
+CASES_SCHEMA = Path(__file__).parents[1] / "fixtures" / "cases" / "ledger" / "qmstrace.schema.toml"
+CASES_LEDGER = CASES_SCHEMA.parent / "qmstrace.toml"
+
+
+def _xunit_like(marker: str, target: str) -> str:
+    return f'`[Fact(DisplayName = "{target} …")]` on the test method'
+
+
+@pytest.fixture(scope="module")
+def cases_config() -> TraceConfig:
+    return TraceConfig.parse(CASES_LEDGER.read_text("utf-8"), CASES_SCHEMA.read_text("utf-8"))
+
+
+@pytest.mark.verifies("DSN-QMT-06", "DSN-QMT-14")
+def test_a_gap_that_several_ways_can_meet_names_them_all(cases_config: TraceConfig) -> None:
+    rule = next(r for r in cases_config.rules if r.code == "G02")
+    requirement = Item("REQ-SVC-01", "requirement", "docs/req/service-srs.md", 5, "r", "d")
+    ways = {
+        "test_case": (Way(FORMS["markdown"], ("ledger",)),),
+        "automated_test": (Way(_xunit_like, ("agent",)), Way(FORMS["pytest"], ("service",))),
+    }
+    said = _fix(cases_config, rule, requirement, [], [], ways, whole_project=True)
+    assert said == (
+        "write one of these — on the automated test in agent, "
+        '`[Fact(DisplayName = "REQ-SVC-01 …")]` on the test method; on the automated test in '
+        'service, `@pytest.mark.verifies("REQ-SVC-01")` on the test; on the test case in '
+        "ledger, `verifies: REQ-SVC-01` under its heading — only if it is true: the link states "
+        "that the automated test or test case verifies REQ-SVC-01."
+    )
+
+
+@pytest.mark.verifies("DSN-QMT-06")
+def test_one_repos_check_names_a_source_another_repo_reads(cases_config: TraceConfig) -> None:
+    rule = next(r for r in cases_config.rules if r.code == "G02")
+    requirement = Item("REQ-SVC-01", "requirement", "docs/req/service-srs.md", 5, "r", "d")
+    said = _fix(cases_config, rule, requirement, [], [], {"test_case": (Way(FORMS["markdown"]),)})
+    assert said.startswith("on the test case, write `verifies: REQ-SVC-01` under its heading")
+    assert said.endswith(
+        " Or another repo of the project meets REQ-SVC-01 with a link from its automated test: "
+        "qmstrace ledger check, run in the ledger, judges that."
+    )
+
+
+@pytest.mark.verifies("DSN-QMT-14")
+def test_an_items_own_gap_is_written_the_way_its_own_repo_reads_it(
+    cases_config: TraceConfig,
+) -> None:
+    rule = next(r for r in cases_config.rules if r.code == "G07")
+    test = Item(
+        "agent:tests/Unit/KeyTests.cs::KeyTests::Refused", "automated_test", "f", 1, "t", "d"
+    )
+    ways = {
+        "automated_test": (Way(_xunit_like, ("agent",)), Way(FORMS["pytest"], ("service",))),
+        "requirement": (Way(FORMS["markdown"], ("ledger",)),),
+    }
+    agent = _fix(cases_config, rule, test, [], [], ways, whole_project=True, repo="agent")
+    service = _fix(cases_config, rule, test, [], [], ways, whole_project=True, repo="service")
+    assert agent.startswith('write `[Fact(DisplayName = "<requirement or design element or ')
+    assert service.startswith("write `@pytest.mark.verifies(")

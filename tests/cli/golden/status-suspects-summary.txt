@@ -3,7 +3,7 @@ scanned (working tree, not pinned):
   requirement       3 items in  1 file   docs/req/*-srs.md
   design_element    2 items in  1 file   docs/design/*.md
   component         2 items in  2 files  src/**/*.py · 1 file ignored by **/__init__.py
-  test_case         4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one test case
+  test_case         4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one automated test
 links: 15
 external AGR-*: verified against ../ledger/agreement.md (3 declared)
 sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID

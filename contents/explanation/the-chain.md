@@ -4,8 +4,9 @@
 
     Everything qmstrace traces is one chain: an agreement clause, the requirements that derive
     from it, the design elements that satisfy them, the code that implements them, and the tests
-    that verify them. Each link is written at its downstream end — the later item names the
-    earlier one — so nothing is recorded twice. `qmstrace thread` walks the chain either way.
+    that verify them — directly, or through the test cases they run. Each link is written at its
+    downstream end — the later item names the earlier one — so nothing is recorded twice.
+    `qmstrace thread` walks the chain either way.
 
 ## The chain
 
@@ -14,8 +15,10 @@ flowchart RL
   req["requirement"] -- Origin --> agr["origin clause<br/>(in the agreement)"]
   dsn["design element"] -- Satisfies --> req
   mod["component<br/>(a module)"] -- Implements --> dsn
-  test["test case"] -- verifies --> req
-  test -- verifies --> dsn
+  tc["test case<br/>(in a Test Specification)"] -- verifies --> req
+  tc -- verifies --> dsn
+  auto["automated test<br/>(a test function)"] -- verifies --> tc
+  auto -. "or directly" .-> req
 ```
 
 Each arrow is a line in something already written: a field under a requirement's heading, a
@@ -44,6 +47,27 @@ that reaches it first, and notes the other link on the same line:
 
 ``` text
 --8<-- "cli/golden/thread-origin.txt"
+```
+
+## Test cases and automated tests
+
+A **test case** is planned: a heading in a Test Specification, a Markdown file of test cases
+kept with the other documents, and a `verifies:` line naming what it checks. An **automated
+test** is the code that runs it — a pytest function — and names the test case it runs. Several
+automated tests may run one test case, which passes only when all of them pass. This is the
+fixture project's Test Specification:
+
+``` markdown
+--8<-- "fixtures/cases/ledger/docs/test/service-test-cases.md"
+```
+
+A project that keeps no Test Specification lets its automated tests verify requirements and
+design elements directly, as in the diagram's dotted arrow; both may sit in one project. Its
+schema says which links it allows, and its coverage rules say what must be met — here, that every
+test case is run:
+
+``` text
+--8<-- "cli/golden/ledger-check-cases.txt"
 ```
 
 ## Assumes: a dependency, not coverage

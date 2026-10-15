@@ -12,7 +12,7 @@ ledger  = "../qmstrace-ledger"      # where the agreement and the change request
 
 # qmstrace:begin — the QMT trace schema, generated in its ledger by `qmstrace ledger copy-schema`; edit it there, never here
 [schema]
-digest = "sha256:2c2b82ac79917b655e8c7296f01370e27e0b5c6279dbf55b9e081608ddef28b4"
+digest = "sha256:2aada47381d28e61ee0a4a382f8b8d4bd5a5db61e05832a8a66c0f7cf2d9f1db"
 # The qmstrace project's TRACE SCHEMA — authored here, in the ledger, and copied into each
 # product repo by `qmstrace ledger copy-schema`. What a repo scans, its ID patterns and its
 # subjects live in that repo's qmstrace.toml. Paths here are relative to this folder.
@@ -36,8 +36,9 @@ Category    = ["functional-suitability", "performance-efficiency", "compatibilit
 [schema.item_types.design_element]
 [schema.item_types.component]
 
-# A test's level is the folder it sits in under tests/.
-[schema.item_types.test_case]
+# An automated test — a pytest function — and its level, the folder it sits in under tests/.
+# qmstrace has no Test Specification of its own: its automated tests verify directly (ADR-0003).
+[schema.item_types.automated_test]
 levels = ["unit", "integration", "cli", "meta"]
 
 # A field named after a marker IS the link. Every link type is many-to-many.
@@ -45,7 +46,7 @@ levels = ["unit", "integration", "cli", "meta"]
 Origin     = { from = ["requirement"],                   to = ["origin_clause"] }
 Satisfies  = { from = ["design_element"],                to = ["requirement"] }
 Implements = { from = ["component"],                     to = ["design_element"] }
-verifies   = { from = ["test_case"],                     to = ["requirement", "design_element"] }
+verifies   = { from = ["automated_test"],                to = ["requirement", "design_element"] }
 Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
 
 # Coverage rules. An unmet rule is a gap. A test that verifies nothing is not one: the suite
@@ -124,7 +125,7 @@ extractor = "python-module"
 files     = ["src/**/*.py"]
 ignore    = ["**/__init__.py"]
 
-[items.test_case]                   # ID = the test function's node id; level = its folder
+[items.automated_test]              # ID = the test function's node id; level = its folder
 extractor = "pytest"
 files     = ["tests/**/test_*.py"]
 ignore    = ["tests/fixtures/**"]   # the miniature project's own tests are data, not ours

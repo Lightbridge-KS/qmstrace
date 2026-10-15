@@ -92,7 +92,8 @@ headings, signature blocks, information-item order — is rendered.
 | `docs/req/<subject>-prd.md` | nothing — stays casual, carries no IDs |
 | `docs/req/<subject>-srs.md` | the requirement items: ID heading, one checkable statement, category, origin, verification method |
 | `docs/design/*.md` | a section that is a design element gets an ID and a `Satisfies:` line |
-| source modules, tests | `Implements:` in the module docstring; a `verifies` tag on the test |
+| source modules, tests | `Implements:` in the module docstring; a `verifies` tag on the automated test, naming its test case or what it verifies directly |
+| `docs/test/<subject>-test-cases.md` (in the ledger) | the test cases, where the project keeps a Test Specification: ID heading, a `verifies:` line (ADR-0003) |
 | `docs/progress/`, `docs/adr/` | untouched — not traced |
 
 Consequences:
@@ -519,8 +520,16 @@ working from nothing but the repo's own guide, a skill and tool output — see
 ```
 origin clause ◀─Origin── requirement ◀─Satisfies── design element ◀─Implements── component
  (declared in                ▲                           ▲
-  the ledger)                └────────── verifies ───────┴──────── test case ──▶ test result
+  the ledger)                └──────── verifies ─────────┤
+                                                     test case
+                                                         ▲ verifies
+                                                   automated test ──▶ test result
 ```
+
+*Amended 2026-10-14 ([ADR-0003](../adr/0003-test-cases-and-automated-tests.md)):* a test case is
+an entry in a Test Specification, run by automated tests. A project that keeps no Test
+Specification lets its automated tests verify requirements and design elements directly — the
+arrow from *test case* is then theirs.
 
 Every arrow is authored at its downstream end and points upstream (D1); the forward view is
 derived. **Every link type is many-to-many, and the tooling must say so**: an agent that did
@@ -530,14 +539,16 @@ told it whether it was done.
 ### Marker syntax v0
 
 *Amended 2026-09-24 (M9): sections, heading forms, near-misses — below the table. Amended
-2026-10-14 ([ADR-0002](../adr/0002-dotted-ids.md)): the ID shape, dotted numbers.*
+2026-10-14 ([ADR-0002](../adr/0002-dotted-ids.md)): the ID shape, dotted numbers; and
+([ADR-0003](../adr/0003-test-cases-and-automated-tests.md)): test cases and automated tests.*
 
 | Item | Declared as | Its ID | Link marker |
 |---|---|---|---|
 | Requirement | a heading `### <ID> — <title>` in the subject's specification file, followed by one checkable statement and its fields | authored, from the trace schema's pattern | `- Origin: <clause>[, <clause>]` |
 | Design element | a heading `## <ID> — <title>` in a design document | authored | `Satisfies: <requirement>[, …]` |
 | Component | a source module | derived — the module's path | `Implements: <design element>` in the module docstring |
-| Test case | a test function | derived — the test runner's own identifier for it | the test framework's own tagging, e.g. `@pytest.mark.verifies("<ID>")`, on the function or its class |
+| Test case | a heading `### <ID> — <title>` in a Test Specification | authored | `verifies: <requirement or design element>[, …]` |
+| Automated test | a test function | derived — the test runner's own identifier for it | the test framework's own tagging, e.g. `@pytest.mark.verifies("<ID>")`, on the function or its class — naming the test case it runs, or what it verifies directly |
 
 - **One ID shape for every project**: capital letters and digits in hyphen-joined segments,
   ending in a number that may carry dotted parts — `REQ-SVC-01`, `TC-SVC-04.1-01`. An ID is
@@ -576,9 +587,10 @@ told it whether it was done.
 - A test's level — unit, integration, system — comes from where it sits and is **information,
   not a rule**. It is a claim that is easy to fake, and some design elements can only be
   verified from outside.
-- A test case is a *test function*. A parametrised function is one test case that runs several
-  times; results are aggregated per test case, worst verdict first, and every count says
-  which of the two it is counting.
+- An automated test is a *test function*. A parametrised function is one automated test that
+  runs several times; results are aggregated per automated test, worst verdict first, and
+  every count says which of the two it is counting. A test case passes only when every
+  automated test that runs it passes (ADR-0003).
 
 **Known limit.** Derived IDs are not immutable: renaming a module or a test function changes
 its ID, which the glossary forbids for an item. No experiment has renamed anything. Open. In
