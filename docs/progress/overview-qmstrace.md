@@ -634,6 +634,15 @@ the stand-in's defects returns ([scenario catalogue](../tests/scenario-catalogue
 
 ## Deferred
 
+- **A public repository.** The code is MIT-licensed (`LICENSE`); the repository stays private
+  until a review clears its history and content:
+  - the full Git history scanned for secrets, home paths, machine names and other projects'
+    data, not only the staged changes the commit hook scans;
+  - third-party text: `docs/references/` (an ISO/IEC 29110 cheat sheet, paraphrased) and
+    any quoted standard text in `docs/`;
+  - ownership of the code confirmed before it is published;
+  - then: the manual's `repo_url` in `zensical.toml`, the *private* wording in the README,
+    *Set up a repo*, *A first look* and the release notes, and whether to publish to PyPI.
 - **Slice 2, the ledger.**
   - Design: event shape, states for non-document work products, the signature loop, the
     recorded inspection basis, cross-repo questions.

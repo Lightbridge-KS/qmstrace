@@ -6,6 +6,10 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The MIT License: `LICENSE`, declared in the package metadata and carried in the wheel.
+
 ## [0.1.0] - 2026-10-15
 
 ### Added
