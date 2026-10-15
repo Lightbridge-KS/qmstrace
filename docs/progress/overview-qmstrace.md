@@ -368,6 +368,11 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
    M11. Baseline only after the IDs, trace and review are ready.
 
 **Fixed from use:**
+- [x] 2026-10-15, seen while the first C# adopter's ledger was designed: `V14` on an xUnit
+  `DisplayName` or a pytest marker named a field line neither has — *the 'verifies' line holds
+  IDs only, comma-separated*. A C# agent goes looking for that line, and in pytest, two IDs in
+  one argument is the very slip that raises `V14`. Each extractor now gives its own next move;
+  Markdown's is unchanged. A test per extractor, each failing when its fix is reverted.
 - [x] 2026-10-14, seen at `75ba627`: the refusals of `ledger copy-schema` and `ledger check`
   (so `ledger thread` and `ledger impact`) ended a reason that closes its own sentence in two
   full stops — `… Fix: use one of those.. Fix: …`. Each reason now gives up its own stop

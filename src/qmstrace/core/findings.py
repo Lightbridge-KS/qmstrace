@@ -314,15 +314,19 @@ def undeclared_external(link: Link, source: str, declared: Iterable[str]) -> Fin
     )
 
 
-def not_an_id(item_id: str, marker: str, token: str, file: str, line: int) -> Finding:
+def not_an_id(
+    item_id: str, marker: str, token: str, file: str, line: int, fix: str | None = None
+) -> Finding:
+    """V14. `fix` is the extractor's own next move where its marker is not a field line."""
     said = f"'{token}' is not an ID" if token else "the line names no ID"
     return Finding(
         "V14",
         file,
         line,
         f"{item_id} → {marker}: {said}, so it links nothing.",
-        f"Fix: the '{marker}' line holds IDs only, comma-separated. If nothing real fits, remove "
-        "the line and tell the developer what is missing — never invent an ID.",
+        fix
+        or f"Fix: the '{marker}' line holds IDs only, comma-separated. If nothing real fits, "
+        "remove the line and tell the developer what is missing — never invent an ID.",
         item_id,
         marker,
     )

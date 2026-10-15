@@ -224,14 +224,21 @@ def test_the_agents_tests_read_whole_at_their_level(agent: TraceConfig) -> None:
 
 
 @pytest.mark.verifies("REQ-QMT-21")
-def test_a_malformed_first_word_is_not_an_id(agent: TraceConfig) -> None:
+@pytest.mark.parametrize("first", ["TC-SVC-01.1a", "TC-SVC-01.1/O03"])
+def test_a_malformed_first_word_is_not_an_id(agent: TraceConfig, first: str) -> None:
     text = (
-        'public class T\n{\n    [Fact(DisplayName = "TC-SVC-01.1a refused")]\n'
+        f'public class T\n{{\n    [Fact(DisplayName = "{first} refused")]\n'
         "    public void M() { }\n}\n"
     )
     found = read_tests(agent, text, "tests/Agent.Tests/Unit/TTests.cs")
     assert found.links == ()
     assert [f.code for f in found.findings] == ["V14"]
+    # its next move names the DisplayName, never a field line C# does not have
+    assert (
+        "start the test's DisplayName with one whole ID, then a space"
+        in found.findings[0].next_move
+    )
+    assert "line" not in found.findings[0].next_move
 
 
 # ── 5. syntax the grammar does not read ────────────────────────────────────────────────────

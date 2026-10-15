@@ -113,9 +113,20 @@ def _declared(reading: _Reading, owner: _Owner, src: str) -> tuple[Link, ...]:
                 found.append(Link(src, value, marker, reading.path, decorator.lineno))
             else:
                 reading.wrong.append(
-                    findings.not_an_id(src, marker, value, reading.path, decorator.lineno)
+                    findings.not_an_id(
+                        src, marker, value, reading.path, decorator.lineno, _not_an_id_fix(marker)
+                    )
                 )
     return tuple(found)
+
+
+def _not_an_id_fix(marker: str) -> str:
+    """V14's next move: each argument of the marker is one whole ID."""
+    return (
+        f'Fix: give @pytest.mark.{marker} one whole ID per argument: @pytest.mark.{marker}("ID", '
+        '"ID"). If nothing real fits, remove the marker and tell the developer what is missing '
+        "— never invent an ID."
+    )
 
 
 def _marker(node: ast.expr) -> str | None:

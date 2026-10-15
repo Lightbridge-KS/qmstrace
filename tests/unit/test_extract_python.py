@@ -143,9 +143,14 @@ def test_a_test_function_defined_twice_is_two_items(service: TraceConfig) -> Non
     assert ids == ["tests/unit/test_keys.py::test_x"] * 2  # the graph reports V01
 
 
-def test_a_literal_that_is_not_an_id_is_v14(service: TraceConfig) -> None:
-    found = cases_in(service, '@pytest.mark.verifies("TBD")\ndef test_x():\n    pass\n')
+@pytest.mark.parametrize("value", ["TBD", "REQ-SVC-01, REQ-SVC-02"])
+def test_a_literal_that_is_not_an_id_is_v14(service: TraceConfig, value: str) -> None:
+    found = cases_in(service, f'@pytest.mark.verifies("{value}")\ndef test_x():\n    pass\n')
     assert [finding.code for finding in found.findings] == ["V14"]
+    # one ID per argument: "comma-separated" would send the second case round again
+    fix = found.findings[0].next_move
+    assert 'give @pytest.mark.verifies one whole ID per argument: @pytest.mark.verifies("ID"' in fix
+    assert "comma-separated" not in fix
 
 
 # ── 3. levels ──────────────────────────────────────────────────────────────────────────────
