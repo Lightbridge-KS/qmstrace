@@ -442,7 +442,12 @@ row; no timestamps (REQ-QMT-15).
 - [ ] **CR-004 accepted** — by the developer, before any SRS edit.
 - [ ] **B · #40** — several reports in core, to ADR-0005; amends REQ-QMT-10 under CR-004.
 - [ ] **#49a** — `ledger table` without verdict columns, in parallel with B; adds REQ-QMT-23
-  and DSN-QMT-16; rebased after #40.
+  and DSN-QMT-16; rebased after #40. *Built on `feat/49-tables`, stacked on Phase A:* the
+  schema-derived tables (`core/tables.py`), `[tables.matrix] fields`, `model.id_order`, each
+  repo's checkout (`infra/git.checkout`), the JSON document (`render/tables.py`), the command,
+  goldens and the manual. `just dry` green, 1,143 tests; mutation check: without the
+  direct-test row rule, 5 tests fail. Waiting on CR-004: REQ-QMT-23, DSN-QMT-16 and the
+  markers — until then the two new modules are G06 gaps.
 - [ ] **#49b** — `--report REPO=FILE`, per-level verdict columns, each cell's evidence pointer;
   additive, so the format stays `qmstrace.table/1`.
 
