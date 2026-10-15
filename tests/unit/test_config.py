@@ -494,7 +494,7 @@ def test_constructors_preserve_the_calling_class() -> None:
                 'needs = "incoming:Satisfies"', 'needs = "incoming:Unknown"'
             ),
             "schema.toml: unknown key 'aaa' (known here: baselines, change_requests, "
-            "externals, item_types, links, project, repos, rules, version).",
+            "externals, item_types, links, project, repos, rules, tables, version).",
             "Fix: correct or remove the key — an unknown key is an error because a mistyped "
             "one would be a rule nobody can see.",
         ),
@@ -507,3 +507,51 @@ def test_refusal_order_and_complete_diagnostics(
     with pytest.raises(CouldNotJudge) as caught:
         TraceConfig.parse(local, schema, local_name="local.toml", schema_name="schema.toml")
     assert (caught.value.what, caught.value.next_move) == (what, next_move)
+
+
+# ── 7. the fields the ledger's tables carry ─────────────────────────────────────────────────
+
+CASES_SCHEMA = (
+    Path(__file__).parents[1] / "fixtures" / "cases" / "ledger" / "qmstrace.schema.toml"
+).read_text(encoding="utf-8")
+
+
+def test_a_schema_without_tables_carries_no_extra_field() -> None:
+    assert TraceConfig.of_schema(CASES_SCHEMA).tables.matrix_fields == ()
+
+
+def test_the_matrix_carries_the_requirement_fields_the_schema_lists_in_order() -> None:
+    listed = CASES_SCHEMA + '\n[tables.matrix]\nfields = ["Verify-by", "Category"]\n'
+    assert TraceConfig.of_schema(listed).tables.matrix_fields == ("Verify-by", "Category")
+
+
+@pytest.mark.parametrize(
+    ("section", "said"),
+    [
+        ('fields = ["Origin"]', "'Origin', which is a link marker"),
+        ('fields = ["Priority"]', "'Priority', which the requirement type does not declare"),
+        ('fields = ["Category", "Category"]', "'Category' twice"),
+        ('fields = "Category"', "'tables.matrix.fields' must be a list of non-empty strings"),
+        ('field = ["Category"]', "unknown key 'tables.matrix.field'"),
+    ],
+)
+def test_a_field_the_matrix_cannot_carry_is_refused(section: str, said: str) -> None:
+    with pytest.raises(CouldNotJudge) as caught:
+        TraceConfig.of_schema(CASES_SCHEMA + f"\n[tables.matrix]\n{section}\n")
+    assert said in caught.value.what and caught.value.next_move.startswith("Fix:")
+
+
+def test_a_table_the_ledger_does_not_emit_is_refused() -> None:
+    with pytest.raises(CouldNotJudge) as caught:
+        TraceConfig.of_schema(CASES_SCHEMA + '\n[tables.other]\nfields = ["Category"]\n')
+    assert "unknown key 'tables.other' (known here: matrix)" in caught.value.what
+
+
+def test_the_section_survives_a_verified_copy(embed: Embed) -> None:
+    listed = CASES_SCHEMA + '\n[tables.matrix]\nfields = ["Category"]\n'
+    local = (
+        Path(__file__).parents[1] / "fixtures" / "cases" / "agent" / "qmstrace.toml"
+    ).read_text(encoding="utf-8")
+    copy = TraceConfig.parse(embed(local, listed))
+    assert copy.schema_form is SchemaForm.VERIFIED_COPY
+    assert copy.tables.matrix_fields == ("Category",)

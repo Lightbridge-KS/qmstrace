@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from qmstrace.core.config._copy import marked, schema_digest
 from qmstrace.core.config._schema import (
@@ -20,6 +20,7 @@ from qmstrace.core.config._schema import (
     LinkType,
     SchemaForm,
     Subject,
+    Tables,
 )
 from qmstrace.core.config._sections import (
     _baselines,
@@ -30,6 +31,7 @@ from qmstrace.core.config._sections import (
     _repos,
     _rules,
     _subjects,
+    _tables,
 )
 from qmstrace.core.config._toml import _load, _Table, _version
 from qmstrace.core.errors import CouldNotJudge
@@ -52,6 +54,7 @@ class TraceConfig:
     change_requests: ChangeRequests | None
     baselines: Mapping[str, BaselineScope]
     repos: Mapping[str, str]
+    tables: Tables = field(default_factory=Tables)
 
     @staticmethod
     def schema_reference(local_text: str, *, local_name: str = "qmstrace.toml") -> str | None:
@@ -156,6 +159,7 @@ class TraceConfig:
             change_requests=_change_requests(schema),
             baselines=_baselines(schema),
             repos=_repos(schema),
+            tables=_tables(schema),
         )
         schema.done()
         local.done()
@@ -248,3 +252,33 @@ def _cross_check(config: TraceConfig, schema_file: str) -> None:
         for name in scope.covers:
             if name not in item_types:
                 raise unknown_type(f"baseline '{scope.name}'", name)
+    _check_tables(config, schema_file)
+
+
+def _check_tables(config: TraceConfig, schema_file: str) -> None:
+    """Each field `[tables.matrix]` names is one the requirement type declares, and none can be
+    mistaken for a column the matrix derives on its own (ADR-0005)."""
+    requirement = config.item_types.get("requirement")
+    declared = requirement.fields if requirement is not None else frozenset()
+    seen: set[str] = set()
+    for name in config.tables.matrix_fields:
+        where = f"{schema_file}: [tables.matrix] fields lists '{name}'"
+        if name in seen:
+            raise CouldNotJudge(f"{where} twice.", "Fix: list each field once.")
+        seen.add(name)
+        if name in config.links:
+            raise CouldNotJudge(
+                f"{where}, which is a link marker — what it points at is a column of its own.",
+                f"Fix: remove '{name}' from the list.",
+            )
+        if name == "title" or name in config.item_types:
+            raise CouldNotJudge(
+                f"{where}, which is also the name of a column the matrix derives.",
+                "Fix: remove it, or rename the field in the schema.",
+            )
+        if name not in declared:
+            known = ", ".join(sorted(f for f in declared if f not in config.links)) or "none"
+            raise CouldNotJudge(
+                f"{where}, which the requirement type does not declare (it declares: {known}).",
+                "Fix: list a field the requirement type declares under required or values.",
+            )

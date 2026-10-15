@@ -17,6 +17,7 @@ from qmstrace.core.config._schema import (
     ItemType,
     LinkType,
     Subject,
+    Tables,
 )
 from qmstrace.core.config._toml import _Table
 from qmstrace.core.errors import CouldNotJudge
@@ -240,6 +241,16 @@ def _baselines(schema: _Table) -> dict[str, BaselineScope]:
             )
         found[name] = BaselineScope(name, tag, table.texts("covers"), subject)
         table.done()
+    return found
+
+
+def _tables(schema: _Table) -> Tables:
+    """`[tables.matrix]` — the requirement fields the traceability matrix carries (ADR-0005)."""
+    tables = schema.table("tables")
+    matrix = tables.table("matrix")
+    found = Tables(matrix.texts("fields"))
+    matrix.done()
+    tables.done()
     return found
 
 

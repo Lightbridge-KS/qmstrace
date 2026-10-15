@@ -304,6 +304,7 @@ EXPORTS: dict[str, dict[str, set[str]]] = {
             "LinkType",
             "SchemaForm",
             "Subject",
+            "Tables",
         },
         "_toml": {"SUPPORTED_VERSION"},
     },
