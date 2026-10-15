@@ -140,7 +140,7 @@ def test_a_stray_in_a_module_names_dotted_ids_whole(dotted: TraceConfig) -> None
 def test_a_pytest_marker_names_a_dotted_id(dotted: TraceConfig) -> None:
     text = 'import pytest\n\n@pytest.mark.verifies("REQ-SVC-04.1")\ndef test_x():\n    pass\n'
     found = pytest_tests.extract(
-        "tests/unit/test_keys.py", text, dotted.item_types["test_case"], dotted
+        "tests/unit/test_keys.py", text, dotted.item_types["automated_test"], dotted
     )
     assert [link.dst for link in found.links] == ["REQ-SVC-04.1"]
     assert found.findings == ()

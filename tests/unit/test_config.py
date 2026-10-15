@@ -55,7 +55,7 @@ def test_the_example_parses_and_merges_the_projects_part_with_the_repos() -> Non
     assert requirement.id_prefix == "REQ-SVC-"  # derived from the pattern
     assert requirement.declared_here
 
-    assert config.item_types["test_case"].levels == ("unit", "integration", "system")
+    assert config.item_types["automated_test"].levels == ("unit", "integration", "system")
     assert config.item_types["component"].ignore == ("**/__init__.py",)
 
 
@@ -87,8 +87,8 @@ def test_links_rules_externals_and_baselines_are_read() -> None:
 
 def test_a_type_the_repo_does_not_declare_is_known_but_not_scanned() -> None:
     config = TraceConfig.parse(SOLO)
-    assert set(config.item_types) == {"requirement", "test_case"}
-    without = re.sub(r"(?ms)^\[items\.component\].*?(?=^\[items\.test_case\])", "", SERVICE)
+    assert set(config.item_types) == {"requirement", "automated_test"}
+    without = re.sub(r"(?ms)^\[items\.component\].*?(?=^\[items\.automated_test\])", "", SERVICE)
     assert TraceConfig.parse(without, SCHEMA).item_types["component"].declared_here is False
 
 

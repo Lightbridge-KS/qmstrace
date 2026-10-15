@@ -1,4 +1,4 @@
-read: 1 requirement, 1 test case
+read: 1 requirement, 1 automated test
   controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
   baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
   baselines: no matching reachable local tag — nothing frozen locally

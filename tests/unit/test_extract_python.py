@@ -25,7 +25,7 @@ def module(config: TraceConfig, text: str, path: str = "src/service/keys.py") ->
 
 
 def cases_in(config: TraceConfig, text: str, path: str = "tests/unit/test_keys.py") -> Extracted:
-    return pytest_tests.extract(path, text, config.item_types["test_case"], config)
+    return pytest_tests.extract(path, text, config.item_types["automated_test"], config)
 
 
 # ── 1. modules ─────────────────────────────────────────────────────────────────────────────

@@ -25,7 +25,7 @@ A requirement — backward to its clause, forward to its design, code and tests:
 --8<-- "cli/golden/thread-requirement.txt"
 ```
 
-A test case, walked back to the clauses it serves:
+An automated test, walked back to the clauses it serves:
 
 ``` text
 --8<-- "cli/golden/thread-backward.txt"

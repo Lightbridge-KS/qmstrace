@@ -29,6 +29,6 @@ extractor = "python-module"
 files     = ["src/**/*.py"]
 ignore    = ["**/__init__.py"]
 
-[items.test_case]                   # ID = the test function's node id
+[items.automated_test]              # ID = the test function's node id
 extractor = "pytest"
 files     = ["tests/**/test_*.py"]

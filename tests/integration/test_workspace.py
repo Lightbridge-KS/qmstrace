@@ -13,6 +13,8 @@ The load-bearing claims, each pinned by a test:
 5. A repo on its own resolves its external sources against its own root.
 6. What the user's repo gets wrong is a finding: an item where its type is not read (V07), a
    file that is not UTF-8 (V08) — never a crash. An ignored note is never read.
+7. Item type names are data: a schema that still calls its pytest functions `test_case`, as
+   schemas did before ADR-0003, reads the same tests with the same links and the same gaps.
 """
 
 import shutil
@@ -94,7 +96,7 @@ def test_a_repo_scans_what_its_configuration_names(project: Path) -> None:
         "requirement": (3, 1, 0),
         "design_element": (2, 1, 0),
         "component": (2, 2, 1),
-        "test_case": (4, 2, 0),
+        "automated_test": (4, 2, 0),
     }
     assert found.violations == ()
     assert len(found.graph.links) == 14
@@ -216,3 +218,27 @@ def test_an_ignored_note_is_never_read(project: Path) -> None:
     write(project / "service" / ".gitignore", "_playground/\n")
     write(project / "service" / "_playground" / "NOTES.md", "### REQ-SVC-01 — quoted\n")
     assert assess(project / "service").violations == ()
+
+
+# ── 7. item type names are data ────────────────────────────────────────────────────────────
+
+
+def test_a_schema_that_calls_its_tests_test_case_reads_them_the_same(project: Path) -> None:
+    unlinked = "tests/unit/test_extra.py::test_unlinked"  # so that G07 has something to find
+    write(project / "service" / unlinked.split("::")[0], "def test_unlinked():\n    pass\n")
+    renamed = assess(project / "service")
+    for name in ("ledger/qmstrace.schema.toml", "service/qmstrace.toml", "client/qmstrace.toml"):
+        path = project / name
+        write(path, path.read_text(encoding="utf-8").replace("automated_test", "test_case"))
+    found = assess(project / "service")
+
+    def gaps(assessment: Assessment) -> set[tuple[str, str | None]]:
+        return {(g.code, g.item) for g in assessment.gaps}
+
+    assert [i.id for i in found.graph.items("test_case")] == [
+        i.id for i in renamed.graph.items("automated_test")
+    ]
+    assert found.graph.items("automated_test") == []
+    assert set(found.graph.links) == set(renamed.graph.links)  # in another order: by type name
+    assert found.violations == renamed.violations == ()
+    assert gaps(found) == gaps(renamed) and ("G07", unlinked) in gaps(found)

@@ -6,7 +6,7 @@ From the project's trace schema
     Origin      requirement → origin clause
     Satisfies   design element → requirement
     Implements  component → design element
-    verifies    test case → requirement, design element
+    verifies    automated test → requirement, design element
     Assumes     requirement, design element → requirement, design element · counts toward no coverage
 
   required fields
@@ -19,7 +19,7 @@ From the project's trace schema
     G04  every design element needs an incoming verifies — "no test verifies it yet." · applies to no item here: this repo does not scan that type
     G05  every design element needs its own Satisfies — "satisfies no requirement — every design element points back to one." · applies to no item here: this repo does not scan that type
     G06  every component needs its own Implements — "implements no design element — every component points back to one."
-    G07  every test case needs its own verifies — "verifies nothing."
+    G07  every automated test needs its own verifies — "verifies nothing."
 
   external AGR-…: declared in agreement.md, in the ledger — cited here, never declared here
 
@@ -34,9 +34,9 @@ From this repo's qmstrace.toml
   subjects: client (key CLT)
 
   declares
-    requirement  markdown       ^REQ-CLT-\d{2}$         docs/req/*-srs.md
-    component    python-module  ID: the module's path   src/**/*.py
-    test case    pytest         ID: the test's node ID  tests/**/test_*.py
+    requirement     markdown       ^REQ-CLT-\d{2}$         docs/req/*-srs.md
+    component       python-module  ID: the module's path   src/**/*.py
+    automated test  pytest         ID: the test's node ID  tests/**/test_*.py
   knows, does not scan: design element
 
 No rule has a stage: in this version every gap fails the gate (qmstrace check --strict).

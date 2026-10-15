@@ -63,7 +63,7 @@ CLEAN = {
     ("requirement", "docs/req/service-srs.md"): SRS,
     ("design_element", "docs/design/service-design.md"): DESIGN,
     ("component", "src/service/keys.py"): MODULE,
-    ("test_case", "tests/unit/test_keys.py"): TESTS,
+    ("automated_test", "tests/unit/test_keys.py"): TESTS,
 }
 AGREEMENT = Surroundings(externals={"agreement": frozenset({"AGR-1", "AGR-2", "AGR-3"})})
 
@@ -141,7 +141,7 @@ def test_a_clean_repo_has_every_link_and_no_findings(service: TraceConfig) -> No
         (
             {
                 (
-                    "test_case",
+                    "automated_test",
                     "tests/unit/test_keys.py",
                 ): '@pytest.mark.verifies("AGR-1")\ndef test_x():\n    pass\n'
             },
@@ -220,7 +220,7 @@ def test_an_id_declared_twice_names_the_first(service: TraceConfig) -> None:
 
 def test_a_test_function_defined_twice_is_v01(service: TraceConfig) -> None:
     twice = TESTS + "\n\ndef test_a_call_without_a_key_is_refused():\n    pass\n"
-    _, found = build(service, {("test_case", "tests/unit/test_keys.py"): twice})
+    _, found = build(service, {("automated_test", "tests/unit/test_keys.py"): twice})
     assert codes(found) == ["V01"]
 
 
@@ -274,7 +274,7 @@ def test_an_item_where_its_type_is_not_read_is_v07(service: TraceConfig) -> None
 
 CITES_CLIENT = {
     (
-        "test_case",
+        "automated_test",
         "tests/unit/test_keys.py",
     ): '@pytest.mark.verifies("REQ-CLT-01")\ndef test_x():\n    pass\n'
 }
@@ -312,7 +312,7 @@ def test_an_id_of_this_repos_own_kind_is_never_given_that_benefit(service: Trace
     around = Surroundings(every_sibling_read=False, externals=AGREEMENT.externals)
     cites_own = {
         (
-            "test_case",
+            "automated_test",
             "tests/unit/test_keys.py",
         ): '@pytest.mark.verifies("REQ-SVC-07")\ndef test_x():\n    pass\n'
     }
@@ -399,7 +399,7 @@ def test_ordinary_ancestry_survives_an_earlier_assumption(
         service,
         {
             ("design_element", "docs/design/service-design.md"): design,
-            ("test_case", "tests/unit/test_keys.py"): tests,
+            ("automated_test", "tests/unit/test_keys.py"): tests,
         },
     )
     assert not wrong
@@ -543,7 +543,7 @@ def test_a_file_read_for_two_types_reports_each_near_miss_once(service: TraceCon
 # ── 6. the project's graph ─────────────────────────────────────────────────────────────────
 
 DOCS = {k: v for k, v in CLEAN.items() if k[0] in ("requirement", "design_element")}
-CODE = {k: v for k, v in CLEAN.items() if k[0] in ("component", "test_case")}
+CODE = {k: v for k, v in CLEAN.items() if k[0] in ("component", "automated_test")}
 
 
 def project(config: TraceConfig) -> TraceGraph:
@@ -551,7 +551,7 @@ def project(config: TraceConfig) -> TraceGraph:
     code and tests in `code`, each built against the other's authored items."""
     docs = extracted(config, DOCS)
     code = [
-        part.qualified("code", "../code", frozenset({"component", "test_case"}))
+        part.qualified("code", "../code", frozenset({"component", "automated_test"}))
         for part in extracted(config, CODE)
     ]
     authored = {i.id: i for part in docs for i in part.items}
@@ -572,7 +572,7 @@ def project(config: TraceConfig) -> TraceGraph:
 def test_the_joined_graph_judges_every_repos_items(service: TraceConfig) -> None:
     graph = project(service)
     test = "code:tests/unit/test_keys.py::test_a_call_without_a_key_is_refused"
-    assert [i.id for i in graph.items("test_case")] == [test]
+    assert [i.id for i in graph.items("automated_test")] == [test]
     requirement = graph.node("REQ-SVC-01")
     assert requirement is not None and (requirement.home, requirement.repo) == (
         Home.LOCAL,
@@ -597,7 +597,7 @@ def test_with_every_repo_read_an_unknown_id_is_v03_never_unverified(service: Tra
         service,
         {
             (
-                "test_case",
+                "automated_test",
                 "tests/unit/test_x.py",
             ): '@pytest.mark.verifies("REQ-CLT-09")\ndef test_x(): ...\n'
         },

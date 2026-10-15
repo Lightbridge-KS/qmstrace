@@ -35,7 +35,7 @@ flowchart RL
   req["REQ-SVC-01 · requirement<br/>A call carries a key"] -- Origin --> agr["AGR-1 · agreement clause"]
   dsn["DSN-SVC-01 · design element<br/>Key check"] -- Satisfies --> req
   mod["src/service/keys.py · component"] -- Implements --> dsn
-  test["test_a_call_without_a_valid_key_is_refused · test case"] -- verifies --> req
+  test["test_a_call_without_a_valid_key_is_refused · automated test"] -- verifies --> req
 ```
 
 Each arrow is a line in a file you already write: a field under a requirement's heading, a line
@@ -60,8 +60,11 @@ you would leave it out: qmstrace walks up to the nearest `qmstrace.toml`.
    from the ledger repo beside this one, plus this repo's own `qmstrace.toml`.
 2. **`scanned`** — what was read, per item type. Three requirements in one file, two design
    elements, two modules — one file was ignored, and the line says by which pattern — and four
-   test cases. A parametrised test function is one test case, however many times it runs. The
-   parenthesis says that the working tree was read, not a pinned commit.
+   automated tests, the test functions. A parametrised test function is one automated test,
+   however many times it runs. (A *test case* is something else: a planned entry in a Test
+   Specification, which this project does not keep — see
+   [the chain](../explanation/the-chain.md#test-cases-and-automated-tests).) The parenthesis
+   says that the working tree was read, not a pinned commit.
 3. **`links:`** — fourteen links entered the graph. A link the rules do not allow never does:
    it becomes a finding instead.
 4. **`external AGR-*`** — every agreement clause a requirement cites was checked against the
@@ -71,7 +74,7 @@ you would leave it out: qmstrace walks up to the nearest `qmstrace.toml`.
 6. **`baselines:`** — the project declares two kinds of baseline. This fixture has no matching
    reachable local tag; the output states that limit and does not claim remote completeness.
 7. **One line per requirement** — its category, the clause it comes from, and what hangs off
-   it: design elements, and test cases by level.
+   it: design elements, and automated tests by level.
 8. **`verified by inspection`** — `REQ-SVC-03` has no test to show, by design. It is listed
    apart, because nothing records the inspection yet.
 9. **`categories with no requirement here`** — a prompt, not a failure: has each quality been

@@ -1,5 +1,5 @@
 tests/integration/test_store.py::test_a_record_survives_a_restart
-  test case, integration
+  automated test, integration
 
 backward — what it derives from:
   verifies  DSN-SVC-02 — Record store · design element · docs/design/service-design.md:13

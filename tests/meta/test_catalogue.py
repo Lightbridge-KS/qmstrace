@@ -124,7 +124,7 @@ def suspect_scenario(config: TraceConfig) -> list[Finding]:
 
     spec = config.item_types["requirement"]
     parts = [REGISTRY["markdown"](SRS, REQ.replace("Statement.", "Changed."), spec, config)]
-    test_spec = config.item_types["test_case"]
+    test_spec = config.item_types["automated_test"]
     tests = '@pytest.mark.verifies("REQ-SVC-01")\ndef test_x(): ...\n'
     test_part = REGISTRY["pytest"](TESTS, tests, test_spec, config)
     old, _ = TraceGraph.build(config, [REGISTRY["markdown"](SRS, REQ, spec, config), test_part])

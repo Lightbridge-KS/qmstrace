@@ -24,6 +24,6 @@ files      = ["docs/req/*-srs.md"]
 extractor = "python-module"
 files     = ["src/**/*.py"]
 
-[items.test_case]
+[items.automated_test]
 extractor = "pytest"
 files     = ["tests/**/test_*.py"]

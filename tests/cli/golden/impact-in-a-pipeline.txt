@@ -9,8 +9,8 @@ starting items:
   change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
 
 downstream — grouped by item type:
-  test case (1):
-    tests/unit/test_api.py::test_the_service_refuses_a_call_without_a_key · test case, unit
+  automated test (1):
+    tests/unit/test_api.py::test_the_service_refuses_a_call_without_a_key · automated test, unit
 
 upstream origins — of the starting items:
   no upstream origins reached here
@@ -19,4 +19,4 @@ candidate for review — configured baseline types, not a claim of edits or froz
   unknown type, omitted from the candidate: REQ-SVC-01
   no candidate line — no items with a known type covered by a baseline
 
-starts: 1 · downstream: 1 test case · upstream origins: 0 — this repo only
+starts: 1 · downstream: 1 automated test · upstream origins: 0 — this repo only

@@ -7,10 +7,10 @@ backward — what it derives from:
 forward — what hangs off it, nearest first:
   Satisfies   DSN-SVC-01 — Key check · design element · docs/design/service-design.md:8
     Implements  src/service/keys.py · component
-    verifies    tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler · test case, unit
+    verifies    tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler · automated test, unit
     Assumes     DSN-SVC-02 — Record store · design element · docs/design/service-design.md:13 · assumes it — counts toward no coverage
       Implements  src/service/store.py · component
-      verifies    tests/integration/test_store.py::test_a_record_survives_a_restart · test case, integration
-  verifies    tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused · test case, unit
+      verifies    tests/integration/test_store.py::test_a_record_survives_a_restart · automated test, integration
+  verifies    tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused · automated test, unit
 
-forward: 2 design elements, 2 components, 3 test cases · backward: 1 origin clause — this repo only
+forward: 2 design elements, 2 components, 3 automated tests · backward: 1 origin clause — this repo only

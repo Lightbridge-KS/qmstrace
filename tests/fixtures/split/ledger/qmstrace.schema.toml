@@ -28,7 +28,7 @@ Category    = ["functional-suitability", "performance-efficiency", "compatibilit
 [item_types.design_element]
 [item_types.component]
 
-[item_types.test_case]
+[item_types.automated_test]
 levels = ["unit", "integration", "system"]
 
 # ── link types — a field whose name is a link marker IS the link; all are many-to-many ────
@@ -36,7 +36,7 @@ levels = ["unit", "integration", "system"]
 Origin     = { from = ["requirement"],                   to = ["origin_clause"] }
 Satisfies  = { from = ["design_element"],                to = ["requirement"] }
 Implements = { from = ["component"],                     to = ["design_element"] }
-verifies   = { from = ["test_case"],                     to = ["requirement", "design_element"] }
+verifies   = { from = ["automated_test"],                to = ["requirement", "design_element"] }
 Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
 
 # ── coverage rules — an unmet rule is a gap ───────────────────────────────────────────────
@@ -79,7 +79,7 @@ text  = "implements no design element — every component points back to one."
 
 [[rules]]
 code  = "G07"
-item  = "test_case"
+item  = "automated_test"
 needs = "outgoing:verifies"
 text  = "verifies nothing."
 

@@ -156,7 +156,7 @@ covers = ["requirement"]
 [baselines.product]                            # the release tag IS the product baseline
 tag     = '^v\d+\.\d+\.\d+$'                    # pre-release tags are a different scope, or none
 subject = "*"
-covers  = ["requirement", "design_element", "component", "test_case"]
+covers  = ["requirement", "design_element", "component", "automated_test"]
 ```
 
 - **A scope is a subject together with item types — never the whole repo.** A *subject* is

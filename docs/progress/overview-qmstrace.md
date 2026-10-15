@@ -8,7 +8,7 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-14 · Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-15 · Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed.** Now: [package refactors](#now--package-refactors). Next:
 [real-world use](#next--real-world-use), in the layout of ADR-0001, and
 [M12 · the C# capability](#next--m12--the-c-capability), whose test bed is built. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
@@ -482,6 +482,13 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   that declares its targets (`fix/gap-wording-sibling-targets`, stacked on M12e): the run's C#
   agent was told to *write the design here*, wording from M3 that predates ADR-0001. Where no
   sibling declares one, the text is unchanged; no golden moved.
+- [x] **After M12-R** — the example fixtures follow ADR-0003 (`fix/mini-automated-test`): `mini`
+  and `split` call their pytest functions `automated_test`, so the manual's first look, the
+  configuration, `status` and `thread` pages no longer teach *test case* for a test function.
+  Every golden moved by wording only, with the schema digests and fixture commit IDs that
+  follow from it. A schema that keeps `test_case` is pinned by one test (reads the same tests,
+  links and gaps). Found by the rename: a next move read *declares a automated test*; it now
+  takes its article.
 
 ## Landed — M10 · the project-wide check
 

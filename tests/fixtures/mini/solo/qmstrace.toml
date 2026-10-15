@@ -11,12 +11,12 @@ project = "SOLO"
 [schema.item_types.requirement]
 required = ["Origin"]
 
-[schema.item_types.test_case]
+[schema.item_types.automated_test]
 levels = ["unit"]
 
 [schema.links]
-Origin   = { from = ["requirement"], to = ["origin_clause"] }
-verifies = { from = ["test_case"],   to = ["requirement"] }
+Origin   = { from = ["requirement"],    to = ["origin_clause"] }
+verifies = { from = ["automated_test"], to = ["requirement"] }
 
 [[schema.rules]]
 code  = "G02"
@@ -43,6 +43,6 @@ extractor  = "markdown"
 id_pattern = '^REQ-APP-\d{2}$'
 files      = ["docs/req/*-srs.md"]
 
-[items.test_case]
+[items.automated_test]
 extractor = "pytest"
 files     = ["tests/**/test_*.py"]

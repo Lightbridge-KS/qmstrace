@@ -31,7 +31,7 @@ CASES = [
     ),
     ("component", "src/service/m.py", "Implements", "DSN-SVC-01", '"""M.\n\n{}\n"""\n'),
     (
-        "test_case",
+        "automated_test",
         "tests/unit/test_m.py",
         "verifies",
         "REQ-SVC-01",
