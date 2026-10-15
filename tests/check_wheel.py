@@ -12,7 +12,11 @@ with ZipFile(wheel_path) as wheel:
         if asset.is_file():
             name = asset.relative_to("src").as_posix()
             assert wheel.read(name) == asset.read_bytes(), name
-print("Wheel carries every setup, skill and browser asset unchanged.")
+    info = next(n for n in wheel.namelist() if n.endswith(".dist-info/METADATA"))
+    assert "License-Expression: MIT" in wheel.read(info).decode(), "no license expression"
+    license_name = info.replace("METADATA", "licenses/LICENSE")
+    assert wheel.read(license_name) == Path("LICENSE").read_bytes(), license_name
+print("Wheel carries every setup, skill and browser asset unchanged, and the MIT license.")
 
 # An isolated interpreter outside the checkout cannot fall back to source files or an
 # editable installation. Reading directly from the wheel keeps this dry check hermetic.

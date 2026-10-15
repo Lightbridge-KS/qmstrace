@@ -7,7 +7,7 @@ site_description = "The trace layer under a quality-management system"
 docs_dir = "contents"
 strict = true                        # a broken link or anchor fails the build
 
-# copyright = "Copyright &copy; 2026 Your name"
+copyright = "Copyright &copy; 2026 Kittipos S. (Lightbridge-KS) · MIT License"
 
 # Set when the repository goes public — until then an edit link would lead nowhere.
 # repo_url = "https://github.com/Lightbridge-KS/qmstrace"

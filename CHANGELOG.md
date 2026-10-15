@@ -15,6 +15,7 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- The MIT License: `LICENSE`, declared in the package metadata and carried in the wheel.
 - C# repos are traced (ADR-0004). `csharp-file` reads one component per `.cs` file, its ID the
   path, linked by a field line in the first type's leading `///` comment. `xunit` reads one
   automated test per `[Fact]` or `[Theory]` method, linked by the ID that starts a literal
