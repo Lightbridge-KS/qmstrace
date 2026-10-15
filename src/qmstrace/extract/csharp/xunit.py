@@ -2,8 +2,9 @@
 
 Its ID is `path::Outer::Inner::Method`. Its link is the ID that starts its `DisplayName`, when
 that is a string literal — regular, verbatim or raw — and the link is the one its item type
-carries: `[Fact(DisplayName = "TC-SVC-01.1 a call without a key is refused")]`. A `[Theory]` is
-one automated test; its rows are runs.
+carries: `[Fact(DisplayName = "TC-SVC-01.1 a call without a key is refused")]`. The ID ends where
+an ID in prose ends, so `TC-SVC-01.1/O03 …` links `TC-SVC-01.1` and `TC-SVC-01.1a …` is no ID.
+A `[Theory]` is one automated test; its rows are runs.
 
 A test report names a run by its class — namespace-qualified, nested classes joined with `+` —
 and its method, never by the `DisplayName`. So the extractor records those identities: the
@@ -28,7 +29,7 @@ from typing import Final
 from qmstrace.core import findings
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import (
-    ID_TOKEN,
+    ID_IN_TEXT,
     Extracted,
     Finding,
     Identity,
@@ -45,11 +46,12 @@ _DISPLAY: Final = "DisplayName"
 _ID_LIKE: Final = re.compile(r"[A-Z][A-Z0-9]*-\S*\d")
 # A test attribute written in a comment: `// [Fact(DisplayName = "TC-SVC-01.1 …")]`.
 _COMMENTED: Final = re.compile(r'\[\s*(?:\w+\.)*\w+\s*\(\s*DisplayName\s*=\s*@?"(\S+)')
-# V14's next move: the first word of the DisplayName must be the whole ID.
+# V14's next move: the DisplayName must start with a whole ID, ended as an ID in prose is.
 _NOT_AN_ID_FIX: Final = (
-    "Fix: start the test's DisplayName with one whole ID, then a space: [Fact(DisplayName = "
-    '"ID …")]; anything after the ID, a suffix included, goes after the space. If nothing real '
-    "fits, leave the ID out and tell the developer what is missing — never invent an ID."
+    'Fix: start the test\'s DisplayName with one whole ID: [Fact(DisplayName = "ID …")]. A space '
+    "or a mark such as '/' or ':' may follow the ID directly; a letter, digit, hyphen or dotted "
+    "number may not. If nothing real fits, leave the ID out and tell the developer what is "
+    "missing — never invent an ID."
 )
 _FIX: Final = (
     "Fix: start the test's DisplayName with the ID, as a string literal: [Fact(DisplayName = \"ID "
@@ -147,19 +149,22 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                     )
                 )
                 continue
+            leading = ID_IN_TEXT.match(display.value.lstrip())
             first = display.value.split()[0] if display.value.split() else ""
-            if ID_TOKEN.fullmatch(first):
-                links.append(Link(test_id, first, marker, path, display.line))
+            if leading is not None:
+                links.append(Link(test_id, leading.group(1), marker, path, display.line))
             elif _ID_LIKE.match(first):
                 wrong.append(
                     findings.not_an_id(test_id, marker, first, path, display.line, _NOT_AN_ID_FIX)
                 )
     strays = tuple(
-        Stray(marker, (found.group(1),), path, comment.line, "comment", _below(comment, starts))
+        Stray(marker, (leading.group(1),), path, comment.line, "comment", _below(comment, starts))
         for comment in source.comments
         if marker is not None
         for found in [_COMMENTED.search(comment.text)]
-        if found is not None and ID_TOKEN.fullmatch(found.group(1))
+        if found is not None
+        for leading in [ID_IN_TEXT.match(found.group(1))]
+        if leading is not None
     )
     return Extracted(tuple(items), tuple(links), tuple(wrong), strays=strays)
 
