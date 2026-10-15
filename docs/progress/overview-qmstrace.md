@@ -498,7 +498,7 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   that declares its targets (`fix/gap-wording-sibling-targets`, stacked on M12e): the run's C#
   agent was told to *write the design here*, wording from M3 that predates ADR-0001. Where no
   sibling declares one, the text is unchanged; no golden moved.
-- [x] **After M12-R** — the example fixtures follow ADR-0003 (`fix/mini-automated-test`): `mini`
+- [x] **After M12-R** — the example fixtures follow ADR-0003 (`fix/mini-automated-test`, [#46](https://github.com/Lightbridge-KS/qmstrace/pull/46)): `mini`
   and `split` call their pytest functions `automated_test`, so the manual's first look, the
   configuration, `status` and `thread` pages no longer teach *test case* for a test function.
   Every golden moved by wording only, with the schema digests and fixture commit IDs that
