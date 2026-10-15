@@ -2,7 +2,7 @@
 
 An engine that keeps the **state, traceability and audit evidence** of a software project's
 work products under ISO/IEC 29110, so an auditor's questions are answered by query instead
-of by assembly. **Phase: the first engine slice is being built** — see the slice tracker under `docs/progress/`. (`CLAUDE.md` is a symlink to
+of by assembly. **Phase: release 0.1.0, applied to its first real project** — see the tracker under `docs/progress/`. (`CLAUDE.md` is a symlink to
 this file.)
 
 ## Orientation — read in this order

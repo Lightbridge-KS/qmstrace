@@ -8,18 +8,19 @@
 
 ## Get qmstrace
 
-Until its first release, qmstrace runs from a clone of its repository. uv fetches the right
-Python and everything else on the first run.
+The example project lives in qmstrace's repository, so this tutorial runs qmstrace from a
+clone of it. uv fetches the right Python and everything else on the first run. To use
+qmstrace in a repo of your own, install a release instead: [set up a
+repo](../how-to/set-up-a-repo.md).
 
 ``` sh
 git clone https://github.com/Lightbridge-KS/qmstrace.git
 cd qmstrace
 ```
 
-!!! note "Not public yet"
+!!! note "A private repository"
 
-    The repository becomes public with the first release. Until then, this step needs access
-    to it.
+    The repository is private. This step needs read access to it.
 
 ## Meet the example project
 
