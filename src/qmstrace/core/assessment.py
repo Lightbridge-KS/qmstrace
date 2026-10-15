@@ -76,6 +76,15 @@ class Assessment:
 
 
 @dataclass(frozen=True, slots=True)
+class Checkout:
+    """What a repo had checked out when it was read: its commit, and whether its working tree
+    was clean. A table records it, so a reader knows which inputs it came from (ADR-0005)."""
+
+    commit: str
+    clean: bool
+
+
+@dataclass(frozen=True, slots=True)
 class RepoState:
     """One repo of the project as the ledger's check read it: where it is, from the ledger;
     what was scanned in it; its baselines."""
@@ -85,6 +94,7 @@ class RepoState:
     tree_label: str
     scanned: tuple[Scanned, ...]
     baseline_state: BaselineState = field(default_factory=BaselineState)
+    checkout: Checkout | None = None  # None outside Git
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,6 +112,7 @@ class ProjectAssessment:
     register: Register
     notices: tuple[Notice, ...]
     suspects: tuple[Suspect, ...] = ()
+    ledger: Checkout | None = None  # the ledger's own checkout, whether or not it is in [repos]
 
     def fails(self, *, strict: bool) -> bool:
         """Whether the check fails: on any violation, and — under the gate — on any gap too."""

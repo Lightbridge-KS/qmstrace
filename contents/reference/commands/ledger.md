@@ -5,7 +5,8 @@
     The project side's verbs, run in the ledger repo — where `qmstrace.schema.toml` is.
     `check` judges every repo of the project together — coverage met across repos, each repo's
     own violations, suspects across repos — from their working trees; `--strict` is the
-    ledger's gate. `thread` and `impact` walk across every repo. `copy-schema` writes the
+    ledger's gate. `thread` and `impact` walk across every repo. `table` emits the traceability
+    matrix, the requirements register or the coverage summary as JSON. `copy-schema` writes the
     project's trace schema into each product repo as a generated, verified copy.
 
 ## The group
@@ -115,6 +116,42 @@ the item types a baseline covers:
 
 The order of the starts, and a start given twice, do not change the output. One unseen start
 refuses the whole request, exit `2`.
+
+## qmstrace ledger table
+
+``` text
+--8<-- "cli/golden/help-ledger-table.txt"
+```
+
+Every repo is read as `ledger check` reads it, and one table is emitted as a JSON document a
+render layer turns into a formal document — a traceability record, a requirements
+specification's register. Its shape, `qmstrace.table/1`, is in [the table
+format](../table-format.md):
+
+- **`matrix`** — one row per requirement, design element and test case, with the origins,
+  components and automated tests that hang off them;
+- **`requirements`** — one row per requirement: its origins, its fields, its change and its
+  status;
+- **`coverage`** — requirements covered and not, tier by tier, against the rules that ask
+  for each.
+
+The `cases` fixture project's coverage summary — a ledger holding the documents and a Test
+Specification, a Python service and a C# agent:
+
+``` json
+--8<-- "cli/golden/ledger-table-coverage-cases.json"
+```
+
+Every repo's commit, and whether its working tree was clean, are in the document; a repo with
+uncommitted work is read as it is and marked `"clean": false`. The tables count links, not
+passing tests. A project with violations is still tabled, exit `0`: the violation count and a
+notice say the links they refuse are not in it, and `ledger check` lists them.
+
+With `--out`, the document is written to a new file — never over an existing one, exit `2`:
+
+``` text
+--8<-- "cli/golden/ledger-table-out.txt"
+```
 
 ## qmstrace ledger copy-schema
 

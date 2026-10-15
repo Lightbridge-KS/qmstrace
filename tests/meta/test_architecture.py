@@ -723,6 +723,8 @@ CLI_IMPORTS: dict[str, set[str]] = {
     "_ledger": {
         "qmstrace.cli._options",
         "qmstrace.cli._outcome",
+        "qmstrace.core.tables",
+        "qmstrace.render.tables",
         "qmstrace.render.text",
         "qmstrace.workspace",
         "typer",
@@ -746,6 +748,7 @@ CLI_EXPORTS = {
         "ledger",
         "ledger_check",
         "ledger_impact",
+        "ledger_table",
         "ledger_thread",
     },
     "qmstrace.cli._local": {

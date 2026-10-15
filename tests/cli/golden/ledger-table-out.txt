@@ -1,0 +1,2 @@
+Written: ../matrix.json · matrix · 5 rows
+Read from working trees, not pinned; a draft, not an issued revision. Exit 0.
