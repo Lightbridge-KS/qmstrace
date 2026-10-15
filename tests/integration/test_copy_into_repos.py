@@ -107,7 +107,8 @@ def test_a_copy_of_another_projects_schema_is_refused(project: Path) -> None:
 
 def test_reasons_that_end_their_own_sentence_are_not_given_a_second_stop(project: Path) -> None:
     for repo in ("client", "service"):
-        unknown = config_of(project, repo).replace('"python-module"', '"csharp-file"')
+        # A slip, so no later extractor makes it known.
+        unknown = config_of(project, repo).replace('"python-module"', '"python-modul"')
         (project / repo / "qmstrace.toml").write_text(unknown, encoding="utf-8")
     with pytest.raises(CouldNotJudge) as caught:
         Workspace.copy_schema(project / "ledger")
