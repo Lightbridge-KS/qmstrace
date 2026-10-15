@@ -349,6 +349,14 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 - **All findings in one pass**, sorted, deterministic — never the first error and stop.
 - **Every violation ends with the next move**, and where the wrong move is tempting it says
   so: *never invent one* · *do not edit the ledger yourself* · *stop and ask the developer*.
+- **A gap whose link has nothing to point at here names who has** (decided 2026-10-15). When
+  this repo declares none of the link's target types but a sibling it reads does — the ledger
+  that holds the documents (ADR-0001), or another product repo — the next move names that
+  sibling and keeps *only if it is true*. With no sibling declaring one, it is as before:
+  *write the design here … or cite another repo's only if this item really serves it*.
+  **Rejected:** keeping *write the design here* everywhere (wrong where the ledger holds the
+  documents, as the beacon-dotnet run showed), and telling a repo to cite the sibling's items
+  without the hedge (a module seldom implements another repo's design).
 - Kinds of finding and what each fails: [Data Architecture § Kinds of finding](data-architecture.md).
 
 ### States that must never look alike

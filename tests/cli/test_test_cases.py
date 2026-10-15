@@ -136,3 +136,24 @@ def test_a_gaps_next_move_cites_only_its_own_tests_unread_marker(cases: Path) ->
         in by_test["ConstConcatenation_Runs"]
     )
     assert f"Shapes.cs:{line} " not in by_test["ConstInterpolation_Runs"]
+
+
+@pytest.mark.verifies("DSN-QMT-06", "DSN-QMT-15")
+def test_a_test_with_nothing_to_point_at_here_is_sent_to_the_ledgers_items(cases: Path) -> None:
+    """Where the ledger holds the documents (ADR-0001), a product repo declares no target of a
+    test's link: the next move names the ledger, never "write the design here"."""
+    agent = cases / "agent"
+    source = agent / "tests/Agent.Tests/Unit/KeyCheckTests.cs"
+    text = source.read_text(encoding="utf-8")
+    old = '[Fact(DisplayName = "TC-SVC-01.1 a call without a key is refused")]'
+    assert old in text
+    source.write_text(text.replace(old, '[Fact(DisplayName = "a call without a key is refused")]'))
+    _, output = run("-C", str(agent), "check")
+    (gap,) = [g for g in gaps(output) if g.startswith("G07")]
+    assert "::KeyCheckTests::Admits_NoKey_IsFalse: verifies nothing." in gap
+    assert (
+        "this repo declares no requirement or design element or test case for it to point at, "
+        'but ledger does: write `[Fact(DisplayName = "<requirement or design element or test '
+        'case ID> …")]` on the test method, citing an item of ledger — only if it is true'
+    ) in gap
+    assert "write the design here" not in gap
