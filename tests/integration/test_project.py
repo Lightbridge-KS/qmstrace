@@ -143,6 +143,17 @@ def test_a_repo_whose_configuration_cannot_be_read_is_named(split: Path) -> None
     assert "service: its configuration could not be read" in refusal(split)
 
 
+def test_reasons_that_end_their_own_sentence_are_not_given_a_second_stop(split: Path) -> None:
+    for repo in ("client", "service"):
+        (split / repo / "qmstrace.toml").write_text("version = 1\n", encoding="utf-8")
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.project(split / "ledger")
+    said = f"{caught.value.what} {caught.value.next_move}"  # as the command prints it
+    assert "the [schema] table is missing; service:" in said
+    assert "the [schema] table is missing. Fix: deal with each repo named above" in said
+    assert ".. " not in said and ".;" not in said
+
+
 def test_run_in_a_product_repo_it_names_the_ledger(split: Path) -> None:
     with pytest.raises(CouldNotJudge) as caught:
         Workspace.project(split / "service")

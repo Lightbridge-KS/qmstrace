@@ -351,6 +351,12 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
 5. Record observed friction as issues; choose fixes from that evidence before expanding to
    M11. Baseline only after the IDs, trace and review are ready.
 
+**Fixed from use:**
+- [x] 2026-10-14, seen at `75ba627`: the refusals of `ledger copy-schema` and `ledger check`
+  (so `ledger thread` and `ledger impact`) ended a reason that closes its own sentence in two
+  full stops — `… Fix: use one of those.. Fix: …`. Each reason now gives up its own stop
+  before the join. A regression test per command; no golden held a doubled stop.
+
 **Reconciled 2026-10-13:** the September 29 onboarding handoff names `94fd827`, still both
 local and remote `main`. M10 PRs #27–#29 and #31 are merged; #30 is closed. Issues #16,
 #20–#22, #25 and #26 remain open. The handoff's project choice remains a proposal, not a

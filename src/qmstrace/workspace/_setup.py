@@ -201,9 +201,11 @@ def copy_schema(
         planned.append((root, updated, copied))
         reports.append(copied)
     if problems:
+        # A refusal passed on whole closes its own sentence ("… Fix: use one of those."); it
+        # gives up that stop, so the joined reasons end in one.
         raise CouldNotJudge(
             "the schema could not be copied into every repo, so nothing was written — "
-            + "; ".join(problems)
+            + "; ".join(problem.removesuffix(".") for problem in problems)
             + ".",
             "Fix: deal with each repo named above, then run qmstrace ledger copy-schema again.",
         )
