@@ -49,7 +49,9 @@ def test_the_ledgers_check_judges_test_cases_with_the_automated_tests_that_run_t
     (gap,) = gaps(output)
     assert gap.startswith("G09  docs/test/service-test-cases.md:")
     assert "TC-SVC-02.2: no automated test runs it yet." in gap
-    assert 'on the automated test in service, write `@pytest.mark.verifies("TC-SVC-02.2")`' in gap
+    # Two repos run automated tests, read by two extractors: the next move names both ways.
+    assert 'on the automated test in service, `@pytest.mark.verifies("TC-SVC-02.2")`' in gap
+    assert 'on the automated test in agent, `[Fact(DisplayName = "TC-SVC-02.2 …")]`' in gap
     assert "on the test case" not in gap  # a test case verifying a test case is never suggested
 
 
@@ -76,3 +78,61 @@ def test_the_ledgers_own_check_names_the_automated_tests_another_repo_holds(
         assert "this repo declares no automated test" in gap
         assert "qmstrace ledger check, run in the ledger, judges that" in gap
         assert "on the test case, write" not in gap
+
+
+# ── 4. a C# repo in the same project (ADR-0004) ────────────────────────────────────────────
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
+def test_a_csharp_repos_status_and_gate(cases: Path, golden: Golden) -> None:
+    agent = str(cases / "agent")
+    code, status = run("-C", agent, "status")
+    assert code == 0
+    golden(GOLDEN / "status-cases-agent.txt", status)
+    assert "component         1 item  in  1 file   src/**/*.cs" in status
+    assert "[Fact]/[Theory] methods: a Theory is one automated test" in status
+    code, output = run("-C", agent, "check", "--strict")
+    assert code == 0, output
+    golden(GOLDEN / "check-cases-agent.txt", output)
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-06", "DSN-QMT-14")
+def test_a_gap_three_ways_can_meet_names_all_three_in_the_ledgers_check(cases: Path) -> None:
+    spec = cases / "ledger/docs/test/service-test-cases.md"
+    spec.write_text(spec.read_text(encoding="utf-8").replace("verifies: REQ-SVC-01\n", "", 1))
+    code, output = run("-C", str(cases / "ledger"), "ledger", "check")
+    assert code == 0
+    (g02,) = [gap for gap in gaps(output) if gap.startswith("G02")]
+    assert "REQ-SVC-01" in g02 and "write one of these — " in g02
+    for way in (
+        'on the automated test in agent, `[Fact(DisplayName = "REQ-SVC-01 …")]` on the test method',
+        'on the automated test in service, `@pytest.mark.verifies("REQ-SVC-01")` on the test',
+        "on the test case in ledger, `verifies: REQ-SVC-01` under its heading",
+    ):
+        assert way in g02, way
+    assert any(gap.startswith("G08") and "TC-SVC-01.1" in gap for gap in gaps(output))
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
+def test_a_gaps_next_move_cites_only_its_own_tests_unread_marker(cases: Path) -> None:
+    """Many tests share a C# file: a test's gap points at a finding about that test, never at
+    the first one in its file."""
+    agent = cases / "agent"
+    config = agent / "qmstrace.toml"
+    text = config.read_text(encoding="utf-8")
+    old = 'files     = ["tests/Agent.Tests/**/*Tests.cs"]'
+    assert old in text
+    config.write_text(text.replace(old, 'files     = ["tests/Agent.Probe/**/*.cs"]'))
+    _, output = run("-C", str(agent), "check")
+    by_test = {gap.split("::")[-1].split(":")[0]: gap for gap in gaps(output) if "G07" in gap}
+    # A test with no DisplayName is told to write one; nothing else in the file is its reason.
+    assert "V15" not in by_test["NoDisplayName_Runs"]
+    assert '[Fact(DisplayName = "<' in by_test["NoDisplayName_Runs"]
+    # A test whose DisplayName is not read is sent to its own finding, on its own line.
+    concatenation = next(line for line in output.splitlines() if "ConstConcatenation_Runs" in line)
+    line = concatenation.split("Shapes.cs:")[1].split()[0]
+    assert (
+        f"first fix V15 at tests/Agent.Probe/Shapes.cs:{line} "
+        in by_test["ConstConcatenation_Runs"]
+    )
+    assert f"Shapes.cs:{line} " not in by_test["ConstInterpolation_Runs"]

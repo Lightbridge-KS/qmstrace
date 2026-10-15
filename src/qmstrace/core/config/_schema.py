@@ -14,7 +14,16 @@ from typing import Final
 # The extractors this qmstrace ships, and whether each reads IDs someone wrote — so an ID
 # pattern is required — or derives them from a path or a test function, so one is refused.
 # `extract/` registers exactly these names; a test keeps the two in step.
-EXTRACTORS: Final[Mapping[str, bool]] = {"markdown": True, "python-module": False, "pytest": False}
+EXTRACTORS: Final[Mapping[str, bool]] = {
+    "markdown": True,
+    "python-module": False,
+    "pytest": False,
+    "csharp-file": False,
+    "xunit": False,
+}
+# Extractors whose one marker names no link type of its own — an xUnit DisplayName starts with
+# an ID and nothing else — so the item type they read must carry exactly one link.
+ONE_LINK: Final = frozenset({"xunit"})
 
 
 class SchemaForm(Enum):

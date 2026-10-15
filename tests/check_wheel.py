@@ -29,6 +29,9 @@ with TemporaryDirectory() as outside:
         "extract.python.pytest_tests",
         "extract.python_module",
         "extract.pytest_tests",
+        "extract.csharp._syntax",
+        "extract.csharp.component",
+        "extract.csharp.xunit",
         "render.text",
         "render.graph",
         "render._evidence",
@@ -128,6 +131,13 @@ assert [link.dst for link in read.links] == ['REQ-SVC-01']
 assert pytest_tests.report_identity(read.items[0].id) == (
     'tests.unit.test_key.TestKey', 'test_valid')
 assert 'pytest' not in sys.modules  # source scanning never imports the test framework
+from qmstrace.extract.csharp import component as csharp_file, xunit
+assert REGISTRY['csharp-file'] is csharp_file.extract and REGISTRY['xunit'] is xunit.extract
+assert FORMS['csharp-file'] is csharp_file.form and FORMS['xunit'] is xunit.form
+assert csharp_file.__file__.startswith(sys.argv[1] + '/')
+source = '/// Implements: DSN-SVC-01\npublic class Key { }\n'
+read = csharp_file.extract('src/Key.cs', source, by_path.item_types['component'], by_path)
+assert [link.dst for link in read.links] == ['DSN-SVC-01'] and not read.findings
 from importlib.resources import files
 block = setup.stanza(files('qmstrace').joinpath('assets/stanza.md').read_text(), by_path)
 guide = setup.guide('Existing guide', block)

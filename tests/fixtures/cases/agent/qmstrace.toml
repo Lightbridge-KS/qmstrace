@@ -1,0 +1,16 @@
+# This product repo's TRACE CONFIGURATION — a C# agent (ADR-0004). It holds code and automated
+# tests only: the requirements, the design and the test cases are in the project's ledger.
+
+version = 1
+ledger  = "../ledger"
+
+[schema]                            # by path, as repos side by side read it
+path = "../ledger/qmstrace.schema.toml"
+
+[items.component]                   # ID = the file's path
+extractor = "csharp-file"
+files     = ["src/**/*.cs"]
+
+[items.automated_test]              # ID = path::Class::Method; the probes are not traced
+extractor = "xunit"
+files     = ["tests/Agent.Tests/**/*Tests.cs"]

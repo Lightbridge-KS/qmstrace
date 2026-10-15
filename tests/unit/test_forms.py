@@ -154,3 +154,35 @@ def test_a_marker_written_as_a_table_row_is_a_stray_of_its_item(
 )
 def test_what_is_not_a_markdown_stray(service: TraceConfig, text: str) -> None:
     assert design(service, text) == []
+
+
+CSHARP_CASES = [
+    ("component", "src/Agent/K.cs", "Implements", "DSN-SVC-01", "{}\npublic class K {{ }}\n"),
+    (
+        "automated_test",
+        "tests/Agent.Tests/Unit/KTests.cs",
+        "verifies",
+        "TC-SVC-01.1",
+        "public class KTests\n{{\n    {}\n    public void M() {{ }}\n}}\n",
+    ),
+]
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+@pytest.mark.parametrize(("type_name", "path", "marker", "target", "frame"), CSHARP_CASES)
+def test_every_suggested_csharp_form_round_trips(
+    type_name: str, path: str, marker: str, target: str, frame: str
+) -> None:
+    from pathlib import Path
+
+    cases = Path(__file__).parents[1] / "fixtures" / "cases"
+    agent = TraceConfig.parse(
+        (cases / "agent" / "qmstrace.toml").read_text("utf-8"),
+        (cases / "ledger" / "qmstrace.schema.toml").read_text("utf-8"),
+    )
+    item_type = agent.item_types[type_name]
+    assert item_type.extractor is not None
+    written = CODE.search(FORMS[item_type.extractor](marker, target))
+    assert written is not None
+    found = REGISTRY[item_type.extractor](path, frame.format(written.group(1)), item_type, agent)
+    assert [(link.marker, link.dst) for link in found.links] == [(marker, target)]

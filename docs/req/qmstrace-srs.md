@@ -58,6 +58,20 @@ malformed ID of the repo's kind is reported, not read as prose.
 - Verify-by: test
 - Change: CR-003
 
+### REQ-QMT-21 — A C# repo is read where its markers are authored
+
+In a C# repo, a component is a `.cs` file whose links are field lines (`Implements: …`) in the
+leading `///` doc comment of its first type, and an automated test is an xUnit `[Fact]` or
+`[Theory]` method whose link is the ID at the start of its `DisplayName`, written as a string
+literal. A marker in a form that is not read — a `DisplayName` that is not a literal, a
+`[Trait]` named after a link, a test attribute other than xUnit's, a test inside conditional
+compilation — is reported, never silently dropped.
+
+- Category: functional-suitability
+- Origin: AGR-2, AGR-6
+- Verify-by: test
+- Change: CR-003
+
 ## Checking
 
 ### REQ-QMT-03 — One check reports every finding, and the gate fails on gaps
@@ -162,12 +176,13 @@ read, and a Git variable pointing at another repository changes nothing.
 ### REQ-QMT-12 — A product repo is set up by one command
 
 `qmstrace init` writes the trace configuration, the agent guide's stanza and the skill, and
-registers the pytest marker. Run again, it changes nothing; it refuses to replace a file it
-did not write, and then writes nothing.
+registers the pytest marker where the repo's automated tests are pytest functions. Run again, it
+changes nothing; it refuses to replace a file it did not write, and then writes nothing.
 
 - Category: usability
 - Origin: AGR-5
 - Verify-by: test
+- Change: CR-003
 
 ### REQ-QMT-13 — The schema is authored once and copied, verified
 

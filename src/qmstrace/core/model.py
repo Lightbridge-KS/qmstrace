@@ -128,7 +128,7 @@ class Stray:
     targets: tuple[str, ...]
     file: str
     line: int
-    kind: Literal["docstring", "outside", "table"] = "docstring"
+    kind: Literal["docstring", "outside", "table", "doccomment", "comment"] = "docstring"
     item: str | None = None
 
 

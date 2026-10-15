@@ -16,6 +16,8 @@ from typing import Final, Protocol
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import Extracted
 from qmstrace.extract import markdown
+from qmstrace.extract.csharp import component as csharp_file
+from qmstrace.extract.csharp import xunit
 from qmstrace.extract.python import module, pytest_tests
 
 
@@ -31,6 +33,8 @@ REGISTRY: Final[Mapping[str, IExtractor]] = {
     "markdown": markdown.extract,
     "python-module": module.extract,
     "pytest": pytest_tests.extract,
+    "csharp-file": csharp_file.extract,
+    "xunit": xunit.extract,
 }
 
 # How each extractor's items declare a link — `form(marker, target)`, for a gap's next move. The
@@ -39,4 +43,6 @@ FORMS: Final[Mapping[str, Callable[[str, str], str]]] = {
     "markdown": markdown.form,
     "python-module": module.form,
     "pytest": pytest_tests.form,
+    "csharp-file": csharp_file.form,
+    "xunit": xunit.form,
 }
