@@ -6,6 +6,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-15
+
 ### Fixed
 
 - `V14` names the form its marker is written in. On an xUnit `DisplayName` it asks for one
@@ -211,5 +213,6 @@ All notable changes to this project are recorded here. The format follows
   with — underscores, lower case, a space — is refused with the ID shape and the next move,
   instead of being accepted and silently matching nothing.
 
-[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Lightbridge-KS/qmstrace/releases/tag/v0.1.0

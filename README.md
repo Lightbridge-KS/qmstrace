@@ -10,7 +10,7 @@ data and owns no evidence: it reads markers where people and coding agents alrea
 a requirement's heading, a line under a design section, a tag on a test — judges them, and
 points at evidence that stays in its home system.
 
-> **Status: 0.1.0.** Setup, trace queries, coverage checks,
+> **Status.** Setup, trace queries, coverage checks,
 > the project-wide check run in the ledger, baseline and change guards, suspects and the
 > offline browser work locally, for Python (pytest) and C# (xUnit) repos, with JUnit and TRX
 > results. Pinned imports and signatures are not built yet. See the
@@ -21,7 +21,7 @@ points at evidence that stays in its home system.
 Install a release as a uv tool. The repository is private, so this needs read access to it:
 
 ```sh
-uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.1.0"
+uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.1.1"
 ```
 
 The pin holds: `uv tool upgrade` keeps it. To move to a later release, run the same command

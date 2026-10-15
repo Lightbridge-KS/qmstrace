@@ -1,6 +1,6 @@
 [project]
 name = "qmstrace"
-version = "0.2.0.dev0"
+version = "0.1.1"
 description = "The trace layer under a quality-management system: state, traceability and audit evidence for a software project's work products."
 authors = [
     { name = "Lightbridge-KS", email = "ki11ip0.s.a.s@gmail.com" }

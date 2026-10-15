@@ -43,6 +43,12 @@ nothing is published to a package index.
 5. **Move `main` on**, in a pull request: `version = "X.Y+1.0.dev0"` and `uv lock`, so a
    build from `main` never claims a released number.
 
+**A patch from `main`.** When everything on `main` since the last release may ship —
+`git log vX.Y.Z..main` lists it — a patch is cut from `main` with the same steps: step 1
+sets `X.Y.Z+1` over the `.dev0` version, and step 5 sets that `.dev0` version back. When
+`main` also holds work that must not ship yet, a patch needs a branch from the tag instead;
+that path is not set up.
+
 If the workflow fails, fix the cause on `main`, delete the tag (`git push origin :vX.Y.Z`,
 `git tag -d vX.Y.Z`) and any draft it left, and tag again. A published release's tag is
 never moved.
