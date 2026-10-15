@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; now release 0.1.0 and the first real project, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; release 0.1.0 published; now the first real project, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,10 +8,10 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-15 · Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-15 · Release 0.1.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
-capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use),
-starting with release 0.1.0 and a C# repo, in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
+on a C# repo, in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
 ## Landed — package refactors
@@ -330,10 +330,13 @@ The first real project is a C# repo, chosen 2026-10-15.
 ([releasing](../dev/releasing.md)):
 - [x] CHANGELOG section, install pages in the README and the manual, the release workflow and
   its runbook — #44 (`80eef1d`).
-- [ ] The MIT License — #45. The first `v0.1.0` tag, on `80eef1d`, was never published; it is
-  re-cut on #45's merge commit, so the first release carries the license.
-- [ ] Tag `v0.1.0` on the merge commit; the workflow drafts the release; publish it.
-- [ ] `main` moves on to `0.2.0.dev0`.
+- [x] The MIT License — #45 (`b88e79a`). The first `v0.1.0` tag, on `80eef1d`, was never
+  published; it was re-cut after #45 and #46 merged, so the first release carries the license
+  and #46's article fix.
+- [x] `v0.1.0`, annotated, on `0ff740e`; the workflow drafted the release with the wheel, and it
+  was published 2026-10-15. Installed here from the tag as a uv tool, both trace gates pass
+  with the installed binary: 657 items, 0 violations, 0 gaps.
+- [x] `main` moves on to `0.2.0.dev0`, with `uv lock`.
 
 **Target layout — [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md), 2026-09-28:**
 - **The ledger repo holds the documents:** the SRS and the design documents, beside the
