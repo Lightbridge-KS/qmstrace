@@ -20,7 +20,6 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from types import MappingProxyType
 from typing import Literal
 
 from qmstrace.core.assessment import Assessment, ProjectAssessment
@@ -335,7 +334,7 @@ def summarize(
         other_tests=tuple(t for t in tests.values() if t.id not in shown_tests),
         unmatched=tuple(unmatched),
         other_cases=other_cases,
-        tests=MappingProxyType(tests),
+        tests=tests,
     )
 
 
