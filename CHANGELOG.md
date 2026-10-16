@@ -33,6 +33,18 @@ All notable changes to this project are recorded here. The format follows
   (`TC-SVC-01.1a`). `V14`'s xUnit next move says what may follow the ID
   ([#50](https://github.com/Lightbridge-KS/qmstrace/issues/50)).
 
+### Fixed
+
+- Two `[externals.*]` tables whose prefixes overlap — equal, or one starting the other — are
+  refused when the schema is read, naming both tables and both prefixes. A citation was judged
+  against the first table's file only, so a clause declared in the second drew a `V09` that
+  named the wrong file and invited a duplicate clause
+  ([#55](https://github.com/Lightbridge-KS/qmstrace/issues/55)).
+- An external `source` holding `*`, `?` or `[` is refused as a pattern: an external reads one
+  file. It used to read as a file not checked out here, leaving every citation of the family
+  *not verified* without a word. A source that is simply absent stays *not verified*
+  ([#56](https://github.com/Lightbridge-KS/qmstrace/issues/56)).
+
 ## [0.1.1] - 2026-10-15
 
 ### Fixed

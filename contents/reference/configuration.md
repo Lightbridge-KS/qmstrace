@@ -58,6 +58,17 @@ A C# product repo reads its components with `csharp-file` and its xUnit tests wi
 --8<-- "fixtures/mini/ledger/qmstrace.schema.toml"
 ```
 
+### The agreement, and other externals
+
+An `[externals.<name>]` table says where IDs declared outside every traced item are declared:
+`prefix`, the text each such ID starts with; `source`, one file in the ledger; `declared_as`,
+a pattern whose one group is the ID. A citation is judged against the external whose prefix
+it starts with, so two externals whose prefixes overlap — equal, or one starting the other, as
+`AC-` and `AC-E1-` do — are refused: give each engagement its own, such as `AC-E1-` and
+`AC-E2-`. A `source` holding `*`, `?` or `[` is a pattern and is refused too; a family kept in
+several files takes one table per file. A `source` that is simply not there — the ledger not
+checked out beside the repo — is not refused: each citation of it is reported *not verified*.
+
 ### The fields the tables carry
 
 A schema may name requirement fields for the traceability matrix to carry beside the chain —

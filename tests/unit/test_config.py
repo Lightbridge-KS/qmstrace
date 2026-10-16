@@ -305,6 +305,74 @@ def test_a_ledger_prefix_that_no_id_can_start_with_is_refused(
     assert stopped.next_move.startswith("Fix: write the prefix in that shape")
 
 
+def externals(*tables: tuple[str, str, str]) -> str:
+    """The mini schema with further `[externals.*]` tables: (name, prefix, source) each."""
+    extra = "".join(
+        f'\n[externals.{name}]\nitem_type   = "origin_clause"\nprefix      = "{prefix}"\n'
+        f"source      = \"{source}\"\ndeclared_as = '^\\s*[-*]\\s+\\*\\*({prefix}\\d+)\\*\\*'\n"
+        for name, prefix, source in tables
+    )
+    return SCHEMA.replace("\n[change_requests]", extra + "\n[change_requests]", 1)
+
+
+@pytest.mark.verifies("DSN-QMT-03")
+@pytest.mark.parametrize(
+    ("first", "second", "expected"),
+    [
+        ("AC-", "AC-", "[externals.eng1] and [externals.eng2] have the same prefix, 'AC-'"),
+        (
+            "AC-",
+            "AC-E1-",
+            "the prefix of [externals.eng2], 'AC-E1-', starts with that of [externals.eng1], 'AC-'",
+        ),
+        (
+            "AC-E1-",
+            "AC-",
+            "the prefix of [externals.eng1], 'AC-E1-', starts with that of [externals.eng2], 'AC-'",
+        ),
+    ],
+)
+def test_two_externals_whose_prefixes_overlap_are_refused(
+    first: str, second: str, expected: str
+) -> None:
+    """A citation goes to the first external its ID starts with (#55): with overlapping
+    prefixes the second table's clauses would be judged against the first table's file."""
+    stopped = refusal(
+        SERVICE,
+        externals(("eng1", first, "eng1/agreement.md"), ("eng2", second, "eng2/agreement.md")),
+    )
+    assert expected in stopped.what
+    assert "could be judged against the wrong file" in stopped.what
+    assert stopped.next_move == (
+        "Fix: give each external a prefix no other external's starts with — "
+        "engagement-qualified, such as 'AC-E1-' and 'AC-E2-'."
+    )
+    # never sent to add a clause to the file the citation was wrongly judged against
+    assert "declare" not in stopped.next_move and "add" not in stopped.next_move
+
+
+@pytest.mark.verifies("DSN-QMT-03")
+def test_externals_whose_prefixes_do_not_overlap_are_read() -> None:
+    config = TraceConfig.parse(
+        SERVICE,
+        externals(("eng1", "AC-E1-", "eng1/agreement.md"), ("eng2", "AC-E2-", "eng2/agreement.md")),
+    )
+    assert [e.prefix for e in config.externals.values()] == ["AGR-", "AC-E1-", "AC-E2-"]
+
+
+@pytest.mark.verifies("DSN-QMT-03")
+@pytest.mark.parametrize("source", ["*/agreement.md", "eng?/agreement.md", "eng[12]/agreement.md"])
+def test_an_external_source_that_is_a_pattern_is_refused(source: str) -> None:
+    """An external reads one file; a pattern would read as one not checked out here, and
+    every citation of the family would pass as not verified (#56)."""
+    stopped = refusal(SERVICE, externals(("eng", "AC-", source)))
+    assert f"'externals.eng.source' is '{source}', a pattern — an external reads one file" in (
+        stopped.what
+    )
+    assert stopped.next_move.startswith('Fix: name one file, e.g. source = "eng1/agreement.md"')
+    assert TraceConfig.parse(SERVICE, externals(("eng", "AC-", "eng1/agreement.md"))).externals
+
+
 @pytest.mark.parametrize(
     ("old", "new", "expected"),
     [

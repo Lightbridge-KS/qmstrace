@@ -380,6 +380,14 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
    M11. Baseline only after the IDs, trace and review are ready.
 
 **Fixed from use:**
+- [x] 2026-10-16, seen while a project was designed with one agreement per engagement (#55,
+  #56): two `[externals.*]` tables with the prefix `AC-` routed every `AC-` citation to the first
+  table's file, so a clause declared in the second drew a `V09` naming the wrong file — whose
+  next move invited a duplicate clause; and a `source` of `*/agreement.md` read as a file not
+  checked out here, leaving the family *not verified* without a word. Both are now refused when
+  the schema is read: overlapping prefixes (equal, or one starting the other) and a `source`
+  holding `*`, `?` or `[`. #56's second item — a `source` naming several files, their IDs
+  pooled — is #60. Removing either refusal in a disposable copy fails its four tests.
 - [x] 2026-10-15, seen in the first C# adopter's tests (#50): a `DisplayName` whose ID is
   followed directly by a suffix — `TC-…-01/O03`, an observation number — was `V14` and linked
   nothing, because the first whole word had to be an ID. The leading ID now ends at the

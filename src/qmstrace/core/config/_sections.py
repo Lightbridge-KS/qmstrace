@@ -23,6 +23,7 @@ from qmstrace.core.config._toml import _Table
 from qmstrace.core.errors import CouldNotJudge
 
 _REGEX_META: Final = set("\\()[].*+?{|$")
+_GLOB: Final = set("*?[")  # what makes a path a pattern
 # Any start of the one shape every ID has (`model.ID_TOKEN`): capitals and digits in
 # hyphen-joined segments, a number with dotted parts. A pattern or prefix that starts otherwise
 # can never match an ID.
@@ -201,9 +202,41 @@ def _externals(schema: _Table) -> dict[str, ExternalSource]:
             f"{table.file}: 'externals.{name}.prefix'",
             'Fix: write the prefix in that shape, e.g. prefix = "AGR-".',
         )
-        found[name] = ExternalSource(
-            name, table.text("item_type"), prefix, table.text("source"), declared_as
-        )
+        source = table.text("source")
+        # One file: a pattern would read as a file that is not there — every citation of the
+        # family then passing as *not verified*, without a word.
+        if _GLOB & set(source):
+            raise CouldNotJudge(
+                f"{table.file}: 'externals.{name}.source' is '{source}', a pattern — an "
+                "external reads one file.",
+                'Fix: name one file, e.g. source = "eng1/agreement.md"; an ID family kept in '
+                "several files takes one [externals.*] table per file, each with its own prefix.",
+            )
+        # A citation goes to the first external its ID starts with, so no prefix may start
+        # another: the second table's clauses would be judged against the first table's file.
+        for other in found.values():
+            (short_name, short), (long_name, long) = sorted(
+                ((other.name, other.prefix), (name, prefix)), key=lambda pair: len(pair[1])
+            )
+            if not long.startswith(short):
+                continue
+            if short == long:
+                what = (
+                    f"[externals.{other.name}] and [externals.{name}] have the same prefix, "
+                    f"'{short}'"
+                )
+            else:
+                what = (
+                    f"the prefix of [externals.{long_name}], '{long}', starts with that of "
+                    f"[externals.{short_name}], '{short}'"
+                )
+            raise CouldNotJudge(
+                f"{table.file}: {what}, so a citation of {long}… could be judged against "
+                "the wrong file.",
+                "Fix: give each external a prefix no other external's starts with — "
+                f"engagement-qualified, such as '{short}E1-' and '{short}E2-'.",
+            )
+        found[name] = ExternalSource(name, table.text("item_type"), prefix, source, declared_as)
         table.done()
     return found
 
