@@ -95,6 +95,7 @@ def test_the_ledger_itself_keeps_its_paths_as_they_are() -> None:
     assert part.qualified("ledger", ".", frozenset()).items[0].file == "docs/req/srs.md"
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_ids_sort_with_their_numbers_read_as_numbers() -> None:
     ids = ["AGR-10", "TC-4.10", "REQ-SVC-10", "agent:tests/b.py", "AGR-2", "TC-4.2", "REQ-SVC-02"]
     assert sorted(ids, key=id_order) == [

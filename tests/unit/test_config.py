@@ -516,10 +516,12 @@ CASES_SCHEMA = (
 ).read_text(encoding="utf-8")
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_schema_without_tables_carries_no_extra_field() -> None:
     assert TraceConfig.of_schema(CASES_SCHEMA).tables.matrix_fields == ()
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_the_matrix_carries_the_requirement_fields_the_schema_lists_in_order() -> None:
     listed = CASES_SCHEMA + '\n[tables.matrix]\nfields = ["Verify-by", "Category"]\n'
     assert TraceConfig.of_schema(listed).tables.matrix_fields == ("Verify-by", "Category")
@@ -535,18 +537,21 @@ def test_the_matrix_carries_the_requirement_fields_the_schema_lists_in_order() -
         ('field = ["Category"]', "unknown key 'tables.matrix.field'"),
     ],
 )
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_field_the_matrix_cannot_carry_is_refused(section: str, said: str) -> None:
     with pytest.raises(CouldNotJudge) as caught:
         TraceConfig.of_schema(CASES_SCHEMA + f"\n[tables.matrix]\n{section}\n")
     assert said in caught.value.what and caught.value.next_move.startswith("Fix:")
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_table_the_ledger_does_not_emit_is_refused() -> None:
     with pytest.raises(CouldNotJudge) as caught:
         TraceConfig.of_schema(CASES_SCHEMA + '\n[tables.other]\nfields = ["Category"]\n')
     assert "unknown key 'tables.other' (known here: matrix)" in caught.value.what
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_the_section_survives_a_verified_copy(embed: Embed) -> None:
     listed = CASES_SCHEMA + '\n[tables.matrix]\nfields = ["Category"]\n'
     local = (

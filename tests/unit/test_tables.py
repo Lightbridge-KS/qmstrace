@@ -133,6 +133,7 @@ def cases_graph(
 # ── 1. columns come from the schema ─────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_the_columns_follow_the_chain_and_are_named_after_its_item_types() -> None:
     columns = matrix(*cases_graph()).columns
     assert [(c.name, c.cell, c.via) for c in columns] == [
@@ -146,6 +147,7 @@ def test_the_columns_follow_the_chain_and_are_named_after_its_item_types() -> No
     ]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_schema_with_no_test_case_has_no_test_case_column() -> None:
     config, graph = graph_of(
         NO_CASES,
@@ -157,6 +159,7 @@ def test_a_schema_with_no_test_case_has_no_test_case_column() -> None:
     assert [r["automated_test"] for r in table.rows] == [("t::one",)]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_renamed_types_name_their_columns() -> None:
     config, graph = graph_of(
         RENAMED,
@@ -175,6 +178,7 @@ def test_renamed_types_name_their_columns() -> None:
     ]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_schema_without_verifies_has_no_test_columns() -> None:
     config, graph = graph_of(NO_VERIFIES, [item("REQ-T-01", "requirement")], [])
     assert [c.name for c in matrix(config, graph).columns] == [
@@ -186,6 +190,7 @@ def test_a_schema_without_verifies_has_no_test_columns() -> None:
     ]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_schema_without_a_requirement_type_cannot_be_tabled() -> None:
     config = TraceConfig.of_schema('version = 1\nproject = "T"\n[item_types.component]\n')
     with pytest.raises(CouldNotJudge) as caught:
@@ -200,6 +205,7 @@ def grain(row: dict[str, object]) -> tuple[object, ...]:
     return (row["requirement"], row["design_element"], row["test_case"], row["automated_test"])
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_every_row_of_the_matrix_has_its_grain() -> None:
     table = matrix(*cases_graph())
     assert [grain(dict(r)) for r in table.rows] == [
@@ -214,6 +220,7 @@ def test_every_row_of_the_matrix_has_its_grain() -> None:
     assert table.rows[2]["component"] == ()
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_case_nothing_runs_still_has_a_row() -> None:
     table = matrix(
         *cases_graph([item("TC-T-02.1", "test_case")], [link("TC-T-02.1", "verifies", "REQ-T-02")])
@@ -221,6 +228,7 @@ def test_a_case_nothing_runs_still_has_a_row() -> None:
     assert ("REQ-T-02", None, "TC-T-02.1", ()) in [grain(dict(r)) for r in table.rows]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_withdrawn_items_are_in_no_row_and_the_table_says_so() -> None:
     config, graph = cases_graph(
         [item("REQ-T-03", "requirement", Status="withdrawn"), item("t::stray", "automated_test")]
@@ -236,6 +244,7 @@ def test_withdrawn_items_are_in_no_row_and_the_table_says_so() -> None:
 # ── 3. the register and the coverage summary ───────────────────────────────────────────────
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_the_register_has_every_requirement_with_its_fields_and_origins() -> None:
     config, graph = cases_graph([item("REQ-T-03", "requirement", Status="withdrawn")])
     table = requirements(config, graph)
@@ -257,6 +266,7 @@ def test_the_register_has_every_requirement_with_its_fields_and_origins() -> Non
     assert table.rows[0]["origin_clause"] == ("AGR-1",)
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_coverage_counts_each_tier_against_the_rules_that_ask_for_it() -> None:
     rows = {r["tier"]: dict(r) for r in coverage(*cases_graph()).rows}
     # no rule asks for a design element here, so every live requirement counts

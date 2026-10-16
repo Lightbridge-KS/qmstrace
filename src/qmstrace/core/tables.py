@@ -6,6 +6,8 @@ Two names are fixed, as in `results`: the `requirement` type every table starts 
 of `verifies` is a test case, a source only an automated test, and the other coverage links,
 walked from the requirement, give the rest of the chain. Each column is named after the item
 type it holds. Verdicts are not here: they join from test reports.
+
+Implements: DSN-QMT-16
 """
 
 from __future__ import annotations

@@ -718,3 +718,17 @@ concrete subclass in the file. Every unread form is V15, a commented-out test at
 stray. Reasoning: [ADR-0004](../adr/0004-reading-csharp.md).
 
 Satisfies: REQ-QMT-21
+
+### DSN-QMT-16 — The ledger's tables are derived from the schema, then rendered as data
+
+`core/tables.py` reads the chain from the schema with two fixed names — the `requirement` type
+and the `verifies` link: a type that is both a source and a target of `verifies` is a test case,
+a source only an automated test, and the other coverage links walked from the requirement give
+the rest, each column named after its item type. From the project's graph it builds the
+traceability matrix (one row per requirement, design element and test case), the requirements
+register and the coverage summary, as columns and rows with no I/O. `render/tables.py` writes
+one as a `qmstrace.table/1` JSON document with what was read — each repo's commit and
+cleanliness, which `infra/git.checkout` reads without the index lock and the project assessment
+records before its scan. Reasoning: [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md).
+
+Satisfies: REQ-QMT-23

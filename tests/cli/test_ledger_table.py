@@ -16,6 +16,7 @@ import json
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
@@ -41,6 +42,7 @@ def table_of(project: Path, name: str) -> dict[str, object]:
 # ── 1. the documents ────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_the_cases_matrix(cases: Path, golden: Golden) -> None:
     code, output = run("-C", str(cases / "ledger"), "ledger", "table", "matrix")
     assert code == 0
@@ -56,18 +58,21 @@ def test_the_cases_matrix(cases: Path, golden: Golden) -> None:
     ]
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_the_cases_requirements_register(cases: Path, golden: Golden) -> None:
     code, output = run("-C", str(cases / "ledger"), "ledger", "table", "requirements")
     assert code == 0
     golden(GOLDEN / "ledger-table-requirements-cases.json", output)
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_the_cases_coverage_summary(cases: Path, golden: Golden) -> None:
     code, output = run("-C", str(cases / "ledger"), "ledger", "table", "coverage")
     assert code == 0
     golden(GOLDEN / "ledger-table-coverage-cases.json", output)
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_every_project_notice_reaches_every_table(cases: Path) -> None:
     for name in ("matrix", "requirements", "coverage"):
         notices = table_of(cases, name)["notices"]
@@ -75,6 +80,7 @@ def test_every_project_notice_reaches_every_table(cases: Path) -> None:
         assert any("remote-tag completeness NOT VERIFIED" in n for n in notices), name
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_the_matrix_carries_the_fields_the_schema_lists(cases: Path) -> None:
     schema = cases / "ledger" / "qmstrace.schema.toml"
     schema.write_text(
@@ -90,6 +96,7 @@ def test_the_matrix_carries_the_fields_the_schema_lists(cases: Path) -> None:
 # ── 2. the same inputs, the same bytes ─────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-23", "REQ-QMT-15")
 def test_the_same_inputs_give_the_same_bytes_with_no_machine_path(cases: Path) -> None:
     ledger = str(cases / "ledger")
     first = run("-C", ledger, "ledger", "table", "matrix")
@@ -101,6 +108,7 @@ def test_the_same_inputs_give_the_same_bytes_with_no_machine_path(cases: Path) -
 # ── 3. what was read ────────────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_a_repo_with_uncommitted_work_is_said_to_be_unclean(cases: Path) -> None:
     (cases / "service" / "notes.txt").write_text("not committed\n", encoding="utf-8")
     read = {r["repo"]: r for r in table_of(cases, "matrix")["read"]}  # type: ignore[union-attr]
@@ -111,6 +119,7 @@ def test_a_repo_with_uncommitted_work_is_said_to_be_unclean(cases: Path) -> None
 # ── 4. writing, and what is refused ────────────────────────────────────────────────────────
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_out_writes_a_new_file_and_refuses_an_existing_one(cases: Path, golden: Golden) -> None:
     ledger = cases / "ledger"
     # beside the repos, so writing it leaves every repo clean
@@ -123,6 +132,7 @@ def test_out_writes_a_new_file_and_refuses_an_existing_one(cases: Path, golden: 
     assert code == 2
 
 
+@pytest.mark.verifies("REQ-QMT-23")
 def test_a_product_repo_and_an_unknown_table_are_refused(cases: Path) -> None:
     assert run("-C", str(cases / "service"), "ledger", "table", "matrix")[0] == 2
     assert run("-C", str(cases / "ledger"), "ledger", "table", "trace")[0] == 2

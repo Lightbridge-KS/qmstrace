@@ -1,6 +1,6 @@
 """Project members and one assessment of their joined graph.
 
-Implements: DSN-QMT-14
+Implements: DSN-QMT-14, DSN-QMT-16
 """
 
 from __future__ import annotations

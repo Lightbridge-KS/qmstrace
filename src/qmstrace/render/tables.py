@@ -5,6 +5,8 @@ A document carries what a reader needs to trust it before its rows: the project,
 digest, the commit each repo had checked out and whether its tree was clean, that it was not
 pinned, the violation and gap counts, and every notice. Identical inputs give identical bytes:
 no timestamp, no machine path.
+
+Implements: DSN-QMT-16
 """
 
 from __future__ import annotations

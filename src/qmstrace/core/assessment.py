@@ -4,7 +4,7 @@ A command is: open the workspace → take its assessment → render → exit. No
 computed on the way out; the renderer only arranges it. A product repo's run gives an
 `Assessment`; the ledger's check of the whole project gives a `ProjectAssessment`.
 
-Implements: DSN-QMT-02, DSN-QMT-14
+Implements: DSN-QMT-02, DSN-QMT-14, DSN-QMT-16
 """
 
 from __future__ import annotations

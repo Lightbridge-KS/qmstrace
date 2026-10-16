@@ -25,6 +25,7 @@ def repo(tmp_path: Path, make_repo: MakeRepo) -> Path:
     return make_repo(root)
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_committed_tree_is_clean_and_names_its_commit(repo: Path) -> None:
     found = checkout(repo)
     head = subprocess.run(
@@ -42,6 +43,7 @@ def test_a_committed_tree_is_clean_and_names_its_commit(repo: Path) -> None:
     ],
     ids=["modified", "untracked", "deleted"],
 )
+@pytest.mark.verifies("DSN-QMT-16")
 def test_uncommitted_work_makes_the_tree_unclean(
     repo: Path, change: Callable[[Path], object]
 ) -> None:
@@ -50,12 +52,14 @@ def test_uncommitted_work_makes_the_tree_unclean(
     assert found is not None and found[1] is False
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_an_ignored_file_leaves_the_tree_clean(repo: Path) -> None:
     (repo / "build").mkdir()
     (repo / "build" / "out.bin").write_bytes(b"x")
     assert checkout(repo) is not None and checkout(repo)[1] is True  # type: ignore[index]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_a_root_inside_a_larger_repo_counts_only_its_own_changes(repo: Path) -> None:
     (repo / "elsewhere.md").write_text("outside docs/\n", encoding="utf-8")
     found = checkout(repo / "docs")
@@ -63,6 +67,7 @@ def test_a_root_inside_a_larger_repo_counts_only_its_own_changes(repo: Path) -> 
     assert checkout(repo) is not None and checkout(repo)[1] is False  # type: ignore[index]
 
 
+@pytest.mark.verifies("DSN-QMT-16")
 def test_outside_git_or_before_a_commit_there_is_none(tmp_path: Path, git_env: None) -> None:
     plain = tmp_path / "plain"
     plain.mkdir()
