@@ -387,8 +387,21 @@ _Avoid_: matrix, export, cache
 
 **Register**:
 A generated listing of the ledger for one audience: work-product register,
-configuration-item register, baselines table. Never maintained by hand.
+configuration-item register, requirements register, baselines table. Never maintained by hand.
 _Avoid_: checklist, index, spreadsheet
+
+**Traceability Matrix**:
+The table a traceability record shows: one row per requirement, design element and test case,
+with the origins, components and automated tests that hang off them, and — given test reports —
+each row's verdicts. Generated from the ledger by `ledger table matrix`; never typed. Not the
+trace lock, which lists every item and link for a reviewer's diff.
+_Avoid_: trace lock, link table, coverage table
+
+**Coverage Summary**:
+The counts of requirements covered and not covered, tier by tier — by design, by test case, by
+automated test — each counted against the rule that asks for it. Coverage counts links, not
+passing tests.
+_Avoid_: test coverage (code lines run by tests), completeness
 
 **Controlled Document**:
 A document under the organisation's document-control procedure, identified by a DocID and

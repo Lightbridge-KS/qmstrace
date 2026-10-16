@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; release 0.1.1 (the V14 fix) published; now the first real project, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; release 0.1.1 (the V14 fix) published; now the first real project, and #49 — tables emitted as data, decided 2026-10-15 and planned in two slices around #40 —, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,10 +8,10 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-15 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-16 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
 capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
-on a C# repo, in the layout of ADR-0001. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+on a C# repo, in the layout of ADR-0001. Next: [#49 · tables as data](#next--49--tables-as-data), around #40. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
 ## Landed — package refactors
@@ -409,6 +409,42 @@ items. The QMT ledger currently lists one repo; this check does not repeat beaco
 multi-repo acceptance. Remote-tag completeness and historical external evidence remain
 unverified. The handoff's 794-test dry-gate result and the acceptance records below are
 historical evidence; the later refactor verification is recorded above.
+
+## Next — #49 · tables as data
+
+The PRD's P0 *emit tables as data for the existing render machine* (success criterion 2: the
+pilot's traceability record renders with **zero hand-typed IDs**). The first C# adopter's
+record is a hand-typed matrix whose two result columns are empty in every row. Issue #49; it
+depends on #40 (several reports in one run).
+
+**Decided 2026-10-15** by the developer, every recommendation taken (the design prep, a probe
+of today's model on the `cases` fixture and the record of the answers are in a local
+playground session, `2026-10-15_issue-49-design`):
+
+| # | Decision | Chosen |
+|---|---|---|
+| 1 | Command | One ledger verb, the table named: `qmstrace ledger table matrix \| requirements \| coverage` |
+| 2 | Format | Versioned JSON, `qmstrace.table/1`: metadata, columns, rows |
+| 3 | Columns | Derived from the schema's chain, plus the requirement fields `[tables.matrix] fields` names |
+| 4 | Verdicts | Reports on the command line (`--report REPO=FILE`), one column per level, each cell pointing at its report; needs #40 |
+| 5 | Read from | Working trees; each repo's commit and cleanliness recorded; not pinned |
+| 6 | Committed? | No — an output a render layer consumes; the issued document is the record |
+| 7 | Change control | One CR-004 for #40 and #49: amends REQ-QMT-10, adds REQ-QMT-23 |
+
+Also settled: an automated test that verifies directly, with no test case between, gets its own
+row; no timestamps (REQ-QMT-15).
+
+**Phases, agreed with the Orchestrator 2026-10-16:**
+
+- [ ] **A · design** (this branch, docs) — CR-004 drafted `evaluated` in `qmstrace-ledger`;
+  [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md), the surface architecture
+  following it; CONTEXT.md's *Traceability Matrix* and *Coverage Summary*.
+- [ ] **CR-004 accepted** — by the developer, before any SRS edit.
+- [ ] **B · #40** — several reports in core, to ADR-0005; amends REQ-QMT-10 under CR-004.
+- [ ] **#49a** — `ledger table` without verdict columns, in parallel with B; adds REQ-QMT-23
+  and DSN-QMT-16; rebased after #40.
+- [ ] **#49b** — `--report REPO=FILE`, per-level verdict columns, each cell's evidence pointer;
+  additive, so the format stays `qmstrace.table/1`.
 
 ## Landed — M12 · the C# capability
 

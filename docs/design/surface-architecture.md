@@ -86,8 +86,9 @@ flowchart TD
 | `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *In the engine since M9b* | ✔ |
 | `qmstrace ledger check [--strict] [--quiet]` | In the ledger: reads the working tree of every repo in `[repos]` — the ledger too, when it holds documents (ADR-0001) — and judges them as one project: coverage met across repos, each repo's own violations, suspects across repos. Refuses (exit 2) when a repo cannot be read or holds other rules. Says *not pinned* in every form. The ledger's gate with `--strict`. *In the engine since M10a* | ✔ |
 | `qmstrace ledger thread <ID>` · `qmstrace ledger impact <ID>…` | In the ledger: `thread` and `impact` over the project's graph — a walk crosses every repo's edge, from a requirement to every repo's tests, from a module back to its origin clause. A module's or test's ID carries its repo; one given without it is refused with the qualified IDs it may mean. *In the engine since M10b* | ✔ |
+| `qmstrace ledger table matrix \| requirements \| coverage [--report REPO=FILE…] [--out FILE]` | In the ledger: the traceability matrix, the requirements register or the coverage summary, as versioned JSON (`qmstrace.table/1`) a render layer consumes — columns derived from the schema, each repo's commit and cleanliness recorded, not pinned, never committed by qmstrace. Verdict columns come from the reports given, one per level ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)) | ◻ — #49 |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
-| `qmstrace ledger …` — the rest | Emit tables for the render machine; record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
+| `qmstrace ledger …` — the rest | Record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
 **M5a — decided 2026-09-22.** `status` reports governing tags and document comparisons;
 `check` emits V10–V13. Frozen counts include changed and removed items; new and current
@@ -203,6 +204,15 @@ line of an error message are read: the file's paths, machine and user names, out
 traces and attachments never reach the view. A report with no match, and an unmatched run,
 name the next move for the format given. **Rejected:** a JUnit logger package in the C# repo
 (every adopter would add one, and its names are the logger's, not the test framework's).
+
+*Amended 2026-10-15 ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)), lands with
+#40:* `results` reads several reports in one run, combined **in core** into one view, so every
+consumer of verdicts applies the same rule. Each run keeps its source report — its label,
+never a machine path, and the sha256 of its bytes — and a report can name the repo it reports,
+since run identities can collide across repos at the ledger. Verdicts and counts do not depend
+on the order the reports are given in; a run in two files combines by its worst verdict and
+counts once as a duplicate. The header lists each report with its entry count. The report's
+commit stays NOT VERIFIED. This replaces "M4 does not … combine reports" above.
 
 ### The authoring surface
 
@@ -470,6 +480,10 @@ project-wide browser follows slice 2. The renderer library remains provisional.
   requiring a public JSON CLI. So a finding is data inside the
   engine — code, file, line, item, what is wrong, the next move — and the line an agent reads
   is one renderer of it. Which commands get the form, and its versioning, are decided then.
+  *Decided 2026-10-15 ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)):* the
+  first is `ledger table`, as `qmstrace.table/1` — a new key, column, table or notice keeps
+  `/1`; removing or renaming anything, or changing a cell's type, the row grain or the sort, is
+  `/2`. Findings keep their line form.
 
 ## 8. Decisions needed
 
