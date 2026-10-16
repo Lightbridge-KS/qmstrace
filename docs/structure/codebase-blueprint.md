@@ -539,8 +539,10 @@ Satisfies: REQ-QMT-03, REQ-QMT-05
 `core/config/` parses the repo's trace configuration and the project's trace schema — by
 path, as a schema copy checked against its digest, or the repo's own — into one validated
 `TraceConfig` that records which part each rule came from. An unknown key, a pattern no ID
-can match or an extractor that does not ship is refused with the next move. Reasoning: data
-architecture § D4, D9; §1 F3–F6.
+can match, an extractor that does not ship, two externals whose prefixes overlap (a citation
+goes to the first one its ID starts with, #55) or an external `source` that is a pattern
+rather than one file (#56) is refused with the next move. Reasoning: data architecture § D4,
+D9; §1 F3–F6.
 
 `TraceConfig` and assembly/cross-checks live in `_parse.py`; records in `_schema.py`;
 strict TOML reading in `_toml.py`; section policy in `_sections.py`; digest and copy-marker

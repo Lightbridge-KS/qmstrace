@@ -247,6 +247,14 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
   ID can have — underscores, lower case, a space — could not judge, naming the ID shape.
   Found in user acceptance: `^REQ_BCN_\d{2}$` was accepted and every requirement vanished.
   Only the literal start is judged; `^FR\.\d{2}$` still passes.
+- Two externals whose prefixes are equal, or one starting the other (`AC-`, `AC-E1-`) — could not
+  judge, naming both tables and both prefixes, before any citation is judged; non-overlapping
+  prefixes (`AC-E1-`, `AC-E2-`) are read. Found while a project was designed with one agreement
+  per engagement: the second table's clauses were judged against the first table's file, and
+  `V09` invited a duplicate clause (#55).
+- An external `source` holding `*`, `?` or `[` — could not judge, naming the pattern; a source
+  that is simply absent stays *not verified*. A glob used to read as a file not checked out
+  here, and every citation of its family passed unverified (#56).
 
 ## Command line
 
