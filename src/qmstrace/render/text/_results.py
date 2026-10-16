@@ -26,8 +26,8 @@ _NAMES: dict[ReportFormat, str] = {
 def results(view: Results) -> str:
     """Render collected verdicts without making freshness or verification claims."""
     assessment = view.assessment
-    # this view reports on one repo; the ledger's tables read a project's results instead
-    assert isinstance(assessment, Assessment), "results renders one repo's assessment"
+    if not isinstance(assessment, Assessment):  # the ledger's tables read a project's results
+        raise TypeError("the results view renders one repo's assessment, not a project's")
     several = len(view.reports) > 1
     # One report keeps the one-line header; several list each, so a missing or truncated
     # file is visible by its count.

@@ -196,7 +196,7 @@ def summarize(
         entries = [entry for entry, _ in found]
         run = RunResult(
             (classname, name),
-            _worst(tuple(e.verdict for e in entries)),
+            worst(tuple(e.verdict for e in entries)),
             len(entries),
             tuple(sorted({kind for e in entries for kind in e.kinds})),
             tuple(sorted({detail for e in entries for detail in e.details})),
@@ -231,7 +231,7 @@ def summarize(
     tests = {
         test_id: TestResult(
             test_id,
-            _worst(tuple(r.verdict for r in matched[test_id])) if matched[test_id] else "no-result",
+            worst(tuple(r.verdict for r in matched[test_id])) if matched[test_id] else "no-result",
             tuple(matched[test_id]),
             tuple(sorted(out.get(test_id, ()))),
         )
@@ -253,7 +253,7 @@ def summarize(
         found = tuple(tests[t] for t in sorted(reached.get(node_id, ())))
         return CaseResult(
             graph.nodes[node_id],
-            _worst(tuple(t.verdict for t in found)) if found else "untested",
+            worst(tuple(t.verdict for t in found)) if found else "untested",
             found,
             tuple(sorted(out.get(node_id, ()))),
         )
@@ -279,7 +279,7 @@ def summarize(
         target = TargetResult(
             node,
             method,
-            _worst(tuple(t.verdict for t in linked)) if linked else "untested",
+            worst(tuple(t.verdict for t in linked)) if linked else "untested",
             linked,
             sum(len(t.runs) for t in linked),
             via,
@@ -349,6 +349,3 @@ def _by_run(
 def worst(verdicts: tuple[Verdict, ...]) -> Verdict:
     """The worst of several verdicts: fail, then no-result, skip, pass, untested."""
     return max(verdicts, key=lambda verdict: _RANK[verdict])
-
-
-_worst = worst
