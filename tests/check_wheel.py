@@ -176,7 +176,7 @@ assert judge.suspects(joined, ()) == ()
 from qmstrace.render import text, graph as browser
 from qmstrace.render._evidence import evidence
 from qmstrace.core.assessment import Assessment, ProjectAssessment, RepoState
-from qmstrace.core.results import Report, summarize
+from qmstrace.core.results import Report, ReportSource, summarize
 assert text.__file__.startswith(sys.argv[1] + '/')
 for owner, names in (
     ('text._status', ('status', 'LISTED', 'CATEGORY', 'VERIFY_BY', 'TESTED')),
@@ -198,7 +198,7 @@ outputs = (
     text.status(assessment), text.thread(assessment, requirement.id),
     text.impact(assessment, [requirement.id]), text.rules(by_path),
     text.schema_copies(by_path, ()),
-    text.results(summarize(assessment, Report(), {}, 'report.xml')),
+    text.results(summarize(assessment, {ReportSource('report.xml', ''): Report()}, {})),
     text.ledger_thread(project, requirement.id), text.ledger_impact(project, [requirement.id]),
 )
 assert all(isinstance(output, str) and output for output in outputs)

@@ -1,0 +1,26 @@
+reports: 2
+  TestResults/first.trx · 3 XML entries
+  TestResults/second.trx · 3 XML entries
+  6 XML entries · 4 reported runs (distinct full identities)
+  matched: 4 runs of 2 automated tests · scanned: 2 automated tests · unmatched: 0 run identities
+  matched against the current working tree — report commit NOT VERIFIED
+  a partial parameter set does not prove every possible variant ran
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+  2 duplicate XML entries combined by full identity; retry attempts are not inferred
+
+requirements — verdicts along verifies links, from automated tests directly or through test cases:
+  REQ-SVC-01  skip      via TC-SVC-01.1 · 1 automated tests · 1 runs — A call carries a key · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:5
+    via TC-SVC-01.1  skip · 1 automated tests · verifies REQ-SVC-01 — A call without a valid key is refused
+      skip      tests/Agent.Tests/Unit/KeyCheckTests.cs::KeyCheckTests::Admits_NoKey_IsFalse · 1 runs
+        skip: TC-SVC-01.1 a call without a key is refused (NotExecuted) · reported in TestResults/first.trx, TestResults/second.trx
+          NotExecuted: the key store is offline
+
+test cases that reach no requirement — no requirement verdict inferred:
+  TC-SVC-01.2  fail · 1 automated tests · verifies DSN-SVC-01 — The key check runs before any handler
+    fail      tests/Agent.Tests/Unit/KeyCheckTests.cs::KeyCheckTests::Admits_AnyKey_DecidesAlone · 3 runs
+      fail: TC-SVC-01.2 the key check decides before any handler(key: "a-wrong-key", admitted: True) (Failed) · reported in TestResults/second.trx
+        Failed: Expected KeyCheck.Admits(key, "the-key") to be True, but found False.
+
+result: 2 matched automated tests · 4 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

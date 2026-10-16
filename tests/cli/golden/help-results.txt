@@ -1,15 +1,18 @@
-Usage: qmstrace results [OPTIONS] {REPORT}
+Usage: qmstrace results [OPTIONS] {REPORT...}
 
-  Match a report to scanned tests and their explicit verifies links.
+  Match reports to scanned tests and their explicit verifies links.
 
-  The report is pytest JUnit XML or a TRX file (dotnet test --logger trx); its
-  root element decides which. Informational: failing tests and partial matches
-  still exit 0. Unmatched entries are listed; a report with no matches exits 2.
-  Relative report paths start at -C or the current directory, not the discovered
-  repo root. The report's commit is not verified.
+  Each report is pytest JUnit XML or a TRX file (dotnet test --logger trx); its
+  root element decides which. Several reports are read as one, in any order: a
+  run in two of them counts once, with its worst verdict. Informational: failing
+  tests and partial matches still exit 0. Unmatched entries are listed; reports
+  with no matches exit 2. Relative report paths start at -C or the current
+  directory, not the discovered repo root. A report outside the repo is shown by
+  its file name. The reports' commit is not verified.
 
 Arguments:
-  REPORT  A pytest JUnit XML report or a TRX file.  [required]
+  REPORT...  Pytest JUnit XML reports or TRX files, read as one —
+             TestResults/*.trx.  [required]
 
 Options:
   -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before

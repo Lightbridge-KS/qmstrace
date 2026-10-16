@@ -67,11 +67,26 @@
     --8<-- "cli/golden/results-trx-mixed.txt"
     ```
 
-    Name the test project, as above. `dotnet test` writes one TRX per test project, and
-    `results` reads one report, so a test in another project's file shows as `no-result`.
-    Given a solution and a fixed `LogFileName`, every project writes the same file and only the
-    last one's results remain, without warning
-    ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
+    With several test projects, write one TRX per project, each with its own name, and give
+    `results` all of them. They are read as one; a run in two files keeps its worst verdict:
+
+    ``` sh
+    dotnet test tests/Agent.Tests --logger "trx;LogFileName=unit.trx" --results-directory TestResults
+    dotnet test tests/Agent.IntegrationTests --logger "trx;LogFileName=integration.trx" --results-directory TestResults
+    qmstrace results TestResults/*.trx
+    ```
+
+    Here, two runs of the agent's tests read together:
+
+    ``` text
+    --8<-- "cli/golden/results-trx-several.txt"
+    ```
+
+    !!! warning "One `LogFileName` for a whole solution overwrites"
+
+        Given a solution and a fixed `LogFileName`, every project writes the same file and
+        only the last one's results remain, without warning. qmstrace cannot see the overwrite;
+        the header's entry count per report is where the shortfall shows.
 
 ## What is not read
 

@@ -518,6 +518,23 @@ ADR-0004: `results` reads TRX as well as JUnit, the root element deciding which.
 | `SENTINEL` in every path, name, output, trace and attachment field, and a message's second line | in neither the report nor the output |
 | A summary count of 999 over three results | three entries |
 | Every run in the probe TRX | matches the identity its xUnit extractor recorded, but for the custom attribute's (V15) |
+
+## #40 — several reports in one run
+
+ADR-0005: `results` reads several reports as one, combined in core. Each line is at least one
+test in `tests/integration/test_results_several.py`.
+
+| Scenario | Expected |
+|---|---|
+| Three reports, in every order | the same view, byte for byte |
+| One identity, `pass` in one report and `fail` in another | one run, `fail`, two entries, one duplicate, both reports as its sources |
+| A filtered TRX alone; with the full run | `no-result` for the test it leaves out; then that test's verdict |
+| Two reports | each run's source carries its report's label and the sha256 of its bytes |
+| One identity reported for two repos | two runs; each matches only its own repo's tests |
+| A report under a folder outside the repo, at an absolute path | shown by its file name; no part of the path printed |
+| Two reports outside the repo with one file name; one report given twice | refused, exit 2, with the next move |
+| One report | the view it always printed — every earlier results golden unchanged |
+| Two TRX files | `reports: 2`, each with its entry count; a run that did not pass names the reports it was in |
 | The agent's full run | REQ-SVC-01 pass via TC-SVC-01.1; TC-SVC-01.2 pass, 2 runs |
 | A skipped `[Fact]` and a failing `[Theory]` row | REQ-SVC-01 skip; TC-SVC-01.2 fail; the reasons' first lines shown |
 | A run filtered out | `no-result` |

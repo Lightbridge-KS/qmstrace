@@ -634,6 +634,15 @@ method are separate runs too. The TRX reader takes only those fields, the outcom
 line of an error message — never a path, a machine or user name, output or a stack trace
 (ADR-0004).
 
+Several reports are read as one (ADR-0005): `summarize` takes a mapping of `ReportSource` —
+a label, the sha256 of the report's bytes and, at the ledger, the repo it reports — to its
+`Report`, so no result depends on the order reports were given in. A run is one identity per
+repo, whichever reports carry it: its entries combine by their worst verdict, it counts once
+as a duplicate, and it keeps every source it came from. `Workspace.results` labels a report
+inside the repo by its path from the root and one outside by its file name, and refuses two
+reports one label would hide or a report given twice; combining stays in core, so the ledger's
+tables apply the same rule.
+
 Satisfies: REQ-QMT-10, REQ-QMT-22
 
 ### DSN-QMT-10 — One source tree seam, one glob matcher

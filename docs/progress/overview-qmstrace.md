@@ -440,7 +440,11 @@ row; no timestamps (REQ-QMT-15).
   [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md), the surface architecture
   following it; CONTEXT.md's *Traceability Matrix* and *Coverage Summary*.
 - [ ] **CR-004 accepted** — by the developer, before any SRS edit.
-- [ ] **B · #40** — several reports in core, to ADR-0005; amends REQ-QMT-10 under CR-004.
+- [x] **B · #40** — several reports in core, to ADR-0005; amends REQ-QMT-10 under CR-004 —
+  pull request. `results REPORT...`: a run in two reports is one run with its worst verdict,
+  each run keeps its reports' labels and sha256, a report may name its repo, and one report
+  prints the view it always did. Order-independence and the cross-file duplicate rule each
+  fail their tests when broken in a disposable copy.
 - [ ] **#49a** — `ledger table` without verdict columns, in parallel with B; adds REQ-QMT-23
   and DSN-QMT-16; rebased after #40.
 - [ ] **#49b** — `--report REPO=FILE`, per-level verdict columns, each cell's evidence pointer;

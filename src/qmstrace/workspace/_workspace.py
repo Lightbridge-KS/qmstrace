@@ -5,6 +5,7 @@ Implements: DSN-QMT-02, DSN-QMT-07, DSN-QMT-09, DSN-QMT-11, DSN-QMT-14
 
 from __future__ import annotations
 
+import hashlib
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
@@ -24,7 +25,13 @@ from qmstrace.infra.files import write_new
 from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 from qmstrace.workspace._baselines import _judged_baselines
-from qmstrace.workspace._discovery import TreeFactory, _configuration, _find_root, _ledger, _shown
+from qmstrace.workspace._discovery import (
+    TreeFactory,
+    _configuration,
+    _find_root,
+    _ledger,
+    _report_label,
+)
 from qmstrace.workspace._project import _unseen_in_project
 from qmstrace.workspace._project import project as _project
 from qmstrace.workspace._scanning import _scan
@@ -316,36 +323,58 @@ class Workspace:
             )
         return assessment
 
-    def results(self, report_path: Path) -> Results:
-        """Match an explicitly selected report against one assessment of the working tree.
+    def results(self, *report_paths: Path) -> Results:
+        """Match explicitly selected reports, read as one, against one assessment of the
+        working tree.
 
         The caller resolves relative report paths from the invocation directory, before repo
         discovery. Reports can be ignored or outside the repo; they are never scanned as items.
+        A report inside the repo is labelled by its path from the root; one outside, by its file
+        name alone, so no path of the machine reaches the output. Any report that cannot be read
+        refuses the whole run.
         """
-        label = _shown(self.root, report_path)
-        try:
-            payload = report_path.read_bytes()
-        except OSError as error:
-            raise CouldNotJudge(
-                f"Cannot read report {label} ({error.strerror}).",
-                f"Fix: check the path, or generate a report: {_GENERATE}.",
-            ) from None
-        report = reports.read(payload)
-        if report.problem:
-            raise CouldNotJudge(
-                f"{label}: {report.problem}.",
-                f"Fix: supply a pytest JUnit report or a TRX file: {_GENERATE}.",
-            )
+        read: dict[results.ReportSource, results.Report] = {}
+        given: set[Path] = set()
+        labels: set[str] = set()
+        for path in report_paths:
+            label = _report_label(self.root, path)
+            if path in given:
+                raise CouldNotJudge(
+                    f"Report {label} is given twice.",
+                    "Fix: name each report once; a run in two reports is combined anyway.",
+                )
+            if label in labels:
+                raise CouldNotJudge(
+                    f"Two reports would both be shown as {label}.",
+                    "Fix: give them distinct file names, or copy them into the repo.",
+                )
+            given.add(path)
+            labels.add(label)
+            try:
+                payload = path.read_bytes()
+            except OSError as error:
+                raise CouldNotJudge(
+                    f"Cannot read report {label} ({error.strerror}).",
+                    f"Fix: check the path, or generate a report: {_GENERATE}.",
+                ) from None
+            report = reports.read(payload)
+            if report.problem:
+                raise CouldNotJudge(
+                    f"{label}: {report.problem}.",
+                    f"Fix: supply a pytest JUnit report or a TRX file: {_GENERATE}.",
+                )
+            read[results.ReportSource(label, hashlib.sha256(payload).hexdigest())] = report
         assessment = self.assessment()
         identities = {item.id: item.runs_as for item in assessment.graph.items() if item.runs_as}
-        view = results.summarize(assessment, report, identities, label)
+        view = results.summarize(assessment, read, identities)
         if not view.matched_cases:
             unmatched = "\n".join(f"  {run.run.identity!r}: {run.reason}" for run in view.unmatched)
+            named = ", ".join(r.source.label for r in view.reports)
+            ways = " ".join(_MATCHING[f] for f in view.formats or ("junit",))
             raise CouldNotJudge(
-                f"{label}: no report entries match the {view.scanned_cases} scanned automated "
+                f"{named}: no report entries match the {view.scanned_cases} scanned automated "
                 f"tests.\n{unmatched}",
-                f"Fix: {_MATCHING[report.format or 'junit']} "
-                "No requirement verdicts were produced.",
+                f"Fix: {ways} No requirement verdicts were produced.",
             )
         return view
 
