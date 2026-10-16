@@ -39,7 +39,9 @@ with TemporaryDirectory() as outside:
         "extract.reports",
         "extract.junit",
         "extract.trx",
+        "core.tables",
         "render.text",
+        "render.tables",
         "render.graph",
         "render._evidence",
         "workspace",
@@ -242,7 +244,8 @@ assert entry.load() is cli.app
 for owner, names in (
     ('_app', ('app', 'main')),
     ('_local', ('status', 'thread', 'impact', 'results', 'check', 'rules', 'init', 'graph')),
-    ('_ledger', ('ledger', 'copy_schema', 'ledger_check', 'ledger_thread', 'ledger_impact')),
+    ('_ledger', ('ledger', 'copy_schema', 'ledger_check', 'ledger_thread', 'ledger_impact',
+                 'ledger_table')),
     ('_options', ('Directory',)),
     ('_outcome', ('outcome', 'EXIT_CODES', 'EXIT_OK', 'EXIT_FAILED',
                   'EXIT_COULD_NOT_JUDGE', 'EXIT_INTERNAL')),
@@ -256,7 +259,7 @@ for command in ((), ('ledger',), *((c.callback.__name__,) for c in cli.app.regis
     result = runner.invoke(entry.load(), [*command, '--help'], prog_name='qmstrace')
     assert result.exit_code == 0, result.output
     assert result.stdout_bytes and not result.stderr_bytes
-assert len(cli.app.registered_commands) == 8 and len(cli.ledger.registered_commands) == 4
+assert len(cli.app.registered_commands) == 8 and len(cli.ledger.registered_commands) == 5
 assert len(cli.app.registered_groups) == 1
 print(f'Wheel package imports and behavior pass in isolation ({sys.argv[4]} first).')
 """,

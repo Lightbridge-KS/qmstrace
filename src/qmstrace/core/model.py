@@ -33,6 +33,14 @@ def id_tokens(text: str) -> tuple[str, ...]:
     return tuple(found.group(1) for found in ID_IN_TEXT.finditer(text))
 
 
+def id_order(item_id: str) -> tuple[tuple[str | int, ...], str]:
+    """Sort key for any ID, a repo-qualified one included: each run of digits compares as a
+    number, so AGR-2 comes before AGR-10, TC-4.2 before TC-4.10 and REQ-SVC-02 before
+    REQ-SVC-10. The ID itself breaks ties."""
+    parts = re.split(r"(\d+)", item_id)
+    return tuple(int(p) if i % 2 else p for i, p in enumerate(parts)), item_id
+
+
 def text_digest(text: str) -> str:
     """The digest of an item's text, with layout ignored.
 

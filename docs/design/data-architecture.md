@@ -647,6 +647,10 @@ files      = ["docs/req/*-srs.md"]
 - A requirement's classification is one `Category` from the profile's list (D8).
 - **Where it lives across repos:** the shared part is authored in the ledger and copied here,
   generated and verified; the local part is written here (D9).
+- **What the ledger's tables carry** beyond the chain: `[tables.matrix] fields`, the requirement
+  fields the traceability matrix shows. The tables' columns are otherwise derived from the
+  item and link types above, so a project whose chain differs needs no engine change
+  ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)).
 
 ### Across repos (v1 — the ledger's check, M10a)
 

@@ -45,6 +45,7 @@ nav = [
     { "Findings" = "reference/findings.md" },
     { "Exit codes" = "reference/exit-codes.md" },
     { "Configuration" = "reference/configuration.md" },
+    { "Table format" = "reference/table-format.md" },
     { "Baselines and change control" = "reference/baselines.md" },
     { "Downstream suspects" = "reference/suspects.md" },
   ] },

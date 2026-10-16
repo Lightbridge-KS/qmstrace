@@ -1,0 +1,123 @@
+{
+  "format": "qmstrace.table/1",
+  "table": "requirements",
+  "project": "CASES",
+  "draft": "generated from the ledger — not an issued revision",
+  "schema": "sha256:aca979f608c4631fb064128ebd0cb9ea00a9dca3c66d08f0769de2d880373f43",
+  "ledger": {
+    "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
+    "clean": true
+  },
+  "read": [
+    {
+      "repo": "agent",
+      "location": "../agent",
+      "commit": "24f6279d9825fe7f941517035047d8a6b98c5562",
+      "clean": true
+    },
+    {
+      "repo": "ledger",
+      "location": ".",
+      "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
+      "clean": true
+    },
+    {
+      "repo": "service",
+      "location": "../service",
+      "commit": "e07096c462636cbc981538a88e669fb2ec6467ca",
+      "clean": true
+    }
+  ],
+  "pinned": false,
+  "violations": 0,
+  "gaps": 1,
+  "notices": [
+    "baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines in ledger: no matching reachable local tag — nothing frozen",
+    "change requests: change-requests (1 readable; 0 malformed) — working tree, not pinned"
+  ],
+  "columns": [
+    {
+      "name": "requirement",
+      "cell": "id",
+      "type": "requirement",
+      "via": null
+    },
+    {
+      "name": "title",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "origin_clause",
+      "cell": "ids",
+      "type": "origin_clause",
+      "via": "Origin"
+    },
+    {
+      "name": "Category",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "Verify-by",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "Change",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "Status",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "repo",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "where",
+      "cell": "text",
+      "type": null,
+      "via": null
+    }
+  ],
+  "rows": [
+    {
+      "requirement": "REQ-SVC-01",
+      "title": "A call carries a key",
+      "origin_clause": [
+        "AGR-1"
+      ],
+      "Category": "security",
+      "Verify-by": "test",
+      "Change": null,
+      "Status": null,
+      "repo": "ledger",
+      "where": "docs/req/service-srs.md:5"
+    },
+    {
+      "requirement": "REQ-SVC-02",
+      "title": "Records survive a restart",
+      "origin_clause": [
+        "AGR-2"
+      ],
+      "Category": "reliability",
+      "Verify-by": "test",
+      "Change": null,
+      "Status": null,
+      "repo": "ledger",
+      "where": "docs/req/service-srs.md:12"
+    }
+  ]
+}

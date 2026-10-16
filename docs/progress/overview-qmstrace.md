@@ -436,17 +436,22 @@ row; no timestamps (REQ-QMT-15).
 
 **Phases, agreed with the Orchestrator 2026-10-16:**
 
-- [ ] **A · design** (this branch, docs) — CR-004 drafted `evaluated` in `qmstrace-ledger`;
+- [x] **A · design** — #54 (`51612c5`) — CR-004 drafted `evaluated` in `qmstrace-ledger`;
   [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md), the surface architecture
   following it; CONTEXT.md's *Traceability Matrix* and *Coverage Summary*.
-- [ ] **CR-004 accepted** — by the developer, before any SRS edit.
+- [x] **CR-004 accepted** — by the developer, 2026-10-16 (qmstrace-ledger `3928b27`).
 - [x] **B · #40** — several reports in core, to ADR-0005; amends REQ-QMT-10 under CR-004 —
   pull request. `results REPORT...`: a run in two reports is one run with its worst verdict,
   each run keeps its reports' labels and sha256, a report may name its repo, and one report
   prints the view it always did. Order-independence and the cross-file duplicate rule each
   fail their tests when broken in a disposable copy.
 - [ ] **#49a** — `ledger table` without verdict columns, in parallel with B; adds REQ-QMT-23
-  and DSN-QMT-16; rebased after #40.
+  and DSN-QMT-16; rebased after #40. *Built on `feat/49-tables`, stacked on Phase A:* the
+  schema-derived tables (`core/tables.py`), `[tables.matrix] fields`, `model.id_order`, each
+  repo's checkout (`infra/git.checkout`), the JSON document (`render/tables.py`), the command,
+  goldens and the manual; REQ-QMT-23 (`Change: CR-004`) and DSN-QMT-16, with their markers.
+  Mutation checks in disposable copies: without the direct-test row rule, 5 tests fail; with
+  cleanliness always true, 5 fail.
 - [ ] **#49b** — `--report REPO=FILE`, per-level verdict columns, each cell's evidence pointer;
   additive, so the format stays `qmstrace.table/1`.
 

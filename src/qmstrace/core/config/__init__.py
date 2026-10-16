@@ -45,6 +45,9 @@ from qmstrace.core.config._schema import (
 from qmstrace.core.config._schema import (
     Subject as Subject,
 )
+from qmstrace.core.config._schema import (
+    Tables as Tables,
+)
 from qmstrace.core.config._toml import (
     SUPPORTED_VERSION as SUPPORTED_VERSION,
 )

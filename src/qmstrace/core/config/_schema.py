@@ -66,6 +66,14 @@ class ItemType:
 
 
 @dataclass(frozen=True, slots=True)
+class Tables:
+    """What the ledger's tables carry beyond the chain (ADR-0005): the requirement fields the
+    traceability matrix shows, in the order given."""
+
+    matrix_fields: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class LinkType:
     """A marker, who may carry it, and what it may point at."""
 

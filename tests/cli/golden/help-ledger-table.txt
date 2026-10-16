@@ -1,0 +1,21 @@
+Usage: qmstrace ledger table [OPTIONS] {TABLE}
+
+  Emit one of the project's tables as versioned JSON (qmstrace.table/1), for a
+  render layer to turn into a document.
+
+  matrix: one row per requirement, design element and test case. requirements:
+  one row per requirement. coverage: requirements covered and not, tier by tier.
+  Columns come from the project's schema. Every repo is read from its working
+  tree, not at a pin; each repo's commit, and whether its tree was clean, are in
+  the document. It is a draft, never an issued revision. Relative --out paths
+  start at -C or the current directory.
+
+Arguments:
+  TABLE  matrix, requirements or coverage.  [required]
+
+Options:
+  --out <path>  Write a new file instead of printing; existing files are
+                refused.
+  -C PATH       Run as if qmstrace had been started in PATH, as with git -C.
+                Before or after the command.
+  --help        Show this message and exit.

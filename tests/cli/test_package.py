@@ -17,7 +17,17 @@ runner = CliRunner()
     [
         ("_app", ("app", "main")),
         ("_local", ("status", "thread", "impact", "results", "check", "rules", "init", "graph")),
-        ("_ledger", ("ledger", "copy_schema", "ledger_check", "ledger_thread", "ledger_impact")),
+        (
+            "_ledger",
+            (
+                "ledger",
+                "copy_schema",
+                "ledger_check",
+                "ledger_thread",
+                "ledger_impact",
+                "ledger_table",
+            ),
+        ),
         ("_options", ("Directory",)),
         (
             "_outcome",
@@ -40,7 +50,7 @@ def test_cli_exports_are_the_implementation_objects(owner: str, names: tuple[str
 
 def test_registration_keeps_callbacks_order_and_wrapped_signatures() -> None:
     root = ("status", "thread", "impact", "results", "check", "rules", "init", "graph")
-    ledger = ("copy_schema", "ledger_check", "ledger_thread", "ledger_impact")
+    ledger = ("copy_schema", "ledger_check", "ledger_thread", "ledger_impact", "ledger_table")
     assert tuple(c.callback for c in cli.app.registered_commands) == tuple(
         getattr(cli, name) for name in root
     )
@@ -52,6 +62,7 @@ def test_registration_keeps_callbacks_order_and_wrapped_signatures() -> None:
         "check",
         "thread",
         "impact",
+        "table",
     ]
     assert len(cli.app.registered_groups) == 1
     assert cli.app.registered_groups[0].typer_instance is cli.ledger

@@ -1,0 +1,119 @@
+{
+  "format": "qmstrace.table/1",
+  "table": "coverage",
+  "project": "CASES",
+  "draft": "generated from the ledger — not an issued revision",
+  "schema": "sha256:aca979f608c4631fb064128ebd0cb9ea00a9dca3c66d08f0769de2d880373f43",
+  "ledger": {
+    "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
+    "clean": true
+  },
+  "read": [
+    {
+      "repo": "agent",
+      "location": "../agent",
+      "commit": "24f6279d9825fe7f941517035047d8a6b98c5562",
+      "clean": true
+    },
+    {
+      "repo": "ledger",
+      "location": ".",
+      "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
+      "clean": true
+    },
+    {
+      "repo": "service",
+      "location": "../service",
+      "commit": "e07096c462636cbc981538a88e669fb2ec6467ca",
+      "clean": true
+    }
+  ],
+  "pinned": false,
+  "violations": 0,
+  "gaps": 1,
+  "notices": [
+    "baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines in ledger: no matching reachable local tag — nothing frozen",
+    "change requests: change-requests (1 readable; 0 malformed) — working tree, not pinned",
+    "Coverage counts links, not passing tests: no verdict is in this table."
+  ],
+  "columns": [
+    {
+      "name": "tier",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "via",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "rules",
+      "cell": "ids",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "of",
+      "cell": "count",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "covered",
+      "cell": "count",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "not_covered",
+      "cell": "count",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "not_covered_ids",
+      "cell": "ids",
+      "type": "requirement",
+      "via": null
+    }
+  ],
+  "rows": [
+    {
+      "tier": "design_element",
+      "via": "Satisfies",
+      "rules": [
+        "G01"
+      ],
+      "of": 2,
+      "covered": 2,
+      "not_covered": 0,
+      "not_covered_ids": []
+    },
+    {
+      "tier": "test_case",
+      "via": "verifies",
+      "rules": [
+        "G02"
+      ],
+      "of": 2,
+      "covered": 2,
+      "not_covered": 0,
+      "not_covered_ids": []
+    },
+    {
+      "tier": "automated_test",
+      "via": "verifies",
+      "rules": [
+        "G02"
+      ],
+      "of": 2,
+      "covered": 2,
+      "not_covered": 0,
+      "not_covered_ids": []
+    }
+  ]
+}

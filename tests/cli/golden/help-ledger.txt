@@ -14,3 +14,5 @@ Commands:
                hangs off it.
   impact       What changing several items affects across every repo of the
                project.
+  table        The traceability matrix, requirements register or coverage
+               summary, as JSON.

@@ -27,9 +27,14 @@ from qmstrace.infra.globbing import matches
 GOLDEN = Path(__file__).parents[1] / "cli" / "golden"
 
 
+def _goldens(name: str) -> list[Path]:
+    """A command's goldens: what it prints, as text — or, for a command that emits data, JSON."""
+    return [*GOLDEN.glob(f"{name}-*.txt"), *GOLDEN.glob(f"{name}-*.json")]
+
+
 def test_every_command_has_a_golden(commands: list[str]) -> None:
     assert commands, "no command is registered"
-    missing = [name for name in commands if not list(GOLDEN.glob(f"{name}-*.txt"))]
+    missing = [name for name in commands if not _goldens(name)]
     assert not missing, f"commands with no golden output in {GOLDEN}: {missing}"
 
 
@@ -38,7 +43,7 @@ def test_every_verb_of_a_group_has_a_golden(subcommands: dict[str, list[str]]) -
         f"{group} {verb}"
         for group, verbs in subcommands.items()
         for verb in verbs
-        if not list(GOLDEN.glob(f"{group}-{verb}-*.txt"))
+        if not _goldens(f"{group}-{verb}")
     ]
     assert not missing, f"verbs with no golden output in {GOLDEN}: {missing}"
 
