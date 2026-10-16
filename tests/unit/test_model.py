@@ -14,7 +14,16 @@ import unicodedata
 
 import pytest
 
-from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Item, Link, Stray, text_digest
+from qmstrace.core.model import (
+    ID_TOKEN,
+    Extracted,
+    Finding,
+    Item,
+    Link,
+    Stray,
+    id_order,
+    text_digest,
+)
 
 
 def test_rewrapping_a_paragraph_is_not_a_change() -> None:
@@ -84,3 +93,17 @@ def test_a_derived_id_carries_its_repo_and_an_authored_one_does_not() -> None:
 def test_the_ledger_itself_keeps_its_paths_as_they_are() -> None:
     part = Extracted(items=(Item("REQ-SVC-01", "requirement", "docs/req/srs.md", 3, "r", "d"),))
     assert part.qualified("ledger", ".", frozenset()).items[0].file == "docs/req/srs.md"
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_ids_sort_with_their_numbers_read_as_numbers() -> None:
+    ids = ["AGR-10", "TC-4.10", "REQ-SVC-10", "agent:tests/b.py", "AGR-2", "TC-4.2", "REQ-SVC-02"]
+    assert sorted(ids, key=id_order) == [
+        "AGR-2",
+        "AGR-10",
+        "REQ-SVC-02",
+        "REQ-SVC-10",
+        "TC-4.2",
+        "TC-4.10",
+        "agent:tests/b.py",
+    ]

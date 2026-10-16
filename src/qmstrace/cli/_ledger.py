@@ -5,13 +5,15 @@ Implements: DSN-QMT-01
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Annotated
 
 import typer
 
 from qmstrace.cli._options import Directory, _directory
 from qmstrace.cli._outcome import EXIT_FAILED, EXIT_OK, outcome
-from qmstrace.render import text
+from qmstrace.core.tables import table
+from qmstrace.render import tables, text
 from qmstrace.workspace import Workspace
 
 ledger = typer.Typer(
@@ -121,4 +123,50 @@ def ledger_impact(
     """
     project = Workspace.project_impact(_directory(ctx, directory), item_ids)
     typer.echo(text.ledger_impact(project, item_ids))
+    return EXIT_OK
+
+
+TABLES = ("matrix", "requirements", "coverage")
+
+
+@ledger.command(
+    "table",
+    short_help="The traceability matrix, requirements register or coverage summary, as JSON.",
+)
+@outcome
+def ledger_table(
+    ctx: typer.Context,
+    name: Annotated[str, typer.Argument(metavar="TABLE", help="matrix, requirements or coverage.")],
+    out: Annotated[
+        Path | None,
+        typer.Option(
+            "--out", help="Write a new file instead of printing; existing files are refused."
+        ),
+    ] = None,
+    directory: Directory = None,
+) -> int:
+    """Emit one of the project's tables as versioned JSON (qmstrace.table/1), for a render
+    layer to turn into a document.
+
+    matrix: one row per requirement, design element and test case. requirements: one row per
+    requirement. coverage: requirements covered and not, tier by tier. Columns come from the
+    project's schema. Every repo is read from its working tree, not at a pin; each repo's commit,
+    and whether its tree was clean, are in the document. It is a draft, never an issued
+    revision. Relative --out paths start at -C or the current directory.
+    """
+    if name not in TABLES:
+        raise typer.BadParameter(
+            f"'{name}' is not a table qmstrace emits — use matrix, requirements or coverage.",
+            param_hint="TABLE",
+        )
+    start = _directory(ctx, directory)
+    project = Workspace.project(start)
+    built = table(name, project.config, project.graph)
+    document = tables.document(project, built)
+    if out is None:
+        typer.echo(document, nl=False)
+        return EXIT_OK
+    Workspace.save_view(start / out, document)
+    typer.echo(f"Written: {out} · {built.name} · {len(built.rows)} rows")
+    typer.echo("Read from working trees, not pinned; a draft, not an issued revision. Exit 0.")
     return EXIT_OK

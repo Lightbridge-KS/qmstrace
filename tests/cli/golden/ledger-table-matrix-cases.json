@@ -1,0 +1,163 @@
+{
+  "format": "qmstrace.table/1",
+  "table": "matrix",
+  "project": "CASES",
+  "draft": "generated from the ledger — not an issued revision",
+  "schema": "sha256:aca979f608c4631fb064128ebd0cb9ea00a9dca3c66d08f0769de2d880373f43",
+  "ledger": {
+    "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
+    "clean": true
+  },
+  "read": [
+    {
+      "repo": "agent",
+      "location": "../agent",
+      "commit": "24f6279d9825fe7f941517035047d8a6b98c5562",
+      "clean": true
+    },
+    {
+      "repo": "ledger",
+      "location": ".",
+      "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
+      "clean": true
+    },
+    {
+      "repo": "service",
+      "location": "../service",
+      "commit": "e07096c462636cbc981538a88e669fb2ec6467ca",
+      "clean": true
+    }
+  ],
+  "pinned": false,
+  "violations": 0,
+  "gaps": 1,
+  "notices": [
+    "baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines in ledger: no matching reachable local tag — nothing frozen",
+    "change requests: change-requests (1 readable; 0 malformed) — working tree, not pinned"
+  ],
+  "columns": [
+    {
+      "name": "origin_clause",
+      "cell": "ids",
+      "type": "origin_clause",
+      "via": "Origin"
+    },
+    {
+      "name": "requirement",
+      "cell": "id",
+      "type": "requirement",
+      "via": null
+    },
+    {
+      "name": "title",
+      "cell": "text",
+      "type": null,
+      "via": null
+    },
+    {
+      "name": "design_element",
+      "cell": "id",
+      "type": "design_element",
+      "via": "Satisfies"
+    },
+    {
+      "name": "component",
+      "cell": "ids",
+      "type": "component",
+      "via": "Implements"
+    },
+    {
+      "name": "test_case",
+      "cell": "id",
+      "type": "test_case",
+      "via": "verifies"
+    },
+    {
+      "name": "automated_test",
+      "cell": "ids",
+      "type": "automated_test",
+      "via": "verifies"
+    }
+  ],
+  "rows": [
+    {
+      "origin_clause": [
+        "AGR-1"
+      ],
+      "requirement": "REQ-SVC-01",
+      "title": "A call carries a key",
+      "design_element": "DSN-SVC-01",
+      "component": [
+        "agent:src/Agent/KeyCheck.cs",
+        "service:src/service/keys.py"
+      ],
+      "test_case": "TC-SVC-01.1",
+      "automated_test": [
+        "agent:tests/Agent.Tests/Unit/KeyCheckTests.cs::KeyCheckTests::Admits_NoKey_IsFalse",
+        "service:tests/unit/test_api.py::test_a_call_with_a_wrong_key_is_refused",
+        "service:tests/unit/test_api.py::test_a_call_without_a_key_is_refused"
+      ]
+    },
+    {
+      "origin_clause": [
+        "AGR-1"
+      ],
+      "requirement": "REQ-SVC-01",
+      "title": "A call carries a key",
+      "design_element": "DSN-SVC-01",
+      "component": [
+        "agent:src/Agent/KeyCheck.cs",
+        "service:src/service/keys.py"
+      ],
+      "test_case": "TC-SVC-01.2",
+      "automated_test": [
+        "agent:tests/Agent.Tests/Unit/KeyCheckTests.cs::KeyCheckTests::Admits_AnyKey_DecidesAlone",
+        "service:tests/unit/test_api.py::test_the_key_check_runs_before_any_handler"
+      ]
+    },
+    {
+      "origin_clause": [
+        "AGR-2"
+      ],
+      "requirement": "REQ-SVC-02",
+      "title": "Records survive a restart",
+      "design_element": "DSN-SVC-02",
+      "component": [
+        "service:src/service/store.py"
+      ],
+      "test_case": "TC-SVC-02.1",
+      "automated_test": [
+        "service:tests/integration/test_store.py::test_a_restart_keeps_every_field"
+      ]
+    },
+    {
+      "origin_clause": [
+        "AGR-2"
+      ],
+      "requirement": "REQ-SVC-02",
+      "title": "Records survive a restart",
+      "design_element": "DSN-SVC-02",
+      "component": [
+        "service:src/service/store.py"
+      ],
+      "test_case": "TC-SVC-02.2",
+      "automated_test": []
+    },
+    {
+      "origin_clause": [
+        "AGR-2"
+      ],
+      "requirement": "REQ-SVC-02",
+      "title": "Records survive a restart",
+      "design_element": "DSN-SVC-02",
+      "component": [
+        "service:src/service/store.py"
+      ],
+      "test_case": null,
+      "automated_test": [
+        "service:tests/integration/test_store.py::test_a_record_survives_a_restart"
+      ]
+    }
+  ]
+}

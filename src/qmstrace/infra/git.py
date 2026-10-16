@@ -4,7 +4,7 @@ Every call runs in the directory it asks about, with the variables that would po
 some other repository removed: inside a hook, `GIT_INDEX_FILE` or `GIT_DIR` would otherwise make
 a sibling's listing read this repo's index.
 
-Implements: DSN-QMT-07, DSN-QMT-10
+Implements: DSN-QMT-07, DSN-QMT-10, DSN-QMT-16
 """
 
 from __future__ import annotations
@@ -53,6 +53,31 @@ def working_files(root: Path) -> tuple[str, ...] | None:
         )
     names = listed.stdout.decode("utf-8", "surrogateescape").split("\0")
     return tuple(name for name in names if name)
+
+
+def checkout(root: Path) -> tuple[str, bool] | None:
+    """The commit `root` has checked out, and whether its working tree is clean — nothing under
+    `root` modified, staged, deleted, or new and not ignored.
+
+    `None` when `root` is not inside a Git work tree, has no commit yet, or Git is not
+    installed. Status is read without taking Git's index lock, so reading never blocks a writer.
+    """
+    head = _git(root, "rev-parse", "--verify", "--quiet", "HEAD^{commit}")
+    if head is None or head.returncode != 0:
+        return None
+    status = _git(
+        root,
+        "--no-optional-locks",
+        "status",
+        "--porcelain",
+        "-z",
+        "--untracked-files=normal",
+        "--",
+        ".",
+    )
+    if status is None or status.returncode != 0:
+        return None
+    return head.stdout.decode().strip(), not status.stdout
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess[bytes] | None:

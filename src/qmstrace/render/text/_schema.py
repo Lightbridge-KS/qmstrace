@@ -95,6 +95,9 @@ def _outside_block(config: TraceConfig) -> list[str]:
                 f"    {scope.name}: tags matching {scope.tag.pattern} freeze "
                 f"{_words(scope.covers)} ({subject})"
             )
+    if config.tables.matrix_fields:
+        carried = ", ".join(config.tables.matrix_fields)
+        lines += ["", f"  tables: the traceability matrix also carries {carried} — ledger table"]
     return lines
 
 

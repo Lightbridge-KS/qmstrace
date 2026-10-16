@@ -55,7 +55,7 @@ src/qmstrace/
     __init__.py          exact compatibility exports of the 22 existing public names
     _app.py              root app, callback/version and explicit root-command registration
     _local.py            eight local handlers: arguments → workspace → render → exit code
-    _ledger.py           ledger sub-app and its four handlers
+    _ledger.py           ledger sub-app and its five handlers
     _options.py          Directory annotation and duplicate -C reconciliation
     _outcome.py          exit constants/help and outcome decorator; errors on stderr
   workspace/             orchestration; callers keep importing qmstrace.workspace.Workspace
@@ -94,6 +94,8 @@ src/qmstrace/
                          comparisons (M5a), suspect values and per-root reasons (M5b); no IO
     results.py           frozen report/result values; pure exact matching, run deduplication and
                          direct-verifies verdict aggregation (M4)
+    tables.py            the ledger's tables — matrix, requirements register, coverage summary —
+                         as columns and rows derived from the schema's chain (#49, ADR-0005)
     setup/               pure setup edits; callers keep importing qmstrace.core.setup
       __init__.py        explicit compatibility exports only
       _guide.py          stanza, guide block replacement and authoring-skill installation paths
@@ -101,7 +103,8 @@ src/qmstrace/
       _schema_copy.py    Held, Copied, schema inspection, block generation and proven replacement
     findings.py          the catalogue: each code once — what is wrong, the next move
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned;
-                         ProjectAssessment and RepoState — the ledger's check (M10a)
+                         ProjectAssessment and RepoState — the ledger's check (M10a); Checkout,
+                         each repo's commit and cleanliness as a table records it (#49)
   extract/               text in, items out — never a path, never a repo
     base.py              IExtractor, the registry by name; FORMS — how each extractor's items
                          write a link, for a gap's next move (M3)
@@ -130,7 +133,8 @@ src/qmstrace/
   infra/                 everything that touches the world
     tree.py              ISourceTree · WorkingTree — files(), read(), label · GitTree (M5a)
     git.py               the one subprocess helper, run where it asks, redirects scrubbed ·
-                         working_files() · IGit, GitCli — reachable tags, files at a revision (M5a)
+                         working_files() · checkout(), the commit and a clean tree, read without the
+                         index lock (#49) · IGit, GitCli — reachable tags, files at a revision (M5a)
     externals.py         raw change-request directory reads (M5a). The agreement and siblings need
                          no module: they are read as WorkingTrees
     globbing.py          the one matcher, for every tree
@@ -148,6 +152,7 @@ src/qmstrace/
       _results.py        report verdicts, shared tests and nonpassing run details
       _schema.py         rules, schema descriptions and schema-copy outcomes
     graph.py             deterministic assessment projection and standalone HTML (M7b)
+    tables.py            one table as a qmstrace.table/1 JSON document, deterministic (#49)
   assets/                skill/SKILL.md · stanza.md · starter.toml · ledger-starter.toml (M10c) · graph.html/js · pinned
                          vendor/vis-network and license — package data
 tests/
@@ -366,6 +371,7 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | change what Git is asked | `infra/git.py` |
 | change how the project's schema is copied into a repo | `core/setup/_schema_copy.py` `schema_block`, `held_schema`, `copy_schema` — `tests/unit/test_schema_copy.py`; which repos and refusals: `workspace/_setup.py` `copy_schema` |
 | add a verb to a group (`ledger …`) | `cli/_ledger.py` (the group's sub-app), `render/text/`, goldens `<group>-<verb>-*.txt` and `help-<group>-<verb>.txt`, and the verb's help included in the group's page — the meta-tests fail without them |
+| add a table, or change a table's columns or rows | `core/tables.py` (derivation, from the schema) and `render/tables.py` (the document); goldens `ledger-table-*.json`; [the table format](../../contents/reference/table-format.md). A change that is not additive is `qmstrace.table/2` (ADR-0005) |
 | change a command's output | the owning view in `render/text/` and its golden file — then `rg <golden> contents/` for the prose that frames it |
 | change which items a walk reaches, or in what order | `core/graph/_graph.py` `_walk` — `thread`, `impact` and suspects all render it; `tests/unit/test_graph.py` § walks pins the rules |
 | add a command | `cli/_local.py` (handler) and `_app.py` (registration and `short_help`), `render/text/`, goldens for its output and its help, a page in `contents/reference/commands/` — `test_catalogue.py`, `test_help.py` and `test_manual.py` fail without them |
@@ -712,3 +718,17 @@ concrete subclass in the file. Every unread form is V15, a commented-out test at
 stray. Reasoning: [ADR-0004](../adr/0004-reading-csharp.md).
 
 Satisfies: REQ-QMT-21
+
+### DSN-QMT-16 — The ledger's tables are derived from the schema, then rendered as data
+
+`core/tables.py` reads the chain from the schema with two fixed names — the `requirement` type
+and the `verifies` link: a type that is both a source and a target of `verifies` is a test case,
+a source only an automated test, and the other coverage links walked from the requirement give
+the rest, each column named after its item type. From the project's graph it builds the
+traceability matrix (one row per requirement, design element and test case), the requirements
+register and the coverage summary, as columns and rows with no I/O. `render/tables.py` writes
+one as a `qmstrace.table/1` JSON document with what was read — each repo's commit and
+cleanliness, which `infra/git.checkout` reads without the index lock and the project assessment
+records before its scan. Reasoning: [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md).
+
+Satisfies: REQ-QMT-23

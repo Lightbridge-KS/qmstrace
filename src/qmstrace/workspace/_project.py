@@ -1,6 +1,6 @@
 """Project members and one assessment of their joined graph.
 
-Implements: DSN-QMT-14
+Implements: DSN-QMT-14, DSN-QMT-16
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from qmstrace.core import judge
-from qmstrace.core.assessment import ProjectAssessment, RepoState
+from qmstrace.core.assessment import Checkout, ProjectAssessment, RepoState
 from qmstrace.core.baselines import BaselineState, Comparison
 from qmstrace.core.config import SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
@@ -19,7 +19,7 @@ from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.model import Extracted, Finding, Item, Notice
 from qmstrace.extract.base import FORMS
 from qmstrace.infra.files import read_optional
-from qmstrace.infra.git import GitCli, IGit
+from qmstrace.infra.git import GitCli, IGit, checkout
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 from qmstrace.workspace._baselines import _baseline_notices, _judged_baselines
 from qmstrace.workspace._discovery import (
@@ -160,6 +160,8 @@ def project(
     ledger = _find_ledger(start)
     config = TraceConfig.of_schema(read_optional(ledger / SCHEMA_FILE) or "")
     members = _members(ledger, config, trees)
+    # read before the scan: a table records which commit each repo had checked out
+    checkouts = {member.name: _checkout(member.root) for member in members}
 
     parts: dict[str, tuple[_Member, _Scan, tuple[Extracted, ...], tuple[Item, ...]]] = {}
     for member in members:
@@ -236,7 +238,16 @@ def project(
             violations += wrong
             comparisons += state.comparisons
             notices += _baseline_notices(name, state)
-        states.append(RepoState(name, member.location, member.tree.label, scan.scanned, state))
+        states.append(
+            RepoState(
+                name,
+                member.location,
+                member.tree.label,
+                scan.scanned,
+                state,
+                checkouts[name],
+            )
+        )
     violations += register.findings
     violations.sort(key=lambda f: (f.file, f.line, f.code, f.what))
     if judged_any:
@@ -273,4 +284,11 @@ def project(
         register=register,
         notices=tuple(notices),
         suspects=judge.suspects(union, comparisons),
+        ledger=_checkout(ledger),
     )
+
+
+def _checkout(root: Path) -> Checkout | None:
+    """The commit a repo has checked out and whether its tree is clean — `None` outside Git."""
+    found = checkout(root)
+    return Checkout(*found) if found is not None else None

@@ -278,3 +278,16 @@ stanza is unchanged.
 - Origin: AGR-5
 - Verify-by: test
 - Change: CR-002
+
+### REQ-QMT-23 — The ledger's tables are emitted as data
+
+`qmstrace ledger table`, run in the ledger, emits the traceability matrix, the requirements
+register or the coverage summary as one versioned data document, its columns derived from the
+project's trace schema. The document records the commit each repo had checked out and whether
+its working tree was clean, says that it was not pinned, and says that it is a draft — never an
+issued revision. The same inputs give the same document.
+
+- Category: functional-suitability
+- Origin: AGR-4, AGR-8, AGR-13
+- Verify-by: test
+- Change: CR-004

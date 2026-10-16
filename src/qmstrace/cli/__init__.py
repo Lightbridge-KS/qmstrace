@@ -6,6 +6,7 @@ from qmstrace.cli._ledger import copy_schema as copy_schema
 from qmstrace.cli._ledger import ledger as ledger
 from qmstrace.cli._ledger import ledger_check as ledger_check
 from qmstrace.cli._ledger import ledger_impact as ledger_impact
+from qmstrace.cli._ledger import ledger_table as ledger_table
 from qmstrace.cli._ledger import ledger_thread as ledger_thread
 from qmstrace.cli._local import check as check
 from qmstrace.cli._local import graph as graph

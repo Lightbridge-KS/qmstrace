@@ -6,6 +6,16 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `qmstrace ledger table matrix | requirements | coverage`, run in the ledger: the traceability
+  matrix, the requirements register or the coverage summary, as a versioned JSON document
+  (`qmstrace.table/1`) for a render layer to turn into a formal document. Columns come from
+  the project's schema, each named after its item type; `[tables.matrix] fields` adds
+  requirement fields. Each repo's commit, and whether its working tree was clean, are recorded;
+  nothing is pinned or committed, and the document says it is a draft. `--out` writes a new
+  file. A reference page, *The table format*.
+
 ### Changed
 
 - An xUnit `DisplayName`'s leading ID ends where an ID in prose ends, so a suffix written

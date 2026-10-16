@@ -524,3 +524,19 @@ ADR-0004: `results` reads TRX as well as JUnit, the root element deciding which.
 | Two methods sharing a `DisplayName` | two runs, one per method |
 | The probe TRX on the agent; a JUnit report on the agent; a TRX on the service | exit 2, the next move for the format given |
 | A test renamed since the run | unmatched, the TRX way to match named |
+
+## #49a — tables as data
+
+| Scenario | Expected |
+|---|---|
+| `cases`: `ledger table matrix` | 5 rows — one per requirement, design element and test case; the service's test that verifies REQ-SVC-02's design directly has a row of its own; TC-SVC-02.2, run by nothing, a row with no automated test |
+| A test case that verifies the requirement, with two design elements | the case repeats on both design rows |
+| A test case run only through another test case | its row lists that case's automated tests |
+| A requirement with nothing below it | one row, every lower cell empty |
+| A withdrawn requirement; an item that reaches no requirement | in no row, each counted in a notice |
+| A schema with no test-case type, renamed types, no `verifies` | columns named after its own types; no test columns without `verifies` |
+| `[tables.matrix] fields`: an undeclared field, a link marker, a repeat, `[tables.other]` | refused, each with its next move |
+| `ledger table coverage`, a rule narrowed by `where` | `of` counts only the requirements the rule selects |
+| A repo with an untracked, modified or deleted file; an ignored file; a change outside a ledger rooted in a subfolder | `clean: false`; clean; clean |
+| Two runs, `-C` before or after the command | the same bytes, no machine path |
+| `--out` to an existing file; the command in a product repo; an unknown table | exit 2 |
