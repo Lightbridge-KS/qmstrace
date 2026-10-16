@@ -213,6 +213,7 @@ TEXT_IMPORTS: dict[str, set[str]] = {
     },
     "_results": {
         "qmstrace.render._evidence",
+        "qmstrace.core.assessment",  # one repo's assessment: results also carry a project's
         "qmstrace.core.results",
         "qmstrace.render._presentation",
     },

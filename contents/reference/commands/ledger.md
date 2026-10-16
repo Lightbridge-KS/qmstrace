@@ -147,6 +147,18 @@ uncommitted work is read as it is and marked `"clean": false`. The tables count 
 passing tests. A project with violations is still tabled, exit `0`: the violation count and a
 notice say the links they refuse are not in it, and `ledger check` lists them.
 
+With `--report REPO=FILE`, repeatable, the matrix also carries verdicts — one column per level
+and an overall one, each naming the reports it came from. Name the repo whose tests each report
+ran, as `[repos]` names it:
+
+``` sh
+qmstrace ledger table matrix --report agent=../agent/TestResults/unit.trx \
+  --report service=../service/report.xml
+```
+
+The reports are read as one, whatever their order; [the table format](../table-format.md#verdicts)
+says how a verdict cell reads.
+
 With `--out`, the document is written to a new file — never over an existing one, exit `2`:
 
 ``` text

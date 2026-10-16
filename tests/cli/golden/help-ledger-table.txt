@@ -7,15 +7,21 @@ Usage: qmstrace ledger table [OPTIONS] {TABLE}
   one row per requirement. coverage: requirements covered and not, tier by tier.
   Columns come from the project's schema. Every repo is read from its working
   tree, not at a pin; each repo's commit, and whether its tree was clean, are in
-  the document. It is a draft, never an issued revision. Relative --out paths
-  start at -C or the current directory.
+  the document. It is a draft, never an issued revision. Relative --out and
+  --report paths start at -C or the current directory.
+
+  With --report, the matrix also carries a verdict per level and an overall one,
+  each naming the reports it came from; the reports are read as one, whatever
+  their order.
 
 Arguments:
   TABLE  matrix, requirements or coverage.  [required]
 
 Options:
-  --out <path>  Write a new file instead of printing; existing files are
-                refused.
-  -C PATH       Run as if qmstrace had been started in PATH, as with git -C.
-                Before or after the command.
-  --help        Show this message and exit.
+  --report REPO=FILE  matrix only: a JUnit or TRX report and the repo whose
+                      tests it ran; repeatable.
+  --out <path>        Write a new file instead of printing; existing files are
+                      refused.
+  -C PATH             Run as if qmstrace had been started in PATH, as with git
+                      -C. Before or after the command.
+  --help              Show this message and exit.

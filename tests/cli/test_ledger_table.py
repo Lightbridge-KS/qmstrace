@@ -12,14 +12,17 @@ The load-bearing claims, each pinned by a test:
    does not emit, are refused.
 """
 
+import itertools
 import json
 from collections.abc import Callable
 from pathlib import Path
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 import pytest
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
+from qmstrace.extract.pytest_tests import report_identity
 
 GOLDEN = Path(__file__).parent / "golden"
 Golden = Callable[[Path, str], None]
@@ -136,3 +139,93 @@ def test_out_writes_a_new_file_and_refuses_an_existing_one(cases: Path, golden: 
 def test_a_product_repo_and_an_unknown_table_are_refused(cases: Path) -> None:
     assert run("-C", str(cases / "service"), "ledger", "table", "matrix")[0] == 2
     assert run("-C", str(cases / "ledger"), "ledger", "table", "trace")[0] == 2
+
+
+# ── 5. verdicts from reports (#49b) ────────────────────────────────────────────────────────
+
+TRX = Path(__file__).parents[1] / "fixtures" / "trx" / "cases-agent-full.trx"
+SERVICE_TESTS = [
+    ("tests/unit/test_api.py::test_a_call_without_a_key_is_refused", "pass"),
+    ("tests/unit/test_api.py::test_a_call_with_a_wrong_key_is_refused", "pass"),
+    ("tests/unit/test_api.py::test_the_key_check_runs_before_any_handler", "fail"),
+    ("tests/integration/test_store.py::test_a_restart_keeps_every_field", "pass"),
+    ("tests/integration/test_store.py::test_a_record_survives_a_restart", "pass"),
+]
+
+
+def junit(path: Path, entries: list[tuple[str, str]]) -> Path:
+    """A pytest JUnit report at `path`, one entry per (node ID, verdict)."""
+    suite = Element("testsuite")
+    for node_id, verdict in entries:
+        classname, name = report_identity(node_id)
+        case = SubElement(suite, "testcase", classname=classname, name=name)
+        if verdict != "pass":
+            SubElement(case, {"fail": "failure", "skip": "skipped"}[verdict])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(tostring(suite))
+    return path
+
+
+def reports(cases: Path) -> list[str]:
+    (cases / "agent" / "TestResults").mkdir()
+    (cases / "agent" / "TestResults" / "unit.trx").write_bytes(TRX.read_bytes())
+    junit(cases / "service" / "report.xml", SERVICE_TESTS)
+    return [
+        "--report",
+        "agent=../agent/TestResults/unit.trx",
+        "--report",
+        "service=../service/report.xml",
+    ]
+
+
+@pytest.mark.verifies("REQ-QMT-23")
+def test_the_cases_matrix_with_verdicts(cases: Path, golden: Golden) -> None:
+    given = reports(cases)
+    code, output = run("-C", str(cases / "ledger"), "ledger", "table", "matrix", *given)
+    assert code == 0, output
+    golden(GOLDEN / "ledger-table-matrix-reports-cases.json", output)
+    matrix = json.loads(output)
+    assert [(r["repo"], r["label"]) for r in matrix["reports"]] == [
+        ("agent", "TestResults/unit.trx"),
+        ("service", "report.xml"),
+    ]
+    by_case = {r["test_case"]: r for r in matrix["rows"]}
+    assert by_case["TC-SVC-01.2"]["verdict_unit"]["verdict"] == "fail"  # the service's run
+    assert by_case["TC-SVC-02.1"]["verdict_integration"]["verdict"] == "pass"
+    assert by_case["TC-SVC-02.2"]["verdict"] == {"verdict": "untested", "reports": []}
+
+
+@pytest.mark.verifies("REQ-QMT-23", "REQ-QMT-15")
+def test_any_order_of_the_reports_gives_the_same_bytes(cases: Path) -> None:
+    given = reports(cases)
+    pairs = [given[i : i + 2] for i in range(0, len(given), 2)]
+    outputs = {
+        run("-C", str(cases / "ledger"), "ledger", "table", "matrix", *itertools.chain(*order))
+        for order in itertools.permutations(pairs)
+    }
+    assert len(outputs) == 1 and next(iter(outputs))[0] == 0
+
+
+@pytest.mark.verifies("REQ-QMT-23", "REQ-QMT-15")
+def test_a_report_outside_every_repo_shows_its_file_name_alone(cases: Path, tmp_path: Path) -> None:
+    sentinel = tmp_path / "SENTINEL-elsewhere" / "service-run.xml"
+    junit(sentinel, SERVICE_TESTS)
+    code, output = run(
+        "-C", str(cases / "ledger"), "ledger", "table", "matrix", "--report", f"service={sentinel}"
+    )
+    assert code == 0, output
+    assert [r["label"] for r in json.loads(output)["reports"]] == ["service-run.xml"]
+    assert "SENTINEL" not in output and str(tmp_path) not in output
+    assert str(Path.home()) not in output
+
+
+@pytest.mark.verifies("REQ-QMT-23")
+def test_reports_that_match_nothing_and_bad_reports_are_refused(cases: Path) -> None:
+    given = reports(cases)
+    ledger = str(cases / "ledger")
+    wrong = ["--report", "agent=../service/report.xml"]  # the service's run, named as the agent's
+    code, output = run("-C", ledger, "ledger", "table", "matrix", *wrong)
+    assert code == 2 and "matches an automated test of the repo it names" in output
+    assert run("-C", ledger, "ledger", "table", "matrix", "--report", "elsewhere=x.xml")[0] == 2
+    assert run("-C", ledger, "ledger", "table", "matrix", "--report", "report.xml")[0] == 2
+    assert run("-C", ledger, "ledger", "table", "requirements", *given)[0] == 2

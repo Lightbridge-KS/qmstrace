@@ -289,7 +289,9 @@ stanza is unchanged.
 register or the coverage summary as one versioned data document, its columns derived from the
 project's trace schema. The document records the commit each repo had checked out and whether
 its working tree was clean, says that it was not pinned, and says that it is a draft — never an
-issued revision. The same inputs give the same document.
+issued revision. Given test reports, each naming the repo whose tests it ran, the matrix
+carries a verdict per level and an overall one, each naming the reports it came from. The same
+inputs give the same document, whatever order the reports are given in.
 
 - Category: functional-suitability
 - Origin: AGR-4, AGR-8, AGR-13

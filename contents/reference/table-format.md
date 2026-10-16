@@ -21,6 +21,7 @@
 | `pinned` | `false`: every repo was read from its working tree, not at a pin |
 | `violations`, `gaps` | the counts `ledger check` would report |
 | `notices` | everything that could not be verified or was not pinned, and what the table leaves out |
+| `reports` | with `--report` only: each report read — its `repo`, `label`, `sha256`, entry count and `format` |
 | `columns` | the columns, in order |
 | `rows` | one object per row, keyed by column name |
 
@@ -31,8 +32,8 @@ commit holds.
 ## Columns
 
 Each column names itself, the kind of value its cells hold — `id`, `ids` (a list, sorted with
-numbers read as numbers), `text` or `count` — the item `type` those values are, and the link
-`via` which they hang off the row.
+numbers read as numbers), `text`, `count` or `verdict` — the item `type` those values are, and
+the link `via` which they hang off the row.
 
 Columns follow the project's [trace schema](configuration.md). Two names are fixed: the
 `requirement` type every table starts from, and the `verifies` link. An item type that is both a
@@ -64,6 +65,28 @@ The `cases` fixture project's matrix:
 --8<-- "cli/golden/ledger-table-matrix-cases.json"
 ```
 
+## Verdicts
+
+Given `--report REPO=FILE`, each naming the repo whose tests it ran, the matrix gains one column
+per level, `verdict_<level>`, and an overall `verdict`. A `verdict` cell holds the worst verdict
+of the row's automated tests there — `fail`, `no-result`, `skip`, `pass` — and every report
+their runs came from, by `repo`, `label` and `sha256`. A level the row has no test at is `null`;
+a row no automated test runs is `untested`.
+
+The levels are the automated tests' levels from the schema, then those of a test-case field
+that `[tables.matrix] level` names. A test's level is where it sits when its type has levels;
+only a test whose type has none takes its test case's level. Where the two differ, where the
+test sits wins, and a notice counts it.
+
+The reports are read as one, whatever their order. A report inside the repo it names is
+labelled by its path from that repo's root; one outside, by its file name alone. Reports that
+match no automated test of the repo they name are refused, exit `2`. The `cases` project's
+matrix with the agent's TRX file and a JUnit report of the service:
+
+``` json
+--8<-- "cli/golden/ledger-table-matrix-reports-cases.json"
+```
+
 ## The requirements register and the coverage summary
 
 The register has one row per requirement, withdrawn ones included: its title, its origins, the
@@ -77,7 +100,7 @@ never through a design element. Coverage counts links, not passing tests.
 
 ## Versioning
 
-A new key, column, table or notice keeps `qmstrace.table/1`: find columns by name, and ignore
+A new key, column, table, cell kind or notice keeps `qmstrace.table/1`: find columns by name, and ignore
 what you do not know. Removing or renaming anything, changing a cell's JSON type, the row grain
 or the order, or what `clean`, `pinned` or `draft` mean, makes `qmstrace.table/2`.
 

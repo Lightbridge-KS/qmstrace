@@ -137,6 +137,14 @@ TABLES = ("matrix", "requirements", "coverage")
 def ledger_table(
     ctx: typer.Context,
     name: Annotated[str, typer.Argument(metavar="TABLE", help="matrix, requirements or coverage.")],
+    reports: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--report",
+            metavar="REPO=FILE",
+            help="matrix only: a JUnit or TRX report and the repo whose tests it ran; repeatable.",
+        ),
+    ] = None,
     out: Annotated[
         Path | None,
         typer.Option(
@@ -152,17 +160,26 @@ def ledger_table(
     requirement. coverage: requirements covered and not, tier by tier. Columns come from the
     project's schema. Every repo is read from its working tree, not at a pin; each repo's commit,
     and whether its tree was clean, are in the document. It is a draft, never an issued
-    revision. Relative --out paths start at -C or the current directory.
+    revision. Relative --out and --report paths start at -C or the current directory.
+
+    With --report, the matrix also carries a verdict per level and an overall one, each naming
+    the reports it came from; the reports are read as one, whatever their order.
     """
     if name not in TABLES:
         raise typer.BadParameter(
             f"'{name}' is not a table qmstrace emits — use matrix, requirements or coverage.",
             param_hint="TABLE",
         )
+    if reports and name != "matrix":
+        raise typer.BadParameter("only the matrix carries verdicts.", param_hint="--report")
     start = _directory(ctx, directory)
-    project = Workspace.project(start)
-    built = table(name, project.config, project.graph)
-    document = tables.document(project, built)
+    given = [_report(start, value) for value in reports or ()]
+    if given:
+        project, view = Workspace.project_results(start, given)
+    else:
+        project, view = Workspace.project(start), None
+    built = table(name, project.config, project.graph, view)
+    document = tables.document(project, built, view)
     if out is None:
         typer.echo(document, nl=False)
         return EXIT_OK
@@ -170,3 +187,15 @@ def ledger_table(
     typer.echo(f"Written: {out} · {built.name} · {len(built.rows)} rows")
     typer.echo("Read from working trees, not pinned; a draft, not an issued revision. Exit 0.")
     return EXIT_OK
+
+
+def _report(start: Path, value: str) -> tuple[str, Path]:
+    """`REPO=FILE`, the file resolved from where qmstrace was started."""
+    repo, _, file = value.partition("=")
+    if not repo or not file:
+        raise typer.BadParameter(
+            f"'{value}' is not REPO=FILE — name the repo whose tests the report ran, e.g. "
+            "agent=TestResults/unit.trx.",
+            param_hint="--report",
+        )
+    return repo, (start / file).resolve()

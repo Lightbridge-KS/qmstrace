@@ -740,6 +740,10 @@ traceability matrix (one row per requirement, design element and test case), the
 register and the coverage summary, as columns and rows with no I/O. `render/tables.py` writes
 one as a `qmstrace.table/1` JSON document with what was read — each repo's commit and
 cleanliness, which `infra/git.checkout` reads without the index lock and the project assessment
-records before its scan. Reasoning: [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md).
+records before its scan. Given the results `Workspace.project_results` matches across the
+project — each report naming its repo — the matrix gains a verdict per level and an overall
+one: each the worst of the row's automated tests there, naming every report their runs came
+from. A test's level is where it sits when its type has levels, else its test case's level
+field. Reasoning: [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md).
 
 Satisfies: REQ-QMT-23

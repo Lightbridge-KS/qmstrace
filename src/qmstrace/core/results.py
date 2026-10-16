@@ -19,10 +19,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
-from qmstrace.core.assessment import Assessment
+from qmstrace.core.assessment import Assessment, ProjectAssessment
 from qmstrace.core.graph import Node
 from qmstrace.core.model import Identity
 
@@ -133,7 +133,7 @@ class UnmatchedRun:
 class Results:
     """A complete informational view; all judgments are computed before rendering."""
 
-    assessment: Assessment
+    assessment: Assessment | ProjectAssessment
     reports: tuple[ReadReport, ...]  # sorted by label, then digest
     entries: int
     runs: int
@@ -147,6 +147,7 @@ class Results:
     other_tests: tuple[TestResult, ...]
     unmatched: tuple[UnmatchedRun, ...]
     other_cases: tuple[CaseResult, ...] = ()  # test cases that reach no requirement
+    tests: Mapping[str, TestResult] = field(default_factory=dict)  # every scanned test, by ID
 
     @property
     def formats(self) -> tuple[ReportFormat, ...]:
@@ -160,7 +161,7 @@ class Results:
 
 
 def summarize(
-    assessment: Assessment,
+    assessment: Assessment | ProjectAssessment,
     reports: Mapping[ReportSource, Report],
     identities: Mapping[str, tuple[Identity, ...]],
     repos: Mapping[str, str] | None = None,
@@ -333,6 +334,7 @@ def summarize(
         other_tests=tuple(t for t in tests.values() if t.id not in shown_tests),
         unmatched=tuple(unmatched),
         other_cases=other_cases,
+        tests=tests,
     )
 
 
@@ -344,5 +346,9 @@ def _by_run(
     return (repo or "", classname, name, test)
 
 
-def _worst(verdicts: tuple[Verdict, ...]) -> Verdict:
+def worst(verdicts: tuple[Verdict, ...]) -> Verdict:
+    """The worst of several verdicts: fail, then no-result, skip, pass, untested."""
     return max(verdicts, key=lambda verdict: _RANK[verdict])
+
+
+_worst = worst

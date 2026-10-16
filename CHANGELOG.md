@@ -23,6 +23,13 @@ All notable changes to this project are recorded here. The format follows
   was in. A report outside the repo is shown by its file name alone; two reports that would be
   shown alike, or one given twice, are refused. One report prints the same view as before
   ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
+- `qmstrace ledger table matrix --report REPO=FILE…`: the traceability matrix with its
+  verdicts — one column per level and an overall one, each the worst of the row's automated
+  tests and naming every report its runs came from. Each report names the repo whose tests it
+  ran; the reports are read as one, whatever their order, and reports that match no automated
+  test are refused. A test's level is where it sits, or its test case's level field —
+  `[tables.matrix] level` — when its type has none
+  ([#49](https://github.com/Lightbridge-KS/qmstrace/issues/49)).
 
 ### Changed
 

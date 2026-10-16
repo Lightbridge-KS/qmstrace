@@ -114,6 +114,9 @@ each writing its own TRX file (#40).
 
 ## Open
 
-- When an automated test's type has levels and the test case's own level field disagrees, which
-  one names the verdict column — settled in #49b.
+- *Settled 2026-10-16 (#49b), by the developer:* when an automated test's type has levels, the
+  level it sits at names its verdict column, even where its test case's level field names
+  another; the field — `[tables.matrix] level` — counts only for a test whose type has none, and
+  a notice counts the disagreements. Every row also carries an overall `verdict`, and reports
+  that match no automated test are refused, as `results` refuses them.
 - A CSV encoding, once a reader asks for one.
