@@ -282,3 +282,22 @@ def _check_tables(config: TraceConfig, schema_file: str) -> None:
                 f"{where}, which the requirement type does not declare (it declares: {known}).",
                 "Fix: list a field the requirement type declares under required or values.",
             )
+    level = config.tables.matrix_level
+    if level is None:
+        return
+    verifies = config.links.get("verifies")
+    cases = [t for t in verifies.sources if t in verifies.targets] if verifies else []
+    where = f"{schema_file}: [tables.matrix] level names '{level}'"
+    if not cases:
+        raise CouldNotJudge(
+            f"{where}, but the schema has no test-case type — none is both a source and a "
+            "target of verifies.",
+            "Fix: remove level; a test's level then comes from where it sits.",
+        )
+    for case in cases:
+        if level not in config.item_types[case].fields:
+            raise CouldNotJudge(
+                f"{where}, which the {case} type does not declare.",
+                f"Fix: declare {level} on [item_types.{case}] under required or values, or "
+                "name a field it declares.",
+            )

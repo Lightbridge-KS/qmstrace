@@ -560,3 +560,15 @@ def test_the_section_survives_a_verified_copy(embed: Embed) -> None:
     copy = TraceConfig.parse(embed(local, listed))
     assert copy.schema_form is SchemaForm.VERIFIED_COPY
     assert copy.tables.matrix_fields == ("Category",)
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_the_test_case_field_that_names_a_level_must_be_declared() -> None:
+    declared = CASES_SCHEMA.replace(
+        "[item_types.test_case]", '[item_types.test_case]\nrequired = ["Level"]', 1
+    )
+    level = '\n[tables.matrix]\nlevel = "Level"\n'
+    assert TraceConfig.of_schema(declared + level).tables.matrix_level == "Level"
+    with pytest.raises(CouldNotJudge) as caught:
+        TraceConfig.of_schema(CASES_SCHEMA + level)
+    assert "which the test_case type does not declare" in caught.value.what

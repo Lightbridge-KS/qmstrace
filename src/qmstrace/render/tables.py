@@ -14,14 +14,16 @@ from __future__ import annotations
 import json
 
 from qmstrace.core.assessment import Checkout, ProjectAssessment
-from qmstrace.core.tables import Cell, Column, Table
+from qmstrace.core.results import Results
+from qmstrace.core.tables import Cell, Column, Table, VerdictCell
 
 FORMAT = "qmstrace.table/1"
 DRAFT = "generated from the ledger — not an issued revision"
 
 
-def document(project: ProjectAssessment, built: Table) -> str:
-    """One of the project's tables as a `qmstrace.table/1` JSON document."""
+def document(project: ProjectAssessment, built: Table, results: Results | None = None) -> str:
+    """One of the project's tables as a `qmstrace.table/1` JSON document — with the reports its
+    verdicts came from, when it carries verdicts."""
     notices = [notice.text for notice in project.notices]
     if project.violations:
         notices.append(
@@ -44,6 +46,7 @@ def document(project: ProjectAssessment, built: Table) -> str:
         "violations": len(project.violations),
         "gaps": len(project.gaps),
         "notices": notices,
+        **({"reports": _reports(results)} if results is not None else {}),
         "columns": [_column(column) for column in built.columns],
         "rows": [{c.name: _cell(row.get(c.name)) for c in built.columns} for row in built.rows],
     }
@@ -63,4 +66,24 @@ def _read(checkout: Checkout | None) -> dict[str, object]:
 
 
 def _cell(value: Cell) -> object:
+    if isinstance(value, VerdictCell):
+        return {
+            "verdict": value.verdict,
+            "reports": [
+                {"repo": s.repo, "label": s.label, "sha256": s.sha256} for s in value.reports
+            ],
+        }
     return list(value) if isinstance(value, tuple) else value
+
+
+def _reports(results: Results) -> list[dict[str, object]]:
+    return [
+        {
+            "repo": read.source.repo,
+            "label": read.source.label,
+            "sha256": read.source.sha256,
+            "entries": read.entries,
+            "format": read.format,
+        }
+        for read in results.reports
+    ]

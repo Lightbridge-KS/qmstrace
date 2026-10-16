@@ -245,10 +245,11 @@ def _baselines(schema: _Table) -> dict[str, BaselineScope]:
 
 
 def _tables(schema: _Table) -> Tables:
-    """`[tables.matrix]` — the requirement fields the traceability matrix carries (ADR-0005)."""
+    """`[tables.matrix]` — the requirement fields the traceability matrix carries, and the
+    test-case field that names a level (ADR-0005)."""
     tables = schema.table("tables")
     matrix = tables.table("matrix")
-    found = Tables(matrix.texts("fields"))
+    found = Tables(matrix.texts("fields"), matrix.opt_text("level"))
     matrix.done()
     tables.done()
     return found

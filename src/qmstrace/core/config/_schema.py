@@ -68,9 +68,11 @@ class ItemType:
 @dataclass(frozen=True, slots=True)
 class Tables:
     """What the ledger's tables carry beyond the chain (ADR-0005): the requirement fields the
-    traceability matrix shows, in the order given."""
+    traceability matrix shows, in the order given, and the test-case field that names a test
+    case's level, for automated tests whose type declares none."""
 
     matrix_fields: tuple[str, ...] = ()
+    matrix_level: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

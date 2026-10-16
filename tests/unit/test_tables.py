@@ -14,7 +14,9 @@ The load-bearing claims, each pinned by a test:
    each tier against the rules that ask for it, their `where` included.
 """
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import replace
+from types import SimpleNamespace
 
 import pytest
 
@@ -22,7 +24,8 @@ from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.model import Extracted, Item, Link
-from qmstrace.core.tables import coverage, matrix, requirements
+from qmstrace.core.results import Report, ReportEntry, ReportSource, Results, summarize
+from qmstrace.core.tables import VerdictCell, coverage, matrix, requirements
 
 TYPES = """\
 version = 1
@@ -98,7 +101,12 @@ def graph_of(
 
 
 def cases_graph(
-    extra_items: Sequence[Item] = (), extra_links: Sequence[Link] = ()
+    extra_items: Sequence[Item] = (),
+    extra_links: Sequence[Link] = (),
+    *,
+    schema: str = "",
+    levels: Mapping[str, str] | None = None,
+    case_levels: Mapping[str, str] | None = None,
 ) -> tuple[TraceConfig, TraceGraph]:
     items = [
         item("REQ-T-01", "requirement", **{"Verify-by": "test"}),
@@ -127,7 +135,18 @@ def cases_graph(
         link("t::direct", "verifies", "DSN-T-02"),  # no test case between
         *extra_links,
     ]
-    return graph_of(CASES, items, links)
+    items = [
+        replace(
+            i,
+            level=(levels or {}).get(i.id, i.level),
+            fields={
+                **i.fields,
+                **({"Level": case_levels[i.id]} if i.id in (case_levels or {}) else {}),
+            },
+        )
+        for i in items
+    ]
+    return graph_of(schema or CASES, items, links)
 
 
 # ── 1. columns come from the schema ─────────────────────────────────────────────────────────
@@ -277,3 +296,109 @@ def test_coverage_counts_each_tier_against_the_rules_that_ask_for_it() -> None:
     assert (rows["test_case"]["of"], rows["test_case"]["covered"]) == (1, 1)
     # t::one reaches REQ-T-01 through TC-T-01.1; never through a design element
     assert (rows["automated_test"]["of"], rows["automated_test"]["covered"]) == (1, 1)
+
+
+# ── 4. verdicts, one column per level (#49b) ───────────────────────────────────────────────
+
+LEVELLED = CASES.replace(
+    "[item_types.automated_test]\n",
+    '[item_types.automated_test]\nlevels = ["unit", "integration"]\n',
+)
+FIELDED = (
+    CASES.replace(
+        "[item_types.test_case]\n",
+        '[item_types.test_case]\n[item_types.test_case.values]\nLevel = ["unit", "integration"]\n',
+    )
+    + '\n[tables.matrix]\nlevel = "Level"\n'
+)
+
+
+def results_of(graph: TraceGraph, runs: Mapping[str, list[tuple[str, str]]]) -> Results:
+    """Results for the tests given, each run as (the report's label, its verdict)."""
+    by_label: dict[str, list[ReportEntry]] = {}
+    for test, found in runs.items():
+        for label, verdict in found:
+            by_label.setdefault(label, []).append(ReportEntry(test, "t", verdict))  # type: ignore[arg-type]
+    reports = {
+        ReportSource(label, f"sha-{label}"): Report(tuple(entries), format="junit")
+        for label, entries in by_label.items()
+    }
+    identities = {test: ((test, "t"),) for test in runs}
+    return summarize(SimpleNamespace(graph=graph), reports, identities)  # type: ignore[arg-type]
+
+
+def cell(table: object, case: str | None, column: str, design: str = "DSN-T-01") -> object:
+    rows = table.rows  # type: ignore[attr-defined]
+    row = next(r for r in rows if r["test_case"] == case and r["design_element"] == design)
+    found = row[column]
+    return (found.verdict, tuple(s.label for s in found.reports)) if found else None
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_a_tests_verdict_lands_in_the_column_of_the_level_it_sits_at() -> None:
+    config, graph = cases_graph(schema=LEVELLED, levels={"t::one": "unit"})
+    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "pass")]}))
+    assert [c.name for c in table.columns][-3:] == [
+        "verdict_unit",
+        "verdict_integration",
+        "verdict",
+    ]
+    assert cell(table, "TC-T-01.1", "verdict_unit") == ("pass", ("a",))
+    assert cell(table, "TC-T-01.1", "verdict_integration") is None
+    assert cell(table, "TC-T-01.1", "verdict") == ("pass", ("a",))
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_with_no_level_on_the_test_the_test_cases_field_names_it() -> None:
+    config, graph = cases_graph(schema=FIELDED, case_levels={"TC-T-01.1": "integration"})
+    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "fail")]}))
+    assert cell(table, "TC-T-01.1", "verdict_integration") == ("fail", ("a",))
+    assert cell(table, "TC-T-01.1", "verdict_unit") is None
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_where_the_test_sits_wins_over_its_test_cases_level() -> None:
+    schema = FIELDED.replace(
+        "[item_types.automated_test]\n",
+        '[item_types.automated_test]\nlevels = ["unit", "integration"]\n',
+    )
+    config, graph = cases_graph(
+        schema=schema, levels={"t::one": "unit"}, case_levels={"TC-T-01.1": "integration"}
+    )
+    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "pass")]}))
+    assert cell(table, "TC-T-01.1", "verdict_unit") == ("pass", ("a",))
+    assert cell(table, "TC-T-01.1", "verdict_integration") is None
+    assert any("sits at another level than its test case names" in n for n in table.notices)
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_a_test_with_no_level_reaches_only_the_overall_verdict() -> None:
+    config, graph = cases_graph(schema=LEVELLED)
+    table = matrix(config, graph, results_of(graph, {"t::direct": [("a", "skip")]}))
+    assert cell(table, None, "verdict_unit", "DSN-T-02") is None
+    assert cell(table, None, "verdict", "DSN-T-02") == ("skip", ("a",))
+    assert any("have no level" in n for n in table.notices)
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_a_row_no_test_runs_is_untested_and_a_test_with_no_run_has_no_result() -> None:
+    config, graph = cases_graph(schema=LEVELLED, levels={"t::one": "unit"})
+    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "pass")], "t::two": []}))
+    no_test = next(r for r in table.rows if r["requirement"] == "REQ-T-02")
+    assert no_test["verdict"] == VerdictCell("untested")
+    assert cell(table, "TC-T-01.2", "verdict") == ("no-result", ())
+
+
+@pytest.mark.verifies("DSN-QMT-16")
+def test_a_cell_is_its_tests_worst_verdict_and_names_every_report() -> None:
+    config, graph = cases_graph(
+        extra_links=[link("t::two", "verifies", "TC-T-01.1")],
+        schema=LEVELLED,
+        levels={"t::one": "unit", "t::two": "unit"},
+    )
+    runs = {"t::one": [("a", "pass")], "t::two": [("b", "fail"), ("a", "pass")]}
+    table = matrix(config, graph, results_of(graph, runs))
+    assert cell(table, "TC-T-01.1", "verdict_unit") == ("fail", ("a", "b"))
+    # the same verdicts whatever order the reports come in
+    flipped = {k: list(reversed(v)) for k, v in reversed(runs.items())}
+    assert matrix(config, graph, results_of(graph, flipped)).rows == table.rows

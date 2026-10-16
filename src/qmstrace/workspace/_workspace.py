@@ -28,6 +28,7 @@ from qmstrace.workspace._baselines import _judged_baselines
 from qmstrace.workspace._discovery import (
     TreeFactory,
     _configuration,
+    _find_ledger,
     _find_root,
     _ledger,
     _report_label,
@@ -240,6 +241,42 @@ class Workspace:
         return _project(start, trees=trees, gits=gits)
 
     @classmethod
+    def project_results(
+        cls, start: Path, reports: Sequence[tuple[str, Path]]
+    ) -> tuple[ProjectAssessment, results.Results]:
+        """In the ledger: read every repo, then the reports given — each naming the repo it
+        reports — as one, matched against each repo's own automated tests (ADR-0005).
+
+        A report inside the repo it names is labelled by its path from that repo's root; one
+        outside, by its file name alone. A repo the schema does not list, a report that cannot
+        be read, or reports that match no automated test refuse the whole run.
+        """
+        project = _project(start)
+        ledger = _find_ledger(start)
+        roots = {repo.name: ledger / repo.location for repo in project.repos}
+        unknown = sorted({name for name, _ in reports if name not in roots})
+        if unknown:
+            raise CouldNotJudge(
+                f"--report names {', '.join(unknown)}, which the schema's [repos] does not list "
+                f"(it lists: {', '.join(sorted(roots)) or 'none'}).",
+                "Fix: name the repo each report reports, as [repos] names it: --report REPO=FILE.",
+            )
+        read = _read_reports((name, roots[name], path) for name, path in reports)
+        graph = project.graph
+        tested = [item for item in graph.items() if item.runs_as]
+        identities = {item.id: item.runs_as for item in tested}
+        repos = {item.id: repo for item in tested if (repo := graph.nodes[item.id].repo)}
+        view = results.summarize(project, read, identities, repos)
+        if not view.matched_cases:
+            named = ", ".join(f"{r.source.repo}:{r.source.label}" for r in view.reports)
+            ways = " ".join(_MATCHING[f] for f in view.formats or ("junit",))
+            raise CouldNotJudge(
+                f"{named}: no report entry matches an automated test of the repo it names.",
+                f"Fix: check each --report names the repo whose tests it ran. {ways}",
+            )
+        return project, view
+
+    @classmethod
     def project_thread(
         cls,
         start: Path,
@@ -333,37 +370,7 @@ class Workspace:
         name alone, so no path of the machine reaches the output. Any report that cannot be read
         refuses the whole run.
         """
-        read: dict[results.ReportSource, results.Report] = {}
-        given: set[Path] = set()
-        labels: set[str] = set()
-        for path in report_paths:
-            label = _report_label(self.root, path)
-            if path in given:
-                raise CouldNotJudge(
-                    f"Report {label} is given twice.",
-                    "Fix: name each report once; a run in two reports is combined anyway.",
-                )
-            if label in labels:
-                raise CouldNotJudge(
-                    f"Two reports would both be shown as {label}.",
-                    "Fix: give them distinct file names, or copy them into the repo.",
-                )
-            given.add(path)
-            labels.add(label)
-            try:
-                payload = path.read_bytes()
-            except OSError as error:
-                raise CouldNotJudge(
-                    f"Cannot read report {label} ({error.strerror}).",
-                    f"Fix: check the path, or generate a report: {_GENERATE}.",
-                ) from None
-            report = reports.read(payload)
-            if report.problem:
-                raise CouldNotJudge(
-                    f"{label}: {report.problem}.",
-                    f"Fix: supply a pytest JUnit report or a TRX file: {_GENERATE}.",
-                )
-            read[results.ReportSource(label, hashlib.sha256(payload).hexdigest())] = report
+        read = _read_reports((None, self.root, path) for path in report_paths)
         assessment = self.assessment()
         identities = {item.id: item.runs_as for item in assessment.graph.items() if item.runs_as}
         view = results.summarize(assessment, read, identities)
@@ -420,3 +427,45 @@ class Workspace:
         """Each sibling with its items (None when not read) and their own links; whether the
         siblings could be located at all; whether this repo is among the project's repos."""
         return _read_siblings(self.root, self.config, self.trees, ledger)
+
+
+def _read_reports(
+    given: Iterable[tuple[str | None, Path, Path]],
+) -> dict[results.ReportSource, results.Report]:
+    """Each report given as (the repo it reports, that repo's root, its path), read and
+    labelled: by its path from that root when it is inside, else by its file name alone — never
+    a path of the machine. A path given twice, two reports one label would show, a report that
+    cannot be read or parsed: each refuses the whole run."""
+    read: dict[results.ReportSource, results.Report] = {}
+    paths: set[Path] = set()
+    labels: set[tuple[str | None, str]] = set()
+    for repo, root, path in given:
+        label = _report_label(root, path)
+        shown = f"{repo}:{label}" if repo else label
+        if path in paths:
+            raise CouldNotJudge(
+                f"Report {shown} is given twice.",
+                "Fix: name each report once; a run in two reports is combined anyway.",
+            )
+        if (repo, label) in labels:
+            raise CouldNotJudge(
+                f"Two reports would both be shown as {shown}.",
+                "Fix: give them distinct file names, or copy them into the repo.",
+            )
+        paths.add(path)
+        labels.add((repo, label))
+        try:
+            payload = path.read_bytes()
+        except OSError as error:
+            raise CouldNotJudge(
+                f"Cannot read report {shown} ({error.strerror}).",
+                f"Fix: check the path, or generate a report: {_GENERATE}.",
+            ) from None
+        report = reports.read(payload)
+        if report.problem:
+            raise CouldNotJudge(
+                f"{shown}: {report.problem}.",
+                f"Fix: supply a pytest JUnit report or a TRX file: {_GENERATE}.",
+            )
+        read[results.ReportSource(label, hashlib.sha256(payload).hexdigest(), repo)] = report
+    return read

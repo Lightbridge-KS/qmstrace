@@ -12,7 +12,7 @@ Implements: DSN-QMT-16
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Literal
 
@@ -20,13 +20,24 @@ from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import TraceGraph
 from qmstrace.core.model import Item, id_order
+from qmstrace.core.results import ReportSource, Results, Verdict, worst
 
 REQUIREMENT = "requirement"
 VERIFIES = "verifies"
 WITHDRAWN = "withdrawn"
 
-Cell = str | int | tuple[str, ...] | None
-Kind = Literal["id", "ids", "text", "count"]
+Kind = Literal["id", "ids", "text", "count", "verdict"]
+
+
+@dataclass(frozen=True, slots=True)
+class VerdictCell:
+    """A verdict, and every report it came from — the evidence a reader can open (AGR-8)."""
+
+    verdict: Verdict
+    reports: tuple[ReportSource, ...] = ()
+
+
+Cell = str | int | tuple[str, ...] | VerdictCell | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,19 +62,23 @@ class Table:
     notices: tuple[str, ...] = ()
 
 
-def table(name: str, config: TraceConfig, graph: TraceGraph) -> Table:
-    """The table named — `matrix`, `requirements` or `coverage` — of the project's graph."""
-    return {"matrix": matrix, "requirements": requirements, "coverage": coverage}[name](
-        config, graph
-    )
+def table(
+    name: str, config: TraceConfig, graph: TraceGraph, results: Results | None = None
+) -> Table:
+    """The table named — `matrix`, `requirements` or `coverage` — of the project's graph; the
+    matrix carries verdicts when test results are given."""
+    if name == "matrix":
+        return matrix(config, graph, results)
+    return {"requirements": requirements, "coverage": coverage}[name](config, graph)
 
 
-def matrix(config: TraceConfig, graph: TraceGraph) -> Table:
+def matrix(config: TraceConfig, graph: TraceGraph, results: Results | None = None) -> Table:
     """One row per requirement, design element and test case, requirement-major.
 
     An automated test that verifies directly, with no test case between, has a row of its own; a
     test case nothing runs still has one; a test case that verifies the requirement itself
-    repeats on each of its design rows. Withdrawn items are in no row.
+    repeats on each of its design rows. Withdrawn items are in no row. Given test results, each
+    row also carries a verdict per level and an overall one, each naming its reports.
     """
     chain = _Chain.of(config)
     fields = config.tables.matrix_fields
@@ -128,6 +143,8 @@ def matrix(config: TraceConfig, graph: TraceGraph) -> Table:
     ]
     if unshown:
         notices.append(f"Items that reach no requirement are in no row: {', '.join(unshown)}.")
+    if results is not None:
+        columns, notices = _verdicts(config, graph, chain, results, columns, rows, notices)
     return Table("matrix", tuple(columns), tuple(rows), tuple(notices))
 
 
@@ -348,3 +365,98 @@ def _sorted(items: Iterable[Item]) -> list[Item]:
 
 def _ordered(ids: Iterable[str]) -> tuple[str, ...]:
     return tuple(sorted(set(ids), key=id_order))
+
+
+def _verdicts(
+    config: TraceConfig,
+    graph: TraceGraph,
+    chain: _Chain,
+    results: Results,
+    columns: list[Column],
+    rows: list[dict[str, Cell]],
+    notices: list[str],
+) -> tuple[list[Column], list[str]]:
+    """Add one verdict column per level, then an overall one, to every row.
+
+    An automated test's level is where it sits, when its type declares levels; otherwise the
+    level its test case names, in the field `[tables.matrix] level` names. Where both are known
+    and differ, where the test sits wins, and a notice counts it.
+    """
+    field = config.tables.matrix_level
+    levels = list(
+        dict.fromkeys(
+            [
+                *(lv for t in chain.tests for lv in config.item_types[t].levels),
+                *(
+                    v
+                    for case in chain.cases
+                    for v in (config.item_types[case].values.get(field, ()) if field else ())
+                ),
+            ]
+        )
+    )
+    columns = [
+        *columns,
+        *(Column(f"verdict_{level}", "verdict") for level in levels),
+        Column("verdict", "verdict"),
+    ]
+    disagree = 0
+    unlevelled: set[str] = set()
+    for row in rows:
+        case = next((c for t in chain.cases if isinstance(c := row.get(t), str)), None)
+        planned = graph.nodes[case].fields.get(field) if case and field else None
+        tests = [t for kind in chain.tests for t in _ids(row.get(kind))]
+        placed: dict[str, list[str]] = {}
+        for test in tests:
+            node = graph.nodes.get(test)
+            sits = (
+                node.item.level if node and node.item and _has_levels(config, node.type) else None
+            )
+            if sits and planned and sits != planned:
+                disagree += 1
+            level = sits or (None if node and _has_levels(config, node.type) else planned)
+            if level is None:
+                unlevelled.add(test)
+            else:
+                placed.setdefault(level, []).append(test)
+        for level in levels:
+            row[f"verdict_{level}"] = _cell(results, placed[level]) if level in placed else None
+        row["verdict"] = _cell(results, tests) if tests else VerdictCell("untested")
+    notices = [
+        *notices,
+        "Verdicts are matched against the working trees — each report's commit NOT VERIFIED.",
+    ]
+    if disagree:
+        notices.append(
+            f"{disagree} time(s) an automated test sits at another level than its test case "
+            "names; where the test sits wins."
+        )
+    if unlevelled and levels:
+        notices.append(
+            f"{len(unlevelled)} automated test(s) have no level, so their verdicts are in the "
+            "overall verdict only."
+        )
+    unmatched: dict[str, int] = {}
+    for run in results.unmatched:
+        for source in run.run.sources:
+            unmatched[source.repo or "this repo"] = unmatched.get(source.repo or "this repo", 0) + 1
+    if unmatched:
+        said = ", ".join(f"{repo} {n}" for repo, n in sorted(unmatched.items()))
+        notices.append(f"Report runs that match no automated test, by repo: {said}.")
+    return columns, notices
+
+
+def _cell(results: Results, tests: Sequence[str]) -> VerdictCell:
+    """The worst verdict of some automated tests, and every report their runs came from."""
+    found = [results.tests[t] for t in tests if t in results.tests]
+    verdicts = tuple(f.verdict for f in found) + (("no-result",) if len(found) < len(tests) else ())
+    sources = sorted({s for f in found for run in f.runs for s in run.sources})
+    return VerdictCell(worst(verdicts), tuple(sources))
+
+
+def _has_levels(config: TraceConfig, kind: str | None) -> bool:
+    return kind is not None and kind in config.item_types and bool(config.item_types[kind].levels)
+
+
+def _ids(cell: Cell) -> tuple[str, ...]:
+    return cell if isinstance(cell, tuple) else ()

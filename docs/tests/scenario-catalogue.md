@@ -557,3 +557,16 @@ test in `tests/integration/test_results_several.py`.
 | A repo with an untracked, modified or deleted file; an ignored file; a change outside a ledger rooted in a subfolder | `clean: false`; clean; clean |
 | Two runs, `-C` before or after the command | the same bytes, no machine path |
 | `--out` to an existing file; the command in a product repo; an unknown table | exit 2 |
+
+## #49b — verdicts in the matrix
+
+| Scenario | Expected |
+|---|---|
+| `cases`, `--report` the agent's TRX and a JUnit of the service | a verdict per level and overall per row; TC-SVC-01.2 `fail` at unit, from the service's report; TC-SVC-02.2 `untested` |
+| A test that sits at `unit` whose test case names `integration` | its verdict in `verdict_unit`; a notice counts the disagreement |
+| A test whose type has no levels, its test case naming one | its verdict in that level's column |
+| A test with no level at all | the overall `verdict` only; a notice counts it |
+| Two tests at one level, a fail in one report and a pass in another | `fail`, naming both reports |
+| The same reports in any order | the same bytes |
+| A report outside every repo, by an absolute path | labelled by its file name; no machine path in the output |
+| A report named as another repo's; an unknown repo; not `REPO=FILE`; `--report` with `requirements` | exit 2 |

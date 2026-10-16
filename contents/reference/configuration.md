@@ -69,7 +69,15 @@ fields = ["Priority", "Category"]
 ```
 
 Each must be a field the requirement type declares, under `required` or `values`; a link
-marker (`Origin`), a field listed twice, or a name a derived column already has is refused. The
+marker (`Origin`), a field listed twice, or a name a derived column already has is refused.
+
+Where automated tests do not sit in level folders, a test case may name the level instead —
+`level` names the test-case field that holds it, for the matrix's verdict columns:
+
+``` toml
+[tables.matrix]
+level = "Level"           # a field the test-case type declares
+``` The
 section is part of the trace schema, so setting it changes the schema's digest: re-copy it
 into every product repo that carries a verified copy (`qmstrace ledger copy-schema`) before
 `ledger check` accepts them again. [The table format](table-format.md) says what the tables

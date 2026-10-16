@@ -5,6 +5,7 @@ Implements: DSN-QMT-12
 
 from __future__ import annotations
 
+from qmstrace.core.assessment import Assessment
 from qmstrace.core.results import (
     CaseResult,
     ReportFormat,
@@ -25,6 +26,8 @@ _NAMES: dict[ReportFormat, str] = {
 def results(view: Results) -> str:
     """Render collected verdicts without making freshness or verification claims."""
     assessment = view.assessment
+    # this view reports on one repo; the ledger's tables read a project's results instead
+    assert isinstance(assessment, Assessment), "results renders one repo's assessment"
     several = len(view.reports) > 1
     # One report keeps the one-line header; several list each, so a missing or truncated
     # file is visible by its count.

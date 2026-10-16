@@ -454,6 +454,11 @@ row; no timestamps (REQ-QMT-15).
   cleanliness always true, 5 fail.
 - [ ] **#49b** — `--report REPO=FILE`, per-level verdict columns, each cell's evidence pointer;
   additive, so the format stays `qmstrace.table/1`.
+  *Built on `feat/49b-verdicts` (2026-10-16), on #40's core combination:*
+  `Workspace.project_results` reads each `--report` as the repo it names; one column per
+  level, then an overall `verdict`, each cell naming its reports. Decided by the developer: a
+  test's own level wins over its test case's (`[tables.matrix] level`); reports matching
+  nothing are refused. REQ-QMT-23 gains its verdict clause under CR-004; DSN-QMT-16 follows.
 
 ## Landed — M12 · the C# capability
 
