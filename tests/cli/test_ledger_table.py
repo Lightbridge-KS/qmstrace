@@ -229,3 +229,34 @@ def test_reports_that_match_nothing_and_bad_reports_are_refused(cases: Path) -> 
     assert run("-C", ledger, "ledger", "table", "matrix", "--report", "elsewhere=x.xml")[0] == 2
     assert run("-C", ledger, "ledger", "table", "matrix", "--report", "report.xml")[0] == 2
     assert run("-C", ledger, "ledger", "table", "requirements", *given)[0] == 2
+
+
+@pytest.mark.verifies("REQ-QMT-23")
+def test_a_report_matches_only_the_tests_of_the_repo_it_names(split: Path) -> None:
+    # client and service both hold tests/unit/test_api.py::test_a_call_without_a_key_is_refused
+    shared = "tests/unit/test_api.py::test_a_call_without_a_key_is_refused"
+    junit(split / "service" / "report.xml", [(shared, "fail")])
+    junit(split / "client" / "report.xml", [(shared, "pass")])
+    code, output = run(
+        "-C",
+        str(split / "ledger"),
+        "ledger",
+        "table",
+        "matrix",
+        "--report",
+        "service=../service/report.xml",
+        "--report",
+        "client=../client/report.xml",
+    )
+    assert code == 0, output
+    by_test = {
+        row["automated_test"][0]: row["verdict"]
+        for row in json.loads(output)["rows"]
+        if row["automated_test"] and row["automated_test"][0].endswith(shared)
+    }
+    assert {
+        test: (v["verdict"], [r["repo"] for r in v["reports"]]) for test, v in by_test.items()
+    } == {
+        f"client:{shared}": ("pass", ["client"]),
+        f"service:{shared}": ("fail", ["service"]),
+    }
