@@ -151,16 +151,20 @@ them does not clear it.
 
 ### REQ-QMT-10 — Test results come from a report, never typed
 
-`qmstrace results REPORT` reads a pytest JUnit report and gives each requirement the worst
-verdict of the automated tests that reach it along `verifies` links — directly, or through the
-test cases they run, each named with its own verdict. A test that reaches only a design element
-gives no requirement a verdict and is still shown; a test case no automated test runs adds
-nothing; an unreadable report is not judged.
+`qmstrace results REPORT...` reads pytest JUnit reports and TRX files, several in one run as
+one, and gives each requirement the worst verdict of the automated tests that reach it along
+`verifies` links — directly, or through the test cases they run, each named with its own
+verdict. A run reported in two files is one run with its worst verdict; no verdict or count
+depends on the order the reports are given in; each run keeps the reports it came from, by a
+label that is never a path of the machine and the sha256 of their bytes; a report may name the
+repo it reports. A test that reaches only a design element gives no requirement a verdict and
+is still shown; a test case no automated test runs adds nothing; an unreadable report is not
+judged.
 
 - Category: functional-suitability
 - Origin: AGR-9
 - Verify-by: test
-- Change: CR-003
+- Change: CR-003, CR-004
 
 ### REQ-QMT-22 — A TRX report is read as a JUnit one is
 

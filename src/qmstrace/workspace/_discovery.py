@@ -111,6 +111,13 @@ def _shown(root: Path, path: Path) -> str:
     return posixpath.normpath(Path(os.path.relpath(path, root)).as_posix())
 
 
+def _report_label(root: Path, path: Path) -> str:
+    """A report's label: its path from the root when it is inside the repo, else its file name
+    alone — never a path of the machine, nor the climb out of the repo to it."""
+    shown = _shown(root, path)
+    return path.name if shown == ".." or shown.startswith("../") else shown
+
+
 def _same(one: Path, other: Path) -> bool:
     """Whether two paths name one folder — by their text first, since in a pipeline the ledger
     they are written through may not exist; then on disk, which also sees through links."""

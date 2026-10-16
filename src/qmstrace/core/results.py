@@ -1,10 +1,16 @@
 """Report facts matched to scanned automated tests, then attributed along verifies links.
 
-No history is written. A reported run is one distinct full identity; duplicate entries are
-combined, not treated as proof of additional attempts. A verdict follows `verifies` links from
-the automated tests this report ran — directly, or through the test cases they run (ADR-0003):
-an item's verdict is the worst of every automated test that reaches it. A design element
-carries `Satisfies`, not `verifies`, so no verdict flows through one.
+No history is written. Several reports are read as one (ADR-0005): a reported run is one
+distinct full identity, whichever reports carry it; duplicate entries — in one report or across
+several — are combined by their worst verdict, not treated as proof of additional attempts, and
+every run keeps the reports it came from. The reports arrive as a mapping, so no verdict or count
+depends on the order they were given in. A report may name the repo it reports; its runs then
+match only that repo's automated tests, so identities that collide across repos stay apart.
+
+A verdict follows `verifies` links from the automated tests the reports ran — directly, or
+through the test cases they run (ADR-0003): an item's verdict is the worst of every automated
+test that reaches it. A design element carries `Satisfies`, not `verifies`, so no verdict flows
+through one.
 
 Implements: DSN-QMT-09
 """
@@ -49,15 +55,36 @@ class Report:
     format: ReportFormat | None = None
 
 
+@dataclass(frozen=True, slots=True, order=True)
+class ReportSource:
+    """Where a report came from: the label it is shown by — relative, never a path of the
+    machine — the sha256 of its bytes, and the repo it reports (`None`: the repo assessed)."""
+
+    label: str
+    sha256: str
+    repo: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ReadReport:
+    """One report read, with its entry count — so a missing or truncated file is visible."""
+
+    source: ReportSource
+    entries: int
+    format: ReportFormat | None
+
+
 @dataclass(frozen=True, slots=True)
 class RunResult:
-    """One full report identity, with repeated entries combined."""
+    """One full report identity, with repeated entries combined, and every report they came
+    from."""
 
     identity: Identity
     verdict: Verdict
     entries: int
     kinds: tuple[str, ...]
     details: tuple[str, ...]
+    sources: tuple[ReportSource, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,7 +134,7 @@ class Results:
     """A complete informational view; all judgments are computed before rendering."""
 
     assessment: Assessment
-    report_name: str
+    reports: tuple[ReadReport, ...]  # sorted by label, then digest
     entries: int
     runs: int
     matched_runs: int
@@ -120,7 +147,11 @@ class Results:
     other_tests: tuple[TestResult, ...]
     unmatched: tuple[UnmatchedRun, ...]
     other_cases: tuple[CaseResult, ...] = ()  # test cases that reach no requirement
-    report_format: ReportFormat | None = None
+
+    @property
+    def formats(self) -> tuple[ReportFormat, ...]:
+        """The formats of the reports read, each once, in a fixed order."""
+        return tuple(sorted({r.format for r in self.reports if r.format is not None}))
 
     @property
     def through_cases(self) -> bool:
@@ -130,38 +161,47 @@ class Results:
 
 def summarize(
     assessment: Assessment,
-    report: Report,
+    reports: Mapping[ReportSource, Report],
     identities: Mapping[str, tuple[Identity, ...]],
-    report_name: str,
+    repos: Mapping[str, str] | None = None,
 ) -> Results:
-    """Match report identities exactly; preserve all unmatched data and missing results.
+    """Match every report's identities exactly, as one; preserve all unmatched data and missing
+    results.
 
     `identities` maps each scanned automated test to the identities its runs carry, as its
-    extractor recorded them. Core does not import an extractor or guess filesystem paths from
-    dotted class names.
+    extractor recorded them; `repos` maps a test to the repo it is in, where reports name one —
+    a test it leaves out is in the repo assessed. Core does not import an extractor or guess
+    filesystem paths from dotted class names.
     """
     graph = assessment.graph
-    index: dict[Identity, list[str]] = defaultdict(list)
+    index: dict[tuple[str | None, str, str], list[str]] = defaultdict(list)
     for test_id, keys in sorted(identities.items()):
-        for key in keys:
-            index[key].append(test_id)
-    # A run is one full identity of the test it matches by: two methods that share a display
-    # name are two runs, never one.
-    grouped: dict[tuple[str, str, str], list[ReportEntry]] = defaultdict(list)
-    for entry in report.entries:
-        grouped[(entry.classname, entry.name, entry.test or entry.name)].append(entry)
+        repo = (repos or {}).get(test_id)
+        for classname, test in keys:
+            index[(repo, classname, test)].append(test_id)
+    # A run is one full identity of the test it matches by, in the repo it reports: two methods
+    # that share a display name are two runs, never one; one identity in two reports is one.
+    grouped: dict[tuple[str | None, str, str, str], list[tuple[ReportEntry, ReportSource]]] = (
+        defaultdict(list)
+    )
+    for source, report in reports.items():
+        for entry in report.entries:
+            key = (source.repo, entry.classname, entry.name, entry.test or entry.name)
+            grouped[key].append((entry, source))
 
     matched: dict[str, list[RunResult]] = defaultdict(list)
     unmatched: list[UnmatchedRun] = []
-    for (classname, name, test), entries in sorted(grouped.items()):
+    for (repo, classname, name, test), found in sorted(grouped.items(), key=_by_run):
+        entries = [entry for entry, _ in found]
         run = RunResult(
             (classname, name),
             _worst(tuple(e.verdict for e in entries)),
             len(entries),
             tuple(sorted({kind for e in entries for kind in e.kinds})),
             tuple(sorted({detail for e in entries for detail in e.details})),
+            tuple(sorted({source for _, source in found})),
         )
-        matches = index.get((classname, test), [])
+        matches = index.get((repo, classname, test), [])
         if not classname or not name:
             reason = "missing classname or name"
         elif not matches:
@@ -274,23 +314,34 @@ def summarize(
     }
     other_cases = tuple(case(m) for m in sorted(passing))
     shown_tests.update(test.id for found in other_cases for test in found.tests)
+    total = sum(len(report.entries) for report in reports.values())
     return Results(
         assessment=assessment,
-        report_name=report_name,
-        entries=len(report.entries),
+        reports=tuple(
+            ReadReport(source, len(reports[source].entries), reports[source].format)
+            for source in sorted(reports)
+        ),
+        entries=total,
         runs=len(grouped),
         matched_runs=sum(len(t.runs) for t in tests.values()),
         matched_cases=sum(bool(t.runs) for t in tests.values()),
         scanned_cases=len(tests),
-        duplicates=len(report.entries) - len(grouped),
+        duplicates=total - len(grouped),
         requirements=tuple(requirements),
         other_methods=tuple(other_methods),
         unverified_targets=tuple(unverified),
         other_tests=tuple(t for t in tests.values() if t.id not in shown_tests),
         unmatched=tuple(unmatched),
         other_cases=other_cases,
-        report_format=report.format,
     )
+
+
+def _by_run(
+    group: tuple[tuple[str | None, str, str, str], list[tuple[ReportEntry, ReportSource]]],
+) -> tuple[str, str, str, str]:
+    """A run's place in the view: by repo — the repo assessed first — then identity."""
+    (repo, classname, name, test), _ = group
+    return (repo or "", classname, name, test)
 
 
 def _worst(verdicts: tuple[Verdict, ...]) -> Verdict:

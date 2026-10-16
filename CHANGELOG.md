@@ -15,6 +15,14 @@ All notable changes to this project are recorded here. The format follows
   requirement fields. Each repo's commit, and whether its working tree was clean, are recorded;
   nothing is pinned or committed, and the document says it is a draft. `--out` writes a new
   file. A reference page, *The table format*.
+- `results` reads several reports in one run, as one: `qmstrace results TestResults/*.trx`
+  reads each test project's TRX file together, so a requirement reached by tests in two
+  projects gets its whole verdict. A run reported in two files keeps its worst verdict and
+  counts once as a duplicate; the order of the reports changes nothing. With several reports
+  the header lists each with its entry count, and a run that did not pass names the reports it
+  was in. A report outside the repo is shown by its file name alone; two reports that would be
+  shown alike, or one given twice, are refused. One report prints the same view as before
+  ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
 
 ### Changed
 

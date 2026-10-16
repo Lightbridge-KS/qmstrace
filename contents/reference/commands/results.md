@@ -2,8 +2,8 @@
 
 !!! abstract "TL;DR"
 
-    `qmstrace results REPORT` matches one pytest JUnit report, or one TRX file, to scanned
-    automated tests, and follows their `verifies` links to requirements — directly, or through the test cases they
+    `qmstrace results REPORT...` matches pytest JUnit reports or TRX files, read as one, to
+    scanned automated tests, and follows their `verifies` links to requirements — directly, or through the test cases they
     run. It shows requirement verdicts, the test cases on the way, missing results, shared tests
     and unmatched entries. Exit `0` means a results view was produced, even if tests failed.
     The report's commit is not verified.
@@ -17,7 +17,19 @@
 A relative report path starts at the invocation directory, or the directory supplied with
 `-C`, even when qmstrace discovers the repository above it. `-C` works before or after the
 command. An explicitly supplied report is read even when Git ignores it or it is outside
-the repository.
+the repository. A report is shown by its path from the repository root, or, outside the
+repository, by its file name alone; two reports that would be shown alike are refused, as is
+a report given twice.
+
+## Several reports
+
+Several reports are read as one, so `qmstrace results TestResults/*.trx` reads each test
+project's file in one run. A run reported in two files is one run: it keeps the worst verdict
+and counts once as a duplicate, as a repeated entry within one file does. The order the reports
+are given in changes nothing. With more than one report, the header lists each one with its
+entry count, so a missing or truncated file is visible, and every run that did not pass names
+the reports it was in. Each run also keeps the sha256 of its reports' bytes. One report
+prints the same view as before.
 
 ## Matching and counts
 
@@ -36,9 +48,8 @@ its outer class with `+`. The `DisplayName` plays no part in matching, so reword
 not unmatch it; renaming or moving its method does. A result's name is its `testName`, so each
 row of a `[Theory]` is a run of one automated test. Only the class, the method, the name, the
 outcome and the first line of an error message are read: a TRX file's paths, machine and user
-names, output, stack traces and attachments are never shown. One file is one report; with
-several test projects, `dotnet test` writes a TRX for each, and a test in another project's
-file shows as `no-result` ([#40](https://github.com/Lightbridge-KS/qmstrace/issues/40)).
+names, output, stack traces and attachments are never shown. With several test projects,
+`dotnet test` writes a TRX for each: give `results` every one of them.
 
 Custom class-name prefixes, identity collisions and entries with missing identity attributes
 are reported; qmstrace does not guess a match.
@@ -126,8 +137,7 @@ shown separately and are never presented as requirement verdicts:
 ```
 
 Unread sources and graph violations remain visible. Matching uses the current working tree;
-qmstrace does not verify which commit produced the report. Results are neither persisted nor
-combined across reports.
+qmstrace does not verify which commit produced a report. Results are not persisted.
 
 ## Exit codes
 

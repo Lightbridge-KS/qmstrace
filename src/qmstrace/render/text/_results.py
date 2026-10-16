@@ -5,12 +5,18 @@ Implements: DSN-QMT-12
 
 from __future__ import annotations
 
-from qmstrace.core.results import CaseResult, ReportFormat, Results, TargetResult, TestResult
+from qmstrace.core.results import (
+    CaseResult,
+    ReportFormat,
+    Results,
+    RunResult,
+    TargetResult,
+    TestResult,
+)
 from qmstrace.render._evidence import _problems
 from qmstrace.render._presentation import _heading, _what
 
-_NAMES: dict[ReportFormat | None, str] = {
-    None: "use default pytest JUnit names.",
+_NAMES: dict[ReportFormat, str] = {
     "junit": "use default pytest JUnit names.",
     "trx": "a TRX run matches by the class and method dotnet test reports.",
 }
@@ -19,8 +25,16 @@ _NAMES: dict[ReportFormat | None, str] = {
 def results(view: Results) -> str:
     """Render collected verdicts without making freshness or verification claims."""
     assessment = view.assessment
-    lines = [
-        f"report: {view.report_name}",
+    several = len(view.reports) > 1
+    # One report keeps the one-line header; several list each, so a missing or truncated
+    # file is visible by its count.
+    lines = (
+        [f"reports: {len(view.reports)}"]
+        + [f"  {r.source.label} · {r.entries} XML entries" for r in view.reports]
+        if several
+        else [f"report: {', '.join(r.source.label for r in view.reports)}"]
+    )
+    lines += [
         f"  {view.entries} XML entries · {view.runs} reported runs (distinct full identities)",
         f"  matched: {view.matched_runs} runs of {view.matched_cases} automated tests · "
         f"scanned: {view.scanned_cases} automated tests · "
@@ -44,7 +58,7 @@ def results(view: Results) -> str:
         else "requirements — direct verifies links only:",
     ]
     for target in view.requirements:
-        lines += _result_target(target)
+        lines += _result_target(target, several)
     if not view.requirements:
         lines.append("  no test-method requirements visible here")
     if view.other_methods:
@@ -62,17 +76,17 @@ def results(view: Results) -> str:
                     f"tests · {target.runs} runs"
                 )
                 for test in target.tests:
-                    lines += _result_test(test, target.node.id, show_pass=True)
+                    lines += _result_test(test, several, target.node.id, show_pass=True)
             else:
                 lines.append("    no linked automated tests")
     if view.unverified_targets:
         lines += ["", "unverified targets — type unknown, not requirement verdicts:"]
         for target in view.unverified_targets:
-            lines += _result_target(target)
+            lines += _result_target(target, several)
     if view.other_cases:
         lines += ["", "test cases that reach no requirement — no requirement verdict inferred:"]
         for case in view.other_cases:
-            lines += _result_case(case, show_pass=True)
+            lines += _result_case(case, several, show_pass=True)
     if view.other_tests:
         lines += [
             "",
@@ -81,17 +95,16 @@ def results(view: Results) -> str:
             else "tests without a direct requirement target — no requirement verdict inferred:",
         ]
         for test in view.other_tests:
-            lines += _result_test(test, show_pass=True)
+            lines += _result_test(test, several, show_pass=True)
     if view.unmatched:
         lines += ["", "unmatched report entries:"]
         for entry in view.unmatched:
             lines.append(
                 f"  {entry.run.verdict:<9} {entry.run.identity!r} · "
-                f"{entry.run.entries} XML entries · {entry.reason}"
+                f"{entry.run.entries} XML entries · {entry.reason}{_in(entry.run, several)}"
             )
-        lines.append(
-            f"  Fix: check report provenance and scan patterns; {_NAMES[view.report_format]}"
-        )
+        names = " ".join(_NAMES[f] for f in view.formats or ("junit",))
+        lines.append(f"  Fix: check report provenance and scan patterns; {names}")
     lines += [
         "",
         f"result: {view.matched_cases} matched automated tests · "
@@ -102,7 +115,12 @@ def results(view: Results) -> str:
     return "\n".join(lines)
 
 
-def _result_target(target: TargetResult) -> list[str]:
+def _in(run: RunResult, several: bool) -> str:
+    """Which reports a run came from — named only when there is more than one to choose from."""
+    return f" · reported in {', '.join(s.label for s in run.sources)}" if several else ""
+
+
+def _result_target(target: TargetResult, several: bool) -> list[str]:
     via = f"via {', '.join(c.node.id for c in target.via)} · " if target.via else ""
     lines = [
         f"  {target.node.id}  {target.verdict:<9} {via}{len(target.tests)} automated tests · "
@@ -111,13 +129,13 @@ def _result_target(target: TargetResult) -> list[str]:
     through = {test.id for case in target.via for test in case.tests}
     for test in target.tests:
         if test.id not in through:  # a test through a case is listed under that case
-            lines += _result_test(test, target.node.id)
+            lines += _result_test(test, several, target.node.id)
     for case in target.via:
-        lines += _result_case(case)
+        lines += _result_case(case, several)
     return lines
 
 
-def _result_case(case: CaseResult, *, show_pass: bool = False) -> list[str]:
+def _result_case(case: CaseResult, several: bool, *, show_pass: bool = False) -> list[str]:
     """A test case on a verdict's path — its verdict, and the automated tests that ran it."""
     if case.verdict == "pass" and not show_pass:
         return [f"    via {case.node.id}  pass · {len(case.tests)} automated tests"]
@@ -130,13 +148,14 @@ def _result_case(case: CaseResult, *, show_pass: bool = False) -> list[str]:
     ]
     for test in case.tests:
         lines += [
-            f"{indent}{line}" for line in _result_test(test, case.node.id, show_pass=show_pass)
+            f"{indent}{line}"
+            for line in _result_test(test, several, case.node.id, show_pass=show_pass)
         ]
     return lines
 
 
 def _result_test(
-    test: TestResult, target: str | None = None, *, show_pass: bool = False
+    test: TestResult, several: bool, target: str | None = None, *, show_pass: bool = False
 ) -> list[str]:
     others = tuple(i for i in test.verifies if i != target)
     if test.verdict == "pass" and not show_pass and len(test.verifies) < 2:
@@ -150,6 +169,9 @@ def _result_test(
     lines = [f"    {test.verdict:<9} {test.id} · {len(test.runs)} runs{shared}{targets}"]
     for run in test.runs:
         if run.verdict != "pass":
-            lines.append(f"      {run.verdict}: {run.identity[1]} ({', '.join(run.kinds)})")
+            lines.append(
+                f"      {run.verdict}: {run.identity[1]} ({', '.join(run.kinds)})"
+                f"{_in(run, several)}"
+            )
             lines += [f"        {detail}" for detail in run.details]
     return lines

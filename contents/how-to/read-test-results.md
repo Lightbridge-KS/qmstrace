@@ -28,6 +28,10 @@ qmstrace results report.xml
 For another directory, use `qmstrace -C path/to/product results report.xml`. The report path
 is relative to that directory. Repository discovery does not move the report path.
 
+Several reports — say, one pytest run per test level — are read as one:
+`qmstrace results unit.xml integration.xml`. A test reported in both keeps its worst verdict,
+and the header lists each report with its entry count.
+
 The miniature service illustrates a partial report with failed and missing results:
 
 ``` text

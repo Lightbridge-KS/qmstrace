@@ -244,7 +244,8 @@ def test_report_path_uses_effective_directory_even_when_ignored(
 def test_argument_errors_and_internal_fault(project: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     root = str(project / "service")
     assert runner.invoke(app, ["-C", root, "results"]).exit_code == 2
-    assert runner.invoke(app, ["-C", root, "results", "a", "b"]).exit_code == 2
+    several = runner.invoke(app, ["-C", root, "results", "a", "b"])  # several are accepted
+    assert several.exit_code == 2 and "Cannot read report a" in several.output
     assert runner.invoke(app, ["-C", root, "results", "a", "-C", root]).exit_code == 2
 
     def broken(*args):

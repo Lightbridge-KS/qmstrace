@@ -149,7 +149,7 @@ traversal at pins belongs to the ledger.
 
 ### Results contract — M4
 
-`results REPORT` reads one explicitly supplied file, including an ignored file. Relative
+`results REPORT...` reads the explicitly supplied files, ignored ones included. Relative
 paths resolve from the effective invocation directory (`-C` on either side of the command),
 before repository discovery. **Rejected:** resolving from the discovered root, which could
 silently read a different report when invoked from a subdirectory.
@@ -205,14 +205,19 @@ traces and attachments never reach the view. A report with no match, and an unma
 name the next move for the format given. **Rejected:** a JUnit logger package in the C# repo
 (every adopter would add one, and its names are the logger's, not the test framework's).
 
-*Amended 2026-10-15 ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)), lands with
+*Amended 2026-10-15 ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)), landed with
 #40:* `results` reads several reports in one run, combined **in core** into one view, so every
 consumer of verdicts applies the same rule. Each run keeps its source report — its label,
 never a machine path, and the sha256 of its bytes — and a report can name the repo it reports,
 since run identities can collide across repos at the ledger. Verdicts and counts do not depend
 on the order the reports are given in; a run in two files combines by its worst verdict and
 counts once as a duplicate. The header lists each report with its entry count. The report's
-commit stays NOT VERIFIED. This replaces "M4 does not … combine reports" above.
+commit stays NOT VERIFIED. This replaces "M4 does not … combine reports" above. As landed, the
+reports are positional (`results REPORT...`, so `TestResults/*.trx` works); a report inside the
+repo is labelled by its path from the root, one outside by its file name; two reports one label
+would hide, or one report given twice, are refused; and one report prints the view it always
+did. **Rejected:** a repeated `--report` option, which would break `results REPORT`; a folder,
+which reads a stale file silently (#40).
 
 ### The authoring surface
 
