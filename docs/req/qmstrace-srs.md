@@ -192,13 +192,16 @@ read, and a Git variable pointing at another repository changes nothing.
 ### REQ-QMT-12 — A product repo is set up by one command
 
 `qmstrace init` writes the trace configuration, the agent guide's stanza and the skill, and
-registers the pytest marker where the repo's automated tests are pytest functions. Run again, it
-changes nothing; it refuses to replace a file it did not write, and then writes nothing.
+registers the pytest marker where the repo's automated tests are pytest functions. The
+configuration it creates declares the item types of the repo's language, chosen from the build
+files the repo holds, and `init` names the starter it chose and why; a repo holding the build
+files of two languages is refused, with the option that settles it. Run again, it changes
+nothing; it refuses to replace a file it did not write, and then writes nothing.
 
 - Category: usability
 - Origin: AGR-5
 - Verify-by: test
-- Change: CR-003
+- Change: CR-003, CR-005
 
 ### REQ-QMT-13 — The schema is authored once and copied, verified
 

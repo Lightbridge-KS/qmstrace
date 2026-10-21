@@ -372,14 +372,25 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
 4. Set up the ledger and code/test repos, then trace the feature and run the project gate.
    Product `init` still generates a repo-owned starter; joining an existing ledger needs
    configuration edits followed by `ledger copy-schema`. See the
-   [project how-to](../../contents/how-to/check-the-project.md). In a C# repo, `init` writes
-   the Python starter and a `pytest.ini` (#38): edit `[items]` as
-   [*Trace a C# repo*](../../contents/how-to/trace-a-csharp-repo.md) says, and delete the
-   `pytest.ini`.
+   [project how-to](../../contents/how-to/check-the-project.md). In a C# repo, `init` writes the
+   C# starter and no `pytest.ini` (#38, ADR-0006): it recognises a .NET repo by its solution or
+   project file and says which starter it chose. See
+   [*Trace a C# repo*](../../contents/how-to/trace-a-csharp-repo.md).
 5. Record observed friction as issues; choose fixes from that evidence before expanding to
    M11. Baseline only after the IDs, trace and review are ready.
 
 **Fixed from use:**
+- [x] 2026-10-21, the deferral ADR-0004 filed and CR-003 excluded, now paid for by the first C#
+  project (#38): `init` in a repo with no configuration wrote the Python starter, so a C# repo
+  read as traced while declaring nothing, and the manual's C# how-to had to tell readers to
+  rewrite `[items]` and delete a `pytest.ini`. The starter now declares the item types of the
+  language the repo's build files name — a .NET solution or project file at or just below the
+  root means C#, `pyproject.toml` or nothing means Python — and the run's first line names the
+  starter and the file that chose it. A repo holding both is refused until `--language` says
+  which. One asset: `starter.toml` plus an `items-<language>.toml` tail, so the schema is not
+  duplicated. No new requirement — REQ-QMT-12 amended under CR-005, decided in ADR-0006. The
+  pytest marker needed no rule: it was already registered only where an item type reads pytest
+  tests.
 - [x] 2026-10-16, seen while a project was designed with one agreement per engagement (#55,
   #56): two `[externals.*]` tables with the prefix `AC-` routed every `AC-` citation to the first
   table's file, so a clause declared in the second drew a `V09` naming the wrong file — whose
@@ -560,7 +571,8 @@ CR-003 (`Impacts: REQ-QMT-02, 10, 12, 20, 21, 22`), which must be accepted in
   - [x] Fixture `tests/fixtures/cases/agent` — a real .NET project (built and run: 3 results,
     probes 18); the ledger's check across three repos names pytest and xUnit ways together.
   - [x] SKILL.md's C# examples; the manual's *Trace a C# repo*; issue
-    [#38](https://github.com/Lightbridge-KS/qmstrace/issues/38) for a C# starter.
+    [#38](https://github.com/Lightbridge-KS/qmstrace/issues/38) for a C# starter — closed
+    2026-10-21, see *Fixed from use*.
   - [x] Fixed after the bed run found it (`e6e5133`): a test's gap cited the first unread-marker
     finding or stray in its file; each now names its own method.
 - [x] **M12e** — the TRX reader and report dispatch, [#41](https://github.com/Lightbridge-KS/qmstrace/pull/41), merged `64f99b3` (stacked on M12d).

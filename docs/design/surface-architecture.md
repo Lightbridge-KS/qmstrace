@@ -81,7 +81,7 @@ flowchart TD
 | `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
 | `qmstrace results <report>` | Matches one pytest JUnit report or TRX file to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
-| `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers | ✔ |
+| `qmstrace init` | Creates a starter or preserves existing config, refreshes managed guidance, ships the skill and registers pytest markers where pytest tests are configured. A new product repo's starter declares the item types of the language its build files name — C# or Python — and the run says which it chose; a repo holding both is refused, and `--language` settles it (ADR-0006) | ✔ |
 | `qmstrace graph … --out FILE` | Generates an offline, read-only local trace browser with item search, thread navigation, findings and evidence limits. Optional ID sets initial focus; --out is required and never overwrites | ✔ |
 | `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *In the engine since M9b* | ✔ |
 | `qmstrace ledger check [--strict] [--quiet]` | In the ledger: reads the working tree of every repo in `[repos]` — the ledger too, when it holds documents (ADR-0001) — and judges them as one project: coverage met across repos, each repo's own violations, suspects across repos. Refuses (exit 2) when a repo cannot be read or holds other rules. Says *not pinned* in every form. The ledger's gate with `--strict`. *In the engine since M10a* | ✔ |
@@ -595,10 +595,24 @@ the cross-repo gaps rather than judging them.
 
 ### Setup contract — M6
 
-`init [--subject NAME --key KEY]` creates a repo-owned starter at the effective directory
-when no ancestor has trace configuration. Defaults are `product` / `PROD`; no ledger,
-origin or baseline is invented. Existing configuration is preserved byte-for-byte and
-subject options then fail with exit 2.
+`init [--subject NAME --key KEY] [--language python|csharp]` creates a repo-owned starter at the
+effective directory when no ancestor has trace configuration. Defaults are `product` / `PROD`;
+no ledger, origin or baseline is invented. Existing configuration is preserved byte-for-byte and
+starter options then fail with exit 2.
+
+**The starter's language — #38 (ADR-0006).** A new product repo's starter declares the item
+types of the repo's language, which the build files at or just below its root choose: `*.sln`,
+`*.slnx`, `*.csproj`, `*/*.csproj` or `src/*/*.csproj` means C# — components by `csharp-file`
+from `src/**/*.cs`, automated tests by `xunit` from `tests/**/*Tests.cs`; `pyproject.toml`, or
+no build file at all, means Python, as before. `init`'s first line names the starter and why —
+`starter: csharp (App.csproj)`. A repo holding both languages' build files is refused (exit 2),
+naming them, and `--language` settles it; `--language` is also refused in a ledger, which holds
+documents rather than code. Nothing else in setup changes: the pytest marker was already
+registered only where an item type uses the `pytest` extractor, so a C# starter writes no
+`pytest.ini`. **Rejected:** two complete starters, duplicating the schema; detection with no
+option, which cannot decide a genuinely mixed repo; an option with no detection, which leaves
+the first run wrong by default; a tie-break instead of a refusal; an `ignore` list for generated
+C#, which is a fact about a project rather than about the language.
 
 **In a ledger — M10c (ADR-0001, #30).** A folder that holds `qmstrace.schema.toml` is set up as
 a ledger that holds the documents. With no `qmstrace.toml`, `init` writes the ledger's own —
@@ -658,3 +672,5 @@ placements work; no Git commit, fetch or inferred marker curation occurs.
 
 **Rejected:** infer project rules, rewrite authored configuration on every init, or replace
 an entire guide/settings file. Setup supplies a reviewable starting point, not project policy.
+Reading a repo's build files to pick the starter's language (ADR-0006) reads their names only,
+and names a language the project already chose; it infers no rule about that project.

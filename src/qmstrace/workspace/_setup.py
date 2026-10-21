@@ -11,12 +11,60 @@ import re
 from collections.abc import Callable, Sequence
 from importlib.resources import files
 from pathlib import Path
+from typing import Final
 
 from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.infra.files import Link, contained, read_optional, update_files, update_in
 from qmstrace.workspace._discovery import CONFIG_FILE, SCHEMA_FILE, _find_ledger, _same
+
+LANGUAGES: Final = ("python", "csharp")
+_BUILD_FILES: Final[dict[str, tuple[str, ...]]] = {
+    # A repo's shape, as patterns relative to its root. The .NET ones reach a solution or
+    # project file at the root, a single-project repo, and the conventional src/Project/, and
+    # stop there: a starter is a starting point, not a survey of the tree.
+    "csharp": ("*.sln", "*.slnx", "*.csproj", "*/*.csproj", "src/*/*.csproj"),
+    "python": ("pyproject.toml",),
+}
+
+
+def _build_files(root: Path, language: str) -> tuple[str, ...]:
+    """The build files that make this repo one of `language`, repo-relative, in a stable order."""
+    found: list[str] = []
+    for pattern in _BUILD_FILES[language]:
+        found += sorted(
+            path.relative_to(root).as_posix() for path in root.glob(pattern) if path.is_file()
+        )
+    return tuple(dict.fromkeys(found))
+
+
+def _language(root: Path, asked: str | None) -> tuple[str, str]:
+    """The language a new configuration declares item types for, and why — the line init prints.
+
+    The repo's shape chooses: a .NET solution or project file means C#, a `pyproject.toml`
+    means Python, and neither means Python, as every starter did before. A repo holding both is
+    refused rather than guessed at, and `--language` settles it (ADR-0006).
+    """
+    if asked is not None:
+        if asked not in LANGUAGES:
+            raise CouldNotJudge(
+                f"There is no {asked} starter.",
+                f"Fix: use --language with one of {', '.join(LANGUAGES)}.",
+            )
+        return asked, "--language"
+    found = {language: _build_files(root, language) for language in LANGUAGES}
+    if all(found.values()):
+        both = " and ".join(", ".join(names) for names in found.values())
+        raise CouldNotJudge(
+            f"This repo holds the build files of two languages: {both}.",
+            "Fix: say which item types the starter declares — init --language "
+            f"{' or --language '.join(LANGUAGES)}.",
+        )
+    for language, names in found.items():
+        if names:
+            return language, ", ".join(names)
+    return "python", "the default; no build file names a language"
 
 
 def _links_for_claude(root: Path) -> bool:
@@ -38,6 +86,7 @@ def initialize(
     load_config: Callable[[Path], TraceConfig],
     subject: str | None = None,
     key: str | None = None,
+    language: str | None = None,
 ) -> tuple[str, ...]:
     """Set up the selected directory, or refresh an existing ancestor's managed files.
 
@@ -56,11 +105,12 @@ def initialize(
             break
     ledger = (root / SCHEMA_FILE).is_file()
     assets = files("qmstrace").joinpath("assets")
+    chosen: tuple[str, ...] = ()
     current = read_optional(contained(root, CONFIG_FILE))
     if current is not None:
-        if subject is not None or key is not None:
+        if subject is not None or key is not None or language is not None:
             raise CouldNotJudge(
-                "Subject options only apply when creating a configuration.",
+                "Starter options only apply when creating a configuration.",
                 "Fix: edit qmstrace.toml explicitly, then rerun init without options.",
             )
         config = load_config(root)
@@ -73,8 +123,22 @@ def initialize(
                 "Subject must be a lowercase name; key must be uppercase letters/digits.",
                 "Fix: use, for example, --subject service --key SVC.",
             )
-        starter = "ledger-starter.toml" if ledger else "starter.toml"
-        current = assets.joinpath(starter).read_text(encoding="utf-8")
+        if ledger:
+            if language is not None:
+                raise CouldNotJudge(
+                    "A ledger holds the project's documents, not its code, so no starter "
+                    "declares item types for a language.",
+                    "Fix: rerun init without --language.",
+                )
+            current = assets.joinpath("ledger-starter.toml").read_text(encoding="utf-8")
+        else:
+            picked, why = _language(root, language)
+            current = (
+                assets.joinpath("starter.toml").read_text(encoding="utf-8")
+                + "\n"
+                + assets.joinpath(f"items-{picked}.toml").read_text(encoding="utf-8")
+            )
+            chosen = (f"starter: {picked} ({why})",)
         current = current.replace("__SUBJECT__", subject).replace("__KEY__", key)
         schema = read_optional(root / SCHEMA_FILE) if ledger else None
         config = TraceConfig.parse(current, schema)
@@ -125,7 +189,7 @@ def initialize(
             name = "pyproject.toml" if source is not None else "pytest.ini"
             section = "tool.pytest.ini_options" if source is not None else "pytest"
             edits[name] = setup.register_marker(name, source or "", section)
-    written = update_files(root, edits)
+    written = chosen + update_files(root, edits)
     if ledger and not any(_same(root / place, root) for place in config.repos.values()):
         written += (
             f'next: list this ledger in {SCHEMA_FILE} under [repos] — ledger = "." — so '

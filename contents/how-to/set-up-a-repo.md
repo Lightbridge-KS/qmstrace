@@ -20,7 +20,10 @@
 
 2. In a new product root, run `qmstrace init --subject service --key SVC`.
    For an existing traced repo, run `qmstrace init` without subject options.
-3. Review `qmstrace.toml`. Match file patterns, test levels and required fields to the
+3. Review `qmstrace.toml`. The run's first line names the starter it chose — the item types of
+   the language the repo's build files name, C# or Python; pass `--language` if the repo holds
+   both, and see [the starter's language](../reference/commands/init.md#the-starters-language).
+   Match file patterns, test levels and required fields to the
    repository. When joining a project, point `[schema]` at its [trace schema](../reference/configuration.md)
    by path rather than keeping the starter's defaults, then have the project side copy the
    schema in — [share the project's schema](share-the-schema.md).
@@ -32,8 +35,10 @@
    the skill moved there keeps a copy in `.qmstrace/skill/`: remove `.qmstrace/` first.
 6. Run `qmstrace rules`, `qmstrace status` and `qmstrace check`. Add real content and markers;
    do not manufacture requirements or evidence merely to silence a finding.
-7. Run pytest with `--strict-markers` to confirm marker registration in the project's test
-   invocation. If that invocation uses `-c`, register `verifies` in that explicit config too.
+7. Where the repo's tests are pytest functions, run pytest with `--strict-markers` to confirm
+   marker registration in the project's test invocation. If that invocation uses `-c`, register
+   `verifies` in that explicit config too. A C# repo has no marker to register: its tests name
+   what they verify in the `DisplayName` — [trace a C# repo](trace-a-csharp-repo.md).
 8. Run `qmstrace init` again; each target should be unchanged. Review and commit the files.
 
 For the authoring loop and the final gate, follow [check your work](check-your-work.md).

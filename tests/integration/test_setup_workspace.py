@@ -18,7 +18,8 @@ from qmstrace.workspace import Workspace
 @pytest.mark.verifies("REQ-QMT-12")
 def test_new_repo_is_idempotent_and_its_marker_runs(tmp_path: Path) -> None:
     first = Workspace.initialize(tmp_path, subject="service", key="SVC")
-    assert all(s.startswith("updated:") for s in first)
+    assert first[0].startswith("starter: python")
+    assert all(s.startswith("updated:") for s in first[1:])
     assert "service (SVC)" in (tmp_path / "AGENTS.md").read_text()
     config = Workspace.open(tmp_path).config
     assert config.schema_form.value == "the repo's own"
@@ -47,7 +48,7 @@ def test_refresh_existing_nested_config_and_symlinked_guide(project: Path) -> No
     assert (root / "guide.md").read_text().startswith("Before\n")
     assert (root / "qmstrace.toml").read_bytes() == before
     assert all(s.startswith("unchanged:") for s in Workspace.initialize(root))
-    with pytest.raises(CouldNotJudge, match="Subject options"):
+    with pytest.raises(CouldNotJudge, match="Starter options"):
         Workspace.initialize(root, subject="wrong")
 
 
@@ -289,3 +290,105 @@ def test_init_in_a_csharp_repo_writes_no_pytest_settings(cases: Path) -> None:
     stanza = (agent / "AGENTS.md").read_text(encoding="utf-8")
     assert "component `csharp-file` in `src/**/*.cs`" in stanza
     assert "automated_test `xunit` in `tests/Agent.Tests/**/*Tests.cs`" in stanza
+
+
+# ── the starter a repo's shape chooses — #38 (ADR-0006) ─────────────────────────────────────
+
+
+@pytest.mark.verifies("REQ-QMT-12")
+@pytest.mark.parametrize(
+    ("build_file", "why"),
+    [
+        ("App.csproj", "App.csproj"),
+        ("App.sln", "App.sln"),
+        ("App.slnx", "App.slnx"),
+        ("App/App.csproj", "App/App.csproj"),
+        ("src/App/App.csproj", "src/App/App.csproj"),
+    ],
+)
+def test_a_dotnet_repo_gets_the_csharp_starter(tmp_path: Path, build_file: str, why: str) -> None:
+    built = tmp_path / build_file
+    built.parent.mkdir(parents=True, exist_ok=True)
+    built.touch()
+    written = Workspace.initialize(tmp_path, subject="agent", key="AGT")
+    assert written[0] == f"starter: csharp ({why})"
+    types = Workspace.open(tmp_path).config.item_types
+    assert types["component"].extractor == "csharp-file"
+    assert types["automated_test"].extractor == "xunit"
+    assert types["requirement"].extractor == "markdown"
+    assert not (tmp_path / "pytest.ini").exists() and not (tmp_path / "pyproject.toml").exists()
+    assert "component `csharp-file` in `src/**/*.cs`" in (tmp_path / "AGENTS.md").read_text()
+
+
+@pytest.mark.verifies("REQ-QMT-12")
+def test_a_python_repo_and_a_bare_one_keep_the_python_starter(tmp_path: Path) -> None:
+    (tmp_path / "declared").mkdir()
+    (tmp_path / "declared" / "pyproject.toml").write_text("[project]\nname = 'p'\n")
+    declared = Workspace.initialize(tmp_path / "declared")
+    assert declared[0] == "starter: python (pyproject.toml)"
+    (tmp_path / "bare").mkdir()
+    bare = Workspace.initialize(tmp_path / "bare")
+    assert bare[0] == "starter: python (the default; no build file names a language)"
+    for repo in ("declared", "bare"):
+        types = Workspace.open(tmp_path / repo).config.item_types
+        assert types["component"].extractor == "python-module"
+        assert types["automated_test"].extractor == "pytest"
+
+
+@pytest.mark.verifies("REQ-QMT-12")
+def test_a_repo_of_two_languages_is_refused_and_writes_nothing(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text("[project]\nname = 'p'\n")
+    (tmp_path / "App.csproj").touch()
+    with pytest.raises(CouldNotJudge, match=r"two languages: pyproject\.toml and App\.csproj"):
+        Workspace.initialize(tmp_path)
+    assert not (tmp_path / "qmstrace.toml").exists() and not (tmp_path / "AGENTS.md").exists()
+    written = Workspace.initialize(tmp_path, language="csharp")
+    assert written[0] == "starter: csharp (--language)"
+    assert Workspace.open(tmp_path).config.item_types["component"].extractor == "csharp-file"
+
+
+@pytest.mark.verifies("REQ-QMT-12")
+def test_language_overrides_what_the_build_files_say(tmp_path: Path) -> None:
+    (tmp_path / "dotnet").mkdir()
+    (tmp_path / "dotnet" / "App.csproj").touch()
+    written = Workspace.initialize(tmp_path / "dotnet", language="python")
+    assert written[0] == "starter: python (--language)"
+    types = Workspace.open(tmp_path / "dotnet").config.item_types
+    assert types["component"].extractor == "python-module"
+    assert (tmp_path / "dotnet" / "pytest.ini").exists()
+
+
+@pytest.mark.verifies("REQ-QMT-12")
+def test_a_language_with_no_starter_is_refused_before_any_write(tmp_path: Path) -> None:
+    with pytest.raises(CouldNotJudge, match="no rust starter"):
+        Workspace.initialize(tmp_path, language="rust")
+    assert not any(tmp_path.iterdir())
+
+
+@pytest.mark.verifies("REQ-QMT-12", "REQ-QMT-19")
+def test_a_ledger_declares_no_language(project: Path) -> None:
+    ledger = project / "ledger"
+    with pytest.raises(CouldNotJudge, match="not its code"):
+        Workspace.initialize(ledger, language="csharp")
+    assert not (ledger / "qmstrace.toml").exists()
+    written = Workspace.initialize(ledger, subject="service", key="SVC")
+    assert not any(line.startswith("starter:") for line in written)
+
+
+@pytest.mark.verifies("REQ-QMT-12")
+def test_the_starter_options_need_a_configuration_to_create(tmp_path: Path) -> None:
+    Workspace.initialize(tmp_path)
+    for options in ({"subject": "other"}, {"key": "OTHER"}, {"language": "csharp"}):
+        with pytest.raises(CouldNotJudge, match="Starter options"):
+            Workspace.initialize(tmp_path, **options)  # type: ignore[arg-type]
+
+
+def test_init_csharp_cli_golden(tmp_path: Path, golden: Callable[[Path, str], None]) -> None:
+    (tmp_path / "App.csproj").touch()
+    result = CliRunner().invoke(
+        app, ["-C", str(tmp_path), "init", "--subject", "agent", "--key", "AGT"]
+    )
+    assert result.exit_code == 0, result.output
+    golden(Path("tests/cli/golden/init-csharp.txt"), result.output)
+    written = (tmp_path / "qmstrace.toml").read_text(encoding="utf-8")
+    golden(Path("tests/cli/golden/init-csharp-config.toml"), written)
