@@ -33,6 +33,17 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- `qmstrace init` in a repo with no configuration writes the starter of the repo's language. A
+  .NET solution or project file at or just below the root — `*.sln`, `*.slnx`, `*.csproj`,
+  `*/*.csproj`, `src/*/*.csproj` — means C#: components read by `csharp-file` from
+  `src/**/*.cs`, automated tests by `xunit` from `tests/**/*Tests.cs`, and no `pytest.ini`. A
+  `pyproject.toml`, or no build file at all, means Python, exactly as before. The run's first
+  line names the starter and the file that chose it — `starter: csharp (App.csproj)`. A repo
+  holding both languages' build files is refused, naming them; `--language python|csharp`
+  settles it, and is refused when a configuration already exists or in a ledger. Everything but
+  the two code item types — the schema, the coverage rules, the requirement and design types —
+  is the same in both starters
+  ([#38](https://github.com/Lightbridge-KS/qmstrace/issues/38)).
 - An xUnit `DisplayName`'s leading ID ends where an ID in prose ends, so a suffix written
   straight after it no longer hides it: `TC-SVC-01.1-01/O03 …` and `TC-SVC-01.1: …` link
   `TC-SVC-01.1-01` and `TC-SVC-01.1`, where they were `V14` and linked nothing. A letter,

@@ -503,6 +503,24 @@ least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
 | A requirement three ways can meet | *write one of these*: agent (xUnit), service (pytest), ledger (test case) |
 | `init` in the C# repo | the stanza names `csharp-file` and `xunit`; no pytest settings written |
 
+## \#38 — the starter a repo's shape chooses
+
+ADR-0006: a new product repo's starter declares the item types of its language, which the build
+files at or just below the root choose; `--language` overrides, and a repo of two languages is
+refused. Covered by `tests/integration/test_setup_workspace.py` § the starter a repo's shape
+chooses.
+
+| Scenario | Expected |
+|---|---|
+| `App.csproj`, `App.sln`, `App.slnx`, `App/App.csproj` or `src/App/App.csproj` at the root | `starter: csharp (<that file>)`; components `csharp-file`, tests `xunit`; no pytest settings |
+| `pyproject.toml` at the root | `starter: python (pyproject.toml)`; components `python-module`, tests `pytest` |
+| Neither | `starter: python (the default; no build file names a language)`, as every starter was before |
+| Both | refused, exit 2, naming both files; nothing is written; `--language csharp` then writes the C# starter |
+| `--language` against what the build files say | the option wins, and the line says `(--language)` |
+| `--language` naming no packaged starter | refused before any write, listing the languages there are |
+| `--language` in a ledger, or with a configuration already present | refused; a ledger declares no code |
+| Either starter, joined with the schema | the document item types, the links and G01–G07 are the same bytes |
+
 ## M12e — TRX reports
 
 ADR-0004: `results` reads TRX as well as JUnit, the root element deciding which. The fixtures in

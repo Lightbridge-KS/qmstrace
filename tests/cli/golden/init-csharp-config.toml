@@ -1,0 +1,98 @@
+# Repo-owned starter schema. Review rules and paths before authoring.
+# No origins or baselines are invented: add the actual sources and tag scopes.
+version = 1
+
+[schema]
+version = 1
+project = "AGT"
+
+[schema.item_types.requirement]
+required = ["Category", "Verify-by"]
+
+[schema.item_types.requirement.values]     # allowed values of a field
+Category    = ["functional-suitability", "performance-efficiency", "compatibility", "usability", "reliability",
+               "maintainability", "portability", "security", "design-constraint", "legal-regulatory"]
+"Verify-by" = ["test", "inspection", "analysis"]
+
+[schema.item_types.design_element]
+[schema.item_types.component]
+
+[schema.item_types.automated_test]   # the code that runs a test
+levels = ["unit", "integration", "system"]
+
+# ── link types — a field whose name is a link marker IS the link; all are many-to-many ────
+[schema.links]
+Satisfies  = { from = ["design_element"],                to = ["requirement"] }
+Implements = { from = ["component"],                     to = ["design_element"] }
+verifies   = { from = ["automated_test"],                to = ["requirement", "design_element"] }
+Assumes    = { from = ["requirement", "design_element"], to = ["requirement", "design_element"], coverage = false }
+# coverage = false: the link carries suspicion and impact, and no coverage rule may need it
+
+# ── coverage rules — an unmet rule is a gap ───────────────────────────────────────────────
+[[schema.rules]]
+code  = "G01"
+item  = "requirement"
+needs = "incoming:Satisfies"
+text  = "no design element satisfies it yet."
+
+[[schema.rules]]
+code  = "G02"
+item  = "requirement"
+where = { "Verify-by" = "test" }
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[schema.rules]]
+code  = "G03"
+item  = "design_element"
+needs = "incoming:Implements"
+text  = "no component implements it yet."
+
+[[schema.rules]]
+code  = "G04"
+item  = "design_element"
+needs = "incoming:verifies"
+text  = "no test verifies it yet."
+
+[[schema.rules]]
+code  = "G05"
+item  = "design_element"
+needs = "outgoing:Satisfies"
+text  = "satisfies no requirement — every design element points back to one."
+
+[[schema.rules]]
+code  = "G06"
+item  = "component"
+needs = "outgoing:Implements"
+text  = "implements no design element — every component points back to one."
+
+[[schema.rules]]
+code  = "G07"
+item  = "automated_test"
+needs = "outgoing:verifies"
+text  = "verifies nothing."
+
+
+[subjects.agent]                  # a named body of requirements; a baseline freezes a subject
+key = "AGT"                         # the key inside its item IDs
+
+[items.requirement]
+extractor  = "markdown"
+id_pattern = '^REQ-AGT-\d{2}$'
+files      = ["docs/req/*-srs.md"]
+
+[items.design_element]
+extractor  = "markdown"
+id_pattern = '^DSN-AGT-\d{2}$'
+files      = ["docs/design/*.md"]
+
+# ── how this repo's code and tests are read — C# ──────────────────────────────────────────
+# Generated source a build commits — migrations, designer files — is a component with nothing
+# to implement: add it to `ignore` here rather than marking it.
+[items.component]                   # ID = the file's path
+extractor = "csharp-file"
+files     = ["src/**/*.cs"]
+
+[items.automated_test]              # ID = path::Class::Method; the level is the folder's
+extractor = "xunit"
+files     = ["tests/**/*Tests.cs"]

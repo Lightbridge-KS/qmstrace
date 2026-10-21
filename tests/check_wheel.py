@@ -148,6 +148,13 @@ source = '/// Implements: DSN-SVC-01\npublic class Key { }\n'
 read = csharp_file.extract('src/Key.cs', source, by_path.item_types['component'], by_path)
 assert [link.dst for link in read.links] == ['DSN-SVC-01'] and not read.findings
 from importlib.resources import files
+starter = files('qmstrace').joinpath('assets/starter.toml').read_text()
+for language, extractors in (('python', ('python-module', 'pytest')),
+                             ('csharp', ('csharp-file', 'xunit'))):
+    tail = files('qmstrace').joinpath(f'assets/items-{language}.toml').read_text()
+    joined = (starter + '\n' + tail).replace('__SUBJECT__', 'service').replace('__KEY__', 'SVC')
+    types = TraceConfig.parse(joined).item_types
+    assert (types['component'].extractor, types['automated_test'].extractor) == extractors
 block = setup.stanza(files('qmstrace').joinpath('assets/stanza.md').read_text(), by_path)
 guide = setup.guide('Existing guide', block)
 assert setup.guide(guide, block) == guide

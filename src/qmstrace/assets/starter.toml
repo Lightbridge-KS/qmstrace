@@ -85,12 +85,3 @@ files      = ["docs/req/*-srs.md"]
 extractor  = "markdown"
 id_pattern = '^DSN-__KEY__-\d{2}$'
 files      = ["docs/design/*.md"]
-
-[items.component]                   # ID = the module's path
-extractor = "python-module"
-files     = ["src/**/*.py"]
-ignore    = ["**/__init__.py"]
-
-[items.automated_test]              # ID = the test function's node id
-extractor = "pytest"
-files     = ["tests/**/test_*.py"]

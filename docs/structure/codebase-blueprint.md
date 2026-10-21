@@ -153,7 +153,7 @@ src/qmstrace/
       _schema.py         rules, schema descriptions and schema-copy outcomes
     graph.py             deterministic assessment projection and standalone HTML (M7b)
     tables.py            one table as a qmstrace.table/1 JSON document, deterministic (#49)
-  assets/                skill/SKILL.md · stanza.md · starter.toml · ledger-starter.toml (M10c) · graph.html/js · pinned
+  assets/                skill/SKILL.md · stanza.md · starter.toml + items-python/csharp.toml (#38) · ledger-starter.toml (M10c) · graph.html/js · pinned
                          vendor/vis-network and license — package data
 tests/
   browser/               Node built-in tests for display-only control behavior; no npm deps
@@ -375,7 +375,7 @@ deciding eligibility. The check failure predicate remains violations plus strict
 | change a command's output | the owning view in `render/text/` and its golden file — then `rg <golden> contents/` for the prose that frames it |
 | change which items a walk reaches, or in what order | `core/graph/_graph.py` `_walk` — `thread`, `impact` and suspects all render it; `tests/unit/test_graph.py` § walks pins the rules |
 | add a command | `cli/_local.py` (handler) and `_app.py` (registration and `short_help`), `render/text/`, goldens for its output and its help, a page in `contents/reference/commands/` — `test_catalogue.py`, `test_help.py` and `test_manual.py` fail without them |
-| change a configuration key | `core/config/_sections.py` (section policy), `_schema.py` (records), `_parse.py` (assembly/cross-checks), both test-bed configurations, the `init` template |
+| change a configuration key | `core/config/_sections.py` (section policy), `_schema.py` (records), `_parse.py` (assembly/cross-checks), both test-bed configurations, the `init` starter and its `items-<language>` fragments |
 | change what the agent is told | `assets/skill/SKILL.md` or `assets/stanza.md` — `test_skill_parity.py` guards the examples |
 | change which repos the ledger's check reads, or when it refuses | `workspace/_project.py` `_members` — `tests/integration/test_project.py` § refused |
 | change how a derived ID or a location is written for the whole project | `core/model.py` `Extracted.qualified` — and the trace lock's future `(ID, type, repo, file, digest)` line |
@@ -672,8 +672,11 @@ objects through explicit compatibility exports. `Workspace.initialize` and
 `infra/files.py` writes them as one change with rollback, refuses a path it did not write, and
 creates a link only when its place is free. In a ledger, `Workspace.initialize` writes the
 ledger's own configuration from `assets/ledger-starter.toml` when it has none, and
-`setup.stanza(…, ledger=True)` names the ledger's verbs (M10c). Reasoning: surface architecture §
-Setup contract — M6, § Schema copy contract — M9b.
+`setup.stanza(…, ledger=True)` names the ledger's verbs (M10c). For a product repo it joins
+`assets/starter.toml` with the `items-<language>.toml` fragment the repo's build files choose,
+or that `--language` names, and returns the choice as its first line; `workspace/_setup.py`
+owns that reading, since `core/setup/` touches no filesystem (#38, ADR-0006). Reasoning: surface
+architecture § Setup contract — M6, § Schema copy contract — M9b.
 
 Satisfies: REQ-QMT-12, REQ-QMT-13, REQ-QMT-19
 

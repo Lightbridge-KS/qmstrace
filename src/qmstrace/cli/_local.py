@@ -132,15 +132,23 @@ def init(
         str | None, typer.Option(help="New repo subject name; default: product.")
     ] = None,
     key: Annotated[str | None, typer.Option(help="New repo ID key; default: PROD.")] = None,
+    language: Annotated[
+        str | None,
+        typer.Option(help="Language the new starter declares item types for: python or csharp."),
+    ] = None,
     directory: Directory = None,
 ) -> int:
     """Initialize the selected directory; refresh managed guidance in an existing traced repo.
 
     Existing configuration and unrelated guide/settings content are preserved. Repeating init
-    changes nothing. The starter is repo-owned, with no invented origins or baseline tags.
-    Commit the generated files after reviewing the rules and scan paths.
+    changes nothing. The starter is repo-owned, with no invented origins or baseline tags; a new
+    product repo's starter declares the item types of the language its build files name, and
+    init says which it chose. Commit the generated files after reviewing the rules and scan
+    paths.
     """
-    for line in Workspace.initialize(_directory(ctx, directory), subject=subject, key=key):
+    for line in Workspace.initialize(
+        _directory(ctx, directory), subject=subject, key=key, language=language
+    ):
         typer.echo(line)
     typer.echo("Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0.")
     return EXIT_OK

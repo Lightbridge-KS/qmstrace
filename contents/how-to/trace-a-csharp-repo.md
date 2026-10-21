@@ -10,8 +10,17 @@
 
 ## Steps
 
-1. **Declare the two item types** in the repo's `qmstrace.toml` — components from the source
-   files, automated tests from the test files. This is the fixture project's C# agent:
+1. **Let `init` declare the two item types** — components from the source files, automated tests
+   from the test files. `qmstrace init` in a repo with no configuration recognises a .NET repo
+   by its solution or project file and writes the C# starter, saying so on its first line, and
+   writes no `pytest.ini`:
+
+    ``` text
+    --8<-- "cli/golden/init-csharp.txt"
+    ```
+
+    This is the fixture project's C# agent, whose `[items]` are the starter's with the test glob
+    narrowed to its one test project:
 
     ``` toml
     --8<-- "fixtures/cases/agent/qmstrace.toml"
@@ -19,10 +28,13 @@
 
     The type the tests are read into must carry exactly one link in the project's schema —
     `verifies` — because a `DisplayName` names an ID, not a link. A schema that gives it two is
-    refused, and says so. `qmstrace init` on a repo with no configuration still writes the
-    Python starter ([#38](https://github.com/Lightbridge-KS/qmstrace/issues/38)), and a
-    `pytest.ini` that registers the `verifies` marker: edit `[items]` as above, and delete the
-    `pytest.ini`.
+    refused, and says so.
+
+    Two things to settle while the paths are still cheap to change. Generated source that the
+    build commits — EF Core migrations, designer files — is a component with nothing to
+    implement, so each one is a `G06` gap: put those paths in `ignore` rather than marking
+    them. And a repo that holds a `pyproject.toml` beside its project file is refused until
+    `--language csharp` says which item types to declare.
 
 2. **Mark each component in its first type's leading doc comment.** A field line, with XML tags
    around it if you like; the same line in any other comment is not read, and is reported:

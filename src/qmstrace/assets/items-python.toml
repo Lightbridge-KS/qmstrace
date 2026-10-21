@@ -1,0 +1,9 @@
+# ── how this repo's code and tests are read — Python ──────────────────────────────────────
+[items.component]                   # ID = the module's path
+extractor = "python-module"
+files     = ["src/**/*.py"]
+ignore    = ["**/__init__.py"]
+
+[items.automated_test]              # ID = the test function's node id
+extractor = "pytest"
+files     = ["tests/**/test_*.py"]

@@ -78,16 +78,28 @@ class Workspace:
 
     @classmethod
     def initialize(
-        cls, start: Path, *, subject: str | None = None, key: str | None = None
+        cls,
+        start: Path,
+        *,
+        subject: str | None = None,
+        key: str | None = None,
+        language: str | None = None,
     ) -> tuple[str, ...]:
         """Set up the selected directory, or refresh an existing ancestor's managed files.
 
         A ledger — the folder that holds `qmstrace.schema.toml` — is set up as a ledger that
         holds the project's documents (ADR-0001): its own configuration reads the schema by
         path, and its stanza names the ledger's verbs (M10c).
+
+        A new product-repo configuration declares the item types of the repo's language, which
+        its build files choose unless `language` names one (ADR-0006).
         """
         return _initialize(
-            start, load_config=lambda root: cls.open(root).config, subject=subject, key=key
+            start,
+            load_config=lambda root: cls.open(root).config,
+            subject=subject,
+            key=key,
+            language=language,
         )
 
     @classmethod

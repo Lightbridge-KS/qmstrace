@@ -1,0 +1,10 @@
+# ── how this repo's code and tests are read — C# ──────────────────────────────────────────
+# Generated source a build commits — migrations, designer files — is a component with nothing
+# to implement: add it to `ignore` here rather than marking it.
+[items.component]                   # ID = the file's path
+extractor = "csharp-file"
+files     = ["src/**/*.cs"]
+
+[items.automated_test]              # ID = path::Class::Method; the level is the folder's
+extractor = "xunit"
+files     = ["tests/**/*Tests.cs"]

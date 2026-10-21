@@ -1,3 +1,4 @@
+starter: python (the default; no build file names a language)
 updated: qmstrace.toml
 updated: AGENTS.md
 updated: .agents/skills/qmstrace/SKILL.md

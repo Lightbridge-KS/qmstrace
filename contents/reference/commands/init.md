@@ -4,8 +4,9 @@
 
     Set up a product directory or refresh its managed guidance. Existing trace configuration
     is preserved. The starter uses subject `product` and key `PROD`; choose these explicitly
-    for a new repo. In a ledger, it sets the ledger up to hold the project's documents.
-    Repeating setup makes no further changes.
+    for a new repo. Its item types are those of the language the repo's build files name — C#
+    or Python — and the run says which starter it chose. In a ledger, it sets the ledger up to
+    hold the project's documents. Repeating setup makes no further changes.
 
 ## Invocation
 
@@ -20,7 +21,38 @@ ledger that holds the documents: see below.
 
 `--subject service --key SVC` applies only to a new configuration. Subject names use lowercase
 letters, digits and hyphens; keys use uppercase letters and digits. Existing configurations
-must be edited explicitly; setup never renames existing item identities.
+must be edited explicitly; setup never renames existing item identities. `--language` applies
+only to a new configuration too, and not in a ledger, which holds documents rather than code.
+
+## The starter's language
+
+A new product repo's starter declares the item types of its language. The build files at or
+just below the repo root choose it:
+
+| Found at the root, or just below | Starter | Components | Automated tests |
+|---|---|---|---|
+| `*.sln`, `*.slnx`, `*.csproj`, `*/*.csproj`, `src/*/*.csproj` | `csharp` | `csharp-file` from `src/**/*.cs` | `xunit` from `tests/**/*Tests.cs` |
+| `pyproject.toml` | `python` | `python-module` from `src/**/*.py` | `pytest` from `tests/**/test_*.py` |
+| neither | `python` | as above | as above |
+
+The first line of the run names the starter and the file that chose it — `starter: csharp
+(App.csproj)` — so the choice is on the record of the run that made it. A repo holding both
+languages' build files is refused with exit 2, naming them: pass `--language python` or
+`--language csharp` to say which item types the starter declares. Nothing beyond `[items]`
+differs between the two: the schema, the coverage rules and the document item types are the
+same.
+
+In a C# repo:
+
+``` text
+--8<-- "cli/golden/init-csharp.txt"
+```
+
+and the configuration it writes:
+
+``` toml
+--8<-- "cli/golden/init-csharp-config.toml"
+```
 
 ## Written files
 
@@ -29,8 +61,9 @@ must be edited explicitly; setup never renames existing item identities.
 ```
 
 - `qmstrace.toml`: a repo-owned starter schema and scan paths, only when absent. It includes
-  requirement/design/component/test types and coverage rules. It invents no origins, request
-  register or baseline tag patterns. Configure those from the actual project before baselining.
+  requirement/design/component/test types and coverage rules, the last two for the language the
+  repo's build files name (above). It invents no origins, request register or baseline tag
+  patterns. Configure those from the actual project before baselining.
 - `AGENTS.md`: replace the single `qmstrace:begin` / `qmstrace:end` block, preserving surrounding
   text. A guide symlink within the product directory is followed; one outside it is refused.
 - `.agents/skills/qmstrace/SKILL.md`: a copy of the packaged authoring skill, in the folder a
@@ -45,10 +78,12 @@ must be edited explicitly; setup never renames existing item identities.
   are already one folder, or when `.claude` or `.claude/skills` links elsewhere. Where
   symbolic links cannot be created — some Windows setups — nothing at all is written. No
   global agent configuration is changed.
-- The selected root pytest configuration: register `verifies` while preserving other settings.
-  Selection follows pytest's root-file priority: `pytest.toml`, `.pytest.toml`, `pytest.ini`,
-  `.pytest.ini`, configured `pyproject.toml`, `tox.ini`, `setup.cfg`. Otherwise add to an existing
-  `pyproject.toml`, or create `pytest.ini`. Explicit pytest `-c` overrides are outside this setup.
+- The selected root pytest configuration, **only where an item type reads pytest tests**:
+  register `verifies` while preserving other settings. Selection follows pytest's root-file
+  priority: `pytest.toml`, `.pytest.toml`, `pytest.ini`, `.pytest.ini`, configured
+  `pyproject.toml`, `tox.ini`, `setup.cfg`. Otherwise add to an existing `pyproject.toml`, or
+  create `pytest.ini`. Explicit pytest `-c` overrides are outside this setup. A C# repo gets no
+  pytest settings, as a ledger does not.
 
 In a repo that already has a `.claude/` folder:
 
@@ -89,4 +124,3 @@ recognises it by its `qmstrace.schema.toml`:
 - The skill, as in a product repo. No pytest settings: a ledger declares no tests.
 - `init` does not edit the schema. Until `[repos]` lists the ledger as `ledger = "."`, it says
   so on a `next:` line, and `qmstrace ledger check` refuses to judge the project.
-
