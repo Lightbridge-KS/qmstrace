@@ -43,6 +43,28 @@
     --8<-- "fixtures/cases/agent/src/Agent/KeyCheck.cs"
     ```
 
+    **A file with no type to document** — a Razor page, whose class is generated at build time,
+    or a file of top-level statements — is marked in its own leading comment instead. Add
+    `src/**/*.razor` to the component type's `files`, as the configuration above does, and mark
+    the page in the first `@* … *@` of its **head**: its leading blank lines, comments and
+    directives, above the first markup or `@code` block. Either order works — the comment above
+    `@page`, or below it:
+
+    ``` razor
+    --8<-- "fixtures/cases/agent/src/Agent/Records.razor"
+    ```
+
+    A `///` line in a Razor page is a C# comment, which Razor renders as page text, so it links
+    nothing — and is reported, as is a `@* … *@` marker below the head. A file of top-level
+    statements is marked in the `//` or `///` block it opens with:
+
+    ``` csharp
+    --8<-- "fixtures/cases/agent/src/Agent/Program.cs"
+    ```
+
+    A file that **does** declare a type is never read this way: a marker above its first type
+    stays a stray, so there is one place to look per file.
+
 3. **Start each test's `DisplayName` with its ID.** In a project with a Test Specification,
    that is the test case the test runs; several tests may run one. A `[Theory]` is one
    automated test, its rows its runs:

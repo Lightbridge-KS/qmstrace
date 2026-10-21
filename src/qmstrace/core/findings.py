@@ -433,8 +433,15 @@ def fix_stray(stray: Stray) -> str:
         )
     if stray.kind == "doccomment":
         return (
-            f"the '{marker}:' line at {where} is not in the first type's leading `///` doc "
-            "comment, so it is not read — move it there."
+            f"the '{marker}:' line at {where} is in neither the first type's leading `///` doc "
+            "comment nor, in a file that declares no type, the comment block the file opens "
+            "with, so it is not read — move it to whichever the file has."
+        )
+    if stray.kind == "razor":
+        return (
+            f"the '{marker}:' line at {where} is not in a `@* … *@` comment above the page's "
+            "first markup or code block, so it is not read — move it there, among the "
+            "directives; `///` is a C# comment, which Razor renders as page text."
         )
     if stray.kind == "comment":
         return (

@@ -1,0 +1,16 @@
+@* A Razor page declares its class at build time, so it is marked here, at the page's head. *@
+@* Implements: DSN-SVC-02 *@
+@page "/records"
+
+<h1>Records</h1>
+
+<ul>
+    @foreach (var line in Lines)
+    {
+        <li>@line</li>
+    }
+</ul>
+
+@code {
+    private string[] Lines { get; set; } = [];
+}

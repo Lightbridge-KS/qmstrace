@@ -89,7 +89,8 @@ def test_a_csharp_repos_status_and_gate(cases: Path, golden: Golden) -> None:
     code, status = run("-C", agent, "status")
     assert code == 0
     golden(GOLDEN / "status-cases-agent.txt", status)
-    assert "component         1 item  in  1 file   src/**/*.cs" in status
+    # A class, a Razor page and a file of top-level statements, all three marked (#64).
+    assert "component         3 items in  3 files  src/**/*.cs, src/**/*.razor" in status
     assert "[Fact]/[Theory] methods: a Theory is one automated test" in status
     code, output = run("-C", agent, "check", "--strict")
     assert code == 0, output

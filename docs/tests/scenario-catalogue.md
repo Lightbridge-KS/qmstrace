@@ -503,6 +503,27 @@ least one test (`tests/unit/test_extract_csharp.py`, `tests/unit/test_forms.py`,
 | A requirement three ways can meet | *write one of these*: agent (xUnit), service (pytest), ledger (test case) |
 | `init` in the C# repo | the stanza names `csharp-file` and `xunit`; no pytest settings written |
 
+## \#64 — a file with no type to document
+
+ADR-0007: a `.razor` page is marked in the first `@* … *@` of its head and read without the C#
+parser; a `.cs` file with no type in the comment block it opens with; a file that has a type is
+never read that way. Covered by `tests/unit/test_extract_csharp.py` § 7, and by the `cases`
+agent fixture, which now holds a marked Razor page and a marked `Program.cs`.
+
+| Scenario | Expected |
+|---|---|
+| `@* Implements: … *@` above `@page`, below it, spanning lines, or with XML around it | one link; no stray, no finding |
+| `@* … *@` below the first markup, or inside `@code` | a `razor` stray naming the line |
+| `///` or `//` carrying a marker in a `.razor` | a `razor` stray — Razor renders it as page text |
+| A Razor page's own copy naming an ID (`<p>Implements: … soon</p>`) | nothing: not a link, not a stray |
+| A `.razor` whose markup would put a `///` field line in an error span | read, **no V08** — the file never reaches the C# parser |
+| A `.razor` with no comment at all | a component, no link, no stray |
+| Top-level statements marked in the opening `//` or `///` block | one link; no stray |
+| A comment below that opening block | a `doccomment` stray |
+| A `.cs` **with** a type and a file-leading `Implements:` line | a `doccomment` stray, as before |
+| A Razor page's digest | unchanged by comment or layout edits; changed by a markup edit |
+| Each place the component form names | round-trips through the extractor in the file shape it belongs to |
+
 ## \#38 — the starter a repo's shape chooses
 
 ADR-0006: a new product repo's starter declares the item types of its language, which the build

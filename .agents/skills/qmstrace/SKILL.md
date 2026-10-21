@@ -68,6 +68,13 @@ and several may run one; `qmstrace rules` says which a project uses.
 public static class KeyCheck { }
 ```
 
+```razor
+@* Implements: DSN-SVC-02 *@
+@page "/records"
+
+<h1>Records</h1>
+```
+
 ```csharp
 public class KeyCheckTests
 {
@@ -78,7 +85,11 @@ public class KeyCheckTests
 
 In a C# repo a file's link is a field line in its first type's leading `///` comment, and an
 xUnit `[Fact]` or `[Theory]` names the ID it verifies at the start of its `DisplayName`, as a
-string literal. A `[Trait]` never reaches a test report and is not read.
+string literal. A `[Trait]` never reaches a test report and is not read. A file with **no type
+to document** is marked in its own leading comment instead: a Razor page in the first
+`@* … *@` of its head — its leading blank lines, comments and directives, above the first
+markup or code block — and a file of top-level statements in the `//` block it opens with. A
+marker a Razor page renders as text, or one below its head, is reported.
 
 A heading that starts with the item's ID, in a file its type is read from, declares a
 document item. The item is its section, down to the next heading at the same or a higher

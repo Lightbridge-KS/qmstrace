@@ -2,10 +2,10 @@ schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo
 scanned (working tree, not pinned):
   requirement     known to the project, not scanned here
   design_element  known to the project, not scanned here
-  component         1 item  in  1 file   src/**/*.cs
+  component         3 items in  3 files  src/**/*.cs, src/**/*.razor
   test_case       known to the project, not scanned here
   automated_test    2 items in  1 file   tests/Agent.Tests/**/*Tests.cs · [Fact]/[Theory] methods: a Theory is one automated test
-links: 3
+links: 5
 external AGR-*: verified against ../ledger/agreement.md (3 declared)
 sibling ledger: 2 requirement, 2 design_element, 4 test_case — read from ../ledger's working tree, not pinned; cite its items by ID
 sibling service: nothing declared — read from ../service's working tree, not pinned; cite its items by ID

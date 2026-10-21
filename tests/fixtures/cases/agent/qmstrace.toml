@@ -9,7 +9,7 @@ path = "../ledger/qmstrace.schema.toml"
 
 [items.component]                   # ID = the file's path
 extractor = "csharp-file"
-files     = ["src/**/*.cs"]
+files     = ["src/**/*.cs", "src/**/*.razor"]
 
 [items.automated_test]              # ID = path::Class::Method; the probes are not traced
 extractor = "xunit"

@@ -63,14 +63,17 @@ malformed ID of the repo's kind is reported, not read as prose.
 In a C# repo, a component is a `.cs` file whose links are field lines (`Implements: …`) in the
 leading `///` doc comment of its first type, and an automated test is an xUnit `[Fact]` or
 `[Theory]` method whose link is the ID at the start of its `DisplayName`, written as a string
-literal. A marker in a form that is not read — a `DisplayName` that is not a literal, a
+literal. A file with no type to document is marked in its own leading comment instead: a Razor
+page in the Razor comment at its head, a file of top-level statements in the comment block it
+opens with. A marker in a form that is not read — a `DisplayName` that is not a literal, a
 `[Trait]` named after a link, a test attribute other than xUnit's, a test inside conditional
-compilation — is reported, never silently dropped.
+compilation, a marker written below a Razor page's head or in a comment syntax the page renders
+as text — is reported, never silently dropped.
 
 - Category: functional-suitability
 - Origin: AGR-2, AGR-6
 - Verify-by: test
-- Change: CR-003
+- Change: CR-003, CR-006
 
 ## Checking
 
