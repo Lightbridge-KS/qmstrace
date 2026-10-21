@@ -541,7 +541,9 @@ told it whether it was done.
 *Amended 2026-09-24 (M9): sections, heading forms, near-misses — below the table. Amended
 2026-10-14 ([ADR-0002](../adr/0002-dotted-ids.md)): the ID shape, dotted numbers; and
 ([ADR-0003](../adr/0003-test-cases-and-automated-tests.md)): test cases and automated tests; and
-([ADR-0004](../adr/0004-reading-csharp.md)): C# components and xUnit tests.*
+([ADR-0004](../adr/0004-reading-csharp.md)): C# components and xUnit tests. Amended 2026-10-21
+([ADR-0007](../adr/0007-a-file-with-no-type-to-document.md)): a file with no type to document —
+a Razor page, a file of top-level statements.*
 
 | Item | Declared as | Its ID | Link marker |
 |---|---|---|---|
@@ -550,6 +552,8 @@ told it whether it was done.
 | Component | a source module | derived — the module's path | `Implements: <design element>` in the module docstring |
 | Test case | a heading `### <ID> — <title>` in a Test Specification | authored | `verifies: <requirement or design element>[, …]` |
 | Component, in C# | a `.cs` file | derived — the file's path | `Implements: <design element>` in the first type's leading `///` doc comment |
+| Component, in a Razor page | a `.razor` file | derived — the file's path | `@* Implements: <design element> *@` in the page's head — its leading blank lines, Razor comments and directives, above the first markup or code block |
+| Component, in a file with no type | a `.cs` file declaring no type, e.g. top-level statements | derived — the file's path | `Implements: <design element>` in the `//` or `///` comment block the file opens with |
 | Automated test, in C# | an xUnit `[Fact]` or `[Theory]` method | derived — `path::Class::Method` | the ID at the start of its `DisplayName`, a string literal: the one link its type carries |
 | Automated test | a test function | derived — the test runner's own identifier for it | the test framework's own tagging, e.g. `@pytest.mark.verifies("<ID>")`, on the function or its class — naming the test case it runs, or what it verifies directly |
 

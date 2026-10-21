@@ -12,7 +12,7 @@
     {
       "repo": "agent",
       "location": "../agent",
-      "commit": "24f6279d9825fe7f941517035047d8a6b98c5562",
+      "commit": "4d2e36bfe01d3dccd7af5d112e6a44b771d112c5",
       "clean": true
     },
     {

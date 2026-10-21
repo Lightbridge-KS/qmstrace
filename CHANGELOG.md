@@ -31,6 +31,20 @@ All notable changes to this project are recorded here. The format follows
   `[tables.matrix] level` — when its type has none
   ([#49](https://github.com/Lightbridge-KS/qmstrace/issues/49)).
 
+### Added
+
+- A C# component whose file has **no type to document** can carry its `Implements:` marker. A
+  Razor page is marked in the first `@* Implements: DSN-… *@` of its head — its leading blank
+  lines, comments and directives, above the first markup or `@code` block, so the comment may
+  sit either side of `@page` — and a `.cs` file of top-level statements in the `//` or `///`
+  block it opens with. Add `src/**/*.razor` to the component type's `files`; the extractor is
+  still `csharp-file` and no schema changes. A Razor page is read by its lines and never handed
+  to the C# parser, which refused or accepted such a file depending on where its markup sat. A
+  marker a page renders as text, or one below its head, is reported as a stray with its own next
+  move. A file that **does** declare a type is unchanged: a marker above its first type is still
+  a stray, so there is one place to look per file
+  ([#64](https://github.com/Lightbridge-KS/qmstrace/issues/64)).
+
 ### Changed
 
 - `qmstrace init` in a repo with no configuration writes the starter of the repo's language. A

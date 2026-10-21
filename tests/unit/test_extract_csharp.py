@@ -16,6 +16,9 @@ The load-bearing claims, each pinned by a test:
 5. Syntax the grammar does not know outside what is read leaves the file readable; a parse error
    inside it is V08.
 6. A level folder matches regardless of case; a type read by `xunit` carries exactly one link.
+7. A file with no type to document is marked in its own leading comment (ADR-0007): a `.razor`
+   page in the Razor comment at its head, read without the C# parser; a `.cs` file of top-level
+   statements in the comment block it opens with. A file that has a type is never read that way.
 """
 
 from __future__ import annotations
@@ -101,7 +104,7 @@ def test_the_line_elsewhere_is_a_stray_and_a_mention_in_prose_is_nothing(
 
 def test_a_file_with_no_type_is_a_component_with_no_link(agent: TraceConfig) -> None:
     found = files(agent, "global using System;\n")
-    assert len(found.items) == 1 and found.links == ()
+    assert len(found.items) == 1 and found.links == () and found.strays == ()
 
 
 def test_layout_and_ordinary_comments_are_not_a_change(agent: TraceConfig) -> None:
@@ -335,3 +338,98 @@ def test_an_empty_file_and_a_broken_one(agent: TraceConfig) -> None:
     assert files(agent, "  \n") == Extracted()
     broken = files(agent, "/// Implements: DSN-SVC-01\npublic class K {\n    [Fact(\n}\n")
     assert [f.code for f in broken.findings] == ["V08"] and broken.items == ()
+
+
+# ── 7. a file with no type to document — #64 (ADR-0007) ────────────────────────────────────
+
+RAZOR = "src/Admin/Clients.razor"
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
+@pytest.mark.parametrize(
+    "text",
+    [
+        '@* Implements: DSN-SVC-01 *@\n@page "/clients"\n<h1>Clients</h1>\n',
+        '@page "/clients"\n@using App.Data\n@* Implements: DSN-SVC-01 *@\n\n<h1>Clients</h1>\n',
+        '@*\n  Implements: DSN-SVC-01\n*@\n@page "/clients"\n<h1>Clients</h1>\n',
+        '@page "/clients"\n@* <summary>Implements: DSN-SVC-01</summary> *@\n<h1>C</h1>\n',
+    ],
+    ids=["before the directives", "after them", "spanning lines", "with xml around it"],
+)
+def test_a_razor_page_links_through_the_comment_at_its_head(agent: TraceConfig, text: str) -> None:
+    found = files(agent, text, path=RAZOR)
+    assert [link.dst for link in found.links] == ["DSN-SVC-01"]
+    assert found.items[0].id == RAZOR and found.items[0].title == "Clients"
+    assert found.strays == () and found.findings == ()
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+@pytest.mark.parametrize(
+    ("text", "line"),
+    [
+        ('@page "/c"\n<h1>C</h1>\n@* Implements: DSN-SVC-01 *@\n', 3),
+        ('@page "/c"\n@code {\n@* Implements: DSN-SVC-01 *@\n}\n', 3),
+        ('/// Implements: DSN-SVC-01\n@page "/c"\n<h1>C</h1>\n', 1),
+    ],
+    ids=["below the head", "inside the code block", "written as a C# comment"],
+)
+def test_a_razor_marker_that_is_not_read_is_a_stray(
+    agent: TraceConfig, text: str, line: int
+) -> None:
+    found = files(agent, text, path=RAZOR)
+    assert found.links == ()
+    assert [(s.marker, s.targets, s.line, s.kind) for s in found.strays] == [
+        ("Implements", ("DSN-SVC-01",), line, "razor")
+    ]
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+def test_a_razor_page_is_never_handed_to_the_csharp_parser(agent: TraceConfig) -> None:
+    # Markup put a `///` field line inside an error span, which made the whole file V08.
+    found = files(agent, '/// Implements: DSN-SVC-01\n<MyComp Value="1" />\n', path=RAZOR)
+    assert found.findings == () and len(found.items) == 1
+    bare = files(agent, '@page "/c"\n<h1>C</h1>\n', path=RAZOR)
+    assert bare.links == () and bare.strays == () and bare.findings == ()
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+def test_a_razor_pages_own_copy_is_not_a_marker(agent: TraceConfig) -> None:
+    found = files(agent, '@page "/c"\n<p>Implements: DSN-SVC-01 soon</p>\n', path=RAZOR)
+    assert found.links == () and found.strays == ()
+
+
+@pytest.mark.verifies("REQ-QMT-21", "DSN-QMT-15")
+@pytest.mark.parametrize("lead", ["//", "///"], ids=["a plain comment", "a doc comment"])
+def test_top_level_statements_link_through_the_comment_the_file_opens_with(
+    agent: TraceConfig, lead: str
+) -> None:
+    text = f"{lead} Implements: DSN-SVC-01\nvar app = WebApplication.Create(args);\napp.Run();\n"
+    found = files(agent, text, path="src/Agent/Program.cs")
+    assert [link.dst for link in found.links] == ["DSN-SVC-01"]
+    assert found.strays == () and found.findings == ()
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+def test_a_comment_below_the_opening_block_is_still_a_stray(agent: TraceConfig) -> None:
+    text = "// a header\n\nvar app = Create();\n// Implements: DSN-SVC-01\napp.Run();\n"
+    found = files(agent, text, path="src/Agent/Program.cs")
+    assert found.links == ()
+    assert [(s.line, s.kind) for s in found.strays] == [(4, "doccomment")]
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+def test_a_file_that_has_a_type_is_never_read_by_its_own_leading_comment(
+    agent: TraceConfig,
+) -> None:
+    found = files(agent, "// Implements: DSN-SVC-01\npublic class K { }\n")
+    assert found.links == ()
+    assert [(s.line, s.kind) for s in found.strays] == [(1, "doccomment")]
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+def test_a_razor_digest_follows_the_page_and_not_its_comments(agent: TraceConfig) -> None:
+    one = files(agent, '@* Implements: DSN-SVC-01 *@\n@page "/c"\n<h1>C</h1>\n', path=RAZOR)
+    two = files(agent, '@page "/c"\n@* Implements: DSN-SVC-02 *@\n\n<h1>C</h1>\n', path=RAZOR)
+    assert one.items[0].digest == two.items[0].digest
+    three = files(agent, '@page "/c"\n<h1>Clients</h1>\n', path=RAZOR)
+    assert three.items[0].digest != one.items[0].digest

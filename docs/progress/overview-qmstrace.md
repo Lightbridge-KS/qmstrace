@@ -380,6 +380,21 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
    M11. Baseline only after the IDs, trace and review are ready.
 
 **Fixed from use:**
+- [x] 2026-10-21, seen in the first C# project's design register (#64): a component's marker was
+  read only from the leading `///` doc comment of a `.cs` file's first type, and a Blazor
+  `.razor` page has no such type — one design element named only an Admin Razor page and stayed
+  uncovered permanently, three more named a Razor component or a `Program.cs` of top-level
+  statements beside C# classes and closed through the classes while the register's other named
+  components dropped out with nothing said. Probing the engine first showed the two shapes are
+  different problems: on a top-level `.cs` the marker was already read and then discarded as a
+  stray, while in a `.razor` it was invisible — and routing such a file through the C# parse is
+  unsafe, since a `///` field line inside an error span makes the whole file V08, so where the
+  markup sits decides whether the file is read. A file with no type is now marked in its own
+  leading comment: a Razor page in the first `@* … *@` of its head, read by line and never by
+  the parser; a file of top-level statements in the block it opens with. A file that has a type
+  is untouched, so nothing that linked links differently. No new requirement and no
+  configuration change — REQ-QMT-21 amended under CR-006, DSN-QMT-15 retitled, decided in
+  ADR-0007.
 - [x] 2026-10-21, the deferral ADR-0004 filed and CR-003 excluded, now paid for by the first C#
   project (#38): `init` in a repo with no configuration wrote the Python starter, so a C# repo
   read as traced while declaring nothing, and the manual's C# how-to had to tell readers to

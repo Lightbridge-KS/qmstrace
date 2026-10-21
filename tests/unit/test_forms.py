@@ -186,3 +186,38 @@ def test_every_suggested_csharp_form_round_trips(
     assert written is not None
     found = REGISTRY[item_type.extractor](path, frame.format(written.group(1)), item_type, agent)
     assert [(link.marker, link.dst) for link in found.links] == [(marker, target)]
+
+
+# Every place a C# component may be marked is named by one form, and each span it names must be
+# writable where the form says — a next move that cannot be followed is the defect #64 fixed.
+COMPONENT_SPANS = [
+    ("src/Agent/K.cs", "{}\npublic class K {{ }}\n"),
+    ("src/Admin/Clients.razor", '{}\n@page "/clients"\n<h1>Clients</h1>\n'),
+    ("src/Agent/Program.cs", "{}\nvar app = WebApplication.Create(args);\n"),
+]
+
+
+@pytest.mark.verifies("REQ-QMT-21")
+@pytest.mark.parametrize(
+    ("span", "where"),
+    list(enumerate(COMPONENT_SPANS)),
+    ids=["the first type's doc comment", "a razor page's head", "a file that declares no type"],
+)
+def test_every_place_a_csharp_component_may_be_marked_round_trips(
+    span: int, where: tuple[str, str]
+) -> None:
+    from pathlib import Path
+
+    cases = Path(__file__).parents[1] / "fixtures" / "cases"
+    agent = TraceConfig.parse(
+        (cases / "agent" / "qmstrace.toml").read_text("utf-8"),
+        (cases / "ledger" / "qmstrace.schema.toml").read_text("utf-8"),
+    )
+    item_type = agent.item_types["component"]
+    assert item_type.extractor is not None
+    written = CODE.findall(FORMS[item_type.extractor]("Implements", "DSN-SVC-01"))
+    assert len(written) == len(COMPONENT_SPANS), "every span the form names needs a frame here"
+    path, frame = where
+    found = REGISTRY[item_type.extractor](path, frame.format(written[span]), item_type, agent)
+    assert [(link.marker, link.dst) for link in found.links] == [("Implements", "DSN-SVC-01")]
+    assert found.strays == ()

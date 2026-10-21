@@ -49,7 +49,7 @@ A C# product repo reads its components with `csharp-file` and its xUnit tests wi
 | `markdown` | headings that start with an ID, and their sections | authored, matching `id_pattern` |
 | `python-module` | a module's docstring | the module's path |
 | `pytest` | test functions and their `verifies` marks | the test's node ID |
-| `csharp-file` | a `.cs` file's first type's `///` comment | the file's path |
+| `csharp-file` | a `.cs` file's first type's `///` comment — or, where the file has no type, the comment it opens with; a `.razor` page's `@* … *@` head comment | the file's path |
 | `xunit` | `[Fact]` and `[Theory]` methods and their `DisplayName` | `path::Class::Method` |
 
 ## The project's trace schema

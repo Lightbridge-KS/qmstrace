@@ -12,7 +12,7 @@
     {
       "repo": "agent",
       "location": "../agent",
-      "commit": "24f6279d9825fe7f941517035047d8a6b98c5562",
+      "commit": "4d2e36bfe01d3dccd7af5d112e6a44b771d112c5",
       "clean": true
     },
     {
@@ -90,6 +90,7 @@
       "design_element": "DSN-SVC-01",
       "component": [
         "agent:src/Agent/KeyCheck.cs",
+        "agent:src/Agent/Program.cs",
         "service:src/service/keys.py"
       ],
       "test_case": "TC-SVC-01.1",
@@ -108,6 +109,7 @@
       "design_element": "DSN-SVC-01",
       "component": [
         "agent:src/Agent/KeyCheck.cs",
+        "agent:src/Agent/Program.cs",
         "service:src/service/keys.py"
       ],
       "test_case": "TC-SVC-01.2",
@@ -124,6 +126,7 @@
       "title": "Records survive a restart",
       "design_element": "DSN-SVC-02",
       "component": [
+        "agent:src/Agent/Records.razor",
         "service:src/service/store.py"
       ],
       "test_case": "TC-SVC-02.1",
@@ -139,6 +142,7 @@
       "title": "Records survive a restart",
       "design_element": "DSN-SVC-02",
       "component": [
+        "agent:src/Agent/Records.razor",
         "service:src/service/store.py"
       ],
       "test_case": "TC-SVC-02.2",
@@ -152,6 +156,7 @@
       "title": "Records survive a restart",
       "design_element": "DSN-SVC-02",
       "component": [
+        "agent:src/Agent/Records.razor",
         "service:src/service/store.py"
       ],
       "test_case": null,

@@ -181,10 +181,12 @@ PYTHON_IMPORTS: dict[str, set[str]] = {
 }
 CSHARP_IMPORTS: dict[str, set[str]] = {
     "_syntax": {"tree_sitter", "tree_sitter_c_sharp"},
+    "_razor": set(),
     "component": {
         "qmstrace.core.findings",
         "qmstrace.core.config",
         "qmstrace.core.model",
+        "qmstrace.extract.csharp._razor",
         "qmstrace.extract.csharp._syntax",
         "qmstrace.extract.fields",
     },

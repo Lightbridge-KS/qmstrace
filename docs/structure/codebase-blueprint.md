@@ -719,17 +719,25 @@ configuration and a graph, not one repo's assessment. Reasoning:
 
 Satisfies: REQ-QMT-17, REQ-QMT-18
 
-### DSN-QMT-15 — C# is read from one parse, by two extractors
+### DSN-QMT-15 — C# is read by two extractors, and Razor by neither parser
 
-`extract/csharp/_syntax.py` parses a file once with tree-sitter into frozen values — types with
-their namespace, enclosing types, bases and leading `///` lines; methods with their attributes
-and arguments; comments — and reports a parse error only inside something read.
+`extract/csharp/_syntax.py` parses a `.cs` file once with tree-sitter into frozen values — types
+with their namespace, enclosing types, bases and leading `///` lines; methods with their
+attributes and arguments; comments — and reports a parse error only inside something read.
 `component.py` (`csharp-file`) makes one component per file and reads its first type's doc
 comment; `xunit.py` (`xunit`) makes one automated test per `[Fact]` or `[Theory]` method, links
 it by the ID that starts a literal `DisplayName` — the one link its type carries, which the
 configuration checks — and records its report identities, an abstract base's tests as each
 concrete subclass in the file. Every unread form is V15, a commented-out test attribute a
-stray. Reasoning: [ADR-0004](../adr/0004-reading-csharp.md).
+stray.
+
+A file with **no type to document** is marked in its own leading comment (#64): `component.py`
+dispatches on the path, reading a `.razor` page through `extract/csharp/_razor.py` — a line
+scanner importing neither `_syntax` nor tree-sitter, since whether the C# grammar refuses a
+Razor file depends on where its markup sits — and a `.cs` file with no type through the comment
+block it opens with. A marker a Razor page cannot carry is a `razor` stray. Reasoning:
+[ADR-0004](../adr/0004-reading-csharp.md),
+[ADR-0007](../adr/0007-a-file-with-no-type-to-document.md).
 
 Satisfies: REQ-QMT-21
 
