@@ -64,12 +64,15 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | This requirement failed | A test case that verifies several items failed | marked *shared*, with what else it verifies |
 | No suspects | A file was touched | a suspect never clears itself |
 | An empty project | A revision older than the repo's configuration | refused, with the reason |
-| Covered | `Verify-by: inspection` with nothing recorded | listed apart from tested requirements, in `status` and `results` |
+| Covered | A valid `Verify-by: demonstration` with a passing linked test but no applicable incoming-`verifies` rule | listed apart in `status` and `results`; linked pass stays test evidence, not method approval |
 
 ## Coverage
 
 - Rules come from data; `where` narrows a rule by a field's value — exactly, as V05 spells it; an
   item missing the field gets V05 and no gap.
+- Status and results classify a requirement as test-backed only when a matching incoming-`verifies`
+  rule applies. The full `where` table matters, not its rule code. A missing or invalid method
+  stays apart with V05; sibling requirements and test-case paths retain their test evidence.
 - No hidden exemption: a rule without `where` applies to every item of its type.
 - A withdrawn item raises no coverage gap, and links with a withdrawn endpoint do not satisfy
   active items' coverage. Validation, traversal and test results remain visible. Withdrawal
@@ -106,7 +109,7 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - Local requirements and locally verified sibling requirements are shown. Sibling ownership,
   unpinned source and declared inspection/analysis methods survive. Unknown-type citations
   stay separate from requirement verdicts; unavailable sources and refused links remain visible.
-- Inspection/analysis requirements are separate, including their linked test results without
+- Requirements outside test-backed verification are separate, including their linked test results without
   claiming verification or approval. Nonpassing details include identities and outcome messages.
 - Informational exit 0 for recognized results, including failed tests and partial matches;
   unmatched entries listed. Zero matches exits 2 with no verdicts. Internal faults exit 3.

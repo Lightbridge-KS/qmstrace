@@ -34,6 +34,12 @@ In a pipeline, where only this repo is checked out:
 --8<-- "cli/golden/status-client-in-a-pipeline.txt"
 ```
 
+With a configured `demonstration` method that has no applicable incoming-`verifies` rule:
+
+``` text
+--8<-- "cli/golden/status-demonstration.txt"
+```
+
 | Block | What it says |
 |---|---|
 | `schema:` | where the rules in force come from — the project's trace schema by path, a verified copy of it, or the repo's own |
@@ -47,7 +53,7 @@ In a pipeline, where only this repo is checked out:
 | `change requests:` | the register's availability, readable requests and malformed files |
 | `suspects:` | unique local items needing review; distance-one items listed, farther items counted by distance; [check](check.md) lists all reasons |
 | one line per requirement | its category, what it points back at, what hangs off it — design elements, the test cases of a Test Specification, automated tests by level — and its title |
-| `verified by …` | requirements verified by inspection or analysis, listed apart: nothing records their basis yet |
+| `outside test-backed verification` | requirements with no applicable incoming-`verifies` coverage rule, listed with their declared `Verify-by` value (or `unspecified`). This view does not establish completion of their verification method |
 | last line | violations and gaps, each counted by code — see [Findings](../findings.md). [`qmstrace check`](check.md) lists every one, with its next move |
 
 ## Exit code

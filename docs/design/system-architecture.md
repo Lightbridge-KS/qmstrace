@@ -289,7 +289,7 @@ reads it explicitly, even outside the Git-filtered tree, and passes bytes to the
 report reader, which picks JUnit or TRX by the root element. It builds one assessment, takes the
 report identities each automated test's extractor recorded, then calls `core.results.summarize`. The returned frozen view contains
 matched runs, unmatched identities and direct-link verdicts; the text renderer makes no
-aggregation decisions. Sibling node fields retain inspection/analysis methods, but only local
+aggregation decisions. Sibling node fields retain declared verification methods, but only local
 tests contribute. No result is written back and no report commit is verified. Usable partial
 or failed results exit 0; unusable reports and zero matches exit 2.
 

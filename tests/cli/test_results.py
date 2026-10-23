@@ -117,6 +117,86 @@ def test_other_methods_and_untested_requirements(project: Path, method: str) -> 
 
 
 @pytest.mark.verifies("REQ-QMT-10")
+def test_demonstration_with_passing_test_is_listed_apart(
+    project: Path, golden: Callable[[Path, str], None]
+) -> None:
+    root = project / "service"
+    schema = project / "ledger/qmstrace.schema.toml"
+    schema.write_text(
+        schema.read_text().replace(
+            '"test", "inspection", "analysis"', '"test", "inspection", "analysis", "demonstration"'
+        )
+    )
+    srs = root / "docs/req/service-srs.md"
+    srs.write_text(srs.read_text().replace("Verify-by: inspection", "Verify-by: demonstration"))
+    source = root / "tests/unit/test_keys.py"
+    source.write_text(source.read_text().replace('"REQ-SVC-01"', '"REQ-SVC-03"'))
+    path = report(root, [(KEY, "pass")])
+    view = Workspace.open(root).results(path)
+    assert "REQ-SVC-03" not in verdicts(view)
+    assert view.other_methods[0].method == "demonstration"
+    assert view.other_methods[0].verdict == "pass"
+    rendered = runner.invoke(app, ["-C", str(root), "results", "report.xml"])
+    assert rendered.exit_code == 0, rendered.output
+    golden(GOLDEN / "results-demonstration.txt", rendered.output)
+
+    # The same authored item becomes test-backed when the project's rule asks for it;
+    # the rule's code has no special meaning.
+    schema.write_text(
+        schema.read_text()
+        .replace('code  = "G02"', 'code  = "G20"')
+        .replace(
+            'where = { "Verify-by" = "test" }',
+            'where = { "Verify-by" = "demonstration" }',
+        )
+    )
+    selected = Workspace.open(root).results(path)
+    assert verdicts(selected)["REQ-SVC-03"] == "pass"
+    assert "REQ-SVC-03" not in {target.node.id for target in selected.other_methods}
+    status = runner.invoke(app, ["-C", str(root), "status"])
+    assert status.exit_code == 0
+    assert "outside test-backed verification (test)" in status.output
+    assert "Verify-by: demonstration" not in status.output
+
+
+@pytest.mark.parametrize("verdict", ["pass", "fail"])
+def test_test_case_path_preserves_evidence_outside_test_backed_group(
+    cases: Path, verdict: str
+) -> None:
+    schema = cases / "ledger/qmstrace.schema.toml"
+    schema.write_text(
+        schema.read_text().replace(
+            '"test", "inspection", "analysis"', '"test", "inspection", "analysis", "demonstration"'
+        )
+    )
+    srs = cases / "ledger/docs/req/service-srs.md"
+    srs.write_text(srs.read_text().replace("Verify-by: test", "Verify-by: demonstration", 1))
+    root = cases / "service"
+    path = report(root, [("tests/unit/test_api.py::test_a_call_without_a_key_is_refused", verdict)])
+    view = Workspace.open(root).results(path)
+    assert "REQ-SVC-01" not in verdicts(view)
+    target = next(t for t in view.other_methods if t.node.id == "REQ-SVC-01")
+    assert target.verdict == ("no-result" if verdict == "pass" else "fail")
+    assert target.via[0].node.id == "TC-SVC-01.1"
+    rendered = text.results(view)
+    assert "linked tests only: " + target.verdict in rendered
+    assert "TC-SVC-01.1" in rendered
+
+
+@pytest.mark.parametrize("method", [None, "invalid"])
+def test_missing_or_invalid_method_is_not_test_backed(project: Path, method: str | None) -> None:
+    root = project / "service"
+    srs = root / "docs/req/service-srs.md"
+    replacement = "" if method is None else f"- Verify-by: {method}\n"
+    srs.write_text(srs.read_text().replace("- Verify-by: test\n", replacement, 1))
+    view = Workspace.open(root).results(report(root, [(KEY, "pass")]))
+    assert "REQ-SVC-01" not in verdicts(view)
+    assert any(t.node.id == "REQ-SVC-01" for t in view.other_methods)
+    assert any(f.code == "V05" for f in view.assessment.violations)
+    assert "1 violation" in text.results(view)
+
+
+@pytest.mark.verifies("REQ-QMT-10")
 def test_design_results_do_not_flow_to_requirements(project: Path) -> None:
     root = project / "service"
     node = "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler"

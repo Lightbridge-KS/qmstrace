@@ -135,7 +135,9 @@ No command verifies semantic truth, report freshness or human approval merely by
 Source notices survive quiet output. Siblings are working trees, not pins; traversal ends at
 this repo's edge. Where the whole project must be judged — coverage met in another repo,
 suspects across repos — `qmstrace ledger check`, run in the ledger, reads every repo together,
-from working trees. Inspection/analysis requirements remain separate from tested requirements.
+from working trees. Requirements without an applicable incoming `verifies` coverage rule are
+listed apart in `status` and `results`; linked test outcomes are evidence, not approval of
+another declared verification method.
 Use `qmstrace --help`, command help and the finding's next move; the catalogue in
 `qmstrace.core.findings.CODES` owns finding descriptions. Never type fabricated dates,
 verdicts or test results. A progress tracker may cite an observed commit as a pointer.

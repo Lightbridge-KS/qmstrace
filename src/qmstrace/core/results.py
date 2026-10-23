@@ -24,6 +24,7 @@ from typing import Literal
 
 from qmstrace.core.assessment import Assessment, ProjectAssessment
 from qmstrace.core.graph import Node
+from qmstrace.core.judge import test_backed_requirement
 from qmstrace.core.model import Identity
 
 Verdict = Literal["pass", "skip", "no-result", "fail", "untested"]
@@ -157,7 +158,9 @@ class Results:
     @property
     def through_cases(self) -> bool:
         """Whether any verdict here passes through a test case."""
-        return bool(self.other_cases) or any(t.via for t in self.requirements)
+        return bool(self.other_cases) or any(
+            t.via for t in (*self.requirements, *self.other_methods)
+        )
 
 
 def summarize(
@@ -286,10 +289,10 @@ def summarize(
         )
         if not is_requirement:
             unverified.append(target)
-        elif method in ("inspection", "analysis"):
-            other_methods.append(target)
-        else:
+        elif test_backed_requirement(assessment.config, node.fields):
             requirements.append(target)
+        else:
+            other_methods.append(target)
         shown_tests.update(t.id for t in linked)
         shown_cases.update(c.node.id for c in via)
     shown = {t.node.id for group in (requirements, other_methods, unverified) for t in group}

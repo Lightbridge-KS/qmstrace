@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1, M10, the package refactors and M12 landed; release 0.1.1 published; the first C# project is in use, #49's three JSON tables and report-backed verdicts landed (#58, #62–#63), and the C# starter and file markers landed (#65–#66). Open authoring-integrity issues #25 and #26, verification-method issue #57 and external-source issue #60 inform the next choice; M11 mentions remains later.
+summary: The single active qmstrace tracker — slice 1, M10, package refactors and M12 landed; release 0.1.1 published; #25 and #26 landed in PR #67. The verification-method fix for #57 is implemented and verified, awaiting review; external-source issue #60 and M11 mentions remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -12,14 +12,36 @@ read_when:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
 capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
 on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--tables-as-data)
-landed; the authoring-integrity fix for #25 and #26 is in progress on
-`codex/id-authoring-integrity`. M11 · mentions
+landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 is implemented
+and verified on `codex/verification-methods`, awaiting commit and review. M11 · mentions
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## Ready for review — #25 and #26 · ID authoring integrity
+## Ready for review — #57 · verification-method grouping
 
-**2026-10-23 · prepared for draft PR on `codex/id-authoring-integrity`.** The existing tracker
+**2026-10-23 · `codex/verification-methods`.** [ADR-0009](../adr/0009-group-verification-by-applicable-rules.md)
+records the accepted display contract. `status` and `results` classify a requirement as
+test-backed only when a valid declared method meets an applicable incoming-`verifies` coverage
+rule; linked outcomes remain test evidence for all methods. The versioned `ledger table`
+format, gap judgment, verdict aggregation and exits remain unchanged.
+
+- [x] Share rule applicability with coverage and classify local and sibling requirements.
+- [x] Add demonstration, missing/invalid method, test-case path and configurable-rule tests.
+- [x] Review all affected goldens and built manual pages.
+- [x] Run the full dry gate and local/ledger strict checks; record measured outcomes.
+
+Verification on this branch: 74 focused CLI/judgment/architecture/table tests passed before
+the final CLI assertions; the final `just dry` passed **1,233 Python tests, 4 browser tests,
+98.51% coverage**, formatting, lint, mypy, wheel/package checks and strict manual build.
+The generated status and results code blocks show the demonstration requirement apart with
+its declared method and passing linked test labelled as evidence. Local and ledger
+`check --strict --quiet` both exited 0 with **757 items, 0 violations, 0 gaps and 32
+informational suspects**; 16 frozen, 3 changed, 7 new and 0 removed. Remote-tag completeness
+remains unverified.
+
+## Landed — #25 and #26 · ID authoring integrity
+
+**Merged as PR #67 (`a5947a0`, 2026-10-23).** The existing tracker
 reconciliation was carried from `main`. [ADR-0008](../adr/0008-prove-id-starts-and-subject-ownership-before-baselines.md)
 records the accepted contract: an `id_prefix` must fit a provable shared start across every
 pattern branch; V17 reports controlled document IDs without one subject while authoring.
@@ -46,7 +68,7 @@ Final review also covered a subject-key change in today's configuration for an e
 frozen item (exit 2) and a repeated key segment in one ID (V17); 51 focused tests passed.
 Local and ledger `check --strict --quiet` both exit 0: **752 items, 0 violations, 0 gaps,
 32 informational suspects**, with 16 frozen, 3 changed, 7 new and 0 removed. Remote-tag
-completeness remains unverified, as before. Issues #25 and #26 remain open until merge.
+completeness remains unverified, as before. These measurements were made on the PR branch.
 
 ## Landed — package refactors
 
@@ -767,10 +789,8 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
   - #20 files `init` creates are `0600`.
   - #21 rollback leaves folders behind.
   - #22 `ux`: no symbolic links.
-  - #25 an `id_pattern` with alternatives lets a slip in its second family pass silently.
-  - #26 `ux`: an ID without its subject key passes until the first baseline, then stops
-    every run.
-  - #57 `status` and `results` disagree about which verification methods are listed apart.
+  - #57 `status` and `results` disagree about which verification methods are listed apart —
+    fix ready for review above.
   - #60 an external source cannot yet pool IDs across several agreement files.
   - [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71).
 - **Not filed, from run A:**

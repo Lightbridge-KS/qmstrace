@@ -76,8 +76,9 @@ you would leave it out: qmstrace walks up to the nearest `qmstrace.toml`.
    reachable local tag; the output states that limit and does not claim remote completeness.
 7. **One line per requirement** — its category, the clause it comes from, and what hangs off
    it: design elements, and automated tests by level.
-8. **`verified by inspection`** — `REQ-SVC-03` has no test to show, by design. It is listed
-   apart, because nothing records the inspection yet.
+8. **`outside test-backed verification`** — `REQ-SVC-03` declares inspection and has no
+   applicable incoming-`verifies` rule. It is listed apart; this view cannot establish that
+   inspection has been completed.
 9. **`categories with no requirement here`** — a prompt, not a failure: has each quality been
    considered?
 10. **The last line** — nothing is wrong in this repo's trace data, and one coverage rule is not

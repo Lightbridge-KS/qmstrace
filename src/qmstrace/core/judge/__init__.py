@@ -9,4 +9,5 @@ from qmstrace.core.judge._baselines import resolve_baselines as resolve_baseline
 from qmstrace.core.judge._coverage import Form as Form
 from qmstrace.core.judge._coverage import Way as Way
 from qmstrace.core.judge._coverage import coverage as coverage
+from qmstrace.core.judge._coverage import test_backed_requirement as test_backed_requirement
 from qmstrace.core.judge._suspects import suspects as suspects

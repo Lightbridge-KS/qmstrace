@@ -67,19 +67,25 @@ def results(view: Results) -> str:
     if view.other_methods:
         lines += [
             "",
-            "inspection / analysis — no verification or approval is established by this report:",
+            "outside test-backed verification — no verification or approval is established "
+            "by this report:",
         ]
         for target in view.other_methods:
             lines.append(
-                f"  {_heading(target.node)} · Verify-by: {target.method} · {_what(target.node)}"
+                f"  {_heading(target.node)} · Verify-by: {target.method or 'unspecified'} · "
+                f"{_what(target.node)}"
             )
-            if target.tests:
+            if target.tests or target.via:
                 lines.append(
                     f"    linked tests only: {target.verdict} · {len(target.tests)} automated "
                     f"tests · {target.runs} runs"
                 )
+                through_cases = {test.id for case in target.via for test in case.tests}
                 for test in target.tests:
-                    lines += _result_test(test, several, target.node.id, show_pass=True)
+                    if test.id not in through_cases:
+                        lines += _result_test(test, several, target.node.id, show_pass=True)
+                for case in target.via:
+                    lines += _result_case(case, several, show_pass=True)
             else:
                 lines.append("    no linked automated tests")
     if view.unverified_targets:

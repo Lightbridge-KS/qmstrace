@@ -1,0 +1,24 @@
+report: report.xml
+  1 XML entries · 1 reported runs (distinct full identities)
+  matched: 1 runs of 1 automated tests · scanned: 4 automated tests · unmatched: 0 run identities
+  matched against the current working tree — report commit NOT VERIFIED
+  a partial parameter set does not prove every possible variant ran
+  baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+  baselines: no matching reachable local tag — nothing frozen locally
+  change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
+
+requirements — direct verifies links only:
+  REQ-SVC-01  untested  0 automated tests · 0 runs — A call carries a key · requirement · docs/req/service-srs.md:12
+  REQ-SVC-02  no-result 2 automated tests · 0 runs — Records survive a restart · requirement · docs/req/service-srs.md:21
+    no-result tests/integration/test_store.py::test_a_record_survives_a_restart · 0 runs · shared: also verifies DSN-SVC-02
+    no-result tests/integration/test_store.py::test_a_restart_loses_no_accepted_record · 0 runs
+
+outside test-backed verification — no verification or approval is established by this report:
+  REQ-SVC-03 — The record format is written down · Verify-by: demonstration · requirement · docs/req/service-srs.md:28
+    linked tests only: pass · 1 automated tests · 1 runs
+    pass      tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused · 1 runs
+
+tests without a direct requirement target — no requirement verdict inferred:
+    no-result tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler · 0 runs · verifies DSN-SVC-01
+
+result: 1 matched automated tests · 1 matched runs · 0 unmatched run identities · exit 0 (informational) — report commit NOT VERIFIED; this repo's tests only

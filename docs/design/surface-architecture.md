@@ -74,7 +74,7 @@ flowchart TD
 
 | Touchpoint | What the user does with it | Status |
 |---|---|---|
-| `qmstrace status` | Sees what was scanned — items and files per item type, and the files each type ignores — what lies around the repo and whether it was verified, then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]`. Requirements verified by inspection or analysis are listed apart. Not a check: it exits 0 whatever it counts. *In the engine since M2; its golden is `tests/cli/golden/`* | ✔ |
+| `qmstrace status` | Sees what was scanned — items and files per item type, and the files each type ignores — what lies around the repo and whether it was verified, then one line per requirement: origin, design elements, test cases by level, and whether it is `[frozen]`, `[changed: CR-…]` or `[new …]`. Requirements without an applicable incoming-`verifies` rule are listed apart with their `Verify-by` value ([ADR-0009](../adr/0009-group-verification-by-applicable-rules.md)). Not a check: it exits 0 whatever it counts. *In the engine since M2; its golden is `tests/cli/golden/`* | ✔ |
 | `qmstrace check` | Lists every violation and gap in one pass, each with file, line and what to do next — a gap's next move names the marker's form, the violation that refused its link, or the stray line that is not read. *In the engine since M3* | ✔ |
 | `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation, each part labelled as the project's or the repo's; a rule this repo cannot meet, or that applies to nothing here, says so. *In the engine since M3* | ✔ |
@@ -180,8 +180,12 @@ reach no requirement are listed apart, so a failure only a design element sees s
 deduplicated before counting, shared tests name other targets, and global counts count each
 case once even when requirement rows overlap. Sibling requirements verified by local tests
 are labelled with their owner and unpinned source; their declared verification method is
-retained. Untyped citations stay outside requirement verdicts. Inspection/analysis requirements
-are separate; linked test outcomes neither change the method nor establish approval.
+retained. Untyped citations stay outside requirement verdicts. Requirements without an
+applicable incoming-`verifies` coverage rule are listed apart, including valid methods added
+after `inspection` and `analysis` ([ADR-0009](../adr/0009-group-verification-by-applicable-rules.md)).
+The rule's complete `where` condition decides applicability, independently of its code.
+Missing or invalid `Verify-by` values are listed apart and retain V05. Linked test outcomes
+are evidence only; they neither change the declared method nor establish its completion or approval.
 
 **Decided 2026-09-21:** a produced view exits 0 whenever at least one test matches, including
 failed tests and partial matches. Every unmatched entry remains visible. Zero matches exits 2
@@ -391,7 +395,7 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 | "A clean project" | A repo in `[repos]` was not read — missing, unreadable, or holding other rules | Refuse the ledger's check (exit 2), naming every such repo at once (M10a) |
 | "Nothing is frozen" | A shallow clone, excluded tags, or not a repository at all | Exit *could not judge* for known incomplete evidence; otherwise report matching reachable local tags and keep remote-tag completeness unverified |
 | "Verified" | The ledger is not beside the repo | *Not verified* in the result line, surviving the quiet form; the citation is verified at the ledger's import |
-| "Covered" | `Verify-by: inspection`, with nothing recorded anywhere | List such items apart, until an inspection has a recorded basis |
+| "Covered" | No applicable incoming-`verifies` rule, whether the declared method is inspection, analysis or demonstration | List the item apart; linked tests alone do not record completion of its method |
 
 ## 6. Information Architecture / API Ergonomics
 

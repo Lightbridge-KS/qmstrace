@@ -14,6 +14,7 @@ The load-bearing claims, each pinned by a test:
 4. Gaps come back sorted by file, line and code.
 """
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,7 @@ from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.judge import Way, coverage
 from qmstrace.core.judge._coverage import _fix
+from qmstrace.core.judge._coverage import test_backed_requirement as _test_backed_requirement
 from qmstrace.core.model import Extracted, Finding, Item
 from qmstrace.extract.base import FORMS, REGISTRY
 
@@ -77,6 +79,44 @@ def gaps(found: list[Finding]) -> list[tuple[str, str | None]]:
 
 
 # ── 1. rules as data ───────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.verifies("DSN-QMT-06")
+def test_test_backed_group_uses_applicable_rule_meaning(service: TraceConfig) -> None:
+    requirement = service.item_types["requirement"]
+    service = replace(
+        service,
+        item_types={
+            **service.item_types,
+            "requirement": replace(
+                requirement,
+                values={
+                    **requirement.values,
+                    "Verify-by": (*requirement.values["Verify-by"], "demonstration"),
+                },
+            ),
+        },
+    )
+    original = next(rule for rule in service.rules if rule.code == "G02")
+    rules = tuple(rule for rule in service.rules if rule.code != "G02")
+    demonstration = {"Verify-by": "demonstration", "Category": "security"}
+    test = {"Verify-by": "test", "Category": "security"}
+    assert not _test_backed_requirement(replace(service, rules=rules), test)
+
+    selected = replace(
+        original, code="G20", where={"Verify-by": "demonstration", "Category": "security"}
+    )
+    config = replace(service, rules=(*rules, selected))
+    assert _test_backed_requirement(config, demonstration)
+    assert not _test_backed_requirement(config, {**demonstration, "Category": "reliability"})
+    assert not _test_backed_requirement(config, test)
+
+    several = replace(service, rules=(*rules, selected, replace(selected, code="G21")))
+    assert _test_backed_requirement(several, demonstration)
+    unconditional = replace(service, rules=(*rules, replace(selected, where={})))
+    assert _test_backed_requirement(unconditional, test)
+    assert not _test_backed_requirement(unconditional, {})
+    assert not _test_backed_requirement(unconditional, {"Verify-by": "invalid"})
 
 
 @pytest.mark.verifies("DSN-QMT-06")

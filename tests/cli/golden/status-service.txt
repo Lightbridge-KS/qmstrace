@@ -15,8 +15,8 @@ change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fres
   REQ-SVC-01  security         origin AGR-1         design elements 1  automated tests 1 (unit 1)         — A call carries a key
   REQ-SVC-02  reliability      origin AGR-2, AGR-3  design elements 1  automated tests 2 (integration 2)  — Records survive a restart
 
-verified by inspection — no recorded basis yet, listed apart:
-  REQ-SVC-03  maintainability  origin AGR-3         design elements 0  automated tests 0                  — The record format is written down
+outside test-backed verification (inspection) — listed apart; this view does not establish their verification:
+  REQ-SVC-03  maintainability  origin AGR-3         design elements 0  automated tests 0                  — The record format is written down · Verify-by: inspection
 
 categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, portability, design-constraint, legal-regulatory
   (a prompt, not a gap — not every product needs one under every category)
