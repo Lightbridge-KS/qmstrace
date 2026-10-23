@@ -1,0 +1,6 @@
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines: no matching reachable local tag — nothing frozen locally
+V17  docs/req/app-srs.md:8  REQ-03 has no configured subject key as a complete internal ID segment (configured: app=APP). Fix: give this controlled item exactly one configured subject key between its first and last ID segments before cutting a baseline; ownership is not inferred from its file.
+G02  docs/req/app-srs.md:8  REQ-03: no test verifies it yet. Fix: on the automated test, write `@pytest.mark.verifies("REQ-03")` on the test — only if it is true: the link states that the automated test verifies REQ-03.
+result: 1 violation, 1 gap in 3 items · 0 suspects (informational) · exit 1 · authoring: gaps do not fail — the gate is qmstrace check --strict · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

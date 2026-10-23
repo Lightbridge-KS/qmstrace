@@ -153,7 +153,9 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 | Historical source/configuration is malformed | exit 2, not an empty snapshot |
 | Current item type, scope, pattern or subject declaration changes | historical identities are retained |
 | New subject after a product release | not frozen by that release |
-| Unknown or ambiguous subject key | exit 2; no ownership guess |
+| Current Markdown item of a baseline-covered type, before a matching tag, with no subject key or several matching subjects | V17, naming the ID and configured subject keys; status still exits 0, check and ledger check exit 1 |
+| Unknown or ambiguous subject key while a baseline may govern the item | exit 2; no ownership guess, current item and applicable tag named |
+| An unowned item or unsound ID pattern in a selected tagged tree | exit 2 naming the tag and source; a corrected current tree needs an approved successor baseline, never a tag rewrite |
 | Several fresh citations, one invalid | each offered citation checked; invalid one fails |
 | Readable empty register; missing request; malformed request; unavailable register | distinct states; only unavailable register permits an unverified fresh citation |
 | Request approval in a fence or prose section | never grants approval |
@@ -246,7 +248,12 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
 - An ID pattern, `id_prefix`, agreement prefix or change-request prefix whose literal start no
   ID can have — underscores, lower case, a space — could not judge, naming the ID shape.
   Found in user acceptance: `^REQ_BCN_\d{2}$` was accepted and every requirement vanished.
-  Only the literal start is judged; `^FR\.\d{2}$` still passes.
+  Escaped literals count too: `^FR\.\d{2}$` is now refused because `FR.` cannot start an ID.
+- `id_prefix` must begin every ID the pattern accepts. `^(REQ|NFR)-SVC-\d{2}$` with
+  `id_prefix = "REQ-"` is refused before scanning; a malformed second-family heading cannot
+  disappear silently. `^(REQ|RQ)-SVC-\d{2}$` with prefix `R`, and
+  `^REQ-(SVC|CLT)-\d{2}$` with prefix `REQ-`, remain valid. Optional or unsupported starts
+  without a provable common literal are refused.
 - Two externals whose prefixes are equal, or one starting the other (`AC-`, `AC-E1-`) — could not
   judge, naming both tables and both prefixes, before any citation is judged; non-overlapping
   prefixes (`AC-E1-`, `AC-E2-`) are read. Found while a project was designed with one agreement

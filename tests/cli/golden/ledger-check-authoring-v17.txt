@@ -1,0 +1,12 @@
+external AGR-*: verified against agreement.md (3 declared)
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines in client: no matching reachable local tag — nothing frozen
+baselines in service: no matching reachable local tag — nothing frozen
+change requests: NOT VERIFIED — change-requests is unavailable
+V17  ../service/docs/req/service-srs.md:41  REQ-04 has no configured subject key as a complete internal ID segment (configured: service=SVC). Fix: give this controlled item exactly one configured subject key between its first and last ID segments before cutting a baseline; ownership is not inferred from its file.
+G01  ../client/docs/req/client-srs.md:3  REQ-CLT-01: no design element satisfies it yet. Fix: on the design element in service, write `Satisfies: REQ-CLT-01` under its heading — only if it is true: the link states that the design element satisfies REQ-CLT-01.
+G06  ../client/src/client/api.py:1  client:src/client/api.py: implements no design element — every component points back to one. Fix: write `Implements: <design element ID>` in its docstring — only if it is true: the link states that this component implements that design element.
+G01  ../service/docs/req/service-srs.md:28  REQ-SVC-03: no design element satisfies it yet. Fix: on the design element in service, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.
+G01  ../service/docs/req/service-srs.md:41  REQ-04: no design element satisfies it yet. Fix: on the design element in service, write `Satisfies: REQ-04` under its heading — only if it is true: the link states that the design element satisfies REQ-04.
+result: 1 violation, 4 gaps in 16 items across 2 repos · 0 suspects (informational) · exit 1 · authoring: gaps do not fail — the gate is qmstrace ledger check --strict · working trees, not pinned · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · change requests NOT VERIFIED

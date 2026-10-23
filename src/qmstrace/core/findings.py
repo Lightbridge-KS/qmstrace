@@ -38,6 +38,7 @@ CODES: Final = {
     "V14": "a link field that holds something other than IDs",
     "V15": "a verifies marker in a form this tool does not read",
     "V16": "an ID of this repo's kind, declared nowhere, written where it declares nothing",
+    "V17": "a controlled document ID without exactly one configured subject key",
     "S01": "an existing local item downstream of changed or removed frozen content needs review",
 }
 
@@ -133,6 +134,41 @@ def malformed_id(token: str, item_type: str, pattern: str, file: str, line: int)
         f"Fix: write the ID as [items.{item_type}] id_pattern says in qmstrace.toml — or, if "
         "this heading is prose, do not start it with an ID.",
         token,
+    )
+
+
+def subject_ownership(
+    item: Item,
+    matches: tuple[str, ...],
+    available: tuple[str, ...],
+    *,
+    duplicate_key: bool,
+    repeated_segment: bool,
+) -> Finding:
+    """A controlled document item whose ID cannot identify one subject before a tag is cut."""
+    detail = (
+        f"repeats a subject key as a complete internal ID segment: {', '.join(matches)}"
+        if repeated_segment and not duplicate_key
+        else f"matches more than one subject as complete internal ID segments: {', '.join(matches)}"
+        if matches
+        else "has no configured subject key as a complete internal ID segment "
+        f"(configured: {', '.join(available) or 'none'})"
+    )
+    fix = (
+        "Fix: give the matching subjects distinct configured keys before cutting a baseline; "
+        "changing only this ID cannot distinguish subjects that share one key."
+        if duplicate_key
+        else "Fix: give this controlled item exactly one configured subject key between its "
+        "first and last ID segments before cutting a baseline; ownership is not inferred "
+        "from its file."
+    )
+    return Finding(
+        "V17",
+        item.file,
+        item.line,
+        f"{item.id} {detail}.",
+        fix,
+        item.id,
     )
 
 

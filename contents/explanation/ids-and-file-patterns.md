@@ -103,9 +103,15 @@ flowchart LR
 word that starts as an ID and runs on, such as `REQ-SVC-03b` or `REQ-SVC-04.1a`, counts as a
 malformed ID too: `V02` names the whole word.
 
-Some patterns have no literal start to read, such as one that begins with a group like
-`^(REQ)-SVC-\d{2}$`. For those, qmstrace refuses the configuration until the type names its
-start in `id_prefix`. Without a start, a malformed ID could not be told from prose.
+The start is proved across every branch, including groups. `^(REQ|RQ)-SVC-\d{2}$` shares
+`R`; `^REQ-(SVC|CLT)-\d{2}$` shares `REQ-`. An explicit `id_prefix` may be shorter than the
+proved start, but cannot name only one branch. For example,
+`^(REQ|NFR)-SVC-\d{2}$` with `id_prefix = "REQ-"` is refused before scanning: the `NFR-`
+branch would otherwise let a malformed heading disappear silently. A pattern with no provable
+ID-shaped start is refused even if `id_prefix` is supplied. Rewrite it to put the shared start
+first, or use separate item types for distinct ID families. Escaped literal characters count:
+`^REQ-SVC-04\.1-\d{2}$` is valid, while `^FR\.\d{2}$` cannot produce an ID of the
+required shape.
 
 ## The subject key
 
@@ -114,8 +120,13 @@ appears as one whole segment inside each of its IDs: `SVC` in `REQ-SVC-01`. Only
 between the first and the last counts.
 
 A baseline freezes one subject, and the key is how qmstrace knows which subject an item belongs
-to. **Ownership is never guessed.** Suppose a baseline covers an item whose ID holds no
-configured key, or two keys. The run then stops with exit code `2` rather than choose.
+to. **Ownership is never guessed.** For a document type a baseline could cover, a current ID
+without exactly one matching subject-key occurrence and one configured owner is V17 while
+authoring, even before the
+first tag. `status` counts it and `check` lists it. If an applicable tag already exists, the
+run stops with exit `2`: it cannot determine whether that item is controlled. An invalid ID
+frozen in a selected tagged tree also exits `2` and names the tag. Correct the current tree
+and establish a new approved baseline; renaming today's heading cannot change the old tag.
 
 Ownership goes by the ID rather than by the file it sits in, because a file can move and an ID
 cannot.

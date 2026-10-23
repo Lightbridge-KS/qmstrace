@@ -362,6 +362,10 @@ V09  docs/req/x-srs.md:92  REQ-XYZ-10 → Origin → AGR-9: the agreement declar
 - **Codes are stable and classed**: `V` violations, `G` gaps, `S` suspects. Gap codes belong
   to the repo's own coverage rules; violation and suspect codes belong to the engine.
 - **All findings in one pass**, sorted, deterministic — never the first error and stop.
+- **V17 catches a controlled document ID with no unique configured subject key before a tag.**
+  Status counts it; check and ledger check list it and fail. Under an applicable baseline,
+  ownership uncertainty is instead *could not judge* (exit 2), naming a tagged source when
+  historical evidence is the cause (ADR-0008).
 - **Every violation ends with the next move**, and where the wrong move is tempting it says
   so: *never invent one* · *do not edit the ledger yourself* · *stop and ask the developer*.
 - **A gap whose link has nothing to point at here names who has** (decided 2026-10-15). When

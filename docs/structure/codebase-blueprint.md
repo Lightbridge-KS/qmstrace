@@ -545,7 +545,8 @@ rather than one file (#56) is refused with the next move. Reasoning: data archit
 D9; §1 F3–F6.
 
 `TraceConfig` and assembly/cross-checks live in `_parse.py`; records in `_schema.py`;
-strict TOML reading in `_toml.py`; section policy in `_sections.py`; digest and copy-marker
+strict TOML reading in `_toml.py`; section policy in `_sections.py`, backed by the conservative
+shared-start proof in `_prefix.py`; digest and copy-marker
 recognition in `_copy.py`. `qmstrace.core.config` preserves the previous imports. Dependencies
 flow from parsing to sections/copy/records, and from sections to TOML/records; none returns
 through the package facade. Constructor behavior, ordered results, digests and complete
@@ -606,8 +607,10 @@ Satisfies: REQ-QMT-03
 `core/judge/_baselines.py` `resolve_baselines` picks the topologically latest tag per scope, and `guard`
 compares item text with that snapshot (`core/baselines.py`) and judges each change against
 the change-request register, read by `infra/externals.py` and `extract/change_requests.py`.
-The workspace scans each tagged tree with its own configuration. Reasoning: data
-architecture § D6, D7.
+The workspace scans each tagged tree with its own configuration. The pure ownership check in
+`core/judge/_baselines.py` emits V17 for current locally declared controlled document items
+before tagging; the guard refuses unknown ownership under a governing baseline and names
+the tagged tree when it is the cause. Reasoning: data architecture § D6, D7; ADR-0008.
 
 Satisfies: REQ-QMT-08
 

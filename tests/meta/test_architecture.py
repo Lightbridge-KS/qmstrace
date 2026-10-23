@@ -101,7 +101,9 @@ CONFIG_IMPORTS: dict[str, set[str]] = {
     "_schema": set(),
     "_toml": {"qmstrace.core.errors"},
     "_copy": set(),
+    "_prefix": set(),
     "_sections": {
+        "qmstrace.core.config._prefix",
         "qmstrace.core.config._schema",
         "qmstrace.core.config._toml",
         "qmstrace.core.errors",
@@ -313,7 +315,7 @@ EXPORTS: dict[str, dict[str, set[str]]] = {
     },
     "judge": {
         "_coverage": {"Form", "Way", "coverage"},
-        "_baselines": {"guard", "resolve_baselines"},
+        "_baselines": {"guard", "ownership_findings", "resolve_baselines"},
         "_suspects": {"suspects"},
     },
     "graph": {

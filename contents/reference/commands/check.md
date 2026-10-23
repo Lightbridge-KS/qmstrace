@@ -61,8 +61,10 @@ not fail while you work: [Kinds of finding](../../explanation/kinds-of-finding.m
 ## Exit code
 
 The [baseline guard](../baselines.md) adds V10–V13 for unauthorized changes and removals.
+V17 reports a baseline-covered document ID with no unique subject before a tag is cut.
 It can also prevent judgment with exit `2`, including ambiguous baseline ancestry or a
-historical schema outside the tagged tree. See [Change a frozen
+historical schema outside the tagged tree, or an unowned ID under a relevant baseline.
+See [Change a frozen
 item](../../how-to/change-a-frozen-item.md) for tested output.
 
 | Mode | `0` | `1` |

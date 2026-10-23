@@ -57,4 +57,6 @@ are labelled explicitly. [Change a frozen item](../../how-to/change-a-frozen-ite
 the authoring workflow.
 
 `0`, whatever it counts — or `2` when it cannot judge at all, such as in a folder with no
-`qmstrace.toml` above it. See [Exit codes](../exit-codes.md).
+`qmstrace.toml` above it. V17, a controlled document ID with no unique subject key, is
+counted before a tag; it does not change this informational exit code. See
+[Exit codes](../exit-codes.md).

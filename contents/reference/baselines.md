@@ -26,6 +26,12 @@ new items are outside that frozen population. Withdrawn counts current items wit
 Path-derived modules and tests are scanned but the document guard does not require item-level
 change citations on them; code changes follow the project's commit or pull-request convention.
 
+A document type named in any baseline `covers` list needs an ID with exactly one configured
+subject key, even before a tag is cut. V17 reports missing or ambiguous ownership while
+authoring. Once a relevant baseline exists, uncertainty prevents judgment (exit `2`). If the
+bad ID or configuration is in the selected tagged tree, the refusal names that tag; correcting
+today's files requires a valid, approved successor baseline rather than rewriting the old one.
+
 ## Historical configuration
 
 Each tagged tree supplies its own `qmstrace.toml`, extraction patterns and schema. A tag from

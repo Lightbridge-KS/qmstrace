@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1 landed through M9c, qmstrace traced by its own ledger and its first requirements baseline cut; M10, the project-wide check, landed; the package refactors landed (#32); M12, the C# capability, landed (#35–#43) with the beacon-dotnet run passing 13 of 13 measures; release 0.1.1 (the V14 fix) published; now the first real project, and #49 — tables emitted as data, decided 2026-10-15 and planned in two slices around #40 —, a C# repo, in the layout where the ledger holds the documents (ADR-0001); then M11 mentions; what landed work left open; deferred slice-2 work.
+summary: The single active qmstrace tracker — slice 1, M10, the package refactors and M12 landed; release 0.1.1 published; the first C# project is in use, #49's three JSON tables and report-backed verdicts landed (#58, #62–#63), and the C# starter and file markers landed (#65–#66). Open authoring-integrity issues #25 and #26, verification-method issue #57 and external-source issue #60 inform the next choice; M11 mentions remains later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,11 +8,45 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-16 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-23 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
 capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
-on a C# repo, in the layout of ADR-0001. Next: [#49 · tables as data](#next--49--tables-as-data), around #40. After: M11 · mentions. Commit hashes locate work. Verification claims refer to checks
+on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--tables-as-data)
+landed; the authoring-integrity fix for #25 and #26 is in progress on
+`codex/id-authoring-integrity`. M11 · mentions
+remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
+
+## Ready for review — #25 and #26 · ID authoring integrity
+
+**2026-10-23 · prepared for draft PR on `codex/id-authoring-integrity`.** The existing tracker
+reconciliation was carried from `main`. [ADR-0008](../adr/0008-prove-id-starts-and-subject-ownership-before-baselines.md)
+records the accepted contract: an `id_prefix` must fit a provable shared start across every
+pattern branch; V17 reports controlled document IDs without one subject while authoring.
+Under an applicable baseline, ownership uncertainty still stops judgment (exit 2), with
+tag-specific recovery when the selected snapshot is at fault.
+
+- [x] Prove common starts for grouped alternatives and escaped literals; reject a mismatched
+  explicit prefix before scanning. Keep the existing V02 path for malformed headings.
+- [x] Add pure ownership judgment for local and ledger assessments, V17 in the catalogue,
+  and tag-aware refusals for current and historical evidence.
+- [x] Add focused regressions, CLI goldens, ADR, design/scenario updates and Diátaxis manual
+  updates; inspect the rendered V17 snippets.
+- [x] Complete the full dry gate and both strict trace checks; record the measured results.
+
+Verification on this branch: 192 focused configuration, ownership, baseline, CLI and catalogue
+tests passed. Both newly tagged behavioral tests failed when their respective guard was
+disabled in a disposable copy; the copy was removed and the evidence is in the local
+`_playground/2026-10-23_id-authoring-integrity/` session. The first `just dry` run reached
+1,222 passing Python tests and 98.50% coverage but identified two architecture-test inventories
+that needed the new `_prefix` owner and judge export; both were updated. The final `just dry`
+passed: **1,224 Python tests, 4 browser tests, 98.53% coverage**, formatting, lint, mypy,
+wheel/package checks and strict manual build. The built V17 code blocks were inspected.
+Final review also covered a subject-key change in today's configuration for an existing
+frozen item (exit 2) and a repeated key segment in one ID (V17); 51 focused tests passed.
+Local and ledger `check --strict --quiet` both exit 0: **752 items, 0 violations, 0 gaps,
+32 informational suspects**, with 16 frozen, 3 changed, 7 new and 0 removed. Remote-tag
+completeness remains unverified, as before. Issues #25 and #26 remain open until merge.
 
 ## Landed — package refactors
 
@@ -444,12 +478,14 @@ multi-repo acceptance. Remote-tag completeness and historical external evidence 
 unverified. The handoff's 794-test dry-gate result and the acceptance records below are
 historical evidence; the later refactor verification is recorded above.
 
-## Next — #49 · tables as data
+## Landed — #49 · tables as data
 
-The PRD's P0 *emit tables as data for the existing render machine* (success criterion 2: the
-pilot's traceability record renders with **zero hand-typed IDs**). The first C# adopter's
-record is a hand-typed matrix whose two result columns are empty in every row. Issue #49; it
-depends on #40 (several reports in one run).
+The PRD's P0 *emit tables as data for the existing render machine* is implemented. Issue #49
+closed 2026-10-23 after #58 (the three JSON tables), #62 (report-backed verdict columns) and
+#63 (review follow-ups) merged; #59 delivered its #40 prerequisite, several reports in one run.
+The first C# adopter's original record was a hand-typed matrix whose result columns were empty.
+**Not yet verified:** a render layer consuming the JSON or a pilot traceability record rendered
+with zero hand-typed IDs (PRD success criterion 2).
 
 **Decided 2026-10-15** by the developer, every recommendation taken (the design prep, a probe
 of today's model on the `cases` fixture and the record of the answers are in a local
@@ -474,21 +510,21 @@ row; no timestamps (REQ-QMT-15).
   [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md), the surface architecture
   following it; CONTEXT.md's *Traceability Matrix* and *Coverage Summary*.
 - [x] **CR-004 accepted** — by the developer, 2026-10-16 (qmstrace-ledger `3928b27`).
-- [x] **B · #40** — several reports in core, to ADR-0005; amends REQ-QMT-10 under CR-004 —
-  pull request. `results REPORT...`: a run in two reports is one run with its worst verdict,
+- [x] **B · #40** — #59 merged; several reports in core, to ADR-0005; amends REQ-QMT-10
+  under CR-004. `results REPORT...`: a run in two reports is one run with its worst verdict,
   each run keeps its reports' labels and sha256, a report may name its repo, and one report
   prints the view it always did. Order-independence and the cross-file duplicate rule each
   fail their tests when broken in a disposable copy.
-- [ ] **#49a** — `ledger table` without verdict columns, in parallel with B; adds REQ-QMT-23
-  and DSN-QMT-16; rebased after #40. *Built on `feat/49-tables`, stacked on Phase A:* the
-  schema-derived tables (`core/tables.py`), `[tables.matrix] fields`, `model.id_order`, each
+- [x] **#49a** — #58 merged; `ledger table` without verdict columns adds REQ-QMT-23
+  and DSN-QMT-16. It includes schema-derived tables (`core/tables.py`),
+  `[tables.matrix] fields`, `model.id_order`, each
   repo's checkout (`infra/git.checkout`), the JSON document (`render/tables.py`), the command,
   goldens and the manual; REQ-QMT-23 (`Change: CR-004`) and DSN-QMT-16, with their markers.
   Mutation checks in disposable copies: without the direct-test row rule, 5 tests fail; with
   cleanliness always true, 5 fail.
-- [ ] **#49b** — `--report REPO=FILE`, per-level verdict columns, each cell's evidence pointer;
-  additive, so the format stays `qmstrace.table/1`.
-  *Built on `feat/49b-verdicts` (2026-10-16), on #40's core combination:*
+- [x] **#49b** — #62 merged, with #63's review follow-ups; `--report REPO=FILE`, per-level
+  verdict columns, each cell's evidence pointer; additive, so the format stays
+  `qmstrace.table/1`. Built on #40's core combination:
   `Workspace.project_results` reads each `--report` as the repo it names; one column per
   level, then an overall `verdict`, each cell naming its reports. Decided by the developer: a
   test's own level wins over its test case's (`[tables.matrix] level`); reports matching
@@ -734,6 +770,8 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
   - #25 an `id_pattern` with alternatives lets a slip in its second family pass silently.
   - #26 `ux`: an ID without its subject key passes until the first baseline, then stops
     every run.
+  - #57 `status` and `results` disagree about which verification methods are listed apart.
+  - #60 an external source cannot yet pool IDs across several agreement files.
   - [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71).
 - **Not filed, from run A:**
   - `check` repeats G06's fix once per module.
