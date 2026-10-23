@@ -85,8 +85,19 @@ of a design element does not imply a verdict for its requirements; such tests an
 listed apart. Nonpassing test details name the affected runs and show outcome messages. A shared
 test names the other items it verifies.
 
-Inspection and analysis requirements appear separately. Their linked test results, if any,
-do not change their verification method or establish approval.
+Requirements with no applicable incoming-`verifies` coverage rule appear separately, whether
+their `Verify-by` value is `inspection`, `analysis`, `demonstration` or another configured method.
+The rule's entire `where` condition applies; its code has no special meaning. A missing or
+invalid method appears as `unspecified` or its authored value and remains a validation finding.
+Linked direct tests and test-case paths are shown as **test evidence only**; even a pass does not
+complete or approve the declared verification method.
+
+For example, a requirement declared `Verify-by: demonstration` with a passing linked test
+appears in the separate section:
+
+``` text
+--8<-- "cli/golden/results-demonstration.txt"
+```
 
 ## Partial report example
 

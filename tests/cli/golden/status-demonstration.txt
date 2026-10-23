@@ -1,0 +1,26 @@
+schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo's qmstrace.toml
+scanned (working tree, not pinned):
+  requirement       3 items in  1 file   docs/req/*-srs.md
+  design_element    2 items in  1 file   docs/design/*.md
+  component         2 items in  2 files  src/**/*.py · 1 file ignored by **/__init__.py
+  automated_test    4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one automated test
+links: 14
+external AGR-*: verified against ../ledger/agreement.md (3 declared)
+sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID
+controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
+baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
+baselines: no matching reachable local tag — nothing frozen locally
+change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import
+
+  REQ-SVC-01  security         origin AGR-1         design elements 1  automated tests 0                  — A call carries a key
+  REQ-SVC-02  reliability      origin AGR-2, AGR-3  design elements 1  automated tests 2 (integration 2)  — Records survive a restart
+
+outside test-backed verification (demonstration) — listed apart; this view does not establish their verification:
+  REQ-SVC-03  maintainability  origin AGR-3         design elements 0  automated tests 1 (unit 1)         — The record format is written down · Verify-by: demonstration
+
+categories with no requirement here: functional-suitability, performance-efficiency, compatibility, usability, portability, design-constraint, legal-regulatory
+  (a prompt, not a gap — not every product needs one under every category)
+
+suspects: 0 — informational; this repo only
+
+0 violations · 2 gaps (G01 ×1, G02 ×1) — qmstrace check lists them

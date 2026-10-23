@@ -4,8 +4,9 @@ scanned (working tree, not pinned):
   design_element    2 items in  1 file   docs/design/*.md
 links: 2
 
-  REQ-RCH-01  functional-suitability  design elements 1  — Registration under a supplied client ID
-  REQ-RCH-02  security                design elements 1  — Only a caller with the key registers
+outside test-backed verification (unspecified) — listed apart; this view does not establish their verification:
+  REQ-RCH-01  functional-suitability  design elements 1  — Registration under a supplied client ID · Verify-by: unspecified
+  REQ-RCH-02  security                design elements 1  — Only a caller with the key registers · Verify-by: unspecified
 
 suspects: 0 — informational; this repo only
 

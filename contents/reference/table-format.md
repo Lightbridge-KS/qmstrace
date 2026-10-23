@@ -72,6 +72,8 @@ per level, `verdict_<level>`, and an overall `verdict`. A `verdict` cell holds t
 of the row's automated tests there — `fail`, `no-result`, `skip`, `pass` — and every report
 their runs came from, by `repo`, `label` and `sha256`. A level the row has no test at is `null`;
 a row no automated test runs is `untested`.
+These cells report test outcomes; they do not establish completion or approval of a
+requirement's declared verification method.
 
 The levels are the automated tests' levels from the schema, then those of a test-case field
 that `[tables.matrix] level` names. A test's level is where it sits when its type has levels;

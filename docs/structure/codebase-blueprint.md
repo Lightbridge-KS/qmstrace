@@ -413,7 +413,9 @@ deciding eligibility. The check failure predicate remains violations plus strict
 - **No use of the framework's private modules.** Typer's vendored click is not ours to import.
 - **No second item type named in `status`.** It lists `requirement` items and reads `Category`
   and `Verify-by` by name — a known hard-coding in `render/text/_status.py`, since every trace schema so
-  far uses those names. Everything else it prints comes from the configuration. Revisit when a
+  far uses those names. `core/judge/_coverage.py` owns rule applicability and the shared
+  test-backed display classification used by status and results; rendering only arranges the
+  classified values. Everything else it prints comes from the configuration. Revisit when a
   second schema does not.
 
 ## 9. Invariants

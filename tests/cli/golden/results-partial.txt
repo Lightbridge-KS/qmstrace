@@ -17,7 +17,7 @@ requirements — direct verifies links only:
         failure: record missing after restart
     no-result tests/integration/test_store.py::test_a_restart_loses_no_accepted_record · 0 runs
 
-inspection / analysis — no verification or approval is established by this report:
+outside test-backed verification — no verification or approval is established by this report:
   REQ-SVC-03 — The record format is written down · Verify-by: inspection · requirement · docs/req/service-srs.md:28
     no linked automated tests
 

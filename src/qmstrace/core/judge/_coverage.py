@@ -26,6 +26,31 @@ class Way:
     repos: tuple[str, ...] = ()
 
 
+def rule_applies(rule: CoverageRule, item_type: str, fields: Mapping[str, str]) -> bool:
+    """Whether this item's type and authored fields meet the rule's conditions."""
+    return rule.item_type == item_type and all(
+        fields.get(key) == value for key, value in rule.where.items()
+    )
+
+
+def test_backed_requirement(config: TraceConfig, fields: Mapping[str, str]) -> bool:
+    """Whether the schema requires incoming test evidence for this requirement.
+
+    Invalid or absent verification methods remain outside the test-backed display even if
+    an unconditional rule exists; field validation reports those defects separately.
+    """
+    method = fields.get("Verify-by")
+    allowed = config.item_types["requirement"].values.get("Verify-by", ())
+    if not method or (allowed and method not in allowed):
+        return False
+    return any(
+        rule.direction == "incoming"
+        and rule.marker == "verifies"
+        and rule_applies(rule, "requirement", fields)
+        for rule in config.rules
+    )
+
+
 def coverage(
     config: TraceConfig,
     graph: TraceGraph,
@@ -61,7 +86,7 @@ def coverage(
         for item in graph.items(rule.item_type):
             if item.fields.get("Status") == "withdrawn":
                 continue
-            if any(item.fields.get(key) != value for key, value in rule.where.items()):
+            if not rule_applies(rule, item.type, item.fields):
                 continue
             links = (
                 graph.incoming(item.id, rule.marker)

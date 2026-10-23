@@ -92,7 +92,8 @@ for package, owners in (
                               'schema_block', 'copy_schema')}),
     (graph, {'_nodes': ('Home', 'Node', 'Surroundings'),
              '_graph': ('TraceGraph', 'Direction', 'Step', 'Closure')}),
-    (judge, {'_coverage': ('Form', 'coverage'), '_baselines': ('resolve_baselines', 'guard'),
+    (judge, {'_coverage': ('Form', 'coverage', 'test_backed_requirement'),
+             '_baselines': ('resolve_baselines', 'guard'),
              '_suspects': ('suspects',)}),
 ):
     assert package.__file__.startswith(sys.argv[1] + '/')

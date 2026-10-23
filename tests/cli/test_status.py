@@ -42,6 +42,40 @@ def test_status_with_everything_beside_the_repo(project: Path, golden: Golden) -
     golden(GOLDEN / "status-service.txt", output)
 
 
+@pytest.mark.verifies("REQ-QMT-05")
+def test_demonstration_is_listed_apart_in_status(project: Path, golden: Golden) -> None:
+    schema = project / "ledger/qmstrace.schema.toml"
+    schema.write_text(
+        schema.read_text().replace(
+            '"test", "inspection", "analysis"', '"test", "inspection", "analysis", "demonstration"'
+        )
+    )
+    root = project / "service"
+    srs = root / "docs/req/service-srs.md"
+    srs.write_text(srs.read_text().replace("Verify-by: inspection", "Verify-by: demonstration"))
+    source = root / "tests/unit/test_keys.py"
+    source.write_text(source.read_text().replace('"REQ-SVC-01"', '"REQ-SVC-03"'))
+    code, output = status(root)
+    assert code == 0
+    assert "Verify-by: demonstration" in output
+    golden(GOLDEN / "status-demonstration.txt", output)
+
+
+@pytest.mark.parametrize("method", [None, "invalid"])
+def test_missing_or_invalid_method_is_apart_with_v05(project: Path, method: str | None) -> None:
+    root = project / "service"
+    srs = root / "docs/req/service-srs.md"
+    replacement = "" if method is None else f"- Verify-by: {method}\n"
+    srs.write_text(srs.read_text().replace("- Verify-by: test\n", replacement, 1))
+    code, output = status(root)
+    assert code == 0
+    assert f"Verify-by: {method or 'unspecified'}" in output
+    assert "1 violation (V05 \N{MULTIPLICATION SIGN}1)" in output
+    check = runner.invoke(app, ["-C", str(root), "check"])
+    assert check.exit_code == 1
+    assert "V05" in check.output
+
+
 def test_status_of_a_product_repo_whose_documents_are_in_the_ledger(
     split: Path, golden: Golden
 ) -> None:

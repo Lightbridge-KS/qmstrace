@@ -214,6 +214,7 @@ TEXT_IMPORTS: dict[str, set[str]] = {
         "qmstrace.render._presentation",
         "qmstrace.core.findings",
         "qmstrace.core.config",
+        "qmstrace.core.judge",
     },
     "_results": {
         "qmstrace.render._evidence",
@@ -314,7 +315,7 @@ EXPORTS: dict[str, dict[str, set[str]]] = {
         "_toml": {"SUPPORTED_VERSION"},
     },
     "judge": {
-        "_coverage": {"Form", "Way", "coverage"},
+        "_coverage": {"Form", "Way", "coverage", "test_backed_requirement"},
         "_baselines": {"guard", "ownership_findings", "resolve_baselines"},
         "_suspects": {"suspects"},
     },

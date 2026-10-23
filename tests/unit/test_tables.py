@@ -313,7 +313,9 @@ FIELDED = (
 )
 
 
-def results_of(graph: TraceGraph, runs: Mapping[str, list[tuple[str, str]]]) -> Results:
+def results_of(
+    config: TraceConfig, graph: TraceGraph, runs: Mapping[str, list[tuple[str, str]]]
+) -> Results:
     """Results for the tests given, each run as (the report's label, its verdict)."""
     by_label: dict[str, list[ReportEntry]] = {}
     for test, found in runs.items():
@@ -324,7 +326,7 @@ def results_of(graph: TraceGraph, runs: Mapping[str, list[tuple[str, str]]]) -> 
         for label, entries in by_label.items()
     }
     identities = {test: ((test, "t"),) for test in runs}
-    return summarize(SimpleNamespace(graph=graph), reports, identities)  # type: ignore[arg-type]
+    return summarize(SimpleNamespace(config=config, graph=graph), reports, identities)  # type: ignore[arg-type]
 
 
 def cell(table: object, case: str | None, column: str, design: str = "DSN-T-01") -> object:
@@ -337,7 +339,7 @@ def cell(table: object, case: str | None, column: str, design: str = "DSN-T-01")
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_tests_verdict_lands_in_the_column_of_the_level_it_sits_at() -> None:
     config, graph = cases_graph(schema=LEVELLED, levels={"t::one": "unit"})
-    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "pass")]}))
+    table = matrix(config, graph, results_of(config, graph, {"t::one": [("a", "pass")]}))
     assert [c.name for c in table.columns][-3:] == [
         "verdict_unit",
         "verdict_integration",
@@ -351,7 +353,7 @@ def test_a_tests_verdict_lands_in_the_column_of_the_level_it_sits_at() -> None:
 @pytest.mark.verifies("DSN-QMT-16")
 def test_with_no_level_on_the_test_the_test_cases_field_names_it() -> None:
     config, graph = cases_graph(schema=FIELDED, case_levels={"TC-T-01.1": "integration"})
-    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "fail")]}))
+    table = matrix(config, graph, results_of(config, graph, {"t::one": [("a", "fail")]}))
     assert cell(table, "TC-T-01.1", "verdict_integration") == ("fail", ("a",))
     assert cell(table, "TC-T-01.1", "verdict_unit") is None
 
@@ -365,7 +367,7 @@ def test_where_the_test_sits_wins_over_its_test_cases_level() -> None:
     config, graph = cases_graph(
         schema=schema, levels={"t::one": "unit"}, case_levels={"TC-T-01.1": "integration"}
     )
-    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "pass")]}))
+    table = matrix(config, graph, results_of(config, graph, {"t::one": [("a", "pass")]}))
     assert cell(table, "TC-T-01.1", "verdict_unit") == ("pass", ("a",))
     assert cell(table, "TC-T-01.1", "verdict_integration") is None
     assert any("sits at another level than its test case names" in n for n in table.notices)
@@ -374,7 +376,7 @@ def test_where_the_test_sits_wins_over_its_test_cases_level() -> None:
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_test_with_no_level_reaches_only_the_overall_verdict() -> None:
     config, graph = cases_graph(schema=LEVELLED)
-    table = matrix(config, graph, results_of(graph, {"t::direct": [("a", "skip")]}))
+    table = matrix(config, graph, results_of(config, graph, {"t::direct": [("a", "skip")]}))
     assert cell(table, None, "verdict_unit", "DSN-T-02") is None
     assert cell(table, None, "verdict", "DSN-T-02") == ("skip", ("a",))
     assert any("have no level" in n for n in table.notices)
@@ -383,7 +385,9 @@ def test_a_test_with_no_level_reaches_only_the_overall_verdict() -> None:
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_row_no_test_runs_is_untested_and_a_test_with_no_run_has_no_result() -> None:
     config, graph = cases_graph(schema=LEVELLED, levels={"t::one": "unit"})
-    table = matrix(config, graph, results_of(graph, {"t::one": [("a", "pass")], "t::two": []}))
+    table = matrix(
+        config, graph, results_of(config, graph, {"t::one": [("a", "pass")], "t::two": []})
+    )
     no_test = next(r for r in table.rows if r["requirement"] == "REQ-T-02")
     assert no_test["verdict"] == VerdictCell("untested")
     assert cell(table, "TC-T-01.2", "verdict") == ("no-result", ())
@@ -397,8 +401,8 @@ def test_a_cell_is_its_tests_worst_verdict_and_names_every_report() -> None:
         levels={"t::one": "unit", "t::two": "unit"},
     )
     runs = {"t::one": [("a", "pass")], "t::two": [("b", "fail"), ("a", "pass")]}
-    table = matrix(config, graph, results_of(graph, runs))
+    table = matrix(config, graph, results_of(config, graph, runs))
     assert cell(table, "TC-T-01.1", "verdict_unit") == ("fail", ("a", "b"))
     # the same verdicts whatever order the reports come in
     flipped = {k: list(reversed(v)) for k, v in reversed(runs.items())}
-    assert matrix(config, graph, results_of(graph, flipped)).rows == table.rows
+    assert matrix(config, graph, results_of(config, graph, flipped)).rows == table.rows

@@ -12,6 +12,7 @@ from typing import Final
 from qmstrace.core import findings
 from qmstrace.core.assessment import Assessment
 from qmstrace.core.config import TraceConfig
+from qmstrace.core.judge import test_backed_requirement
 from qmstrace.core.model import Finding, Item
 from qmstrace.render._evidence import _baselines, _external, _schema, _siblings
 from qmstrace.render._presentation import _finding, _noun
@@ -28,7 +29,7 @@ CATEGORY: Final = "Category"
 VERIFY_BY: Final = "Verify-by"
 
 
-TESTED: Final = "test"
+TESTED: Final = "test"  # compatibility export; grouping now follows coverage rules
 
 
 def status(assessment: Assessment) -> str:
@@ -99,13 +100,21 @@ def _listing(assessment: Assessment) -> list[str]:
         cells = [cell.ljust(width) for cell, width in zip(row[:-1], widths, strict=False)]
         return "  " + "  ".join(cells) + "  — " + row[-1]
 
-    tested = [row for item, row in rows if item.fields.get(VERIFY_BY, TESTED) == TESTED]
-    apart = [(item, row) for item, row in rows if item.fields.get(VERIFY_BY, TESTED) != TESTED]
+    tested = [row for item, row in rows if test_backed_requirement(config, item.fields)]
+    apart = [(item, row) for item, row in rows if not test_backed_requirement(config, item.fields)]
     lines = ["", *(line(row) for row in tested)]
     if apart:
-        ways = sorted({item.fields[VERIFY_BY] for item, _ in apart})
-        lines += ["", f"verified by {' or '.join(ways)} — no recorded basis yet, listed apart:"]
-        lines += [line(row) for _, row in apart]
+        ways = sorted({item.fields.get(VERIFY_BY) or "unspecified" for item, _ in apart})
+        if tested:
+            lines.append("")
+        lines += [
+            f"outside test-backed verification ({', '.join(ways)}) — listed apart; "
+            "this view does not establish their verification:",
+        ]
+        lines += [
+            f"{line(row)} · Verify-by: {item.fields.get(VERIFY_BY) or 'unspecified'}"
+            for item, row in apart
+        ]
     lines += _categories(config, listed)
     return lines
 

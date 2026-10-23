@@ -8,7 +8,8 @@ controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 with
 baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
 baselines: no matching reachable local tag — nothing frozen locally
 
-  REQ-APP-01  origin BRF-1  automated tests 1 (unit 1)  — A greeting
+outside test-backed verification (unspecified) — listed apart; this view does not establish their verification:
+  REQ-APP-01  origin BRF-1  automated tests 1 (unit 1)  — A greeting · Verify-by: unspecified
 
 suspects: 0 — informational; this repo only
 

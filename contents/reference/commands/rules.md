@@ -40,7 +40,7 @@ and the words its gap uses. Then, only where it applies:
 
 | Note | What it means |
 |---|---|
-| `not for Verify-by = inspection, analysis` | the rule's `where` leaves these values out — such items fall under no rule of this kind, and `qmstrace status` lists them apart |
+| `not for Verify-by = inspection, analysis` | this particular rule's `where` leaves these values out. Status and results list a requirement apart only if no other applicable incoming-`verifies` rule covers it |
 | `applies to no item here` | this repo does not scan the rule's item type, so nothing here can raise the gap |
 | `cannot be met with the item types this repo scans` | the link comes from a type this repo does not scan — the gap stays until the repo declares that type, or the item is met in another repo — judged in the ledger by `qmstrace ledger check` |
 

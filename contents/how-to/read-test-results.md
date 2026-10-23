@@ -53,8 +53,10 @@ The miniature service illustrates a partial report with failed and missing resul
    test case it runs — or review the requirement's verification method. A few reported parameter variants do not establish a complete set.
 4. Resolve unmatched entries by checking report provenance, scan patterns and default pytest
    names. Zero matched tests is an error; a partly matched report still shows recognized results.
-5. Review inspection and analysis requirements through their own verification process. Linked
-   test results do not approve them.
+5. Review requirements outside test-backed verification through their declared method, such
+   as inspection, analysis or demonstration. Linked test results are evidence only; they do
+   not complete or approve that method. A missing or invalid `Verify-by` value needs its V05
+   finding corrected.
 
 The output always states that the report's commit is **not verified**. Generate a fresh report
 from the intended working tree and retain the run's provenance through the project's evidence
