@@ -214,6 +214,14 @@ implementation:
   identities remain eligible after a type or scope rename. Subject keys are exact ID segments;
   unknown or ambiguous ownership is *could not judge*. A new subject absent from a historical
   configuration is not frozen by that snapshot's wildcard release.
+- **Authoring catches unowned controlled IDs before a tag** (ADR-0008). A locally declared
+  Markdown item of a baseline-covered type without exactly one subject-key occurrence and
+  one configured owner is
+  V17 while no applicable baseline is selected. Once a baseline may govern it, ownership is
+  required to judge scope: the run exits 2. A bad selected tagged tree names its tag and needs
+  a valid, approved successor baseline; the current file cannot repair the old snapshot.
+  An existing frozen item's ID must also remain owned under the current subject configuration;
+  changing today's subject keys cannot silently leave it frozen under only the old key.
 
 How the standard's baselines fall onto a release-branch workflow, none of it new work:
 
@@ -577,6 +585,10 @@ a Razor page, a file of top-level statements.*
   matches one of this repo's item-ID patterns or shares their prefix; any other heading is a
   sub-heading if deeper, a boundary if not. `#### IEC-62304 software safety class` stays
   inside a requirement although its first word has an ID's shape. Items never nest.
+- **The shared prefix is proved, not asserted** (ADR-0008). Configuration derives a literal
+  beginning common to every `id_pattern` branch; `id_prefix` may shorten that start but may
+  not name only one branch. A grouped pattern with a provable start still works. If the proof
+  cannot establish an ID-shaped start, configuration is refused before anything is scanned.
 - **Heading forms.** The ID comes first, after an optional section number (`4.2`, `4.2.1.`),
   and may be wrapped in emphasis or backticks; a trailing Pandoc attribute (`{#…}`, `{.…}`,
   `{-}`) is not part of the title. Decoration is layout: renumbering or restyling a heading

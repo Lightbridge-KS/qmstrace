@@ -52,6 +52,13 @@ A C# product repo reads its components with `csharp-file` and its xUnit tests wi
 | `csharp-file` | a `.cs` file's first type's `///` comment — or, where the file has no type, the comment it opens with; a `.razor` page's `@* … *@` head comment | the file's path |
 | `xunit` | `[Fact]` and `[Theory]` methods and their `DisplayName` | `path::Class::Method` |
 
+For a Markdown type, `id_pattern` must have a provable literal beginning shared by every
+branch. `id_prefix`, when supplied, must be a prefix of that beginning; it cannot cover just
+one alternative. Grouped alternatives with a shared start work. Configuration that cannot
+prove the start exits `2` before scanning; see [IDs and file patterns](../explanation/ids-and-file-patterns.md).
+For types in a baseline's `covers`, give each document ID exactly one configured subject key
+as a complete internal segment before cutting the tag.
+
 ## The project's trace schema
 
 ``` toml

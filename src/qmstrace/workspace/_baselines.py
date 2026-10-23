@@ -51,8 +51,17 @@ def _judged_baselines(
         tree = GitTree(source, commit)
         if CONFIG_FILE not in tree.files():
             continue
-        tagged = _configuration(root, tree)
-        scan = _scan(tree, tagged, tagged.item_types.values(), with_misplaced=True)
+        tags_here = ", ".join(t.name for t in tags if t.commit == commit)
+        try:
+            tagged = _configuration(root, tree)
+            scan = _scan(tree, tagged, tagged.item_types.values(), with_misplaced=True)
+        except CouldNotJudge as stopped:
+            raise CouldNotJudge(
+                f"Historical trace data at {tags_here} ({commit}) cannot be read: {stopped.what}",
+                f"{stopped.next_move} Correct the current tree and establish a valid, approved "
+                "successor baseline; editing today's files cannot repair this snapshot, and "
+                "the tag must not be rewritten.",
+            ) from None
         extracted, misplaced = scan.extracted, scan.misplaced
         if repo is not None:
             derived = frozenset(t.name for t in tagged.item_types.values() if t.derives_ids)
@@ -70,7 +79,6 @@ def _judged_baselines(
         )
         problems = [f for f in found if f.code not in findings.SNAPSHOT_SAFE]
         if problems or misplaced or len({i.id for i in found_items}) != len(found_items):
-            tags_here = ", ".join(t.name for t in tags if t.commit == commit)
             where = f" in {repo}" if repo is not None else ""
             raise CouldNotJudge(
                 f"Historical trace data at {tags_here} ({commit}){where} cannot form a reliable "

@@ -204,6 +204,7 @@ def project(
             member.config, extracted, around, misplaced=misplaced
         )
         violations += found
+        violations += judge.ownership_findings(member.config, graphs[name].items())
         for t in member.config.item_types.values():
             if t.declared_here and t.extractor is not None:
                 readers.setdefault((t.name, t.extractor), []).append(name)

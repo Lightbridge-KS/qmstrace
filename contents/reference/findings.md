@@ -33,6 +33,13 @@ Every finding carries the same four parts, and the last one is never left out:
 `V10` to `V13` are emitted by the [baseline guard](baselines.md).
 `V16` is the one violation found in a baseline tag's tree that does not stop the tag being
 read: it declares nothing. How to avoid it: [write traced docs](../how-to/write-traced-docs.md).
+`V17` catches a document ID without exactly one configured subject key before a tag is cut.
+It is shown in this tested quiet check:
+
+``` text
+--8<-- "cli/golden/check-authoring-v17.txt"
+```
+
 `S01` is a [suspect](suspects.md); its next move starts with `Review:` and does not claim
 that review or approval has happened.
 

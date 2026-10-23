@@ -235,11 +235,50 @@ def test_an_item_type_the_project_does_not_know_is_refused() -> None:
     assert "requirement" in stopped.what
 
 
-def test_an_id_pattern_with_no_literal_start_needs_a_prefix() -> None:
-    loose = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^(REQ|RQ)-SVC-\d{2}$'")
-    assert "id_prefix" in refusal(loose).next_move
-    given = loose.replace('files      = ["docs/req', 'id_prefix  = "R"\nfiles      = ["docs/req', 1)
+def test_grouped_alternatives_with_a_proven_shared_start_are_accepted() -> None:
+    grouped = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^(REQ|RQ)-SVC-\d{2}$'")
+    assert TraceConfig.parse(grouped, SCHEMA).item_types["requirement"].id_prefix == "R"
+    given = grouped.replace(
+        'files      = ["docs/req', 'id_prefix  = "R"\nfiles      = ["docs/req', 1
+    )
     assert TraceConfig.parse(given, SCHEMA).item_types["requirement"].id_prefix == "R"
+    shared = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^REQ-(SVC|CLT)-\d{2}$'")
+    assert TraceConfig.parse(shared, SCHEMA).item_types["requirement"].id_prefix == "REQ-"
+
+
+@pytest.mark.parametrize(
+    ("pattern", "prefix"),
+    [
+        (r"'^(REQ|NFR)-SVC-\d{2}$'", "REQ-"),
+        (r"'^REQ-SVC-\d{2}$|^NFR-SVC-\d{2}$'", "REQ-"),
+        (r"'^R?EQ-SVC-\d{2}$'", "REQ-"),
+        (r"'^[RN]EQ-SVC-\d{2}$'", "REQ-"),
+    ],
+)
+@pytest.mark.verifies("DSN-QMT-03", "REQ-QMT-01")
+def test_a_prefix_that_misses_a_pattern_branch_is_refused(pattern: str, prefix: str) -> None:
+    given = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern)
+    given = given.replace(
+        'files      = ["docs/req', f'id_prefix  = "{prefix}"\nfiles      = ["docs/req', 1
+    )
+    stopped = refusal(given)
+    assert "no provable common literal start" in stopped.what
+    assert "every branch" in stopped.what
+
+
+def test_an_explicit_prefix_must_fit_the_proven_start() -> None:
+    given = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^REQ-(SVC|CLT)-\d{2}$'")
+    given = given.replace(
+        'files      = ["docs/req', 'id_prefix = "REQ-SVC-"\nfiles      = ["docs/req', 1
+    )
+    stopped = refusal(given)
+    assert "does not cover every ID" in stopped.what
+    assert "proved common start: 'REQ-'" in stopped.what
+
+
+def test_unsupported_regex_syntax_before_the_start_is_refused() -> None:
+    given = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'(?=REQ)REQ-SVC-\d{2}$'")
+    assert "no provable common literal start" in refusal(given).what
 
 
 @pytest.mark.parametrize(
@@ -259,14 +298,17 @@ def test_an_id_pattern_that_no_id_can_match_is_refused(pattern: str, start: str)
     assert "id_pattern = '^REQ-SVC-" in stopped.next_move
 
 
-# Only the literal start is judged: `^FR\.\d{2}$` starts with `FR` and is accepted, though
-# `FR.12` is no ID — the extractor reports what then fails to link.
 @pytest.mark.parametrize(
-    "pattern", [r"'^REQ-SVC-\d{2}$'", r"'^R-\d+$'", r"'^REQ-SVC-0\d$'", r"'^FR\.\d{2}$'"]
+    "pattern", [r"'^REQ-SVC-\d{2}$'", r"'^R-\d+$'", r"'^REQ-SVC-0\d$'", r"'^REQ-SVC-04\.1-\d{2}$'"]
 )
 def test_an_id_pattern_in_the_shape_is_accepted(pattern: str) -> None:
     config = TraceConfig.parse(SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern, 1), SCHEMA)
     assert config.item_types["requirement"].id_pattern is not None
+
+
+def test_escaped_invalid_start_is_refused() -> None:
+    stopped = refusal(SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^FR\.\d{2}$'"))
+    assert "starts with 'FR.'" in stopped.what
 
 
 @pytest.mark.parametrize("item_id", ["REQ-SVC-01", "A-1", "R2D2-X-9", "CR-003"])
@@ -279,7 +321,7 @@ def test_every_start_of_an_id_is_a_start_the_configuration_accepts(item_id: str)
 
 
 def test_an_id_prefix_that_no_id_can_start_with_is_refused() -> None:
-    loose = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^(REQ|RQ)-SVC-\d{2}$'")
+    loose = SERVICE
     given = loose.replace(
         'files      = ["docs/req', 'id_prefix  = "req-"\nfiles      = ["docs/req', 1
     )

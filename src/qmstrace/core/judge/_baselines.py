@@ -15,6 +15,31 @@ from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.model import ID_TOKEN, Finding, Item
 
 
+def ownership_findings(config: TraceConfig, items: Iterable[Item]) -> tuple[Finding, ...]:
+    """Report subject-less controlled document IDs before a baseline freezes them."""
+    covered = {kind for scope in config.baselines.values() for kind in scope.covers}
+    available = tuple(sorted(f"{name}={subject.key}" for name, subject in config.subjects.items()))
+    wrong = []
+    for item in items:
+        if item.type not in covered or config.item_types[item.type].extractor != "markdown":
+            continue
+        matches = _matching_subjects(item, config)
+        if len(matches) != 1:
+            wrong.append(
+                findings.subject_ownership(
+                    item,
+                    tuple(f"{name}={key}" for name, key in matches),
+                    available,
+                    duplicate_key=any(
+                        sum(subject.key == key for subject in config.subjects.values()) > 1
+                        for _, key in matches
+                    ),
+                    repeated_segment=len(set(matches)) != len(matches),
+                )
+            )
+    return tuple(wrong)
+
+
 def resolve_baselines(
     config: TraceConfig,
     tags: tuple[Tag, ...],
@@ -84,7 +109,11 @@ def guard(
             old_config = baseline.snapshot.config
             if old_config is None:
                 continue
-            key = _subject(candidate, old_config if before else config)
+            key = _subject(
+                candidate, old_config if before else config, baseline, historical=before is not None
+            )
+            if before is not None and after is not None:
+                _subject(after, config, baseline, historical=False)
             old_keys = {s.key for s in old_config.subjects.values()}
             if key not in old_keys:
                 continue  # a new subject is not a change to the old subject's baseline
@@ -151,15 +180,43 @@ def _citations(item: Item | None) -> set[str]:
     }
 
 
-def _subject(item: Item, config: TraceConfig) -> str:
-    keys = [s.key for s in config.subjects.values() if s.key in item.id.split("-")[1:-1]]
-    if len(keys) != 1:
-        raise CouldNotJudge(
-            f"{item.id}: subject ownership is {'ambiguous' if keys else 'unknown'}.",
-            "Fix: give the item exactly one configured subject key as a complete ID segment; "
-            "baseline ownership is never guessed.",
+def _matching_subjects(item: Item, config: TraceConfig) -> tuple[tuple[str, str], ...]:
+    segments = item.id.split("-")[1:-1]
+    return tuple(
+        (name, subject.key)
+        for name, subject in sorted(config.subjects.items())
+        for segment in segments
+        if subject.key == segment
+    )
+
+
+def _subject(item: Item, config: TraceConfig, baseline: Baseline, *, historical: bool) -> str:
+    matches = _matching_subjects(item, config)
+    if len(matches) != 1:
+        where = "tagged snapshot" if historical else "current working tree"
+        reason = (
+            "repeated"
+            if len(set(matches)) != len(matches)
+            else "ambiguous"
+            if matches
+            else "unknown"
         )
-    return keys[0]
+        next_move = (
+            "Fix: correct the current tree and establish a valid, approved successor baseline; "
+            "editing today's item cannot repair the tagged snapshot, and the tag must not "
+            "be rewritten."
+            if historical
+            else "Fix: give the current item exactly one configured subject key as a complete "
+            "internal ID segment; baseline applicability cannot be judged until then."
+        )
+        raise CouldNotJudge(
+            f"{item.id} at {item.file}:{item.line}: subject ownership is "
+            f"{reason} in the {where} for "
+            f"baseline {baseline.label} (matches: "
+            f"{', '.join(f'{name}={key}' for name, key in matches) or 'none'}).",
+            next_move,
+        )
+    return matches[0][1]
 
 
 def _latest(commits: set[str], ancestry: frozenset[tuple[str, str]]) -> set[str]:

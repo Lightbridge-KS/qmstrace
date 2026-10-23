@@ -220,10 +220,11 @@ def test_historical_patterns_and_subjects_survive_current_config_changes(control
     )
     assert "V13" in codes(controlled)
     config.write_text(source.replace('key = "SVC"', 'key = "OTHER"'))
-    assert all(
-        c.state == "frozen"
-        for c in Workspace.open(controlled).assessment().baseline_state.comparisons
-    )
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.open(controlled).assessment()
+    assert "current working tree" in caught.value.what
+    assert TAG in caught.value.what
+    assert "exactly one configured subject key" in caught.value.next_move
 
 
 def test_pretrace_release_and_detached_head(controlled):
@@ -406,6 +407,72 @@ def test_ambiguous_subject_key_fails_for_new_item(controlled):
     srs.write_text(srs.read_text() + "\n### REQ-SVC-04 — Added\n")
     with pytest.raises(CouldNotJudge, match="ambiguous"):
         Workspace.open(controlled).assessment()
+
+
+@pytest.mark.verifies("DSN-QMT-07", "REQ-QMT-08")
+def test_current_unowned_item_after_a_tag_names_the_applicable_baseline(controlled):
+    config = controlled / "qmstrace.toml"
+    config.write_text(config.read_text().replace(r"'^REQ-SVC-\d{2}$'", r"'^REQ-(SVC-)?\d{2}$'"))
+    srs = controlled / REQ
+    srs.write_text(
+        srs.read_text() + "\n### REQ-04 — No subject\n- Category: security\n- Origin: AGR-1\n"
+        "- Verify-by: inspection\n"
+    )
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.open(controlled).assessment()
+    assert "REQ-04" in caught.value.what
+    assert TAG in caught.value.what and "current working tree" in caught.value.what
+    assert "baseline applicability cannot be judged" in caught.value.next_move
+    with pytest.raises(CouldNotJudge) as project_caught:
+        Workspace.project(controlled.parent / "ledger")
+    assert "REQ-04" in project_caught.value.what and TAG in project_caught.value.what
+
+
+@pytest.mark.verifies("DSN-QMT-07", "REQ-QMT-08")
+def test_invalid_subject_frozen_in_a_tag_names_recovery(controlled):
+    config = controlled / "qmstrace.toml"
+    config.write_text(config.read_text().replace(r"'^REQ-SVC-\d{2}$'", r"'^REQ-(SVC-)?\d{2}$'"))
+    srs = controlled / REQ
+    srs.write_text(
+        srs.read_text() + "\n### REQ-04 — No subject\n- Category: security\n- Origin: AGR-1\n"
+        "- Verify-by: inspection\n"
+    )
+    commit(controlled)
+    newer = "baseline/service/requirements/2"
+    git(controlled, "tag", newer)
+    srs.write_text(srs.read_text().replace("REQ-04", "REQ-SVC-04"))
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.open(controlled).assessment()
+    assert "REQ-04" in caught.value.what and newer in caught.value.what
+    assert "tagged snapshot" in caught.value.what
+    assert "approved successor baseline" in caught.value.next_move
+    assert "must not be rewritten" in caught.value.next_move
+    commit(controlled)
+    git(controlled, "tag", "baseline/service/requirements/3")
+    assert not Workspace.open(controlled).assessment().violations
+
+
+@pytest.mark.verifies("DSN-QMT-03", "DSN-QMT-07")
+def test_invalid_prefix_frozen_in_a_tag_names_recovery(controlled):
+    config = controlled / "qmstrace.toml"
+    original = config.read_text()
+    config.write_text(
+        original.replace(r"'^REQ-SVC-\d{2}$'", r"'^(REQ|NFR)-SVC-\d{2}$'").replace(
+            'files      = ["docs/req', 'id_prefix = "REQ-"\nfiles      = ["docs/req', 1
+        )
+    )
+    commit(controlled)
+    newer = "baseline/service/requirements/2"
+    git(controlled, "tag", newer)
+    config.write_text(original)
+    with pytest.raises(CouldNotJudge) as caught:
+        Workspace.open(controlled).assessment()
+    assert newer in caught.value.what
+    assert "no provable common literal start" in caught.value.what
+    assert "approved successor baseline" in caught.value.next_move
+    commit(controlled)
+    git(controlled, "tag", "baseline/service/requirements/3")
+    assert not Workspace.open(controlled).assessment().violations
 
 
 def test_malformed_change_and_duplicate_metadata_are_findings(controlled):

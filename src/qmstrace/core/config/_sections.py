@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 from typing import Final
 
+from qmstrace.core.config._prefix import common_prefix
 from qmstrace.core.config._schema import (
     EXTRACTORS,
     BaselineScope,
@@ -22,7 +23,6 @@ from qmstrace.core.config._schema import (
 from qmstrace.core.config._toml import _Table
 from qmstrace.core.errors import CouldNotJudge
 
-_REGEX_META: Final = set("\\()[].*+?{|$")
 _GLOB: Final = set("*?[")  # what makes a path a pattern
 # Any start of the one shape every ID has (`model.ID_TOKEN`): capitals and digits in
 # hyphen-joined segments, a number with dotted parts. A pattern or prefix that starts otherwise
@@ -47,16 +47,6 @@ def _subjects(local: _Table) -> dict[str, Subject]:
         table.done()
         found[name] = Subject(name, key)
     return found
-
-
-def _literal_prefix(pattern: str) -> str:
-    """The literal text an ID pattern starts with: `^REQ-SVC-\\d{2}$` → `REQ-SVC-`."""
-    literal = []
-    for char in pattern.removeprefix("^"):
-        if char in _REGEX_META:
-            break
-        literal.append(char)
-    return "".join(literal)
 
 
 def _id_start(start: str, what: str, fix: str) -> None:
@@ -114,20 +104,21 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
                     "Fix: remove id_pattern and id_prefix from this table.",
                 )
             if pattern is not None:
-                start = _literal_prefix(pattern.pattern)
-                if start:
-                    _id_start(
-                        start,
-                        f"{here.file}: the ID pattern of [items.{name}]",
-                        "Fix: write the pattern in that shape, e.g. "
-                        r"id_pattern = '^REQ-SVC-\d{2}$'.",
-                    )
-                elif prefix is None:
+                start = common_prefix(pattern)
+                if not start:
                     raise CouldNotJudge(
-                        f"{here.file}: the ID pattern of [items.{name}] starts with no literal "
-                        "text, so a malformed ID cannot be told from prose.",
-                        'Fix: add id_prefix = "…" — the text every ID of this type starts with.',
+                        f"{here.file}: the ID pattern of [items.{name}] has no provable "
+                        "common literal start shared by every branch; id_prefix cannot make "
+                        "an unproved start safe.",
+                        "Fix: write one ID-shaped literal start common to every branch, or "
+                        "use separate item types for separate ID families.",
                     )
+                _id_start(
+                    start,
+                    f"{here.file}: the ID pattern of [items.{name}]",
+                    "Fix: write the pattern in that shape, e.g. "
+                    r"id_pattern = '^REQ-SVC-\d{2}$'.",
+                )
                 if prefix is None:
                     prefix = start
                 else:
@@ -136,6 +127,14 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
                         f"{here.file}: the id_prefix of [items.{name}]",
                         'Fix: write the prefix in that shape, e.g. id_prefix = "REQ-".',
                     )
+                    if not start.startswith(prefix):
+                        raise CouldNotJudge(
+                            f"{here.file}: the id_prefix '{prefix}' of [items.{name}] "
+                            f"does not cover every ID in its pattern (proved common start: "
+                            f"'{start}').",
+                            "Fix: use a prefix of the proved common start, or rewrite the "
+                            "pattern so every branch shares the intended prefix.",
+                        )
             here.done()
         found[name] = ItemType(
             name, required, values, levels, extractor, pattern, prefix, files, ignore

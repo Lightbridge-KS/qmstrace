@@ -138,6 +138,7 @@ class Workspace:
         graph, violations = TraceGraph.build(
             config, scan.extracted, around, misplaced=scan.misplaced
         )
+        violations += list(judge.ownership_findings(config, graph.items()))
         ways = {
             t.name: (judge.Way(FORMS[t.extractor]),)
             for t in config.item_types.values()

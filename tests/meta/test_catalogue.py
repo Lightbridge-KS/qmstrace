@@ -10,6 +10,7 @@ The stand-in's only regression was the one command nobody re-ran after a rewrite
 """
 
 from collections.abc import Callable
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -19,7 +20,7 @@ from qmstrace.core.baselines import Baseline, ChangeRequest, Register, Snapshot,
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.findings import CODES
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.judge import guard, suspects
+from qmstrace.core.judge import guard, ownership_findings, suspects
 from qmstrace.core.model import Finding, Item
 from qmstrace.extract.base import REGISTRY
 from qmstrace.infra.globbing import matches
@@ -92,6 +93,15 @@ SCENARIOS: dict[str, Scenario] = {
     "V14": lambda c: found(c, {SRS: REQ.replace("AGR-1", "TBD")}),
     "V15": lambda c: found(c, {TESTS: 'pytestmark = pytest.mark.verifies("REQ-SVC-01")\n'}),
     "V16": lambda c: found(c, {SRS: REQ + "\n| REQ-SVC-12 | a planned requirement |\n"}),
+    "V17": lambda c: list(
+        ownership_findings(
+            c,
+            tuple(
+                replace(item, id="REQ-03")
+                for item in REGISTRY["markdown"](SRS, REQ, c.item_types["requirement"], c).items
+            ),
+        )
+    ),
 }
 
 

@@ -84,6 +84,21 @@ planned `REQ-RCH-03` added to the summary table, and a heading that ends with `(
 - **An ID that nothing declares** is `V16`. Declare it as a heading where its kind is read — or,
   if it only names a planned item, take it out of the table until the item exists.
 
+## Check an ID before the first baseline
+
+For an item type listed in a baseline's `covers`, include exactly one configured subject key
+as a whole segment between the first and last ID segments. `REQ-SVC-03` identifies subject
+`SVC`; `REQ-03` does not. Run `qmstrace check` before cutting the tag. V17 names missing or
+ambiguous ownership while it can still be corrected in the current tree:
+
+``` text
+--8<-- "cli/golden/check-authoring-v17.txt"
+```
+
+If the tag has already frozen a bad ID, `check` exits `2` and names the tag. Correct the
+current item, then follow the project's approval process to establish a successor baseline;
+do not move the old tag.
+
 !!! note "Not built yet"
 
     An ID named in prose or inside a diagram is not checked yet: one that exists nowhere passes
