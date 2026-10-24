@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — v0.2.0 published; 0.3.0 names-only v2 configuration is implemented with passing local gates and native Windows distinct-drive acceptance; draft PR 74 awaits review. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
+summary: The single active qmstrace tracker — v0.2.0 published; names-only v2 configuration merged as PR 74 at 79841ec, with local gates and native Windows distinct-drive acceptance verified. The v0.3.0 release candidate is prepared on codex/release-0.3.0; manifest and lockfile name 0.3.0, with review, tag and publication pending. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -10,7 +10,7 @@ read_when:
 
 **Updated 2026-10-24 · Release 0.2.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
-capability](#landed--m12--the-c-capability): landed.** Now: [0.3.0 names-only configuration](#in-progress--030-names-only-configuration),
+capability](#landed--m12--the-c-capability): landed.** Now: [v0.3.0 release preparation](#in-progress--030-release),
 alongside [real-world use](#now--real-world-use) in the layout of ADR-0001.
 [#49 · tables as data](#landed--49--tables-as-data)
 landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps merged as PR #69 (`8223d32`).
@@ -20,16 +20,63 @@ at that verified merge commit. PR #73 (`bebf1f1`) advances `main` to `0.3.0.dev0
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## In progress — 0.3.0 names-only configuration
+## In progress — 0.3.0 release
+
+Release scope: the merged names-only configuration and portable `/2` output from PR #74.
+The candidate is on `codex/release-0.3.0`, carrying the PR #74 reconciliation. Manifest and
+lockfile name `0.3.0`; no local/remote `v0.3.0` tag or GitHub release exists as of this check.
+Issue #60, M11 and real consumer migration remain separate.
+The [release runbook](../dev/releasing.md) owns the mechanics; CI drafts, a maintainer publishes.
+
+- [x] Prepare a release branch/PR carrying this reconciliation: set the manifest to `0.3.0`,
+  regenerate `uv.lock` without dependency churn, move Unreleased notes into the dated release
+  section, update comparison links and current installation pins in README/manual.
+- [x] Make migration guidance explicit: v1 inputs remain readable; all CLI/table JSON uses
+  `/2`, v2 requires repo/profile identity, and fresh `init` starters remain v1. Run `just dry`,
+  both strict trace checks and isolated candidate-wheel/version/assets smoke tests.
+- [ ] Review/merge the draft release PR after its dry, native Windows distinct-drive and
+  preview checks pass; require green CI on that exact merge commit.
+- [ ] With explicit release authorization, push a new annotated `v0.3.0` tag at the verified
+  release merge commit. Let the release workflow rerun the Linux/Windows gates, verify
+  tag/manifest equality and draft the notes plus wheel. Preserve published v0.2.0.
+- [ ] Inspect the CI-created draft, migration notes and wheel/version/packaged assets;
+  maintainer reviews and publishes. Installation uses the tag or wheel, not a package index.
+- [ ] After publication, reconcile the tracker and prepare a PR for `0.4.0.dev0` plus lockfile.
+  Upgrade installed tools and migrate real consumers through separate coordinated work.
+
+**Release-candidate verification, 2026-10-24:** `just dry` passed **1,524 Python tests,
+4 browser tests and 98.33% coverage**, formatting, lint, strict mypy, all 37 isolated wheel
+import orders and the strict manual build. Both strict trace gates exit 0 with **892 items,
+0 violations, 0 gaps and 32 informational suspects**. Manifest and lockfile differ from
+`79841ec` only in qmstrace's version; all dependency records remain unchanged. Engine source,
+tests, workflows and trace configuration are unchanged.
+
+The fresh `0.3.0` wheel was installed offline into a temporary environment outside the
+source checkout with locked runtime constraints and an isolated home. Console version/help,
+v1 commands using CLI `/2` and table `/2`, a fresh v1 starter with the exact packaged skill,
+and the complete mapped v2 command smoke passed. Packaged assets match source bytes; the
+temporary environment and fixtures were removed. The local smoke does not substitute for
+native Windows acceptance, which remains required on the release PR and tagged commit.
+The built installation page contains the v0.3.0 pin; the release workflow's notes extractor
+selects only the new changelog section, including migration guidance. Published v0.2.0,
+consumer checkouts and the installed global CLI remain unchanged. Review/merge, tag creation,
+CI-drafted release inspection and publication remain pending.
+
+## Landed — 0.3.0 names-only configuration
 
 Design: [names-only workspaces](../design/names-only-workspaces.md).
 Accepted amendment: [ADR-0012](../adr/0012-names-only-configuration.md).
 Fixed measures and measured live results: [N01–N22](../tests/names-only-workspaces.md).
-Implementation is on `codex/names-only-workspaces`, opened as
-[draft PR #74](https://github.com/Lightbridge-KS/qmstrace/pull/74).
-[Hosted CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086635317) passed at
-`c4929d4`, including native Windows acceptance; the documentation preview also passed.
-Consumer rollout remains separate.
+**Merged as [PR #74](https://github.com/Lightbridge-KS/qmstrace/pull/74), `79841ec`,
+2026-10-24.** Implementation `5ad1f5e`, UTF-8 pipe fix `bd356a6`, Windows cleanup fix
+`c4929d4` and native evidence reconciliation `a53825b` are ancestors of the merge.
+[Final PR CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086985054) passed at
+`a53825b`, including native Windows acceptance; the documentation preview also passed.
+[Merge CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40089047351) passed
+at `79841ec`, including the dry gate and native Windows distinct-drive acceptance. Local
+`main` was fast-forwarded there; the merged local branch and stale remote reference were
+pruned. Reconciliation checks passed 320 meta tests and both strict trace gates (892 items,
+0 violations, 0 gaps, 32 informational suspects). Consumer rollout remains separate.
 
 Accepted 2026-10-24: required v2 `workspace_profile`, native Windows cross-drive support,
 uniform `qmstrace.cli/2`, `qmstrace.table/2`, preserved v1 starter creation and explicit v2
@@ -54,12 +101,12 @@ retain their meaning. Mapped/project evidence labels change intentionally in 0.3
   verify focused edge cases including unreadable ledger schema references and absent profiles.
 - [x] Complete `just dry`, isolated wheel/CLI smoke and both strict trace checks;
   final measured totals are recorded below.
-- [x] **N12: native Windows distinct-drive proof.** The [native job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086635317/job/120850811085) passed at
-  `c4929d4` on Windows Server 2025 / Python 3.13.16. Real distinct-drive command assertions
+- [x] **N12: native Windows distinct-drive proof.** The [native job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40089047351/job/120857770501) passed again at
+  merge commit `79841ec`, following the Windows Server 2025 / Python 3.13.16 proof at `c4929d4`. Real distinct-drive command assertions
   and cleanup completed; no same-drive smoke flag or alias setup was used.
 - [x] Open draft PR #74; fix redirected pipe encoding and read-only Git fixture cleanup;
   complete hosted dry/Windows gates and documentation preview.
-- [ ] Maintainer review/merge. Consumer migration and release preparation follow
+- [x] Maintainer review/merge as PR #74. Consumer migration and release preparation follow
   independently. v0.2.0 is immutable.
 
 **Verified local gates, 2026-10-24:** `just dry` passed **1,524 Python tests, 4 browser
@@ -88,7 +135,8 @@ with informational exit 0; restoration passes. Pins and limits are in the accept
 Planning-only checks (125 documentation meta tests, 36 legacy-map checks) remain historical
 assessment evidence; they are not presented as v2 acceptance. Engine/consumer release tags,
 manifest/lock versions and real consumer configurations are unchanged. Native Windows proof
-and local checks do not constitute maintainer review, consumer rollout or publication.
+and local checks do not constitute consumer rollout or publication; maintainer merge is
+recorded separately above.
 
 ## Landed — post-release development version
 

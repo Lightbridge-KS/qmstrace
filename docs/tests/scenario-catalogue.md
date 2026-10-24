@@ -708,7 +708,7 @@ test in `tests/integration/test_results_several.py`.
 
 The [acceptance protocol](names-only-workspaces.md) fixes N01–N22 before
 test-bed modification; the [feature design](../design/names-only-workspaces.md) owns their
-meaning and the [active tracker](../progress/overview-qmstrace.md#in-progress--030-names-only-configuration)
+meaning and the [active tracker](../progress/overview-qmstrace.md#landed--030-names-only-configuration)
 owns execution status. Measured outcomes and any unverified platform gates live in that protocol:
 
 - V1/v2 parsing, stable member identities, required profile stems and deterministic v2

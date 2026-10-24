@@ -6,6 +6,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-24
+
 ### Added
 
 - Names-only v2 project membership and explicit local repository identities, with required
@@ -19,12 +21,24 @@ All notable changes to this project are recorded here. The format follows
 
 - Redirected CLI output and diagnostics use UTF-8 even under a legacy Windows/Python code
   page; actual terminal streams keep their native encoding.
-- CLI JSON advances to `qmstrace.cli/2` for every handled outcome, including legacy inputs
-  and parser errors. Source locations use repo-relative records; rules expose named
-  membership. Table output advances to `qmstrace.table/2` with logical read locations.
+- **Output contract change:** CLI JSON advances to `qmstrace.cli/2` for every handled
+  outcome, including legacy inputs and parser errors. Source locations use repo-relative
+  records; rules expose named membership. Table output advances to `qmstrace.table/2` with
+  logical read locations.
   Existing IDs, configured rules, columns, verdict aggregation and exits retain their meaning.
 - Mapped/project source labels no longer depend on checkout nesting or cross-drive relative
-  paths. A native Windows acceptance probe and CI job require distinct-drive proof.
+  paths. Native Windows cross-drive acceptance is verified and remains part of CI.
+
+### Migration
+
+- Existing v1 configuration remains readable; conversion to v2 is explicit. V2 replaces
+  committed cross-repo paths with member names and local `repo`/`workspace_profile` identity.
+  Workspace maps keep format version 1; historical tags retain their original configuration.
+- Output consumers must support CLI `/2` and table `/2`, including when configuration remains
+  v1. Location records use `repo`/`path`/`line`; no legacy-output selector is provided.
+  See the [migration guide](https://qmstrace.netlify.app/how-to/migrate-to-names-only/) for
+  configuration, output-consumer and managed-skill updates
+  ([#74](https://github.com/Lightbridge-KS/qmstrace/pull/74)).
 
 ## [0.2.0] - 2026-10-24
 
@@ -346,7 +360,8 @@ All notable changes to this project are recorded here. The format follows
   with — underscores, lower case, a space — is refused with the ID shape and the next move,
   instead of being accepted and silently matching nothing.
 
-[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Lightbridge-KS/qmstrace/releases/tag/v0.1.0
