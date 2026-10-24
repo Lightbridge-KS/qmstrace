@@ -137,6 +137,7 @@ worked through in parallel with the first slice, which does not depend on it.
 | `Assumes` — a dependency link | Counts toward no coverage rule; carries suspicion and the impact set across repos; judged at import against the pin (D10) |
 | Suspect detection by content hash | Tracked against the item, never cleared by being touched; cleared by the next baseline or by an explicit, recorded review; also rendered documents against their source |
 | Workspace maps for current checkout locations | One whole local map selected by CLI, environment, nearest ancestor file or a unique user-level match; missing members stay unavailable. `qmstrace paths` explains resolution without assessing trace content. Schema defaults remain the fallback; schema digests and tagged reads keep their meaning (ADR-0010) |
+| Names-only membership and workspace profiles — 0.3.0 | Git owns stable repo identities and rules; developer/CI maps own checkout locations, including different Windows drives. V2 requires a named default profile and has no committed cross-repo path defaults. V1 inputs/history remain readable; output changes are explicitly versioned. See the [implementation design](../design/names-only-workspaces.md) and ADR-0012 |
 | The five-step audit demo, one command per step | See *Success criteria* |
 | Collector for the Git host | Pull requests, reviews, tags, releases, issues — with the host's own timestamps |
 | Drift check on a Word document | IDs and generated tables compared with the ledger at the document's pin |
@@ -192,7 +193,7 @@ as its plan declares; nothing there changes mid-audit.
 - **Checkout locations are local operational data.** A workspace map cannot change the
   project's rules or identities, supply today's schema to a historical read, or turn a
   missing repo into verified evidence. Ledger commands still run from the ledger trace root;
-  locations in output stay relative to the active root, with cross-drive layouts refused.
+  source evidence uses portable repo-relative locations; native checkout roots remain local.
 
 ## Success criteria
 

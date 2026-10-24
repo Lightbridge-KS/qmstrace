@@ -29,17 +29,23 @@ are separate from the generic `MINI` map input in the
 --8<-- "cli/golden/paths-map.txt"
 ```
 
-Checkout locations are relative to the current trace root; provenance names the source
+Mapped checkout locations are logical labels such as `service:.`; provenance names the source
 kind and map filename. A missing member is labelled unavailable, never filled from the
 tracked default location.
 
 ## With tracked defaults
 
-With no matching map, existing tracked locations are used and labelled:
+For v1 input without a matching map, existing tracked locations are used and labelled:
 
 ``` text
 --8<-- "cli/golden/paths-default.txt"
 ```
+
+## Version 2 without a profile file
+
+A missing implicit named profile permits a local-only view. `paths` shows the required
+profile stem, known local identity and unavailable members. A malformed or explicitly missing
+profile is an error. See [names-only configuration](../names-only-configuration.md).
 
 ## Scope and exits
 
@@ -49,6 +55,6 @@ Git/network operation or write. An available directory does not prove its trace 
 can be judged, its schema is current or its evidence is verified.
 
 Exit `0` means the layout was diagnosed; siblings may still be unavailable. Exit `2` means
-configuration, map selection or relative representation failed, including ambiguity and
-cross-drive layouts. Exit `3` means an internal fault. Use [`check`](check.md) or
+configuration or map selection failed, including ambiguous v1 matches or a wrongly bound
+v2 profile. Exit `3` means an internal fault. Use [`check`](check.md) or
 [`ledger check`](ledger.md#qmstrace-ledger-check) for trace judgment.

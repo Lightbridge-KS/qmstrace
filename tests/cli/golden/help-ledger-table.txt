@@ -1,6 +1,6 @@
 Usage: qmstrace ledger table [OPTIONS] {TABLE}
 
-  Emit one of the project's tables as versioned JSON (qmstrace.table/1), for a
+  Emit one of the project's tables as versioned JSON (qmstrace.table/2), for a
   render layer to turn into a document.
 
   matrix: one row per requirement, design element and test case. requirements:

@@ -50,9 +50,9 @@ CLIENT_TEST = "client:tests/unit/test_api.py::test_a_call_without_a_key_is_refus
 def test_every_repo_is_read_and_judged_as_one_graph(split: Path) -> None:
     project = Workspace.project(split / "ledger")
     assert [(r.name, r.location) for r in project.repos] == [
-        ("client", "../client"),
-        ("ledger", "."),
-        ("service", "../service"),
+        ("client", "client:."),
+        ("ledger", "ledger:."),
+        ("service", "service:."),
     ]
     assert project.violations == () and project.gaps == ()
     assert len(project.graph.items()) == 13
@@ -83,7 +83,7 @@ def test_an_id_nothing_declares_is_v03_located_from_the_ledger(split: Path) -> N
     rewrite(split / "client" / "tests" / "unit" / "test_api.py", '"REQ-SVC-01"', '"REQ-SVC-09"')
     project = Workspace.project(split / "ledger")
     (found,) = project.violations
-    assert (found.code, found.file) == ("V03", "../client/tests/unit/test_api.py")
+    assert (found.code, found.file) == ("V03", "client:tests/unit/test_api.py")
     assert "no such item in any repo of the project" in found.what
 
 
@@ -95,11 +95,9 @@ def test_each_repos_violations_are_the_ones_its_own_check_reports(split: Path) -
     project = Workspace.project(split / "ledger")
     whole = {(f.code, f.file, f.line) for f in project.violations}
     each = set()
-    for repo, location in (("client", "../client"), ("ledger", "."), ("service", "../service")):
+    for repo in ("client", "ledger", "service"):
         own = Workspace.open(split / repo).assessment()
-        each |= {
-            (f.code, str(Path(location, f.file)).removeprefix("./"), f.line) for f in own.violations
-        }
+        each |= {(f.code, f"{repo}:{f.file}", f.line) for f in own.violations}
     assert whole == each
     assert {code for code, _, _ in whole} == {"V03", "V04", "V05"}
 
@@ -119,8 +117,8 @@ def test_a_missing_repo_and_a_stale_copy_are_named_together(split: Path) -> None
     rewrite(split / "ledger" / "qmstrace.schema.toml", "verifies nothing.", "verifies nothing yet.")
     shutil.rmtree(split / "client")
     said = refusal(split)
-    assert "client: there is no ../client/qmstrace.toml" in said
-    assert "service: ../service/qmstrace.toml holds other rules than this ledger's" in said
+    assert "client: there is no client:qmstrace.toml" in said
+    assert "service: service:qmstrace.toml holds other rules than this ledger's" in said
     assert "run qmstrace ledger copy-schema service" in said
 
 
@@ -135,7 +133,7 @@ def test_two_names_for_one_folder_are_refused(split: Path) -> None:
         'client  = "../client"\n',
         'client  = "../client"\nagain   = "../client/"\n',
     )
-    assert "client and again name the same folder, ../client" in refusal(split)
+    assert "client and again name the same folder, client:." in refusal(split)
 
 
 def test_a_repo_whose_configuration_cannot_be_read_is_named(split: Path) -> None:

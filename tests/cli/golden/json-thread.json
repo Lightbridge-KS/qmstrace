@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "thread",
   "scope": "local",
   "exit_code": 0,
@@ -23,7 +23,11 @@
         "type": "design_element",
         "ownership": "local",
         "repo": null,
-        "location": "docs/design/service-design.md:8",
+        "location": {
+          "repo": null,
+          "path": "docs/design/service-design.md",
+          "line": 8
+        },
         "fields": {
           "Satisfies": "REQ-SVC-01"
         },
@@ -35,7 +39,11 @@
         "type": "design_element",
         "ownership": "local",
         "repo": null,
-        "location": "docs/design/service-design.md:13",
+        "location": {
+          "repo": null,
+          "path": "docs/design/service-design.md",
+          "line": 13
+        },
         "fields": {
           "Assumes": "DSN-SVC-01",
           "Satisfies": "REQ-SVC-02"
@@ -48,7 +56,11 @@
         "type": "requirement",
         "ownership": "local",
         "repo": null,
-        "location": "docs/req/service-srs.md:12",
+        "location": {
+          "repo": null,
+          "path": "docs/req/service-srs.md",
+          "line": 12
+        },
         "fields": {
           "Category": "security",
           "Origin": "AGR-1",
@@ -62,7 +74,11 @@
         "type": "component",
         "ownership": "local",
         "repo": null,
-        "location": "src/service/keys.py:1",
+        "location": {
+          "repo": null,
+          "path": "src/service/keys.py",
+          "line": 1
+        },
         "fields": {},
         "withdrawn": false
       },
@@ -72,7 +88,11 @@
         "type": "component",
         "ownership": "local",
         "repo": null,
-        "location": "src/service/store.py:1",
+        "location": {
+          "repo": null,
+          "path": "src/service/store.py",
+          "line": 1
+        },
         "fields": {},
         "withdrawn": false
       },
@@ -82,7 +102,11 @@
         "type": "automated_test",
         "ownership": "local",
         "repo": null,
-        "location": "tests/integration/test_store.py:5",
+        "location": {
+          "repo": null,
+          "path": "tests/integration/test_store.py",
+          "line": 5
+        },
         "fields": {},
         "withdrawn": false
       },
@@ -92,7 +116,11 @@
         "type": "automated_test",
         "ownership": "local",
         "repo": null,
-        "location": "tests/unit/test_keys.py:12",
+        "location": {
+          "repo": null,
+          "path": "tests/unit/test_keys.py",
+          "line": 12
+        },
         "fields": {},
         "withdrawn": false
       },
@@ -102,7 +130,11 @@
         "type": "automated_test",
         "ownership": "local",
         "repo": null,
-        "location": "tests/unit/test_keys.py:6",
+        "location": {
+          "repo": null,
+          "path": "tests/unit/test_keys.py",
+          "line": 6
+        },
         "fields": {},
         "withdrawn": false
       }
@@ -117,6 +149,7 @@
           "target": "REQ-SVC-01",
           "marker": "Satisfies",
           "location": {
+            "repo": null,
             "path": "docs/design/service-design.md",
             "line": 9
           }
@@ -132,6 +165,7 @@
           "target": "REQ-SVC-01",
           "marker": "verifies",
           "location": {
+            "repo": null,
             "path": "tests/unit/test_keys.py",
             "line": 6
           }
@@ -147,6 +181,7 @@
           "target": "DSN-SVC-01",
           "marker": "Implements",
           "location": {
+            "repo": null,
             "path": "src/service/keys.py",
             "line": 3
           }
@@ -162,6 +197,7 @@
           "target": "DSN-SVC-01",
           "marker": "verifies",
           "location": {
+            "repo": null,
             "path": "tests/unit/test_keys.py",
             "line": 12
           }
@@ -177,6 +213,7 @@
           "target": "DSN-SVC-01",
           "marker": "Assumes",
           "location": {
+            "repo": null,
             "path": "docs/design/service-design.md",
             "line": 15
           }
@@ -192,6 +229,7 @@
           "target": "DSN-SVC-02",
           "marker": "Implements",
           "location": {
+            "repo": null,
             "path": "src/service/store.py",
             "line": 3
           }
@@ -207,6 +245,7 @@
           "target": "DSN-SVC-02",
           "marker": "verifies",
           "location": {
+            "repo": null,
             "path": "tests/integration/test_store.py",
             "line": 5
           }
@@ -224,6 +263,7 @@
           "target": "AGR-1",
           "marker": "Origin",
           "location": {
+            "repo": null,
             "path": "docs/req/service-srs.md",
             "line": 16
           }
@@ -235,7 +275,7 @@
   "notices": [
     "schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo's qmstrace.toml",
     "external AGR-*: verified against ../ledger/agreement.md (3 declared)",
-    "sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
     "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
     "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
     "baselines: no matching reachable local tag — nothing frozen locally",

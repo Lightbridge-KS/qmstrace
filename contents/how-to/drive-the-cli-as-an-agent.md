@@ -65,3 +65,13 @@ and other workspace maps. Never delete the entire `.qmstrace/` directory to refr
 The [JSON reference](../reference/cli-json.md) defines the contract; the bundled skill gives
 the compact authoring workflow. [Evidence and completion](../explanation/command-evidence.md)
 explains what a result can establish.
+
+## Resolve v2 identities before using source locations
+
+Read `paths --json` and `rules --json`: v2 identifies the current `repo` and required
+`workspace_profile`. The default names one local file; it is not a tracked path. Keep
+unavailable-source notices when that implicit file is absent. A malformed or wrongly bound
+profile is an error, not permission to fall back. Parse CLI `/2` locations as records rather
+than joining them to a local checkout directory. See
+[names-only configuration](../reference/names-only-configuration.md) and
+[migrate to names-only](migrate-to-names-only.md).

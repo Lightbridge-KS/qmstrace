@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.table/1",
+  "format": "qmstrace.table/2",
   "table": "matrix",
   "project": "CASES",
   "draft": "generated from the ledger — not an issued revision",
@@ -11,19 +11,31 @@
   "read": [
     {
       "repo": "agent",
-      "location": "../agent",
+      "location": {
+        "repo": "agent",
+        "path": ".",
+        "line": null
+      },
       "commit": "4d2e36bfe01d3dccd7af5d112e6a44b771d112c5",
       "clean": true
     },
     {
       "repo": "ledger",
-      "location": ".",
+      "location": {
+        "repo": "ledger",
+        "path": ".",
+        "line": null
+      },
       "commit": "88b8304a05f44a9a1eb25bc7bbe6f8a146e6a67b",
       "clean": true
     },
     {
       "repo": "service",
-      "location": "../service",
+      "location": {
+        "repo": "service",
+        "path": ".",
+        "line": null
+      },
       "commit": "e07096c462636cbc981538a88e669fb2ec6467ca",
       "clean": true
     }

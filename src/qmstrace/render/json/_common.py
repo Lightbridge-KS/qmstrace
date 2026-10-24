@@ -13,10 +13,11 @@ from qmstrace.core import findings
 from qmstrace.core.assessment import Assessment, ProjectAssessment, Scanned
 from qmstrace.core.baselines import Baseline, BaselineState, Suspect
 from qmstrace.core.graph import Node
+from qmstrace.core.locations import EvidenceLocation
 from qmstrace.core.model import Finding, Link
 from qmstrace.render._evidence import evidence
 
-FORMAT = "qmstrace.cli/1"
+FORMAT = "qmstrace.cli/2"
 View = Assessment | ProjectAssessment
 
 
@@ -47,6 +48,20 @@ def document(
     )
 
 
+def location(
+    file: str | None, line: int | None = None, repo: str | None = None
+) -> dict[str, object] | None:
+    """Project an evidence label; native roots never enter this interface."""
+    if file is None:
+        return None
+    if line is None:
+        path, separator, last = file.rpartition(":")
+        if separator and last.isdecimal():
+            file, line = path, int(last)
+    value = EvidenceLocation.parse(file, line)
+    return EvidenceLocation(value.repo or repo, value.path, value.line).public()
+
+
 def node(value: Node) -> dict[str, object]:
     return {
         "id": value.id,
@@ -54,16 +69,16 @@ def node(value: Node) -> dict[str, object]:
         "type": value.type,
         "ownership": value.home.name.lower(),
         "repo": value.repo,
-        "location": value.where,
+        "location": location(value.where, repo=value.repo if value.item else None),
         "fields": dict(sorted(value.fields.items())),
         "withdrawn": value.fields.get("Status") == "withdrawn",
     }
 
 
-def finding(value: Finding) -> dict[str, object]:
+def finding(value: Finding, repo: str | None = None) -> dict[str, object]:
     return {
         "code": value.code,
-        "location": {"path": value.file, "line": value.line},
+        "location": location(value.file, value.line, repo),
         "message": value.what,
         "next_move": value.next_move,
         "item": value.item,
@@ -72,12 +87,12 @@ def finding(value: Finding) -> dict[str, object]:
     }
 
 
-def link(value: Link) -> dict[str, object]:
+def link(value: Link, repo: str | None = None) -> dict[str, object]:
     return {
         "source": value.src,
         "target": value.dst,
         "marker": value.marker,
-        "location": {"path": value.file, "line": value.line},
+        "location": location(value.file, value.line, repo),
     }
 
 
@@ -137,19 +152,19 @@ def baselines(value: BaselineState) -> dict[str, object]:
             for c in value.comparisons
         ],
         "register": {
-            "location": value.register.location,
+            "location": location(value.register.location),
             "available": value.register.available,
             "accepted": value.register.accepted,
         },
     }
 
 
-def suspect(value: Suspect) -> dict[str, object]:
+def suspect(value: Suspect, repo: str | None = None) -> dict[str, object]:
     return {
-        **finding(findings.suspect(value)),
+        **finding(findings.suspect(value), repo),
         "id": value.item.id,
         "title": value.item.title,
-        "location": {"path": value.item.file, "line": value.item.line},
+        "location": location(value.item.file, value.item.line, repo),
         "withdrawn": value.item.fields.get("Status") == "withdrawn",
         "distance": value.distance,
         "reasons": [

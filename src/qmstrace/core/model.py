@@ -11,12 +11,13 @@ Implements: DSN-QMT-05, DSN-QMT-14
 from __future__ import annotations
 
 import hashlib
-import posixpath
 import re
 import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from typing import Final, Literal
+
+from qmstrace.core.locations import joined
 
 # What an item ID looks like, whatever the project's own patterns: capitals and digits in
 # hyphenated parts, ending in a number, where a number may carry dotted parts — REQ-SVC-01,
@@ -193,7 +194,7 @@ class Extracted:
         renamed = {i.id: f"{repo}:{i.id}" for i in self.items if i.type in derived}
 
         def at(file: str) -> str:
-            return posixpath.normpath(posixpath.join(location, file))
+            return joined(location, file)
 
         def named(item_id: str | None) -> str | None:
             return renamed.get(item_id, item_id) if item_id is not None else None

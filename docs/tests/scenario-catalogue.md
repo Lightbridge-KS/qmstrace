@@ -294,7 +294,7 @@ checkout, project data or machine configuration is needed. These cases exercise
 | Same project but map points only at another checkout | Not a match; do not select by project alone |
 | User stage contains a malformed/unreadable candidate and a valid match | Exit 2 identifying the bad candidate, regardless of file order |
 | Two user files match the same project and current root | Ambiguity, exit 2; list candidates relatively and request explicit selection |
-| No selector, no ancestor candidate, no matching user map | Existing tracked `ledger`/schema `[repos]` resolution and ordinary command bytes unchanged |
+| No selector, no ancestor candidate, no matching user map | V1 tracked `ledger`/schema `[repos]` resolution remains; 0.3.0 source labels follow ADR-0012 |
 | Selected map omits a schema member while its default checkout exists | Member unavailable; never borrow the default path |
 | Selected map points at an absent/unreadable member, with a usable default elsewhere | Same unavailable policy: local notices survive quiet output; whole-project reads refuse |
 | Selected map omits current root or ledger role; two names alias one canonical root | Exit 2; symlink aliases detected without exposing absolute paths |
@@ -308,10 +308,10 @@ checkout, project data or machine configuration is needed. These cases exercise
 | Map selected; `check --quiet` reads missing sources | Map provenance and source notices remain visible; existing exits unchanged |
 | `paths` from product and ledger roots, with a map and without one | Config-only report of current-root anchor, provenance/defaults, ledger and members; `Paths.source` holds the full notice string; no scanning, assessment, Git/network or writes |
 | `paths` with an unavailable sibling | Exit 0 with labelled unavailability, without claiming trace validity; malformed selection/configuration still exit 2 |
-| Cross-drive checkout location cannot be represented from active root | Exit 2, no absolute-path fallback; provenance names source kind plus filename |
-| Map relocation, nested `-C`, repeated calls and reordered map tables | Equivalent effective locations yield deterministic relative output; report/output arguments retain their existing bases |
+| Mapped checkout locations span native drives | Logical repo-relative evidence avoids cross-drive relpaths; native acceptance requires a real Windows run (N12) |
+| Map relocation, nested `-C`, repeated calls and reordered map tables | Equivalent effective locations yield deterministic logical output; report/output arguments retain their existing bases |
 | Legacy skill migration with `.qmstrace/workspace.toml` beside `.qmstrace/skill/` | Recovery wording removes only `.qmstrace/skill/`; workspace configuration is preserved |
-| Mapped ledger emits tables with source notices | Preserve `qmstrace.table/1`, report-verdict semantics and evidence limits |
+| Mapped ledger emits tables with source notices | Use versioned `qmstrace.table/2` locations; preserve report-verdict semantics and evidence limits |
 | CI generates a temporary map for checkout roots and supplies it explicitly to each command | Bypass ambient environment/ancestor/user lookup; do not write checkout roots into tracked configuration |
 | Product-only job with a verified schema copy and no map/ambient selector | Existing local check works; unavailable-source notices stay visible, without claiming whole-project verification |
 
@@ -703,3 +703,21 @@ test in `tests/integration/test_results_several.py`.
   check exits and full findings are preserved. Unseen impact starts yield no partial data.
 - Table stdout JSON remains identical; JSON writing combinations are refused without
   side effects. Schema/manual/bundled-skill assets ship and their examples execute.
+
+## Names-only v2 configuration — ADR-0012
+
+The [acceptance protocol](names-only-workspaces.md) fixes N01–N22 before
+test-bed modification; the [feature design](../design/names-only-workspaces.md) owns their
+meaning and the [active tracker](../progress/overview-qmstrace.md#in-progress--030-names-only-configuration)
+owns execution status. Measured outcomes and any unverified platform gates live in that protocol:
+
+- V1/v2 parsing, stable member identities, required profile stems and deterministic v2
+  digests; preserve the v1 parser/digest and historical tree boundary.
+- Exact named lookup after explicit/environment/ancestor overrides, absent versus invalid
+  profiles, partial maps, no fallback and swapped member identities.
+- Portable repo-relative source locations across real Windows drives, nested/Unicode/symlink
+  roots, worktrees and two developers' relocated layouts.
+- Uniform CLI `/2` success/error/quiet behavior and table `/2` locations without
+  changing judgment, qualified IDs, columns, verdicts or evidence limits.
+- Transactional v2 copy/bootstrap, preserved v1 starter/init policy, matching packaged assets,
+  standalone source notices and no changes to original test beds or consumer repositories.

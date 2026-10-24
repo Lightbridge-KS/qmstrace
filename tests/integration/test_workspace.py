@@ -80,7 +80,7 @@ def test_with_everything_beside_it_the_repo_is_judged_in_full(project: Path) -> 
     (sibling,) = found.siblings
     assert (sibling.name, sibling.location, sibling.declares) == (
         "service",
-        "../service",
+        "service:.",
         {"requirement": 3, "design_element": 2},
     )
     node = found.graph.node("REQ-SVC-01")

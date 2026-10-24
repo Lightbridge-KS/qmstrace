@@ -435,6 +435,14 @@ the repo's.
 
 #### Current checkout locations — ADR-0010
 
+**0.3.0 amendment ([ADR-0012](../adr/0012-names-only-configuration.md)):**
+[names-only v2 configuration](names-only-workspaces.md) separates membership/identity from
+native checkout locations. V2 requires `repo`/`workspace_profile`, uses exact named-user-file
+selection after overrides, and emits portable evidence. The v1 input contract below retains
+its original discovery/default/digest interpretation; its old relative-output limit is
+superseded by logical source labels and CLI/table `/2`. Native Windows acceptance is recorded
+separately from the representation's implementation.
+
 The schema's `[repos]` continues to declare project membership and ledger-relative default
 locations. The local `ledger` pointer remains a default locator relative to its repo's
 trace root. A **workspace map** can
@@ -488,16 +496,16 @@ older layout where the ledger itself is not a traced member of the schema's `[re
   tagged configuration and its existing same-tree schema rules apply. Maps are excluded
   from schema digests and item text and never rewrite a copied `[schema]`, tracked defaults,
   scan paths, report paths or output destinations.
-- **Relative output only.** Checkout locations are shown relative to the active trace root;
-  selection provenance names the source kind and map filename. Ledger output stays
-  ledger-relative. If the selected layout cannot be
-  expressed relatively across drives, refuse with exit 2 rather than print absolute paths.
+- **Portable evidence (ADR-0012).** Mapped/project checkout labels use repo identities;
+  sources carry a path within their owning root, never a filesystem relpath across drives.
+  Selection provenance names the source and map filename. Native roots stay operational.
+  Legacy input defaults remain relative as authored; no map changes a historical schema.
 
 **Rejected:** editing schema `[repos]` for each machine (changes the shared digest), merging
 partial maps with defaults (can mix unrelated checkouts), taking the first user match
 (directory order would select evidence), and letting current maps replace historical paths
-(would judge a tagged item against today's rules). Removing location defaults from the
-schema is a separate versioned migration, outside this change.
+(would judge a tagged item against today's rules). Removing defaults from v1 remains unsupported; the separate v2 migration in ADR-0012
+removes them without reinterpreting old evidence.
 
 The shape — settled by writing the examples first and the parser second, because it lands in
 every product repo and is expensive to change. **The annotated reference is the engine's own

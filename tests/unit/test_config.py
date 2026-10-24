@@ -210,7 +210,7 @@ def test_an_unknown_key_in_a_copy_names_the_repos_file() -> None:
     assert stopped.what.startswith("qmstrace.toml: unknown key 'schema.projct'")
 
 
-@pytest.mark.parametrize("line", ["version = 2", 'version = "1"', ""])
+@pytest.mark.parametrize("line", ["version = 3", 'version = "1"', ""])
 def test_a_version_this_engine_does_not_read_is_refused(line: str) -> None:
     assert "'version'" in refusal(SERVICE.replace("version = 1", line, 1)).what
 

@@ -100,8 +100,8 @@ def test_paths_default_golden(split: Path, golden: Callable[[Path, str], None]) 
 def test_paths_selected_golden(mapped: Mapped, golden: Callable[[Path, str], None]) -> None:
     result = run(mapped.repos["service"], "paths", workspace=mapped.file)
     assert result.exit_code == 0, result.output
-    assert "ledger: ../records" in result.stdout
-    assert "repo service: . — available · current repo" in result.stdout
+    assert "ledger: ledger:." in result.stdout
+    assert "repo service: service:. — available · current repo" in result.stdout
     assert str(mapped.file.parent.parent) not in result.stdout
     golden(GOLDEN / "paths-map.txt", result.stdout)
 
@@ -134,7 +134,7 @@ def test_relative_selector_uses_effective_minus_c_directory(
     result = runner.invoke(app, [*before, "paths", *after])
     assert result.exit_code == 0, result.output
     assert "explicit map local.toml" in result.stdout
-    assert "repo service: . — available · current repo" in result.stdout
+    assert "repo service: service:. — available · current repo" in result.stdout
 
 
 def test_explicit_overrides_environment_ancestor_and_user(
@@ -311,15 +311,15 @@ def test_local_results_and_graph_retain_selected_sources(
     result = run(start, "results", "report.xml", workspace=mapped.file)
     assert result.exit_code == 0, result.output
     assert "workspace: explicit map local.toml" in result.stdout
-    assert "verified against ../records/agreement.md" in result.stdout
-    assert "../records/change-requests" in result.stdout
+    assert "verified against ledger:agreement.md" in result.stdout
+    assert "ledger:change-requests" in result.stdout
     assert "source: workspace: explicit map local.toml" in result.stdout.splitlines()[-1]
     assert "REQ-SVC-01  pass" in result.stdout
     graph = run(start, "graph", "--out", "view.html", workspace=mapped.file)
     assert graph.exit_code == 0, graph.output
     html = (start / "view.html").read_text(encoding="utf-8")
     assert "workspace: explicit map local.toml" in html
-    assert "../records/agreement.md" in html
+    assert "ledger:agreement.md" in html
     assert not (root / "view.html").exists()
     assert str(project.parent) not in html
 
@@ -332,7 +332,7 @@ def test_ledger_text_commands_use_resolved_roots(mapped: Mapped, command: list[s
     assert result.exit_code == 0, result.output
     assert "workspace: explicit map local.toml" in result.stdout
     if command[0] == "check":
-        assert "../backend" in result.stdout and "../frontend" in result.stdout
+        assert "service:." in result.stdout and "client:." in result.stdout
     else:
         assert "service:tests/" in result.stdout and "client:tests/" in result.stdout
     assert str(mapped.original.parent) not in result.stdout
@@ -342,11 +342,11 @@ def test_ledger_matrix_is_json_with_relative_locations_and_source(mapped: Mapped
     result = run(mapped.repos["ledger"], "ledger", "table", "matrix", workspace=mapped.file)
     assert result.exit_code == 0, result.output
     document = json.loads(result.stdout)
-    assert document["format"] == "qmstrace.table/1"
+    assert document["format"] == "qmstrace.table/2"
     assert {r["repo"]: r["location"] for r in document["read"]} == {
-        "ledger": ".",
-        "service": "../backend",
-        "client": "../frontend",
+        "ledger": {"repo": "ledger", "path": ".", "line": None},
+        "service": {"repo": "service", "path": ".", "line": None},
+        "client": {"repo": "client", "path": ".", "line": None},
     }
     assert any("workspace: explicit map local.toml" in n for n in document["notices"])
     assert str(mapped.original.parent) not in result.stdout
@@ -377,8 +377,8 @@ def test_schema_copy_updates_mapped_destinations_only(mapped: Mapped) -> None:
     before = {name: files_under(root) for name, root in mapped.repos.items()}
     result = run(mapped.repos["ledger"], "ledger", "copy-schema", workspace=mapped.file)
     assert result.exit_code == 0, result.output
-    assert "../backend/qmstrace.toml" in result.stdout
-    assert "../frontend/qmstrace.toml" in result.stdout
+    assert "service:qmstrace.toml" in result.stdout
+    assert "client:qmstrace.toml" in result.stdout
     assert files_under(mapped.original) == original
     for name in ("service", "client"):
         after = files_under(mapped.repos[name])

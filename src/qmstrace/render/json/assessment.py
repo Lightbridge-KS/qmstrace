@@ -7,7 +7,16 @@ from collections import Counter
 
 from qmstrace.core.assessment import Assessment
 from qmstrace.core.judge import test_backed_requirement
-from qmstrace.render.json._common import View, baselines, counts, finding, node, scanned, suspect
+from qmstrace.render.json._common import (
+    View,
+    baselines,
+    counts,
+    finding,
+    location,
+    node,
+    scanned,
+    suspect,
+)
 
 
 def check(value: View, *, strict: bool) -> dict[str, object]:
@@ -15,15 +24,19 @@ def check(value: View, *, strict: bool) -> dict[str, object]:
         "project": value.config.project,
         "counts": counts(value),
         "strict": strict,
-        "violations": [finding(f) for f in value.violations],
-        "gaps": [finding(f) for f in value.gaps],
-        "suspects": [suspect(s) for s in value.suspects],
+        "violations": [finding(f, value.config.repo) for f in value.violations],
+        "gaps": [finding(f, value.config.repo) for f in value.gaps],
+        "suspects": [suspect(s, value.config.repo) for s in value.suspects],
     }
     if isinstance(value, Assessment):
         result["baselines"] = baselines(value.baseline_state)
     else:
         result["repos"] = [
-            {"name": r.name, "location": r.location, "baselines": baselines(r.baseline_state)}
+            {
+                "name": r.name,
+                "location": location(r.location),
+                "baselines": baselines(r.baseline_state),
+            }
             for r in value.repos
         ]
     return result
@@ -54,13 +67,18 @@ def status(value: Assessment) -> dict[str, object]:
         "requirements": requirements,
         "sources": {
             "externals": [
-                {"name": s.name, "prefix": s.prefix, "location": s.location, "declared": s.declared}
+                {
+                    "name": s.name,
+                    "prefix": s.prefix,
+                    "location": location(s.location),
+                    "declared": s.declared,
+                }
                 for s in value.externals
             ],
             "siblings": [
                 {
                     "name": s.name,
-                    "location": s.location,
+                    "location": location(s.location),
                     "declares": dict(s.declares) if s.declares is not None else None,
                     "problem": s.problem,
                 }
@@ -71,7 +89,9 @@ def status(value: Assessment) -> dict[str, object]:
         "baselines": baselines(value.baseline_state),
         "suspects": {
             "total": len(value.suspects),
-            "distance_one": [suspect(s) for s in value.suspects if s.distance == 1],
+            "distance_one": [
+                suspect(s, value.config.repo) for s in value.suspects if s.distance == 1
+            ],
             "farther": [
                 {"distance": distance, "count": number}
                 for distance, number in sorted(

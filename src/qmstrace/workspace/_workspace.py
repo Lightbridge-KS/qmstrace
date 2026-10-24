@@ -17,7 +17,7 @@ from qmstrace.core.baselines import BaselineState, Register
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.locations import Locations, LocationState, Paths
+from qmstrace.core.locations import Locations, LocationState, Paths, qualify
 from qmstrace.core.model import Finding, Item, Link, Notice
 from qmstrace.core.results import Results
 from qmstrace.extract import reports
@@ -33,6 +33,7 @@ from qmstrace.workspace._discovery import (
     _find_ledger,
     _find_root,
     _ledger,
+    _ledger_configuration,
     _report_label,
 )
 from qmstrace.workspace._project import _unseen_in_project
@@ -155,7 +156,7 @@ class Workspace:
         if (root / "qmstrace.toml").is_file():
             config = _configuration(root, WorkingTree(root))
         else:
-            config = TraceConfig.of_schema(read_optional(root / "qmstrace.schema.toml") or "")
+            config = _ledger_configuration(root, read_optional(root / "qmstrace.schema.toml") or "")
         locations = discover(start, root, config, workspace)
         ledger = (
             locations.ledger
@@ -165,24 +166,46 @@ class Workspace:
         states = []
         for name, default in sorted(config.repos.items()):
             path = (
-                locations.roots.get(name) if locations else (ledger / default if ledger else None)
+                locations.roots.get(name)
+                if locations
+                else (
+                    ledger / default
+                    if ledger and config.version == 1
+                    else (root if name == config.repo else None)
+                )
             )
             states.append(
                 LocationState(
                     name,
-                    relative(root, path) if path else None,
+                    qualify(name) if path else None,
                     bool(path and (path / "qmstrace.toml").is_file()),
                     bool(path and path.resolve() == root.resolve()),
                 )
             )
         return Paths(
             config.project,
-            locations.notice if locations else "workspace: tracked paths (no map selected)",
-            relative(root, ledger) if ledger else None,
+            locations.notice
+            if locations
+            else (
+                f"workspace: profile {config.workspace_profile}.toml absent — local evidence only"
+                if config.version == 2
+                else "workspace: tracked paths (no map selected)"
+            ),
+            (
+                qualify(
+                    (locations.ledger_repo if locations else None) or config.ledger_repo or "ledger"
+                )
+                if locations or config.version == 2
+                else relative(root, ledger)
+            )
+            if ledger
+            else None,
             tuple(states),
             bool(ledger and (ledger / "qmstrace.schema.toml").is_file()),
             locations.source if locations else None,
             locations.filename if locations else None,
+            config.repo,
+            config.workspace_profile,
         )
 
     @staticmethod
@@ -196,7 +219,7 @@ class Workspace:
         scan = _scan(self.tree, config, config.item_types.values(), with_misplaced=True)
         ledger = self.locations.ledger if self.locations else _ledger(self.root, config)
         externals = [
-            _external(ledger, config.externals[name], self.root)
+            _external(ledger, config.externals[name], self.root, self.locations, config)
             for name in sorted(config.externals)
         ]
         siblings, located, listed = self._siblings(ledger)
@@ -221,13 +244,26 @@ class Workspace:
         }
         strays = [stray for part in scan.extracted for stray in part.strays]
         gaps = judge.coverage(config, graph, violations, strays, ways)
-        register = _register(self.root, ledger, config)
+        register = _register(self.root, ledger, config, self.locations)
         baseline_state, guard_findings = self._baselines(graph, register)
         violations += [*register.findings, *guard_findings]
         violations.sort(key=lambda f: (f.file, f.line, f.code, f.what))
 
         notices: list[Notice] = [Notice(self.locations.notice)] if self.locations else []
-        if located and config.repos and not listed:
+        if config.version == 2 and self.locations is None:
+            notices.append(
+                Notice(
+                    f"workspace: profile {config.workspace_profile}.toml absent — "
+                    "local evidence only; "
+                    "other checkouts NOT LOCATED"
+                )
+            )
+        if (
+            located
+            and config.repos
+            and not listed
+            and (config.version == 1 or config.repo != config.ledger_repo)
+        ):
             notices.append(
                 Notice(
                     "this repo is not among the project's repos in the trace schema ([repos] "
@@ -347,7 +383,7 @@ class Workspace:
         roots = (
             {repo.name: project.locations.roots[repo.name] for repo in project.repos}
             if project.locations
-            else {repo.name: ledger / repo.location for repo in project.repos}
+            else {repo.name: ledger / project.config.repos[repo.name] for repo in project.repos}
         )
         unknown = sorted({name for name, _ in reports if name not in roots})
         if unknown:

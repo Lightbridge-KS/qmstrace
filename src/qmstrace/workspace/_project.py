@@ -16,12 +16,12 @@ from qmstrace.core.baselines import BaselineState, Comparison
 from qmstrace.core.config import SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
-from qmstrace.core.locations import Locations
+from qmstrace.core.locations import Locations, joined, qualify
 from qmstrace.core.model import Extracted, Finding, Item, Notice
 from qmstrace.extract.base import FORMS
 from qmstrace.infra.files import read_optional
 from qmstrace.infra.git import GitCli, IGit, checkout
-from qmstrace.infra.locations import discover, relative
+from qmstrace.infra.locations import discover
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 from qmstrace.workspace._baselines import _baseline_notices, _judged_baselines
 from qmstrace.workspace._discovery import (
@@ -30,6 +30,7 @@ from qmstrace.workspace._discovery import (
     TreeFactory,
     _configuration,
     _find_ledger,
+    _ledger_configuration,
     _same,
 )
 from qmstrace.workspace._scanning import _Scan, _scan
@@ -59,22 +60,26 @@ def _members(
             'Fix: add each repo under [repos] — name = "../path", and the ledger itself as '
             '"." when it holds documents — then check again.',
         )
+    if config.version == 2 and locations is None:
+        raise CouldNotJudge(
+            "A v2 project operation requires a workspace map for every member.",
+            "Fix: create the named profile or select a complete map with --workspace FILE.",
+        )
     problems: list[str] = []
     members: list[_Member] = []
-    seen: dict[str, str] = {}
+    seen: dict[str, Path] = {}
     for name, place in sorted(config.repos.items()):
         root = locations.roots.get(name) if locations else ledger / place
         if root is None:
             problems.append(f"{name}: no location in the selected workspace map")
             continue
-        if locations:
-            place = relative(ledger, root)
-        shown = posixpath.normpath(posixpath.join(place, CONFIG_FILE))
-        twin = next((other for other, path in seen.items() if _same(ledger / path, root)), None)
+        place = qualify(name)
+        shown = joined(place, CONFIG_FILE)
+        twin = next((other for other, path in seen.items() if _same(path, root)), None)
         if twin is not None:
             problems.append(f"{name} and {twin} name the same folder, {place}")
             continue
-        seen[name] = place
+        seen[name] = root
         if not (root / CONFIG_FILE).is_file():
             problems.append(f"{name}: there is no {shown}")
             continue
@@ -83,6 +88,9 @@ def _members(
             own = _configuration(root, tree)
         except CouldNotJudge as stopped:
             problems.append(f"{name}: its configuration could not be read — {stopped.what}")
+            continue
+        if config.version == 2 and own.repo != name:
+            problems.append(f"{name}: {shown} declares another repository identity")
             continue
         if own.schema_digest != config.schema_digest:
             itself = _same(root, ledger)
@@ -96,12 +104,12 @@ def _members(
             continue
         location = posixpath.normpath(place)
         members.append(_Member(name, root.resolve(), location, tree, own))
-    listed = (
-        any(_same(member.root, ledger) for member in members)
-        if locations
-        else any(_same(ledger / place, ledger) for place in config.repos.values())
-    )
-    if (ledger / CONFIG_FILE).is_file() and not listed:
+    listed = any(_same(member.root, ledger) for member in members)
+    if (
+        (ledger / CONFIG_FILE).is_file()
+        and not listed
+        and (config.version == 1 or any(t.declared_here for t in config.item_types.values()))
+    ):
         problems.append(
             f"this ledger holds a {CONFIG_FILE}, but [repos] does not list it — add "
             'ledger = "." under [repos], or the documents it holds are not judged'
@@ -172,7 +180,7 @@ def project(
         problem is named at once.
     """
     ledger = _find_ledger(start)
-    config = TraceConfig.of_schema(read_optional(ledger / SCHEMA_FILE) or "")
+    config = _ledger_configuration(ledger, read_optional(ledger / SCHEMA_FILE) or "")
     locations = discover(start, ledger, config, workspace)
     members = _members(ledger, config, trees, locations)
     # read before the scan: a table records which commit each repo had checked out
@@ -186,10 +194,7 @@ def project(
         extracted = tuple(
             p.qualified(member.name, member.location, derived) for p in scan.extracted
         )
-        misplaced = tuple(
-            replace(i, file=posixpath.normpath(posixpath.join(member.location, i.file)))
-            for i in scan.misplaced
-        )
+        misplaced = tuple(replace(i, file=joined(member.location, i.file)) for i in scan.misplaced)
         parts[member.name] = (member, scan, extracted, misplaced)
     authored = {
         name: {
@@ -201,7 +206,8 @@ def project(
         for name, (member, _, extracted, _) in parts.items()
     }
     externals = [
-        _external(ledger, config.externals[name], ledger) for name in sorted(config.externals)
+        _external(ledger, config.externals[name], ledger, locations, config)
+        for name in sorted(config.externals)
     ]
     declared = {state.name: ids for state, ids in externals}
 
@@ -231,7 +237,7 @@ def project(
         ways[item_type] = (*ways.get(item_type, ()), way)
     gaps = judge.coverage(config, union, violations, strays, ways, whole_project=True)
 
-    register = _register(ledger, ledger, config)
+    register = _register(ledger, ledger, config, locations)
     covered = {t for scope in config.baselines.values() for t in scope.covers}
     states: list[RepoState] = []
     comparisons: list[Comparison] = []

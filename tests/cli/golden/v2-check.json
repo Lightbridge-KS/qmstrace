@@ -1,0 +1,68 @@
+{
+  "format": "qmstrace.cli/2",
+  "command": "check",
+  "scope": "local",
+  "exit_code": 0,
+  "data": {
+    "project": "MINI",
+    "counts": {
+      "items": 11,
+      "links": 14,
+      "violations": 0,
+      "gaps": 1,
+      "suspects": 0,
+      "withdrawn": 0
+    },
+    "strict": false,
+    "violations": [],
+    "gaps": [
+      {
+        "code": "G01",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 28
+        },
+        "message": "REQ-SVC-03: no design element satisfies it yet.",
+        "next_move": "Fix: on the design element, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.",
+        "item": "REQ-SVC-03",
+        "marker": null,
+        "target": null
+      }
+    ],
+    "suspects": [],
+    "baselines": {
+      "counts": {
+        "frozen": 0,
+        "changed": 0,
+        "new": 0,
+        "removed": 0
+      },
+      "governing": [],
+      "comparisons": [],
+      "register": {
+        "location": {
+          "repo": "ledger",
+          "path": "change-requests",
+          "line": null
+        },
+        "available": false,
+        "accepted": "accepted"
+      }
+    }
+  },
+  "notices": [
+    "schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml",
+    "external AGR-*: verified against ledger:agreement.md (3 declared)",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
+    "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
+    "workspace: profile map mini-service.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used",
+    "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines: no matching reachable local tag — nothing frozen locally",
+    "change requests: NOT VERIFIED — ledger:change-requests is unavailable; fresh citations are verified at the ledger's import",
+    "Working-tree snapshot; its commit has not been verified. Regenerate to refresh.",
+    "Traversal stops at this repo's edge. Sibling contents are not pinned.",
+    "Suspects need review; edits and passing tests do not record review."
+  ],
+  "error": null
+}

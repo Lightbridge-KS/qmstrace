@@ -26,6 +26,7 @@ nav = [
     { "Check your work" = "how-to/check-your-work.md" },
     { "Share the project's schema" = "how-to/share-the-schema.md" },
     { "Use a workspace map" = "how-to/use-a-workspace-map.md" },
+    { "Migrate to names-only configuration" = "how-to/migrate-to-names-only.md" },
     { "Check the whole project" = "how-to/check-the-project.md" },
     { "Write traced docs with diagrams and tables" = "how-to/write-traced-docs.md" },
     { "Write an impact list" = "how-to/write-an-impact-list.md" },
@@ -50,6 +51,7 @@ nav = [
     { "CLI output" = "reference/output.md" },
     { "CLI JSON format" = "reference/cli-json.md" },
     { "Configuration" = "reference/configuration.md" },
+    { "Names-only configuration" = "reference/names-only-configuration.md" },
     { "Workspace maps" = "reference/workspace-maps.md" },
     { "Table format" = "reference/table-format.md" },
     { "Baselines and change control" = "reference/baselines.md" },
@@ -61,6 +63,7 @@ nav = [
     { "IDs and file patterns" = "explanation/ids-and-file-patterns.md" },
     { "Kinds of finding" = "explanation/kinds-of-finding.md" },
     { "Around the repo" = "explanation/around-the-repo.md" },
+    { "Identity and checkout location" = "explanation/identity-and-location.md" },
     { "Command completion and evidence" = "explanation/command-evidence.md" },
   ] },
 ]

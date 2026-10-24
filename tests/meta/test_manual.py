@@ -92,3 +92,19 @@ def test_the_copy_example_is_what_the_command_writes(
     local = (mini / "service" / "qmstrace.toml").read_text(encoding="utf-8")
     schema = (mini / "ledger" / "qmstrace.schema.toml").read_text(encoding="utf-8")
     golden(MANUAL_GOLDEN / "copy-example.toml", embed(local, schema))
+
+
+@pytest.mark.verifies("DSN-QMT-03", "DSN-QMT-10")
+def test_names_only_reference_inputs_are_valid_configurations() -> None:
+    from qmstrace.core.config import TraceConfig
+    from qmstrace.core.locations import WorkspaceMap
+
+    source = (CONTENTS / "reference/names-only-configuration.md").read_text(encoding="utf-8")
+    schema, product, ledger, workspace = re.findall(r"```toml\n(.*?)```", source, re.S)
+    service = TraceConfig.parse(product + '\n[schema]\npath = "qmstrace.schema.toml"\n', schema)
+    assert service.version == 2 and service.repo == "service"
+    assert service.workspace_profile == "mini-service"
+    assert TraceConfig.parse(ledger, schema).ledger_repo == "ledger"
+    spec = WorkspaceMap.parse(workspace, "mini-service.toml")
+    assert set(spec.repos) == set(service.repos)
+    assert spec.ledger_repo == service.ledger_repo

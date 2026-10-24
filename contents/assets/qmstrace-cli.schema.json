@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://qmstrace.netlify.app/assets/qmstrace-cli.schema.json",
-  "title": "qmstrace.cli/1 command results",
+  "title": "qmstrace.cli/2 command results",
   "type": "object",
   "required": [
     "format",
@@ -14,7 +14,7 @@
   ],
   "properties": {
     "format": {
-      "const": "qmstrace.cli/1"
+      "const": "qmstrace.cli/2"
     },
     "command": {
       "anyOf": [
@@ -146,7 +146,7 @@
         "location": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/location"
             },
             {
               "type": "null"
@@ -180,20 +180,7 @@
           "type": "string"
         },
         "location": {
-          "type": "object",
-          "required": [
-            "path",
-            "line"
-          ],
-          "properties": {
-            "path": {
-              "type": "string"
-            },
-            "line": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
+          "$ref": "#/$defs/location"
         },
         "message": {
           "type": "string"
@@ -252,20 +239,7 @@
           "type": "string"
         },
         "location": {
-          "type": "object",
-          "required": [
-            "path",
-            "line"
-          ],
-          "properties": {
-            "path": {
-              "type": "string"
-            },
-            "line": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
+          "$ref": "#/$defs/location"
         }
       }
     },
@@ -449,7 +423,7 @@
             "location": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "$ref": "#/$defs/location"
                 },
                 {
                   "type": "null"
@@ -536,20 +510,7 @@
           "type": "string"
         },
         "location": {
-          "type": "object",
-          "required": [
-            "path",
-            "line"
-          ],
-          "properties": {
-            "path": {
-              "type": "string"
-            },
-            "line": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
+          "$ref": "#/$defs/location"
         },
         "withdrawn": {
           "type": "boolean"
@@ -840,7 +801,7 @@
         "location": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/location"
             },
             {
               "type": "null"
@@ -946,7 +907,7 @@
         "location": {
           "anyOf": [
             {
-              "type": "string"
+              "$ref": "#/$defs/location"
             },
             {
               "type": "null"
@@ -1141,7 +1102,7 @@
                   "location": {
                     "anyOf": [
                       {
-                        "type": "string"
+                        "$ref": "#/$defs/location"
                       },
                       {
                         "type": "null"
@@ -1177,7 +1138,7 @@
                     "type": "string"
                   },
                   "location": {
-                    "type": "string"
+                    "$ref": "#/$defs/location"
                   },
                   "declares": {
                     "anyOf": [
@@ -1373,7 +1334,7 @@
                     "type": "string"
                   },
                   "location": {
-                    "type": "string"
+                    "$ref": "#/$defs/location"
                   },
                   "baselines": {
                     "$ref": "#/$defs/baselines"
@@ -1400,7 +1361,10 @@
         "baselines",
         "change_requests",
         "tables",
-        "workspace"
+        "workspace",
+        "repo",
+        "workspace_profile",
+        "version"
       ],
       "properties": {
         "project": {
@@ -1441,12 +1405,29 @@
         },
         "repos": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "required": [
+            "ledger_repo",
+            "members"
+          ],
+          "properties": {
+            "ledger_repo": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          "additionalProperties": false
         },
         "repo_path_anchor": {
-          "const": "ledger-relative defaults"
+          "const": "repository identity; v1 defaults are ledger-relative"
         },
         "subjects": {
           "type": "array",
@@ -1765,6 +1746,24 @@
               "type": "null"
             }
           ]
+        },
+        "repo": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_profile": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "enum": [
+            1,
+            2
+          ]
         }
       }
     },
@@ -1776,7 +1775,9 @@
         "workspace",
         "anchor",
         "ledger",
-        "repos"
+        "repos",
+        "repo",
+        "workspace_profile"
       ],
       "properties": {
         "project": {
@@ -1808,7 +1809,7 @@
           ]
         },
         "anchor": {
-          "const": "current trace root"
+          "const": "repository trace roots"
         },
         "ledger": {
           "type": "object",
@@ -1820,7 +1821,7 @@
             "location": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "$ref": "#/$defs/location"
                 },
                 {
                   "type": "null"
@@ -1849,7 +1850,7 @@
               "location": {
                 "anyOf": [
                   {
-                    "type": "string"
+                    "$ref": "#/$defs/location"
                   },
                   {
                     "type": "null"
@@ -1864,6 +1865,18 @@
               }
             }
           }
+        },
+        "repo": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_profile": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
@@ -2215,6 +2228,33 @@
           }
         }
       }
+    },
+    "location": {
+      "type": "object",
+      "required": [
+        "repo",
+        "path",
+        "line"
+      ],
+      "properties": {
+        "repo": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "line": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [

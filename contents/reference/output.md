@@ -17,6 +17,13 @@ Help uses Rich layout only in styled mode; plain help has no boxes. Report layou
 identifiers remain complete. No pager, spinner or automatic truncation is introduced.
 Removing ANSI style sequences from a styled report gives the plain report's bytes.
 
+## Encoding
+
+Redirected standard output and standard error use UTF-8, including text receipts, JSON
+and handled diagnostics. This is independent of a legacy Windows/Python pipe code page;
+no environment override is needed. Real terminal streams keep their native encoding.
+Encoding selection happens at the CLI boundary and does not alter generated file contents.
+
 ## Meaning
 
 Headings and IDs use cyan/bold. Violations and failed test verdicts use red; gaps,

@@ -1,7 +1,7 @@
 read — each repo's working tree, not pinned:
-  client   ../client   1 component · 2 automated tests
-  ledger   .           3 requirements · 3 design elements
-  service  ../service  2 components · 2 automated tests
+  client   client:.   1 component · 2 automated tests
+  ledger   ledger:.   3 requirements · 3 design elements
+  service  service:.  2 components · 2 automated tests
   external AGR-*: verified against agreement.md (3 declared)
   controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
   baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches

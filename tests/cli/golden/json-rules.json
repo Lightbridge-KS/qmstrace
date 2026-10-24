@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "rules",
   "scope": "local",
   "exit_code": 0,
@@ -10,11 +10,17 @@
       "digest": "sha256:b4129c158e6fdaa3b314b6b5e4d675085ec385e094fd57048bf9cd7796b3a3d1",
       "path": "../ledger/qmstrace.schema.toml"
     },
+    "version": 1,
+    "repo": null,
+    "workspace_profile": null,
     "repos": {
-      "service": "../service",
-      "client": "../client"
+      "ledger_repo": null,
+      "members": [
+        "client",
+        "service"
+      ]
     },
-    "repo_path_anchor": "ledger-relative defaults",
+    "repo_path_anchor": "repository identity; v1 defaults are ledger-relative",
     "subjects": [
       {
         "name": "service",

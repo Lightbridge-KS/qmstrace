@@ -7,6 +7,11 @@
     (`qmstrace.toml`, at the repo's root). No rule hides in the tool, and an unknown key anywhere
     is an error — a mistyped key would be a rule nobody can see.
 
+Version 2 separates names from machine paths and requires `repo`/`workspace_profile` in
+the local file. See [names-only configuration](names-only-configuration.md) and its
+[migration guide](../how-to/migrate-to-names-only.md). The annotated fixtures below are
+**version 1**, which remains supported with its original path meanings and digest.
+
 ## Three levels, three owners
 
 | Level | File | Owner | Says |
@@ -16,7 +21,7 @@
 | trace configuration | `qmstrace.toml` | one product repo | where the schema is, the repo's subjects, which item types it declares, their ID patterns and the files to read |
 
 Current checkout locations may also come from a local [workspace map](workspace-maps.md).
-It selects a whole layout without changing these files or their rules. Schema `[repos]`
+It selects a whole layout without changing these files or their rules. V1 schema `[repos]`
 paths remain ledger-relative defaults, and `[schema] path` still resolves from the repo's
 trace root. Inspect the effective locations with [qmstrace paths](commands/paths.md).
 

@@ -50,5 +50,10 @@ def schema_digest(schema: Mapping[str, object]) -> str:
     file and a product repo's copy of it.
     """
     content = {k: v for k, v in schema.items() if k not in {"digest", "path"}}
+    repos = content.get("repos")
+    if content.get("version") == 2 and isinstance(repos, dict):
+        members = repos.get("members")
+        if isinstance(members, list) and all(isinstance(name, str) for name in members):
+            content["repos"] = {**repos, "members": sorted(members)}
     canonical = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()

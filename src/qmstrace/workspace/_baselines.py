@@ -5,7 +5,6 @@ Implements: DSN-QMT-07
 
 from __future__ import annotations
 
-import posixpath
 from collections.abc import Iterable
 from dataclasses import replace
 from pathlib import Path
@@ -15,6 +14,7 @@ from qmstrace.core.baselines import BaselineState, Register, Snapshot
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
+from qmstrace.core.locations import joined
 from qmstrace.core.model import Finding, Item, Notice
 from qmstrace.infra.git import IGit
 from qmstrace.infra.tree import GitTree
@@ -66,10 +66,7 @@ def _judged_baselines(
         if repo is not None:
             derived = frozenset(t.name for t in tagged.item_types.values() if t.derives_ids)
             extracted = tuple(p.qualified(repo, location, derived) for p in extracted)
-            misplaced = tuple(
-                replace(i, file=posixpath.normpath(posixpath.join(location, i.file)))
-                for i in misplaced
-            )
+            misplaced = tuple(replace(i, file=joined(location, i.file)) for i in misplaced)
         found_items = tuple(i for part in extracted for i in part.items)
         historical, found = TraceGraph.build(
             tagged,

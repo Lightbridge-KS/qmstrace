@@ -113,7 +113,7 @@ def test_table_alias_and_refusal(project: Path) -> None:
     alias = runner.invoke(app, [*args, "--json"], env={"FORCE_COLOR": "1"})
     assert old.exit_code == alias.exit_code == 0
     assert old.stdout == alias.stdout
-    assert json.loads(alias.stdout)["format"] == "qmstrace.table/1"
+    assert json.loads(alias.stdout)["format"] == "qmstrace.table/2"
     out = project / "ledger/table.json"
     invoke([*args, "--json", "--out", str(out)], code=2)
     assert not out.exists()
@@ -214,7 +214,7 @@ def test_schema_is_valid_and_published_copy_matches() -> None:
     Draft202012Validator.check_schema(SCHEMA)
     assert json.loads(Path("contents/assets/qmstrace-cli.schema.json").read_text()) == SCHEMA
     invalid = {
-        "format": "qmstrace.cli/1",
+        "format": "qmstrace.cli/2",
         "command": "status",
         "scope": "local",
         "exit_code": 0,

@@ -11,7 +11,7 @@ def paths(view: Paths, *, style: Style = PLAIN) -> str:
     lines = [
         style.heading(f"project: {view.project}"),
         style.location(view.source),
-        "path anchor: current trace root; map entries start at the map's directory",
+        "path anchor: repository trace roots; map entries start at the map's directory",
         f"ledger: {view.ledger or 'not located'} — "
         f"{'available' if view.ledger_available else style.warning('NOT AVAILABLE')}",
     ]

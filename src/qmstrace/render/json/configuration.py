@@ -5,6 +5,7 @@ Implements: DSN-QMT-12
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.locations import Locations, Paths
+from qmstrace.render.json._common import location
 
 
 def rules(config: TraceConfig, *, locations: Locations | None = None) -> dict[str, object]:
@@ -15,8 +16,11 @@ def rules(config: TraceConfig, *, locations: Locations | None = None) -> dict[st
             "digest": config.schema_digest,
             "path": config.schema_path,
         },
-        "repos": dict(config.repos),
-        "repo_path_anchor": "ledger-relative defaults",
+        "version": config.version,
+        "repo": config.repo,
+        "workspace_profile": config.workspace_profile,
+        "repos": {"ledger_repo": config.ledger_repo, "members": sorted(config.repos)},
+        "repo_path_anchor": "repository identity; v1 defaults are ledger-relative",
         "subjects": [{"name": s.name, "key": s.key} for s in config.subjects.values()],
         "item_types": [
             {
@@ -91,10 +95,17 @@ def paths(value: Paths) -> dict[str, object]:
         "workspace": {"source": value.workspace_source, "filename": value.workspace_filename}
         if value.workspace_source
         else None,
-        "anchor": "current trace root",
-        "ledger": {"location": value.ledger, "available": value.ledger_available},
+        "anchor": "repository trace roots",
+        "repo": value.repo,
+        "workspace_profile": value.workspace_profile,
+        "ledger": {"location": location(value.ledger), "available": value.ledger_available},
         "repos": [
-            {"name": r.name, "location": r.location, "available": r.available, "current": r.current}
+            {
+                "name": r.name,
+                "location": location(r.location),
+                "available": r.available,
+                "current": r.current,
+            }
             for r in value.repos
         ],
     }

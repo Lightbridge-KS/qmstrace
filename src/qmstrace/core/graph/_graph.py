@@ -137,6 +137,7 @@ class TraceGraph:
                 Home.LOCAL,
                 it.type,
                 it,
+                repo=config.repo,
                 title=it.title,
                 where=f"{it.file}:{it.line}",
                 fields=it.fields,

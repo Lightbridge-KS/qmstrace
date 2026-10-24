@@ -6,7 +6,6 @@ Implements: DSN-QMT-11
 from __future__ import annotations
 
 import os
-import posixpath
 import re
 from collections.abc import Callable, Sequence
 from dataclasses import replace
@@ -17,9 +16,16 @@ from typing import Final
 from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.core.locations import joined, qualify
 from qmstrace.infra.files import Link, contained, read_optional, update_files, update_in
-from qmstrace.infra.locations import discover, relative
-from qmstrace.workspace._discovery import CONFIG_FILE, SCHEMA_FILE, _find_ledger, _same
+from qmstrace.infra.locations import discover
+from qmstrace.workspace._discovery import (
+    CONFIG_FILE,
+    SCHEMA_FILE,
+    _find_ledger,
+    _ledger_configuration,
+    _same,
+)
 
 LANGUAGES: Final = ("python", "csharp")
 _BUILD_FILES: Final[dict[str, tuple[str, ...]]] = {
@@ -197,7 +203,11 @@ def initialize(
             section = "tool.pytest.ini_options" if source is not None else "pytest"
             edits[name] = setup.register_marker(name, source or "", section)
     written = chosen + update_files(root, edits)
-    if ledger and not any(_same(root / place, root) for place in config.repos.values()):
+    if (
+        ledger
+        and config.version == 1
+        and not any(_same(root / place, root) for place in config.repos.values())
+    ):
         written += (
             f'next: list this ledger in {SCHEMA_FILE} under [repos] — ledger = "." — so '
             "qmstrace ledger check reads its documents; init does not edit the schema",
@@ -212,8 +222,13 @@ def copy_schema(
     every named repo, or every repo in [repos]; all of them, or none (D9)."""
     ledger = _find_ledger(start)
     schema_text = read_optional(ledger / SCHEMA_FILE) or ""
-    config = TraceConfig.of_schema(schema_text)
+    config = _ledger_configuration(ledger, schema_text)
     locations = discover(start, ledger, config, workspace)
+    if config.version == 2 and locations is None:
+        raise CouldNotJudge(
+            "V2 schema copying requires a workspace map for its selected destinations.",
+            "Fix: create the named profile or select a map with --workspace FILE.",
+        )
     if not config.repos:
         raise CouldNotJudge(
             f"{SCHEMA_FILE} names no product repos under [repos], so there is nowhere to copy it.",
@@ -238,10 +253,8 @@ def copy_schema(
         if root is None:
             problems.append(f"{name}: no location in the selected workspace map")
             continue
-        if locations:
-            place = relative(ledger, root)
-        shown = posixpath.normpath(posixpath.join(place, CONFIG_FILE))
-        if _same(ledger / place, ledger):  # the ledger reads the schema it holds, by path
+        shown = joined(qualify(name), CONFIG_FILE)
+        if _same(root, ledger):  # the ledger reads the schema it holds, by path
             reason = setup.ledger_itself(read_optional(ledger / CONFIG_FILE))
             reports.append(setup.Copied(name, shown, False, reason, skipped=True))
             continue
@@ -270,6 +283,12 @@ def copy_schema(
                 )
                 continue
             updated = setup.copy_schema(local, held, block, shown)
+            candidate = TraceConfig.parse(updated, local_name=shown)
+            if config.version == 2 and candidate.repo != name:
+                raise CouldNotJudge(
+                    f"{shown} declares another repository identity.",
+                    "Fix: set repo to the schema member named by this destination.",
+                )
         except CouldNotJudge as stopped:
             problems.append(f"{name}: {stopped.what} {stopped.next_move}")
             continue

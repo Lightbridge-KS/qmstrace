@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "check",
   "scope": "local",
   "exit_code": 1,
@@ -19,6 +19,7 @@
       {
         "code": "G01",
         "location": {
+          "repo": null,
           "path": "docs/req/service-srs.md",
           "line": 28
         },
@@ -40,7 +41,11 @@
       "governing": [],
       "comparisons": [],
       "register": {
-        "location": "../ledger/change-requests",
+        "location": {
+          "repo": null,
+          "path": "../ledger/change-requests",
+          "line": null
+        },
         "available": false,
         "accepted": "accepted"
       }
@@ -49,7 +54,7 @@
   "notices": [
     "schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo's qmstrace.toml",
     "external AGR-*: verified against ../ledger/agreement.md (3 declared)",
-    "sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
     "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
     "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
     "baselines: no matching reachable local tag — nothing frozen locally",

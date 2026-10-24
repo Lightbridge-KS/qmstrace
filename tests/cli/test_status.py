@@ -115,7 +115,7 @@ def test_what_cannot_be_found_or_read_is_said_in_the_header(
 
     (project / "service" / "qmstrace.toml").write_text("version = = 1\n", encoding="utf-8")
     output = status(project / "client")[1]
-    assert "sibling service: at ../service, its configuration could not be read" in output
+    assert "sibling service: at service:., its configuration could not be read" in output
 
 
 # ── 2. determinism ─────────────────────────────────────────────────────────────────────────

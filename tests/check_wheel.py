@@ -1,5 +1,6 @@
 """Prove assets ship unchanged and package imports work from the built distribution."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -278,7 +279,7 @@ assert len(cli.app.registered_groups) == 1
 import json
 from importlib.resources import files
 schema = json.loads(files('qmstrace').joinpath('assets/cli.schema.json').read_text())
-assert schema['properties']['format']['const'] == 'qmstrace.cli/1'
+assert schema['properties']['format']['const'] == 'qmstrace.cli/2'
 with TemporaryDirectory() as fixture:
     root = Path(fixture)
     Workspace.initialize(root, subject='example', key='EX')
@@ -293,7 +294,7 @@ with TemporaryDirectory() as fixture:
                                env={'FORCE_COLOR': '1'}, color=True)
         assert result.exit_code == code, result.output
         value = json.loads(result.stdout)
-        assert value['format'] == 'qmstrace.cli/1' and value['exit_code'] == code
+        assert value['format'] == 'qmstrace.cli/2' and value['exit_code'] == code
         assert not result.stderr and '\x1b[' not in result.stdout
     import subprocess
     console = subprocess.run([sys.executable, '-I', '-c',
@@ -301,6 +302,31 @@ with TemporaryDirectory() as fixture:
         str(sys.argv[1]), '-C', str(root), 'paths', '--json'],
         capture_output=True, text=True, check=True)
     assert json.loads(console.stdout)['command'] == 'paths'
+# The same installed package reads v2 without borrowing current source or a machine profile.
+import re
+schema_v2 = re.sub(r'\[repos\][\s\S]*?(?=\[item_types)',
+    '[repos]\nledger_repo = "ledger"\nmembers = ["service", "client"]\n\n',
+    sys.argv[3]).replace('version = 1', 'version = 2', 1)
+header_v2 = ('version = 2\nrepo = "service"\nworkspace_profile = "wheel-fixture"\n'
+             '[schema]\n')
+block_v2 = setup.schema_block(schema_v2, 'MINI')
+copy_v2 = setup.copy_schema(header_v2, setup.held_schema(header_v2), block_v2)
+parsed_v2 = TraceConfig.parse(copy_v2)
+assert parsed_v2.version == 2 and parsed_v2.repo == 'service'
+assert parsed_v2.schema_digest != by_path.schema_digest
+with TemporaryDirectory() as fixture:
+    root = Path(fixture)
+    (root / 'qmstrace.toml').write_text(copy_v2, encoding='utf-8')
+    response = runner.invoke(cli.app, ['-C', str(root), 'paths', '--json'])
+    assert response.exit_code == 0, response.output
+    payload = json.loads(response.stdout)
+    assert payload['format'] == 'qmstrace.cli/2'
+    assert payload['data']['workspace_profile'] == 'wheel-fixture'
+    assert payload['data']['workspace'] is None
+    assert payload['data']['repo'] == 'service'
+    invalid = runner.invoke(cli.app, ['-C', str(root), '--workspace', 'absent.toml',
+                                      'paths', '--json'])
+    assert invalid.exit_code == 2 and json.loads(invalid.stdout)['data'] is None
 print(f'Wheel package imports and behavior pass in isolation ({sys.argv[4]} first).')
 """,
                 str(wheel_path),
@@ -309,5 +335,14 @@ print(f'Wheel package imports and behavior pass in isolation ({sys.argv[4]} firs
                 first,
             ],
             cwd=outside,
+            env={
+                **{
+                    k: v
+                    for k, v in os.environ.items()
+                    if k not in {"QMSTRACE_WORKSPACE", "FORCE_COLOR", "NO_COLOR"}
+                },
+                "HOME": outside,
+                "USERPROFILE": outside,
+            },
             check=True,
         )

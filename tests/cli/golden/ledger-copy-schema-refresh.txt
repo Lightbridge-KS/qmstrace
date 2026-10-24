@@ -1,3 +1,3 @@
 schema: MINI sha256:129a775c5c9ccba3899726b703f6d7a9cf865ae158f13583386e0fdbed286361
-updated: service — ../service/qmstrace.toml, rules changed (was sha256:b4129c158e6fdaa3b314b6b5e4d675085ec385e094fd57048bf9cd7796b3a3d1)
+updated: service — service:qmstrace.toml, rules changed (was sha256:b4129c158e6fdaa3b314b6b5e4d675085ec385e094fd57048bf9cd7796b3a3d1)
 Commit qmstrace.toml in each updated repo. Exit 0.
