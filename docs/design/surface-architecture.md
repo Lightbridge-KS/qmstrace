@@ -562,7 +562,8 @@ project-wide browser follows slice 2. The renderer library remains provisional.
   exits 0/1/2/3; error categories and next moves are structured. Quiet preserves all JSON
   findings. JSON retains scope, evidence limits and repo-relative source records. Pipes otherwise keep
   plain text; terminals receive semantic styles with conditional Rich help. Selection is
-  per invocation and stream: NO_COLOR, FORCE_COLOR, TTY/TERM. Styled reports stripped of ANSI
+  per invocation and stream: NO_COLOR, FORCE_COLOR, TTY/TERM. Redirected stdout/stderr
+  text wrappers use UTF-8 independently of the Windows pipe code page; terminal codecs stay native. Styled reports stripped of ANSI
   equal the plain bytes; authored text is literal. Help/version never assess or discover maps.
   `ledger table` keeps `qmstrace.table/2` and accepts a redundant JSON flag only without --out;
   other writing commands reject it before writes. Format changes that remove/rename fields

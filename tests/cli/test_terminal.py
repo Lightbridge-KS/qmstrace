@@ -193,3 +193,48 @@ def test_force_color_survives_real_redirected_stderr(project: Path) -> None:
     assert not forced.stdout and not plain.stdout
     assert "\x1b[" in forced.stderr
     assert ANSI.sub("", forced.stderr) == plain.stderr
+
+
+@pytest.mark.verifies("DSN-QMT-01", "DSN-QMT-12")
+@pytest.mark.parametrize("mode", ["text", "json", "diagnostic"])
+def test_redirected_cli_is_utf8_even_with_a_legacy_python_codepage(
+    project: Path, mode: str
+) -> None:
+    root = project / "service"
+    if mode == "diagnostic":
+        config = root / "qmstrace.toml"
+        config.write_text("unknown_setting = true\n" + config.read_text(), encoding="utf-8")
+    arguments = ["status", "--json"] if mode == "json" else ["paths"]
+    result = subprocess.run(
+        [sys.executable, "-c", "from qmstrace.cli import app; app()", "-C", str(root), *arguments],
+        env={**os.environ, "PYTHONIOENCODING": "cp1252", "NO_COLOR": "1"},
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == (2 if mode == "diagnostic" else 0)
+    output = result.stderr if mode == "diagnostic" else result.stdout
+    assert "—" in output.decode("utf-8")
+    assert (result.stdout if mode == "diagnostic" else result.stderr) == b""
+
+
+def test_encoding_policy_is_per_stream_and_keeps_terminal_encoding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from io import BytesIO, TextIOWrapper
+
+    from qmstrace.cli._terminal import _utf8_pipes
+
+    class Terminal(TextIOWrapper):
+        def isatty(self) -> bool:
+            return True
+
+    terminal = Terminal(BytesIO(), encoding="cp1252")
+    pipe = TextIOWrapper(BytesIO(), encoding="cp1252")
+    with monkeypatch.context() as context:
+        context.setattr(sys, "stdout", terminal)
+        context.setattr(sys, "stderr", pipe)
+        _utf8_pipes()
+        assert terminal.encoding == "cp1252"
+        assert pipe.encoding == "utf-8"
+    terminal.close()
+    pipe.close()

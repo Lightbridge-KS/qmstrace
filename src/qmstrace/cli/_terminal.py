@@ -8,12 +8,24 @@ from __future__ import annotations
 import os
 import sys
 from collections.abc import Sequence
+from io import TextIOWrapper
 from typing import Any, TextIO
 
 from typer.core import TyperCommand, TyperGroup
 
 from qmstrace.cli._invocation import CURRENT, select
 from qmstrace.cli._json import error
+
+
+def _utf8_pipes() -> None:
+    """Use UTF-8 for redirected text wrappers without replacing streams or terminal codecs."""
+    for stream in (sys.stdout, sys.stderr):
+        if (
+            isinstance(stream, TextIOWrapper)
+            and not stream.isatty()
+            and stream.encoding.lower().replace("_", "-") != "utf-8"
+        ):
+            stream.reconfigure(encoding="utf-8")
 
 
 def styled(stream: TextIO | None = None) -> bool:
@@ -52,6 +64,7 @@ class TerminalGroup(TyperGroup):
         windows_expand_args: bool = True,
         **extra: Any,
     ) -> Any:
+        _utf8_pipes()
         arguments = list(sys.argv[1:] if args is None else args)
         request = select(arguments, self)
         token = CURRENT.set(request)

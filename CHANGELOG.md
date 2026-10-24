@@ -17,6 +17,8 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- Redirected CLI output and diagnostics use UTF-8 even under a legacy Windows/Python code
+  page; actual terminal streams keep their native encoding.
 - CLI JSON advances to `qmstrace.cli/2` for every handled outcome, including legacy inputs
   and parser errors. Source locations use repo-relative records; rules expose named
   membership. Table output advances to `qmstrace.table/2` with logical read locations.

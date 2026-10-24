@@ -825,6 +825,9 @@ Satisfies: REQ-QMT-23
 configuration. Its immutable invocation value lives in a resettable ContextVar, scoped to
 one CLI call; it never enters domain judgment. `_terminal.py` uses public TyperCommand and
 TyperGroup extension points for help and parser errors, restoring state after each call.
+Before parsing, it configures each redirected TextIOWrapper independently for UTF-8;
+terminal codecs and other stream types stay intact. This keeps receipts, JSON and diagnostics
+consistent when Windows starts Python with a legacy pipe code page.
 No framework-private imports or new runtime dependencies are introduced. `_outcome.py`
 retains domain/exit mapping and refuses unsupported writing combinations before handlers.
 `_json.py` emits one serialized result or error and uses safe diagnostics rather than raw

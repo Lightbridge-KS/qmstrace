@@ -25,7 +25,8 @@ that were actually run.
 Design: [names-only workspaces](../design/names-only-workspaces.md).
 Accepted amendment: [ADR-0012](../adr/0012-names-only-configuration.md).
 Fixed measures and measured live results: [N01–N22](../tests/names-only-workspaces.md).
-Implementation is on `codex/names-only-workspaces`; draft PR and hosted CI are pending.
+Implementation is on `codex/names-only-workspaces`, opened as
+[draft PR #74](https://github.com/Lightbridge-KS/qmstrace/pull/74). Hosted CI is being verified.
 Consumer rollout remains separate.
 
 Accepted 2026-10-24: required v2 `workspace_profile`, native Windows cross-drive support,
