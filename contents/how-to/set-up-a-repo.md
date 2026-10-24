@@ -10,7 +10,7 @@
    The repository is private, so this needs read access to it:
 
     ``` sh
-    uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.2.0"
+    uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.3.0"
     ```
 
     The tag is the pin: `uv tool upgrade` keeps it, and a later release is installed with the

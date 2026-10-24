@@ -1,5 +1,5 @@
 ---
-summary: 0.3.0 design and implementation plan for names-only v2 trace configuration, required workspace_profile selection, portable evidence locations across Windows drives and versioned JSON output. Implementation and native Windows acceptance verified in draft PR 74; review and release pending.
+summary: 0.3.0 design and implementation plan for names-only v2 trace configuration, required workspace_profile selection, portable evidence locations across Windows drives and versioned JSON output. Implementation merged as PR 74 at 79841ec; native Windows acceptance verified; release pending.
 read_when:
   - implementing names-only repository membership or workspace_profile discovery
   - migrating v1 configuration and schema copies to v2
@@ -8,12 +8,12 @@ read_when:
 
 # Names-only configuration and workspace profiles
 
-**Status: implemented in draft PR #74, 2026-10-24; native acceptance verified; unreleased.** The developer accepted three
+**Status: merged as PR #74 (`79841ec`), 2026-10-24; native acceptance verified; unreleased.** The developer accepted three
 design choices: every v2 trace configuration requires `workspace_profile`; 0.3.0 includes
 cross-drive Windows layouts; `--json` consistently emits `qmstrace.cli/2`, including
 handled parser errors. The examples below are v2 inputs, not v0.2.0 syntax.
 
-Implementation state belongs in the [single active tracker](../progress/overview-qmstrace.md#in-progress--030-names-only-configuration).
+Implementation state belongs in the [single active tracker](../progress/overview-qmstrace.md#landed--030-names-only-configuration).
 [ADR-0012](../adr/0012-names-only-configuration.md) records the accepted amendment to
 shipped design. The [acceptance protocol](../tests/names-only-workspaces.md) fixes live
 measures before implementation or test-bed modification.
@@ -289,5 +289,5 @@ Native Windows cross-drive proof is a release gate; POSIX path mocks do not sati
 
 The three form decisions and both table/setup amendments are accepted. Implementation,
 source-level/live checks and native Windows proof are recorded in the tracker and acceptance
-results. Draft PR #74 contains the implementation. Maintainer review/merge, consumer migration
-and release publication remain separate actions.
+results. PR #74 merged the implementation. Consumer migration and release publication remain
+separate actions.

@@ -8,9 +8,9 @@ read_when:
 
 # Names-only workspaces — acceptance protocol
 
-**Status: implementation, macOS acceptance and native Windows N12 verified, 2026-10-24. Draft PR #74 awaits review.**
+**Status: implementation, macOS acceptance and native Windows N12 verified, 2026-10-24. PR #74 merged at `79841ec`; release remains separate.**
 Parent: [feature design and implementation plan](../design/names-only-workspaces.md).
-Progress belongs in the [existing tracker](../progress/overview-qmstrace.md#in-progress--030-names-only-configuration).
+Progress belongs in the [existing tracker](../progress/overview-qmstrace.md#landed--030-names-only-configuration).
 Tests must distinguish configuration readability, trace judgment, actual test execution,
 installation, maintainer review and release publication.
 
@@ -187,4 +187,4 @@ The final live candidate is wheel `0.3.0.dev0`, SHA-256
 `3e50af1bf6126e1ee9c87bec920f43b4a3bce27786d6fb60d123203a83193f85`. It was built from
 source base `cc6952dc1c6bc0bd41e583a685cb861519d9b24d` plus the uncommitted implementation.
 The run record retains the source base/dirty-state provenance. Full-gate
-counts and final review state belong to the [active tracker](../progress/overview-qmstrace.md#in-progress--030-names-only-configuration).
+counts and final review state belong to the [active tracker](../progress/overview-qmstrace.md#landed--030-names-only-configuration).
