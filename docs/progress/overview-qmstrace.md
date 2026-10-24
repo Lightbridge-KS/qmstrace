@@ -53,17 +53,19 @@ retain their meaning. Mapped/project evidence labels change intentionally in 0.3
 - [x] Complete `just dry`, isolated wheel/CLI smoke and both strict trace checks;
   final measured totals are recorded below.
 - [ ] **N12: native Windows distinct-drive proof.** The native probe and required Windows
-  CI job are present. No Windows host was available; a passing same-drive macOS smoke is
-  explicitly not N12. This remains a release gate, not an inferred platform claim.
+  CI job are present. The first hosted run exposed legacy pipe encoding; the retry passed
+  command assertions but failed cleaning read-only Git objects. UTF-8 pipe regressions
+  pass locally; temporary-directory cleanup is being retried. A green native job remains
+  required; the macOS smoke does not satisfy N12.
 - [ ] Open the draft PR and complete hosted gates, including native Windows distinct-drive
   acceptance. Maintainer review/merge, consumer migration and release preparation follow
   independently. v0.2.0 is immutable.
 
-**Verified local gates, 2026-10-24:** `just dry` passed **1,520 Python tests, 4 browser
-tests and 98.33% coverage**, formatting, lint, strict mypy, all 37 isolated wheel import
+**Verified local gates, 2026-10-24:** `just dry` passed **1,524 Python tests, 4 browser
+tests and 98.35% coverage**, formatting, lint, strict mypy, all 37 isolated wheel import
 orders and the strict manual build. Final installed-wheel smoke exercises paths/rules/status/
 check/thread/impact/results/table/graph/copy with portable locations. Both strict trace gates
-exit 0: **890 items, 0 violations, 0 gaps, 32 informational suspects**; **16 frozen, 3 changed,
+exit 0: **892 items, 0 violations, 0 gaps, 32 informational suspects**; **16 frozen, 3 changed,
 7 new, 0 removed, 0 withdrawn**. Remote-tag completeness remains NOT VERIFIED.
 
 Output review confirms business-data parity across all 18 changed existing JSON goldens;

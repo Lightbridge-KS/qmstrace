@@ -23,7 +23,10 @@ def main() -> None:
     source = Path(__file__).resolve().parent / "fixtures/mini"
     candidates = [Path.home(), Path(tempfile.gettempdir())]
     candidates += [Path(f"{letter}:\\") for letter in "CDEFGHIJKLMNOPQRSTUVWXYZ"]
-    bases = [Path(tempfile.mkdtemp(prefix="qmstrace-smoke-")) for _ in range(2)] if smoke else []
+    directories = (
+        [tempfile.TemporaryDirectory(prefix="qmstrace-smoke-") for _ in range(2)] if smoke else []
+    )
+    bases = [Path(directory.name) for directory in directories]
     for candidate in [] if smoke else candidates:
         if not candidate.is_dir():
             continue
@@ -31,10 +34,11 @@ def main() -> None:
         if any(canonical.drive.casefold() == base.drive.casefold() for base in bases):
             continue
         try:
-            directory = Path(tempfile.mkdtemp(prefix="qmstrace-native-", dir=canonical))
+            directory = tempfile.TemporaryDirectory(prefix="qmstrace-native-", dir=canonical)
         except OSError:
             continue
-        bases.append(directory)
+        directories.append(directory)
+        bases.append(Path(directory.name))
         if len(bases) == 2:
             break
     try:
@@ -133,18 +137,19 @@ def main() -> None:
         rendered_html = html.replace("\\\\", "\\").replace("\\", "/").casefold()
         assert all(base.as_posix().casefold() not in rendered_html for base in bases)
         run("ledger", "ledger", "copy-schema")
-        print(
-            (
-                "PASS: same-drive smoke (not native acceptance): "
-                if smoke
-                else "PASS: native distinct-drive "
-            )
-            + "paths/rules/status/check/thread/impact/"
-            "results/table/graph/copy"
-        )
     finally:
-        for base in bases:
-            shutil.rmtree(base)
+        # TemporaryDirectory handles read-only Git objects on native Windows.
+        for directory in directories:
+            directory.cleanup()
+    print(
+        (
+            "PASS: same-drive smoke (not native acceptance): "
+            if smoke
+            else "PASS: native distinct-drive "
+        )
+        + "paths/rules/status/check/thread/impact/"
+        "results/table/graph/copy"
+    )
 
 
 if __name__ == "__main__":
