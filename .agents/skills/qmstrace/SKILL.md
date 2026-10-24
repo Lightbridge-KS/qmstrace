@@ -10,6 +10,13 @@ ID patterns, paths, fields, link types, baseline scopes and coverage rules. Exam
 use the miniature service schema; substitute the actual project's IDs and fields. Do not
 copy a rule from this skill over the configured rule.
 
+`REQ-SVC-01` and `REQ-SVC-02` are example IDs for two distinct requirements. In this
+example, `REQ` is the configured requirement prefix, `SVC` is the subject key for the
+service, and `01` / `02` distinguish the items; they do not indicate priority or status.
+These are not built-in or reserved IDs. Read `qmstrace rules` for the actual project's
+ID patterns and subject keys, and `qmstrace status` for its declared requirements. Replace
+the example IDs in commands with existing project IDs; mentioning an ID does not declare it.
+
 Links are authored at the downstream end: design satisfies requirements, components
 implement design, and tests verify the items they actually check. Forward reach is derived.
 An `Assumes` link carries impact without satisfying coverage. A test verifying a design

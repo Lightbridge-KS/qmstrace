@@ -52,6 +52,9 @@ case paths, verification methods, unavailable sources, projection failures and o
 per invocation. The installed skill is synchronized with its packaged source; init's
 existing refusal policy remains unchanged.
 
+Review follow-up: both skill copies explain the example requirement IDs (`REQ-SVC-01`
+and `REQ-SVC-02`), their prefix/subject/item parts and substitution with declared project IDs.
+
 **Final verification, 2026-10-24:** `just dry` passed **1,470 Python tests, 4 browser tests,
 98.45% coverage**, formatting, lint, strict mypy, wheel checks and the strict manual build.
 Wheel verification exercises **37 import orders**, packaged skill/schema assets and
