@@ -8,7 +8,7 @@ read_when:
 
 # Names-only workspaces — acceptance protocol
 
-**Status: implementation, macOS acceptance and native Windows N12 verified, 2026-10-24. PR #74 merged at `79841ec`; release remains separate.**
+**Status: implementation, macOS acceptance and native Windows N12 verified, 2026-10-24. PR #74 merged at `79841ec`; v0.3.0 published at `a276e6e`.**
 Parent: [feature design and implementation plan](../design/names-only-workspaces.md).
 Progress belongs in the [existing tracker](../progress/overview-qmstrace.md#landed--030-names-only-configuration).
 Tests must distinguish configuration readability, trace judgment, actual test execution,

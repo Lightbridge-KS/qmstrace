@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — v0.2.0 published; names-only v2 configuration merged as PR 74 at 79841ec, with local gates and native Windows distinct-drive acceptance verified. The v0.3.0 release candidate is prepared on codex/release-0.3.0; manifest and lockfile name 0.3.0, with review, tag and publication pending. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
+summary: The single active qmstrace tracker — v0.3.0 published at a276e6e after PR 75; tag and CI wheel identity verified unchanged. The next development version, 0.4.0.dev0, is being prepared on codex/post-release-0.3.0. Names-only v2 configuration and native Windows distinct-drive acceptance are verified. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,9 +8,9 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-24 · Release 0.2.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-24 · Release 0.3.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
-capability](#landed--m12--the-c-capability): landed.** Now: [v0.3.0 release preparation](#in-progress--030-release),
+capability](#landed--m12--the-c-capability): landed.** Now: [post-release development version](#in-progress--040-development-version),
 alongside [real-world use](#now--real-world-use) in the layout of ADR-0001.
 [#49 · tables as data](#landed--49--tables-as-data)
 landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps merged as PR #69 (`8223d32`).
@@ -20,11 +20,47 @@ at that verified merge commit. PR #73 (`bebf1f1`) advances `main` to `0.3.0.dev0
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## In progress — 0.3.0 release
+## In progress — 0.4.0 development version
+
+The [published v0.3.0 release](https://github.com/Lightbridge-KS/qmstrace/releases/tag/v0.3.0)
+remains pinned to `a276e6e`. Branch `codex/post-release-0.3.0` carries the release execution,
+editorial and publication reconciliation and changes only qmstrace's manifest/lock version
+to `0.4.0.dev0`. No engine behavior, dependency, published asset or current installation pin
+is changed. Consumer upgrades and migration remain separate.
+
+- [x] Verify publication and unchanged annotated tag/asset identity; reconcile the tracker
+  and linked design/acceptance status.
+- [x] Set the next development version and regenerate the lockfile without dependency churn.
+- [x] Run `just dry`, both strict trace gates and isolated installed-wheel/version checks;
+  inspect the diff against the release and record measured results.
+- [ ] Review/merge the draft PR after hosted dry/Windows/preview checks pass; require green
+  merge-commit CI before post-merge cleanup.
+
+
+**Verified 2026-10-24:** `just dry` passed **1,524 Python tests, 4 browser tests and
+98.35% coverage**, formatting, lint, strict mypy, all 37 isolated wheel import orders
+and the strict manual build. Both strict trace gates exit 0: **892 items, 0 violations,
+0 gaps and 32 informational suspects**; **16 frozen, 3 changed, 7 new, 0 removed,
+0 withdrawn**. Remote-tag completeness remains NOT VERIFIED.
+
+Manifest and lockfile comparison against `a276e6e` confirms only qmstrace's version changes;
+all dependency records remain identical. All **106 packaged source/asset files** match the
+published v0.3.0 wheel, and distribution METADATA differs only in Version. An isolated,
+offline-installed wheel outside the source checkout reports `qmstrace 0.4.0.dev0`; module
+version/import origin, eager help/version, JSON usage errors and v1 paths/rules with CLI `/2`
+pass. Its temporary environment and fixtures were removed. Runtime source, tests, current
+install pins, published changelog, workflows, trace configuration and frozen SRS bytes are
+unchanged. The published tag, notes and wheel are preserved. Review/merge and consumer
+upgrades remain separate.
+
+## Landed — 0.3.0 release
 
 Release scope: the merged names-only configuration and portable `/2` output from PR #74.
-The candidate is on `codex/release-0.3.0`, carrying the PR #74 reconciliation. Manifest and
-lockfile name `0.3.0`; no local/remote `v0.3.0` tag or GitHub release exists as of this check.
+**[PR #75](https://github.com/Lightbridge-KS/qmstrace/pull/75) merged at `a276e6e`,
+2026-10-24**, carrying the PR #74 reconciliation. The tagged manifest and lockfile name
+`0.3.0`. Annotated `v0.3.0` points to that verified merge commit; CI created the draft,
+which the maintainer reviewed and [published](https://github.com/Lightbridge-KS/qmstrace/releases/tag/v0.3.0)
+on 2026-10-24 at 13:45:14 UTC. The tag and wheel asset identity/digest are unchanged.
 Issue #60, M11 and real consumer migration remain separate.
 The [release runbook](../dev/releasing.md) owns the mechanics; CI drafts, a maintainer publishes.
 
@@ -34,15 +70,16 @@ The [release runbook](../dev/releasing.md) owns the mechanics; CI drafts, a main
 - [x] Make migration guidance explicit: v1 inputs remain readable; all CLI/table JSON uses
   `/2`, v2 requires repo/profile identity, and fresh `init` starters remain v1. Run `just dry`,
   both strict trace checks and isolated candidate-wheel/version/assets smoke tests.
-- [ ] Review/merge the draft release PR after its dry, native Windows distinct-drive and
+- [x] Review/merge the draft release PR after its dry, native Windows distinct-drive and
   preview checks pass; require green CI on that exact merge commit.
-- [ ] With explicit release authorization, push a new annotated `v0.3.0` tag at the verified
+- [x] With explicit release authorization, push a new annotated `v0.3.0` tag at the verified
   release merge commit. Let the release workflow rerun the Linux/Windows gates, verify
   tag/manifest equality and draft the notes plus wheel. Preserve published v0.2.0.
-- [ ] Inspect the CI-created draft, migration notes and wheel/version/packaged assets;
-  maintainer reviews and publishes. Installation uses the tag or wheel, not a package index.
-- [ ] After publication, reconcile the tracker and prepare a PR for `0.4.0.dev0` plus lockfile.
-  Upgrade installed tools and migrate real consumers through separate coordinated work.
+- [x] Inspect the CI-created draft, migration notes and wheel/version/packaged assets.
+- [x] Maintainer reviews and publishes the draft. Installation uses the tag or wheel,
+  not a package index.
+- [x] Record publication and prepare the `0.4.0.dev0` follow-up above.
+  Installed-tool upgrades and real consumer migration remain separate work.
 
 **Release-candidate verification, 2026-10-24:** `just dry` passed **1,524 Python tests,
 4 browser tests and 98.33% coverage**, formatting, lint, strict mypy, all 37 isolated wheel
@@ -59,8 +96,29 @@ temporary environment and fixtures were removed. The local smoke does not substi
 native Windows acceptance, which remains required on the release PR and tagged commit.
 The built installation page contains the v0.3.0 pin; the release workflow's notes extractor
 selects only the new changelog section, including migration guidance. Published v0.2.0,
-consumer checkouts and the installed global CLI remain unchanged. Review/merge, tag creation,
-CI-drafted release inspection and publication remain pending.
+consumer checkouts and the installed global CLI remain unchanged. PR merge, tagging and
+CI-drafted release inspection and maintainer publication are complete as recorded below.
+
+**Release execution, 2026-10-24:** [merge CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40090412339)
+passed on `a276e6e`. The checked PR head `5659b38` has the same Git tree and is an ancestor.
+Local `main` was fast-forwarded there; `codex/release-0.3.0` and its stale remote reference
+were pruned. The new annotated tag was pushed at that exact commit; published v0.2.0 is unchanged.
+[Release CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40090633829) passed its
+Linux dry gate, native Windows distinct-drive gate, tag/version check, changelog extraction,
+wheel verification and draft creation. The maintainer subsequently published the reviewed
+draft; the engine did not create a replacement release or move the published tag.
+
+The CI wheel `qmstrace-0.3.0-py3-none-any.whl` has SHA-256
+`22f711a23047f9efe083a764334b944d649cfc55f2aea03fe65249dbb6b8c1d4`, matching the GitHub asset digest.
+All **106 packaged source/assets** match the tagged Git tree, and METADATA names `0.3.0`.
+The downloaded CI wheel also passed the isolated installed-CLI v1/v2 smoke described above;
+its temporary environment and fixtures were removed. The initial CI-generated notes matched
+the tagged changelog section. The draft notes were then editorially reorganized into highlights, a compatibility table, installation and upgrade
+guidance, preserving the shipped behavior and migration boundary. The tag and wheel asset
+identity/digest are unchanged. Initial draft/unpublished checks were followed by verification
+of `draft = false` and publication at 2026-10-24 13:45:14 UTC. Published wheel digest and
+annotated tag/commit still match the verified candidate. The `0.4.0.dev0` follow-up is tracked
+above; real consumer upgrades remain separate.
 
 ## Landed — 0.3.0 names-only configuration
 
