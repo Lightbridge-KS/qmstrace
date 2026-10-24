@@ -266,6 +266,69 @@ Never a bundle of the test bed: opaque in review, and it would carry a tagger's 
   that is simply absent stays *not verified*. A glob used to read as a file not checked out
   here, and every citation of its family passed unverified (#56).
 
+## Workspace maps — ADR-0010
+
+**Accepted scenarios; implementation verification pending.** Use the generic `MINI` and
+`SPLIT` projects, with disposable checkout layouts built from the miniature fixtures. No consumer
+checkout, project data or machine configuration is needed. These cases exercise
+[D9](../design/data-architecture.md#current-checkout-locations--adr-0010) and the
+[selection contract](../design/surface-architecture.md#workspace-map-selection-and-paths).
+
+| Scenario | Expected |
+|---|---|
+| Parse `version = 1`, `project = 'MINI'`, `ledger_repo = 'ledger'`, `[repos]` name-to-path entries | Pure values, no filesystem or environment access; map-relative paths |
+| Unsupported version, unknown key, malformed TOML, wrong type, empty name/path, missing ledger role/entry | Exit 2 with the candidate and next move; no partial resolution |
+| Map names an unknown member other than the ledger role | Exit 2; a location file cannot extend schema membership |
+| Map's ledger role is not a traced member in the older MINI layout | Allowed; role resolution does not add a member to the project graph |
+| Schema has a traced ledger self-member, but map moves its role to a different name/root | Exit 2; preserve the ledger's identity and exact trace-root binding |
+| Mapped ledger directory exists but has no schema, or its schema names another project | Exit 2 with ledger trace-root guidance; the containing Git root is not a substitute |
+| CLI map, environment map, ancestor map and matching user maps all exist | CLI wins; lower stages are not read, even when malformed |
+| `--workspace FILE` at root or local/ledger leaf, with `-C` before or after the command | Same resolution from the effective invocation directory; nested invocation does not change map-entry bases |
+| `--workspace` supplied twice at root, twice at leaf, or at root and leaf, including the same file | Usage error, exit 2; no duplicate silently wins |
+| No CLI map; environment selector present | Environment wins over ancestor/user; unusable or inapplicable environment file exits 2 without fallback |
+| Missing, unreadable, malformed, wrong-project or wrong-current-root explicit map | Exit 2 without trying another source |
+| Ancestor files above and below the trace root, invoked from a nested directory | Search starts at the discovered trace root; nearest ancestor candidate wins; below-root file cannot select a map |
+| Nearest ancestor candidate malformed/unreadable | Exit 2, no silent fallback |
+| Nearest ancestor candidate valid but wrong project or current root | Exit 2 without user-level fallback; the nearest file is a strict selector |
+| User directory contains one project-and-canonical-root match plus unrelated valid maps | Select the unique match, independent of candidate ordering |
+| Same project but map points only at another checkout | Not a match; do not select by project alone |
+| User stage contains a malformed/unreadable candidate and a valid match | Exit 2 identifying the bad candidate, regardless of file order |
+| Two user files match the same project and current root | Ambiguity, exit 2; list candidates relatively and request explicit selection |
+| No selector, no ancestor candidate, no matching user map | Existing tracked `ledger`/schema `[repos]` resolution and ordinary command bytes unchanged |
+| Selected map omits a schema member while its default checkout exists | Member unavailable; never borrow the default path |
+| Selected map points at an absent/unreadable member, with a usable default elsewhere | Same unavailable policy: local notices survive quiet output; whole-project reads refuse |
+| Selected map omits current root or ledger role; two names alias one canonical root | Exit 2; symlink aliases detected without exposing absolute paths |
+| Current trace root is nested in a Git repo; symlinked invocation points to that root | Match canonical trace roots, not Git roots or lexical-only paths |
+| Mapped ledger provides agreement and change requests, with sibling locations different from defaults | All current reads use one resolution; source paths within the ledger keep their existing meaning |
+| Mapped project has schema skew or a member without usable config | Existing project refusals; a map cannot approve different rules or hide unread members |
+| Schema copy targets a different mapped layout; a later target is refused | All destinations use the map; nothing is written anywhere on refusal |
+| `ledger check/thread/impact/table/copy-schema` launched in a product repo with a valid map | Still refuses wrong-root invocation; explicit `-C` to the ledger remains required |
+| `[schema] path` missing at its original base, but a map locates a ledger | Existing schema-load refusal; no reinterpretation or repair via the map |
+| Current map differs from tagged layout; baseline uses embedded or same-tree historical schema | Tagged reads, digests, baseline comparison and evidence limits unchanged; current map never supplies historical rules |
+| Map selected; `check --quiet` reads missing sources | Map provenance and source notices remain visible; existing exits unchanged |
+| `paths` from product and ledger roots, with a map and without one | Config-only report of current-root anchor, provenance/defaults, ledger and members; `Paths.source` holds the full notice string; no scanning, assessment, Git/network or writes |
+| `paths` with an unavailable sibling | Exit 0 with labelled unavailability, without claiming trace validity; malformed selection/configuration still exit 2 |
+| Cross-drive checkout location cannot be represented from active root | Exit 2, no absolute-path fallback; provenance names source kind plus filename |
+| Map relocation, nested `-C`, repeated calls and reordered map tables | Equivalent effective locations yield deterministic relative output; report/output arguments retain their existing bases |
+| Legacy skill migration with `.qmstrace/workspace.toml` beside `.qmstrace/skill/` | Recovery wording removes only `.qmstrace/skill/`; workspace configuration is preserved |
+| Mapped ledger emits tables with source notices | Preserve `qmstrace.table/1`, report-verdict semantics and evidence limits |
+| CI generates a temporary map for checkout roots and supplies it explicitly to each command | Bypass ambient environment/ancestor/user lookup; do not write checkout roots into tracked configuration |
+| Product-only job with a verified schema copy and no map/ambient selector | Existing local check works; unavailable-source notices stay visible, without claiming whole-project verification |
+
+### Workspace-map manual evidence
+
+The implementation/tests work owns generation and review of these exact files; the docs
+include them and do not invent output. Until generated, the manual's include gate cannot
+pass. Generic map input examples use `MINI`; the command-output goldens use the separate
+`SPLIT` fixture. Neither carries consumer project data.
+
+| Proposed golden under `tests/cli/golden/` | Case shown in the manual |
+|---|---|
+| `paths-map.txt` | `qmstrace paths` with a selected SPLIT map; provenance, ledger and member locations |
+| `paths-default.txt` | `qmstrace paths` with no matching map; tracked-default resolution |
+| `workspace-check-quiet.txt` | Mapped local `qmstrace check --quiet`; provenance and unavailable-source notice retained |
+| `help-paths.txt` | `qmstrace paths --help` |
+
 ## Command line
 
 - One golden output per registered command; a meta-test fails when a command has none.

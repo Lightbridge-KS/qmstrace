@@ -267,7 +267,7 @@ for command in ((), ('ledger',), *((c.callback.__name__,) for c in cli.app.regis
     result = runner.invoke(entry.load(), [*command, '--help'], prog_name='qmstrace')
     assert result.exit_code == 0, result.output
     assert result.stdout_bytes and not result.stderr_bytes
-assert len(cli.app.registered_commands) == 8 and len(cli.ledger.registered_commands) == 5
+assert len(cli.app.registered_commands) == 9 and len(cli.ledger.registered_commands) == 5
 assert len(cli.app.registered_groups) == 1
 print(f'Wheel package imports and behavior pass in isolation ({sys.argv[4]} first).')
 """,

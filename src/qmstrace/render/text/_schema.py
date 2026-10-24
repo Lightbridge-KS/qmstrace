@@ -9,6 +9,7 @@ from collections.abc import Iterable
 from typing import Final
 
 from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
+from qmstrace.core.locations import Locations
 from qmstrace.core.setup import Copied
 
 _DERIVED: Final = {
@@ -19,7 +20,7 @@ _DERIVED: Final = {
 }
 
 
-def rules(config: TraceConfig) -> str:
+def rules(config: TraceConfig, *, locations: Locations | None = None) -> str:
     """What `check` holds this repo to, and whose each part is — read from the configuration."""
     own = config.schema_form is SchemaForm.OWN
     lines = [f"rules in force here — {_schema_source(config)}", ""]
@@ -33,6 +34,8 @@ def rules(config: TraceConfig) -> str:
         "Rules are judged on this repo's items; whether an item is covered across the project's "
         "repos is judged in the ledger, by qmstrace ledger check.",
     ]
+    if locations:
+        lines += ["", locations.notice]
     return "\n".join(lines)
 
 
@@ -166,6 +169,8 @@ def schema_copies(config: TraceConfig, copies: Iterable[Copied]) -> str:
     """What `ledger copy-schema` did: the schema it copied, then one line per repo."""
     written = list(copies)
     lines = [f"schema: {config.project} {config.schema_digest}"]
+    if written and written[0].location_notice:
+        lines.append(written[0].location_notice)
     for copy in written:
         if copy.skipped:
             lines.append(f"skipped: {copy.repo} — the ledger itself; {copy.before}")

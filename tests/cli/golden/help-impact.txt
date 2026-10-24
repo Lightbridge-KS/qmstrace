@@ -11,6 +11,9 @@ Arguments:
   ID…  One or more item IDs visible to this run.  [required]
 
 Options:
-  -C PATH  Run as if qmstrace had been started in PATH, as with git -C. Before
-           or after the command.
-  --help   Show this message and exit.
+  -C PATH           Run as if qmstrace had been started in PATH, as with git -C.
+                    Before or after the command.
+  --workspace FILE  Select a checkout map; overrides QMSTRACE_WORKSPACE and
+                    automatic discovery. Before or after the command. Relative
+                    files start at the effective -C directory.
+  --help            Show this message and exit.

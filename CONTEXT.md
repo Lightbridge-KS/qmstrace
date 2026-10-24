@@ -335,6 +335,18 @@ product repo; where the ledger holds the documents (ADR-0001), the ledger is a s
 Only the ledger's import reads it at a pin.
 _Avoid_: dependency, neighbour, peer
 
+**Trace Root**:
+The directory holding the active `qmstrace.toml`, or the ledger's `qmstrace.schema.toml`
+for a ledger command. It may be inside a larger Git repository. Invocation from a nested
+directory discovers this root before looking for an ancestor workspace map.
+_Avoid_: Git root (not necessarily the same directory), current directory
+
+**Workspace Map**:
+A local TOML file mapping the project's stable repo names to checkout locations on this
+machine, with one name identifying the ledger role. One whole map is selected per run;
+it changes current locations, never the trace schema, project membership or historical rules.
+_Avoid_: trace configuration, trace schema, ledger, registry
+
 **Ledger's Check**:
 `qmstrace ledger check`, run in the ledger repo: every repo of the project read from its
 working tree and judged as one — coverage met across repos, each repo's own violations,

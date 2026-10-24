@@ -8,8 +8,11 @@ Usage: qmstrace check [OPTIONS]
   record review.
 
 Options:
-  --strict  The gate: gaps fail too; suspects never fail.
-  --quiet   Findings only — what could not be verified still shows.
-  -C PATH   Run as if qmstrace had been started in PATH, as with git -C. Before
-            or after the command.
-  --help    Show this message and exit.
+  --strict          The gate: gaps fail too; suspects never fail.
+  --quiet           Findings only — what could not be verified still shows.
+  -C PATH           Run as if qmstrace had been started in PATH, as with git -C.
+                    Before or after the command.
+  --workspace FILE  Select a checkout map; overrides QMSTRACE_WORKSPACE and
+                    automatic discovery. Before or after the command. Relative
+                    files start at the effective -C directory.
+  --help            Show this message and exit.

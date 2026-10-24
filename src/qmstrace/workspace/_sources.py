@@ -15,6 +15,7 @@ from qmstrace.core.assessment import ExternalState, SiblingState
 from qmstrace.core.baselines import Register
 from qmstrace.core.config import ExternalSource, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.core.locations import Locations
 from qmstrace.core.model import ID_TOKEN, Item, Link
 from qmstrace.extract import change_requests
 from qmstrace.infra.externals import request_files
@@ -70,7 +71,11 @@ def _external(
 
 
 def _siblings(
-    root: Path, config: TraceConfig, trees: TreeFactory, ledger: Path | None
+    root: Path,
+    config: TraceConfig,
+    trees: TreeFactory,
+    ledger: Path | None,
+    locations: Locations | None = None,
 ) -> tuple[list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]], bool, bool]:
     """Each sibling with its items (None when not read) and the links those items declare;
     whether the siblings could be located at all; whether this repo is among the project's
@@ -79,8 +84,12 @@ def _siblings(
         return [], not config.repos, False
     found: list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]] = []
     listed = False
+    project_name = config.project
     for name, relative in sorted(config.repos.items()):
-        path = ledger / relative
+        path = locations.roots.get(name) if locations else ledger / relative
+        if path is None:
+            found.append((SiblingState(name, "not mapped", None, "not reachable"), None, ()))
+            continue
         location = _shown(root, path)
         if _same(path, root):
             listed = True
@@ -95,6 +104,11 @@ def _siblings(
             problem = f"its configuration could not be read — {stopped.what}"
             found.append((SiblingState(name, location, None, problem), None, ()))
             continue
+        if locations and config.project != project_name:
+            raise CouldNotJudge(
+                f"Mapped member {name} belongs to project {config.project}, not {project_name}.",
+                "Fix: bind the member to the intended project's trace root.",
+            )
         authored = [t for t in config.item_types.values() if t.id_pattern is not None]
         scan = _scan(tree, config, authored, with_misplaced=False)
         # a sibling's files, as a reader of this repo would write them: ../service/docs/…

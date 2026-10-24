@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1, M10, package refactors and M12 landed; release 0.1.1 published; #25 and #26 landed in PR #67. The verification-method fix for #57 is implemented and verified, awaiting review; external-source issue #60 and M11 mentions remain later.
+summary: The single active qmstrace tracker — slice 1, M10, package refactors and M12 landed; release 0.1.1 published; #25 and #26 landed in PR #67. #57 landed in PR #68; workspace maps are implemented and verified, awaiting review; external-source issue #60 and M11 mentions remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,18 +8,58 @@ read_when:
 
 # qmstrace — progress
 
-**Updated 2026-10-23 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
+**Updated 2026-10-24 · Release 0.1.1, the V14 fix, published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
 capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
 on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--tables-as-data)
-landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 is implemented
-and verified on `codex/verification-methods`, awaiting commit and review. M11 · mentions
+landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps are implemented and verified on
+`codex/workspace-map`. M11 · mentions
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## Ready for review — #57 · verification-method grouping
+## Ready for review — workspace maps
 
-**2026-10-23 · `codex/verification-methods`.** [ADR-0009](../adr/0009-group-verification-by-applicable-rules.md)
+**2026-10-24 · `codex/workspace-map`.** Add per-machine checkout maps without changing
+schema formats, digests or historical reads. Consumer rollout remains separate.
+
+- [x] Add strict map parsing and shared location resolution, preserving tracked-path fallback.
+- [x] Wire explicit/environment/ancestor/user discovery into reads and transactional copies.
+- [x] Add the paths diagnostic, CLI options, provenance and focused regression coverage.
+- [x] Ship ADR-0010, design/ownership/scenario updates and Diátaxis manual pages.
+- [x] Inspect goldens and rendered manual; run dry and both strict trace gates.
+
+Accepted discovery: CLI, environment, nearest ancestor map, then a unique user-level match
+by project and canonical current checkout. Malformed user candidates fail discovery; maps
+never merge or replace tagged configuration. Relative locations remain the output contract;
+cross-drive layouts are refused. Implementation is verified; PR review and consumer rollout
+remain separate gates.
+
+Verified during development: **142 focused workspace-map tests** passed, followed by **107
+setup, CLI-map and workspace-dispatch tests** after adding init provenance coverage.
+Acceptance includes a Unicode Git worktree, two relocated layouts with equal logical
+graphs and schema/configuration bytes, report matching, transactional schema copies,
+historical-schema isolation and deterministic output. Disabling discovery in a disposable
+copy made the nested relocated-ledger test fail on the obsolete tracked defaults; the copy
+was removed. The local playground session retains that mutation evidence.
+
+Final local and ledger `check --strict --quiet` both exit 0: **829 items, 0 violations,
+0 gaps and 32 informational suspects**, with 16 frozen, 3 changed, 7 new and 0 removed.
+Remote-tag completeness remains unverified. Consumer rollout and the actual user profile
+remain separate; this change does not migrate consumer repositories. The frozen SRS,
+dependency manifest/lockfile and trace configuration are unchanged. Existing behavior-output
+goldens are unchanged; the 14 existing help goldens add the workspace option and command.
+
+Final `just dry` passed: **1,385 Python tests, 4 browser tests, 98.46% coverage**,
+formatting, lint, strict mypy, isolated wheel/package checks and the manual build. The
+built paths reference, map reference and developer/CI how-to were inspected: four included
+goldens match exactly, all 16 rendered code blocks are intact, and CI heredoc boundaries
+and cleanup survive rendering. The final review found no remaining concrete defects.
+Accepted limits remain: no cross-drive layout support, schema-format migration, tracked
+member-identity field, or consumer rollout in this increment.
+
+## Landed — #57 · verification-method grouping
+
+**Merged as PR #68 (`03d0719`, 2026-10-23).** [ADR-0009](../adr/0009-group-verification-by-applicable-rules.md)
 records the accepted display contract. `status` and `results` classify a requirement as
 test-backed only when a valid declared method meets an applicable incoming-`verifies` coverage
 rule; linked outcomes remain test evidence for all methods. The versioned `ledger table`
@@ -30,7 +70,7 @@ format, gap judgment, verdict aggregation and exits remain unchanged.
 - [x] Review all affected goldens and built manual pages.
 - [x] Run the full dry gate and local/ledger strict checks; record measured outcomes.
 
-Verification on this branch: 74 focused CLI/judgment/architecture/table tests passed before
+Verification recorded for PR #68: 74 focused CLI/judgment/architecture/table tests passed before
 the final CLI assertions; the final `just dry` passed **1,233 Python tests, 4 browser tests,
 98.51% coverage**, formatting, lint, mypy, wheel/package checks and strict manual build.
 The generated status and results code blocks show the demonstration requirement apart with
@@ -789,8 +829,6 @@ methods are in the [experiment record](../tests/beacon-authoring-experiment.md).
   - #20 files `init` creates are `0600`.
   - #21 rollback leaves folders behind.
   - #22 `ux`: no symbolic links.
-  - #57 `status` and `results` disagree about which verification methods are listed apart —
-    fix ready for review above.
   - #60 an external source cannot yet pool IDs across several agreement files.
   - [agent-stuff#71](https://github.com/Lightbridge-KS/agent-stuff/issues/71).
 - **Not filed, from run A:**

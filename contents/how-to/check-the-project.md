@@ -3,7 +3,7 @@
 !!! abstract "TL;DR"
 
     In the ledger repo, run `qmstrace ledger check`. It reads every repo the schema lists
-    under `[repos]` — from the folders beside the ledger — and judges them as one project.
+    under `[repos]` — from tracked defaults or a selected workspace map — and judges them as one project.
     `qmstrace ledger check --strict` is the ledger's gate. A repo it cannot read stops it,
     with exit `2`.
 
@@ -14,8 +14,10 @@
    design, list it too, as `ledger = "."`, and give it a `qmstrace.toml` of its own — see
    [configuration](../reference/configuration.md#a-ledger-that-holds-the-documents).
 
-2. **Put every repo where `[repos]` says**, beside the ledger. In a pipeline, check each one
-   out at that path: a repo that is not there stops the check rather than passing unread.
+2. **Locate every repo.** Use the ledger-relative defaults in `[repos]`, or
+   [select a workspace map](use-a-workspace-map.md) for a different layout. In a pipeline,
+   check out each repo at the selected location. Inspect it with `qmstrace paths`; a repo
+   that is not there stops the check rather than passing unread.
 
 3. **Give every product repo the ledger's rules**, in the ledger:
 

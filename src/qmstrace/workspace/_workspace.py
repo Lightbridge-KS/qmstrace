@@ -17,12 +17,14 @@ from qmstrace.core.baselines import BaselineState, Register
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
+from qmstrace.core.locations import Locations, LocationState, Paths
 from qmstrace.core.model import Finding, Item, Link, Notice
 from qmstrace.core.results import Results
 from qmstrace.extract import reports
 from qmstrace.extract.base import FORMS
-from qmstrace.infra.files import write_new
+from qmstrace.infra.files import read_optional, write_new
 from qmstrace.infra.git import GitCli, IGit
+from qmstrace.infra.locations import discover, relative
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 from qmstrace.workspace._baselines import _judged_baselines
 from qmstrace.workspace._discovery import (
@@ -59,10 +61,17 @@ class Workspace:
     config: TraceConfig
     trees: TreeFactory
     git: IGit | None = None
+    locations: Locations | None = None
 
     @classmethod
     def open(
-        cls, start: Path, *, trees: TreeFactory = WorkingTree, git: IGit | None = None
+        cls,
+        start: Path,
+        *,
+        workspace: Path | None = None,
+        trees: TreeFactory = WorkingTree,
+        git: IGit | None = None,
+        _invocation: Path | None = None,
     ) -> Workspace:
         """Find the product repo at or above `start`, and read its trace configuration.
 
@@ -74,7 +83,9 @@ class Workspace:
         """
         root = _find_root(start)
         tree = trees(root)
-        return cls(root, tree, _configuration(root, tree), trees, git)
+        config = _configuration(root, tree)
+        locations = discover(_invocation or start, root, config, workspace)
+        return cls(root, tree, config, trees, git, locations)
 
     @classmethod
     def initialize(
@@ -84,6 +95,7 @@ class Workspace:
         subject: str | None = None,
         key: str | None = None,
         language: str | None = None,
+        workspace: Path | None = None,
     ) -> tuple[str, ...]:
         """Set up the selected directory, or refresh an existing ancestor's managed files.
 
@@ -94,21 +106,82 @@ class Workspace:
         A new product-repo configuration declares the item types of the repo's language, which
         its build files choose unless `language` names one (ADR-0006).
         """
-        return _initialize(
+        locations: Locations | None = None
+
+        def load_config(root: Path) -> TraceConfig:
+            nonlocal locations
+            opened = cls.open(root, workspace=workspace, _invocation=start)
+            locations = opened.locations
+            return opened.config
+
+        written = _initialize(
             start,
-            load_config=lambda root: cls.open(root).config,
+            load_config=load_config,
             subject=subject,
             key=key,
             language=language,
+            workspace=workspace,
         )
+        return ((locations.notice,) if locations else ()) + written
 
     @classmethod
     def copy_schema(
-        cls, start: Path, names: Sequence[str] = ()
+        cls, start: Path, names: Sequence[str] = (), *, workspace: Path | None = None
     ) -> tuple[TraceConfig, tuple[setup.Copied, ...]]:
         """In the ledger: write the project's schema into its product repos as a verified copy —
         every named repo, or every repo in [repos]; all of them, or none (D9)."""
-        return _copy_schema(start, names)
+        return (
+            _copy_schema(start, names, workspace=workspace)
+            if workspace
+            else _copy_schema(start, names)
+        )
+
+    @classmethod
+    def paths(cls, start: Path, *, workspace: Path | None = None) -> Paths:
+        """Inspect configuration and locations without scanning items or reading baselines."""
+        # A ledger may hold a schema without a traced configuration of its own.
+        here = start.resolve()
+        root = next(
+            (
+                p
+                for p in (here, *here.parents)
+                if (p / "qmstrace.toml").is_file() or (p / "qmstrace.schema.toml").is_file()
+            ),
+            None,
+        )
+        if root is None:
+            _find_root(start)
+            raise AssertionError("root discovery must refuse")
+        if (root / "qmstrace.toml").is_file():
+            config = _configuration(root, WorkingTree(root))
+        else:
+            config = TraceConfig.of_schema(read_optional(root / "qmstrace.schema.toml") or "")
+        locations = discover(start, root, config, workspace)
+        ledger = (
+            locations.ledger
+            if locations
+            else (root if (root / "qmstrace.schema.toml").is_file() else _ledger(root, config))
+        )
+        states = []
+        for name, default in sorted(config.repos.items()):
+            path = (
+                locations.roots.get(name) if locations else (ledger / default if ledger else None)
+            )
+            states.append(
+                LocationState(
+                    name,
+                    relative(root, path) if path else None,
+                    bool(path and (path / "qmstrace.toml").is_file()),
+                    bool(path and path.resolve() == root.resolve()),
+                )
+            )
+        return Paths(
+            config.project,
+            locations.notice if locations else "workspace: tracked paths (no map selected)",
+            relative(root, ledger) if ledger else None,
+            tuple(states),
+            bool(ledger and (ledger / "qmstrace.schema.toml").is_file()),
+        )
 
     @staticmethod
     def save_view(path: Path, content: str) -> None:
@@ -119,7 +192,7 @@ class Workspace:
         """Scan, read what lies around the repo, build the graph — once."""
         config = self.config
         scan = _scan(self.tree, config, config.item_types.values(), with_misplaced=True)
-        ledger = _ledger(self.root, config)
+        ledger = self.locations.ledger if self.locations else _ledger(self.root, config)
         externals = [
             _external(ledger, config.externals[name], self.root)
             for name in sorted(config.externals)
@@ -151,7 +224,7 @@ class Workspace:
         violations += [*register.findings, *guard_findings]
         violations.sort(key=lambda f: (f.file, f.line, f.code, f.what))
 
-        notices: list[Notice] = []
+        notices: list[Notice] = [Notice(self.locations.notice)] if self.locations else []
         if located and config.repos and not listed:
             notices.append(
                 Notice(
@@ -234,6 +307,7 @@ class Workspace:
         cls,
         start: Path,
         *,
+        workspace: Path | None = None,
         trees: TreeFactory = WorkingTree,
         gits: Callable[[Path], IGit] = GitCli,
     ) -> ProjectAssessment:
@@ -251,11 +325,13 @@ class Workspace:
             schema — a repo that was not read would make a clean result a false one. Every
             problem is named at once.
         """
+        if workspace is not None:
+            return _project(start, workspace=workspace, trees=trees, gits=gits)
         return _project(start, trees=trees, gits=gits)
 
     @classmethod
     def project_results(
-        cls, start: Path, reports: Sequence[tuple[str, Path]]
+        cls, start: Path, reports: Sequence[tuple[str, Path]], *, workspace: Path | None = None
     ) -> tuple[ProjectAssessment, results.Results]:
         """In the ledger: read every repo, then the reports given — each naming the repo it
         reports — as one, matched against each repo's own automated tests (ADR-0005).
@@ -264,9 +340,13 @@ class Workspace:
         outside, by its file name alone. A repo the schema does not list, a report that cannot
         be read, or reports that match no automated test refuse the whole run.
         """
-        project = _project(start)
+        project = _project(start, workspace=workspace) if workspace else _project(start)
         ledger = _find_ledger(start)
-        roots = {repo.name: ledger / repo.location for repo in project.repos}
+        roots = (
+            {repo.name: project.locations.roots[repo.name] for repo in project.repos}
+            if project.locations
+            else {repo.name: ledger / repo.location for repo in project.repos}
+        )
         unknown = sorted({name for name, _ in reports if name not in roots})
         if unknown:
             raise CouldNotJudge(
@@ -295,6 +375,7 @@ class Workspace:
         start: Path,
         item_id: str,
         *,
+        workspace: Path | None = None,
         trees: TreeFactory = WorkingTree,
         gits: Callable[[Path], IGit] = GitCli,
     ) -> ProjectAssessment:
@@ -306,7 +387,11 @@ class Workspace:
             For an ID no repo declares or cites — and, for a module's or a test's ID written
             without its repo, the qualified IDs it may mean.
         """
-        project = cls.project(start, trees=trees, gits=gits)
+        project = (
+            cls.project(start, workspace=workspace, trees=trees, gits=gits)
+            if workspace
+            else cls.project(start, trees=trees, gits=gits)
+        )
         if project.graph.node(item_id) is not None:
             return project
         raise _unseen_in_project(project, item_id)
@@ -317,6 +402,7 @@ class Workspace:
         start: Path,
         item_ids: Iterable[str],
         *,
+        workspace: Path | None = None,
         trees: TreeFactory = WorkingTree,
         gits: Callable[[Path], IGit] = GitCli,
     ) -> ProjectAssessment:
@@ -324,7 +410,11 @@ class Workspace:
         starts = sorted(set(item_ids))
         if not starts:
             raise CouldNotJudge("No starting IDs supplied.", "Fix: pass at least one item ID.")
-        project = cls.project(start, trees=trees, gits=gits)
+        project = (
+            cls.project(start, workspace=workspace, trees=trees, gits=gits)
+            if workspace
+            else cls.project(start, trees=trees, gits=gits)
+        )
         missing = [
             _unseen_in_project(project, item_id)
             for item_id in starts
@@ -439,6 +529,8 @@ class Workspace:
     ) -> tuple[list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]], bool, bool]:
         """Each sibling with its items (None when not read) and their own links; whether the
         siblings could be located at all; whether this repo is among the project's repos."""
+        if self.locations:
+            return _read_siblings(self.root, self.config, self.trees, ledger, self.locations)
         return _read_siblings(self.root, self.config, self.trees, ledger)
 
 

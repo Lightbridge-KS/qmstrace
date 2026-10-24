@@ -6,7 +6,7 @@ Implements: DSN-QMT-01
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import typer
 
@@ -30,3 +30,23 @@ def _directory(ctx: typer.Context, after: Path | None) -> Path:
             param_hint="'-C'",
         )
     return after or before or Path(".")
+
+
+WorkspaceFile = Annotated[
+    list[Path] | None,
+    typer.Option(
+        "--workspace",
+        metavar="FILE",
+        help="Select a checkout map; overrides QMSTRACE_WORKSPACE and automatic discovery. "
+        "Before or after the command. Relative files start at the effective -C directory.",
+    ),
+]
+
+
+def _workspace(ctx: typer.Context, after: list[Path] | None) -> Path | None:
+    """Reconcile explicit map selectors without reading any configuration."""
+    before = cast(list[Path] | None, ctx.find_root().meta.get("workspace"))
+    selected = [*(before or ()), *(after or ())]
+    if len(selected) > 1:
+        raise typer.BadParameter("given twice; give it once.", param_hint="'--workspace'")
+    return selected[0] if selected else None

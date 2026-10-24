@@ -41,7 +41,7 @@ def test_open_keeps_subclass_construction_and_injected_dependencies(project: Pat
     assert workspace.trees is trees and workspace.git is git
     assert opened == [root]
     assert workspace.root == root
-    assert Workspace.__slots__ == ("root", "tree", "config", "trees", "git")
+    assert Workspace.__slots__ == ("root", "tree", "config", "trees", "git", "locations")
     with pytest.raises(AttributeError):
         workspace.root = root / "other"
 

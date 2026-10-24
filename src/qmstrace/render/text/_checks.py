@@ -146,6 +146,8 @@ def _project_result(project: ProjectAssessment, *, strict: bool) -> str:
     cited = any(i.fields.get("Change") for i in project.graph.items())
     if (project.config.change_requests or cited) and not project.register.available:
         parts.append("change requests NOT VERIFIED")
+    if any(n.text.startswith("workspace:") for n in project.notices):
+        parts.append("workspace map selected")
     return " · ".join(parts)
 
 
@@ -201,4 +203,6 @@ def _result(assessment: Assessment, *, strict: bool) -> str:
         assessment.config.change_requests or has_citations
     ) and not assessment.baseline_state.register.available:
         parts.append("change requests NOT VERIFIED")
+    if any(n.text.startswith("workspace:") for n in assessment.notices):
+        parts.append("workspace map selected")
     return " · ".join(parts)

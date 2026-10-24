@@ -16,10 +16,12 @@ from qmstrace.core.baselines import BaselineState, Comparison
 from qmstrace.core.config import SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
+from qmstrace.core.locations import Locations
 from qmstrace.core.model import Extracted, Finding, Item, Notice
 from qmstrace.extract.base import FORMS
 from qmstrace.infra.files import read_optional
 from qmstrace.infra.git import GitCli, IGit, checkout
+from qmstrace.infra.locations import discover, relative
 from qmstrace.infra.tree import ISourceTree, WorkingTree
 from qmstrace.workspace._baselines import _baseline_notices, _judged_baselines
 from qmstrace.workspace._discovery import (
@@ -46,7 +48,9 @@ class _Member:
     config: TraceConfig
 
 
-def _members(ledger: Path, config: TraceConfig, trees: TreeFactory) -> list[_Member]:
+def _members(
+    ledger: Path, config: TraceConfig, trees: TreeFactory, locations: Locations | None = None
+) -> list[_Member]:
     """Every repo the schema lists, opened — or one refusal naming every repo that cannot be
     judged with the others."""
     if not config.repos:
@@ -59,7 +63,12 @@ def _members(ledger: Path, config: TraceConfig, trees: TreeFactory) -> list[_Mem
     members: list[_Member] = []
     seen: dict[str, str] = {}
     for name, place in sorted(config.repos.items()):
-        root = ledger / place
+        root = locations.roots.get(name) if locations else ledger / place
+        if root is None:
+            problems.append(f"{name}: no location in the selected workspace map")
+            continue
+        if locations:
+            place = relative(ledger, root)
         shown = posixpath.normpath(posixpath.join(place, CONFIG_FILE))
         twin = next((other for other, path in seen.items() if _same(ledger / path, root)), None)
         if twin is not None:
@@ -87,7 +96,11 @@ def _members(ledger: Path, config: TraceConfig, trees: TreeFactory) -> list[_Mem
             continue
         location = posixpath.normpath(place)
         members.append(_Member(name, root.resolve(), location, tree, own))
-    listed = any(_same(ledger / place, ledger) for place in config.repos.values())
+    listed = (
+        any(_same(member.root, ledger) for member in members)
+        if locations
+        else any(_same(ledger / place, ledger) for place in config.repos.values())
+    )
     if (ledger / CONFIG_FILE).is_file() and not listed:
         problems.append(
             f"this ledger holds a {CONFIG_FILE}, but [repos] does not list it — add "
@@ -140,6 +153,7 @@ def _unseen_in_project(project: ProjectAssessment, item_id: str) -> CouldNotJudg
 def project(
     start: Path,
     *,
+    workspace: Path | None = None,
     trees: TreeFactory = WorkingTree,
     gits: Callable[[Path], IGit] = GitCli,
 ) -> ProjectAssessment:
@@ -159,7 +173,8 @@ def project(
     """
     ledger = _find_ledger(start)
     config = TraceConfig.of_schema(read_optional(ledger / SCHEMA_FILE) or "")
-    members = _members(ledger, config, trees)
+    locations = discover(start, ledger, config, workspace)
+    members = _members(ledger, config, trees, locations)
     # read before the scan: a table records which commit each repo had checked out
     checkouts = {member.name: _checkout(member.root) for member in members}
 
@@ -220,7 +235,7 @@ def project(
     covered = {t for scope in config.baselines.values() for t in scope.covers}
     states: list[RepoState] = []
     comparisons: list[Comparison] = []
-    notices: list[Notice] = []
+    notices: list[Notice] = [Notice(locations.notice)] if locations else []
     judged_any = False
     for name, (member, scan, _, _) in parts.items():
         state = BaselineState(register=register)
@@ -286,6 +301,7 @@ def project(
         notices=tuple(notices),
         suspects=judge.suspects(union, comparisons),
         ledger=_checkout(ledger),
+        locations=locations,
     )
 
 

@@ -15,6 +15,11 @@
 | trace schema | `qmstrace.schema.toml` | the project, in its ledger repo | item types and their required fields, link types, coverage rules, where the agreement and the change requests are, which tags are baselines, the project's product repos |
 | trace configuration | `qmstrace.toml` | one product repo | where the schema is, the repo's subjects, which item types it declares, their ID patterns and the files to read |
 
+Current checkout locations may also come from a local [workspace map](workspace-maps.md).
+It selects a whole layout without changing these files or their rules. Schema `[repos]`
+paths remain ledger-relative defaults, and `[schema] path` still resolves from the repo's
+trace root. Inspect the effective locations with [qmstrace paths](commands/paths.md).
+
 A product repo holds the project's trace schema in one of three forms:
 
 - **by path** — `[schema] path = "…"`, when the ledger repo sits beside it;

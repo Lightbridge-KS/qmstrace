@@ -69,8 +69,9 @@ and the configuration it writes:
 - `.agents/skills/qmstrace/SKILL.md`: a copy of the packaged authoring skill, in the folder a
   coding agent's harness reads for a repo's skills; the stanza points at it as well. A
   differing local copy is refused so local edits can be preserved before replacing it. A copy
-  in the earlier home, `.qmstrace/skill/SKILL.md`, is refused too: remove `.qmstrace/`, then
-  run `init` again.
+  in the earlier home, `.qmstrace/skill/SKILL.md`, is refused too: remove only
+  `.qmstrace/skill/`, then run `init` again. Preserve `.qmstrace/workspace.toml` and any
+  other local configuration.
 - `.claude/skills/qmstrace`: only when the repo already has a `.claude/` folder — a link to
   `../../.agents/skills/qmstrace`, so Claude Code lists the skill as well. It is created once
   and then left alone; anything else at that path, or a `.claude/skills` that is a file, is

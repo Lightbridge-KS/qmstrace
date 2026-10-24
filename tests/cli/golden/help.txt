@@ -3,10 +3,13 @@ Usage: qmstrace [OPTIONS] COMMAND [ARGS]...
   The trace layer under a quality-management system.
 
 Options:
-  -C PATH    Run as if qmstrace had been started in PATH, as with git -C. Before
-             or after the command.
-  --version  Print the version and exit.
-  --help     Show this message and exit.
+  -C PATH           Run as if qmstrace had been started in PATH, as with git -C.
+                    Before or after the command.
+  --workspace FILE  Select a checkout map; overrides QMSTRACE_WORKSPACE and
+                    automatic discovery. Before or after the command. Relative
+                    files start at the effective -C directory.
+  --version         Print the version and exit.
+  --help            Show this message and exit.
 
 Commands:
   status   Where am I: what was read, and one line per requirement.
@@ -17,6 +20,7 @@ Commands:
   rules    What check holds this repo to, and whose each rule is.
   init     Set up trace configuration, agent guidance and pytest markers.
   graph    Write an offline, interactive view of the local trace graph.
+  paths    Explain checkout locations and workspace-map selection.
   ledger   The project side's verbs — run them in the ledger repo.
 
   Exit codes:

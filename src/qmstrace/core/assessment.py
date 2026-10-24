@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from qmstrace.core.baselines import BaselineState, Register, Suspect
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import TraceGraph
+from qmstrace.core.locations import Locations
 from qmstrace.core.model import Finding, Notice
 
 
@@ -112,6 +113,7 @@ class ProjectAssessment:
     register: Register
     notices: tuple[Notice, ...]
     suspects: tuple[Suspect, ...] = ()
+    locations: Locations | None = None
     ledger: Checkout | None = None  # the ledger's own checkout, whether or not it is in [repos]
 
     def fails(self, *, strict: bool) -> bool:

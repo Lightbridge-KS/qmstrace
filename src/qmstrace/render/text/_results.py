@@ -14,7 +14,7 @@ from qmstrace.core.results import (
     TargetResult,
     TestResult,
 )
-from qmstrace.render._evidence import _problems
+from qmstrace.render._evidence import _external, _problems
 from qmstrace.render._presentation import _heading, _what
 
 _NAMES: dict[ReportFormat, str] = {
@@ -45,7 +45,10 @@ def results(view: Results) -> str:
         "  matched against the current working tree — report commit NOT VERIFIED",
         "  a partial parameter set does not prove every possible variant ran",
     ]
+    selected = next((n.text for n in assessment.notices if n.text.startswith("workspace:")), None)
     lines += _problems(assessment)
+    if selected:
+        lines += [f"  {_external(s)}" for s in assessment.externals if s.declared is not None]
     lines += [f"  {notice.text}" for notice in assessment.notices]
     if view.duplicates:
         lines.append(
@@ -121,6 +124,8 @@ def results(view: Results) -> str:
         f"{len(view.unmatched)} unmatched run identities · exit 0 (informational) — "
         "report commit NOT VERIFIED; this repo's tests only",
     ]
+    if selected:
+        lines[-1] += f" · source: {selected}"
     return "\n".join(lines)
 
 
