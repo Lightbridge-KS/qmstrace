@@ -30,6 +30,7 @@ nav = [
     { "Write traced docs with diagrams and tables" = "how-to/write-traced-docs.md" },
     { "Write an impact list" = "how-to/write-an-impact-list.md" },
     { "Read test results" = "how-to/read-test-results.md" },
+    { "Drive the CLI from an agent or CI" = "how-to/drive-the-cli-as-an-agent.md" },
     { "Change a frozen item" = "how-to/change-a-frozen-item.md" },
     { "Review downstream suspects" = "how-to/review-suspects.md" },
   ] },
@@ -46,6 +47,8 @@ nav = [
     { "qmstrace ledger" = "reference/commands/ledger.md" },
     { "Findings" = "reference/findings.md" },
     { "Exit codes" = "reference/exit-codes.md" },
+    { "CLI output" = "reference/output.md" },
+    { "CLI JSON format" = "reference/cli-json.md" },
     { "Configuration" = "reference/configuration.md" },
     { "Workspace maps" = "reference/workspace-maps.md" },
     { "Table format" = "reference/table-format.md" },
@@ -58,6 +61,7 @@ nav = [
     { "IDs and file patterns" = "explanation/ids-and-file-patterns.md" },
     { "Kinds of finding" = "explanation/kinds-of-finding.md" },
     { "Around the repo" = "explanation/around-the-repo.md" },
+    { "Command completion and evidence" = "explanation/command-evidence.md" },
   ] },
 ]
 

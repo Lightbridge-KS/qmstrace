@@ -550,16 +550,19 @@ project-wide browser follows slice 2. The renderer library remains provisional.
 - **The stanza is generated**, between markers, from the trace configuration. It is edited by
   editing the configuration.
 - **Baselines are recognised, not imposed**: a project's own tag names are configuration (D6).
-- **Machine-readable output comes later, and findings are structured from the first line of
-  code.** No agent has needed a `--json` form — line output was enough in every experiment —
-  and the local trace browser consumes an internal projection of the assessment rather than
-  requiring a public JSON CLI. So a finding is data inside the
-  engine — code, file, line, item, what is wrong, the next move — and the line an agent reads
-  is one renderer of it. Which commands get the form, and its versioning, are decided then.
-  *Decided 2026-10-15 ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)):* the
-  first is `ledger table`, as `qmstrace.table/1` — a new key, column, table or notice keeps
-  `/1`; removing or renaming anything, or changing a cell's type, the row grain or the sort, is
-  `/2`. Findings keep their line form.
+- **Machine-readable assessment output is explicit** ([ADR-0011](../adr/0011-cli-presentation-and-json.md)).
+  `--json` selects `qmstrace.cli/1` for local status/check/rules/paths/thread/impact/results
+  and ledger check/thread/impact. One stdout document includes handled errors and existing
+  exits 0/1/2/3; error categories and next moves are structured. Quiet preserves all JSON
+  findings. JSON retains scope, evidence limits and relative locations. Pipes otherwise keep
+  plain text; terminals receive semantic styles with conditional Rich help. Selection is
+  per invocation and stream: NO_COLOR, FORCE_COLOR, TTY/TERM. Styled reports stripped of ANSI
+  equal the plain bytes; authored text is literal. Help/version never assess or discover maps.
+  `ledger table` keeps `qmstrace.table/1` and accepts a redundant JSON flag only without --out;
+  other writing commands reject it before writes. Format changes that remove/rename fields
+  or change their types/meaning require /2; additive fields remain /1. Public JSON schemas
+  ship with the package and manual. No universal success boolean implies verification.
+
 
 ## 8. Decisions needed
 

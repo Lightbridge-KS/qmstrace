@@ -57,7 +57,10 @@ src/qmstrace/
     _local.py            local handlers, including paths: arguments → workspace → render → exit code
     _ledger.py           ledger sub-app and its five handlers
     _options.py          Directory annotation and duplicate -C reconciliation
-    _outcome.py          exit constants/help and outcome decorator; errors on stderr
+    _outcome.py          exit mapping; plain stderr diagnostics or one structured JSON error
+    _terminal.py         per-stream policy, public Typer help/parser boundary
+    _invocation.py       option-aware selection and invocation-local output state
+    _json.py             versioned output emission and safe error diagnostics
   workspace/             orchestration; callers keep importing qmstrace.workspace.Workspace
     __init__.py          exact exports: Workspace, TreeFactory, CONFIG_FILE, SCHEMA_FILE
     _workspace.py        public class; local assessment, thread/impact and explicit report reading
@@ -450,7 +453,8 @@ deciding eligibility. The check failure predicate remains violations plus strict
   initializers, exact exports, each package's dependency direction and callers' public imports.
   The two legacy Python extractor modules also permit only exact forwarding imports;
   `extract/python/__init__.py` stays empty and canonical callers import its concrete owners.
-- **No pydantic, no rich.** Dataclasses and plain text; the tool installs with Typer,
+- **No pydantic or direct Rich dependency.** Dataclasses, pure ANSI formatting and JSON;
+  conditional Rich help is provided by Typer. The tool installs with Typer,
   `defusedxml` and, for C#, tree-sitter with its C# grammar (prebuilt wheels; ADR-0004).
 - **No use of the framework's private modules.** Typer's vendored click is not ours to import.
 - **No second item type named in `status`.** It lists `requirement` items and reads `Category`
@@ -728,7 +732,7 @@ architecture § Setup contract — M6, § Schema copy contract — M9b.
 
 Satisfies: REQ-QMT-12, REQ-QMT-13, REQ-QMT-19
 
-### DSN-QMT-12 — Plain-text renderers, deterministic
+### DSN-QMT-12 — Text and JSON renderers, deterministic
 
 `render/text/` turns an assessment into the bytes a reader sees. `_status`, `_walks`, `_checks`,
 `_results` and `_schema` own their views; local and ledger variants share the same owner.
@@ -806,3 +810,28 @@ from. A test's level is where it sits when its type has levels, else its test ca
 field. Reasoning: [ADR-0005](../adr/0005-tables-as-data-and-several-reports.md).
 
 Satisfies: REQ-QMT-23
+
+## CLI presentation and JSON ownership — ADR-0011
+
+`cli/_invocation.py` reads option arities from the registered command tree without reading
+configuration. Its immutable invocation value lives in a resettable ContextVar, scoped to
+one CLI call; it never enters domain judgment. `_terminal.py` uses public TyperCommand and
+TyperGroup extension points for help and parser errors, restoring state after each call.
+No framework-private imports or new runtime dependencies are introduced. `_outcome.py`
+retains domain/exit mapping and refuses unsupported writing combinations before handlers.
+`_json.py` emits one serialized result or error and uses safe diagnostics rather than raw
+exception representations. JSON uses the existing assessment exactly once.
+
+`render/_style.py` is a pure Style value, passed explicitly through text renderers; plain
+is its default. Alignment precedes styling and content is never interpreted as markup.
+`render/json/` has an empty initializer and concrete owners: `_common` owns envelope,
+portable records and evidence, `assessment` owns inventory/check projection, `configuration`
+owns configuration/path projection, `walks` calls the shared graph walks, and `results`
+projects core verdict values using references to tests/cases. Projections do not scan or
+rejudge; neither JSON nor text imports the other's command owners. Existing text exports
+and the installed CLI entry point remain unchanged. Table JSON retains its separate owner.
+
+The CLI schema is a packaged asset, with a byte-identical published copy checked by tests.
+Only development tests import jsonschema. Renderers remain standard-library/core-only.
+Public locations use display labels, never the map's operational roots. Paths retains
+structured map source/filename in addition to its existing human provenance string.

@@ -690,3 +690,16 @@ test in `tests/integration/test_results_several.py`.
 | The same reports in any order | the same bytes |
 | A report outside every repo, by an absolute path | labelled by its file name; no machine path in the output |
 | A report named as another repo's; an unknown repo; not `REPO=FILE`; `--report` with `requirements` | exit 2 |
+
+## Terminal and command JSON — ADR-0011
+
+- Per-stream terminal/NO_COLOR/FORCE_COLOR/TERM selection, repeated calls, literal brackets,
+  Unicode and long IDs, narrow help and real PTY; stripped reports equal plain goldens.
+- Each supported local/project JSON command validates against the packaged schema and
+  matches deterministic goldens; fields retain judgment, scope and evidence limits.
+- Root/leaf selectors, duplicates, argument values containing --json and -- delimiters;
+  eager help/version never read maps; parser/domain/internal errors emit one complete document.
+- Quiet/forced color do not alter JSON. Failed reports still complete with exit zero;
+  check exits and full findings are preserved. Unseen impact starts yield no partial data.
+- Table stdout JSON remains identical; JSON writing combinations are refused without
+  side effects. Schema/manual/bundled-skill assets ship and their examples execute.

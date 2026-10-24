@@ -19,7 +19,16 @@ class CouldNotJudge(Exception):
         What the reader should do about it. Every message that reaches an agent says so.
     """
 
-    def __init__(self, what: str, next_move: str) -> None:
+    def __init__(
+        self,
+        what: str,
+        next_move: str,
+        *,
+        display_what: str | None = None,
+        display_next_move: str | None = None,
+    ) -> None:
         super().__init__(f"{what} {next_move}")
+        self.display_what = display_what
+        self.display_next_move = display_next_move
         self.what = what
         self.next_move = next_move

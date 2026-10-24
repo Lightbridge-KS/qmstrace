@@ -1,0 +1,13 @@
+{
+  "format": "qmstrace.cli/1",
+  "command": "check",
+  "scope": "local",
+  "exit_code": 2,
+  "data": null,
+  "notices": [],
+  "error": {
+    "category": "usage",
+    "message": "No such option: --invalid",
+    "next_move": "Read qmstrace --help or the leaf command's --help and correct the invocation."
+  }
+}

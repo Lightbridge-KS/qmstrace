@@ -11,6 +11,7 @@ from typing import Final
 from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
 from qmstrace.core.locations import Locations
 from qmstrace.core.setup import Copied
+from qmstrace.render._style import PLAIN, Style
 
 _DERIVED: Final = {
     "python-module": "ID: the module's path",
@@ -20,10 +21,10 @@ _DERIVED: Final = {
 }
 
 
-def rules(config: TraceConfig, *, locations: Locations | None = None) -> str:
+def rules(config: TraceConfig, *, locations: Locations | None = None, style: Style = PLAIN) -> str:
     """What `check` holds this repo to, and whose each part is — read from the configuration."""
     own = config.schema_form is SchemaForm.OWN
-    lines = [f"rules in force here — {_schema_source(config)}", ""]
+    lines = [style.heading(f"rules in force here — {_schema_source(config)}"), ""]
     lines.append("From this repo's own schema" if own else "From the project's trace schema")
     lines += _links_block(config) + _fields_block(config) + _rules_block(config)
     lines += _outside_block(config)
@@ -35,7 +36,7 @@ def rules(config: TraceConfig, *, locations: Locations | None = None) -> str:
         "repos is judged in the ledger, by qmstrace ledger check.",
     ]
     if locations:
-        lines += ["", locations.notice]
+        lines += ["", style.warning(locations.notice)]
     return "\n".join(lines)
 
 
@@ -165,10 +166,10 @@ def _rule(config: TraceConfig, rule: CoverageRule) -> str:
     return text
 
 
-def schema_copies(config: TraceConfig, copies: Iterable[Copied]) -> str:
+def schema_copies(config: TraceConfig, copies: Iterable[Copied], *, style: Style = PLAIN) -> str:
     """What `ledger copy-schema` did: the schema it copied, then one line per repo."""
     written = list(copies)
-    lines = [f"schema: {config.project} {config.schema_digest}"]
+    lines = [style.heading(f"schema: {config.project} {config.schema_digest}")]
     if written and written[0].location_notice:
         lines.append(written[0].location_notice)
     for copy in written:

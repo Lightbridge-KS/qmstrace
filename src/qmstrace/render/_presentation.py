@@ -7,13 +7,16 @@ from __future__ import annotations
 
 from qmstrace.core.graph import Home, Node
 from qmstrace.core.model import Finding
+from qmstrace.render._style import PLAIN, Style
 
 
-def _heading(node: Node) -> str:
-    return f"{node.id} — {node.title}" if node.title and node.title not in node.id else node.id
+def _heading(node: Node, *, style: Style = PLAIN) -> str:
+    return style.heading(
+        f"{node.id} — {node.title}" if node.title and node.title not in node.id else node.id
+    )
 
 
-def _what(node: Node) -> str:
+def _what(node: Node, *, style: Style = PLAIN) -> str:
     """The type and home of an item, and where to read it."""
     kind = node.type.replace("_", " ") if node.type else "an item of unknown type"
     if node.fields.get("Status") == "withdrawn":
@@ -28,7 +31,7 @@ def _what(node: Node) -> str:
         kind += f", in {node.repo}"
     if node.item is not None and node.item.level:
         kind += f", {node.item.level}"
-    return kind if _where_shown_by_id(node) else f"{kind} · {node.where}"
+    return kind if _where_shown_by_id(node) else f"{kind} · {style.location(node.where or '')}"
 
 
 def _where_shown_by_id(node: Node) -> bool:
@@ -43,9 +46,13 @@ def _where_shown_by_id(node: Node) -> bool:
     return file == path or file.endswith(f"/{path}")
 
 
-def _finding(finding: Finding, *, indent: str) -> str:
+def _finding(finding: Finding, *, indent: str, style: Style = PLAIN) -> str:
+    code = (
+        style.error(finding.code) if finding.code.startswith("V") else style.warning(finding.code)
+    )
     return (
-        f"{indent}{finding.code}  {finding.file}:{finding.line}  {finding.what} {finding.next_move}"
+        f"{indent}{code}  "
+        f"{style.location(f'{finding.file}:{finding.line}')}  {finding.what} {finding.next_move}"
     )
 
 

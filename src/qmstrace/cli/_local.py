@@ -10,16 +10,35 @@ from typing import Annotated
 
 import typer
 
-from qmstrace.cli._options import Directory, WorkspaceFile, _directory, _workspace
+from qmstrace.cli._invocation import CURRENT
+from qmstrace.cli._json import emit
+from qmstrace.cli._options import (
+    Directory,
+    JsonOutput,
+    UnsupportedJsonOutput,
+    WorkspaceFile,
+    _directory,
+    _workspace,
+)
 from qmstrace.cli._outcome import EXIT_FAILED, EXIT_OK, outcome
+from qmstrace.cli._terminal import styled
 from qmstrace.render import graph as browser
 from qmstrace.render import text
+from qmstrace.render._style import Style
+from qmstrace.render.json import assessment as json_assessment
+from qmstrace.render.json import configuration as json_configuration
+from qmstrace.render.json import results as json_results
+from qmstrace.render.json import walks as json_walks
+from qmstrace.render.json._common import notices as json_notices
 from qmstrace.workspace import Workspace
 
 
 @outcome
 def status(
-    ctx: typer.Context, directory: Directory = None, workspace_file: WorkspaceFile = None
+    ctx: typer.Context,
+    directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """What was scanned, what lies around the repo, and one line per requirement.
 
@@ -27,13 +46,13 @@ def status(
     Check lists all suspects; they never fail the gate. Not a check: it exits 0
     whatever it counts, or 2 when the evidence cannot be judged.
     """
-    typer.echo(
-        text.status(
-            Workspace.open(
-                _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
-            ).assessment()
-        )
-    )
+    assessment = Workspace.open(
+        _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
+    ).assessment()
+    if CURRENT.get().json:
+        emit(json_assessment.status(assessment), notices=json_notices(assessment))
+    else:
+        typer.echo(text.status(assessment, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
@@ -45,6 +64,7 @@ def thread(
     ],
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Walk one item backward to what it derives from, and forward to what hangs off it.
 
@@ -54,7 +74,10 @@ def thread(
     assessment = Workspace.open(
         _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
     ).thread(item_id)
-    typer.echo(text.thread(assessment, item_id))
+    if CURRENT.get().json:
+        emit(json_walks.thread(assessment, item_id), code=0, notices=json_notices(assessment))
+    else:
+        typer.echo(text.thread(assessment, item_id, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
@@ -66,6 +89,7 @@ def impact(
     ],
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Show the combined downstream items and upstream origins of several starting items.
 
@@ -75,7 +99,10 @@ def impact(
     assessment = Workspace.open(
         _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
     ).impact(item_ids)
-    typer.echo(text.impact(assessment, item_ids))
+    if CURRENT.get().json:
+        emit(json_walks.impact(assessment, item_ids), code=0, notices=json_notices(assessment))
+    else:
+        typer.echo(text.impact(assessment, item_ids, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
@@ -91,6 +118,7 @@ def results(
     ],
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Match reports to scanned tests and their explicit verifies links.
 
@@ -105,7 +133,20 @@ def results(
     view = Workspace.open(start, workspace=_workspace(ctx, workspace_file)).results(
         *((start / report).resolve() for report in reports)
     )
-    typer.echo(text.results(view))
+    if CURRENT.get().json:
+        emit(
+            json_results.results(view),
+            code=0,
+            notices=[
+                *json_notices(view.assessment),
+                "Report commit and freshness NOT VERIFIED; "
+                "matched against the current working tree.",
+                "A partial parameter set does not prove all variants ran; "
+                "retries are not inferred.",
+            ],
+        )
+    else:
+        typer.echo(text.results(view, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
@@ -121,6 +162,7 @@ def check(
     ] = False,
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """List every violation, gap and suspect, each with its next move.
 
@@ -131,20 +173,46 @@ def check(
     assessment = Workspace.open(
         _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
     ).assessment()
-    typer.echo(text.check(assessment, strict=strict, quiet=quiet))
+    if CURRENT.get().json:
+        emit(
+            json_assessment.check(assessment, strict=strict),
+            code=1 if assessment.fails(strict=strict) else 0,
+            notices=json_notices(assessment),
+        )
+    else:
+        typer.echo(
+            text.check(assessment, strict=strict, quiet=quiet, style=Style(styled())),
+            color=styled(),
+        )
     return EXIT_FAILED if assessment.fails(strict=strict) else EXIT_OK
 
 
 @outcome
 def rules(
-    ctx: typer.Context, directory: Directory = None, workspace_file: WorkspaceFile = None
+    ctx: typer.Context,
+    directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Print the rules in force: the project's trace schema and this repo's own part.
 
     Read from the configuration alone — nothing is scanned.
     """
     opened = Workspace.open(_directory(ctx, directory), workspace=_workspace(ctx, workspace_file))
-    typer.echo(text.rules(opened.config, locations=opened.locations))
+    if CURRENT.get().json:
+        emit(
+            json_configuration.rules(opened.config, locations=opened.locations),
+            code=0,
+            notices=[
+                "Configuration only; no items scanned or baselines judged.",
+                *([opened.locations.notice] if opened.locations else []),
+            ],
+        )
+    else:
+        typer.echo(
+            text.rules(opened.config, locations=opened.locations, style=Style(styled())),
+            color=styled(),
+        )
     return EXIT_OK
 
 
@@ -161,6 +229,7 @@ def init(
     ] = None,
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: UnsupportedJsonOutput = False,
 ) -> int:
     """Initialize the selected directory; refresh managed guidance in an existing traced repo.
 
@@ -177,8 +246,13 @@ def init(
         language=language,
         workspace=_workspace(ctx, workspace_file),
     ):
-        typer.echo(line)
-    typer.echo("Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0.")
+        typer.echo(Style(styled()).location(line), color=styled())
+    typer.echo(
+        Style(styled()).heading(
+            "Setup complete. Review qmstrace rules, then run qmstrace status. Exit 0."
+        ),
+        color=styled(),
+    )
     return EXIT_OK
 
 
@@ -191,6 +265,7 @@ def graph(
     ] = None,
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: UnsupportedJsonOutput = False,
 ) -> int:
     """Export one working-tree assessment as a self-contained, read-only HTML browser.
 
@@ -203,16 +278,25 @@ def graph(
     assessment = workspace.thread(item_id) if item_id is not None else workspace.assessment()
     workspace.save_view(start / out, browser.document(assessment, item_id))
     typer.echo(
-        f"Written: {out} · {len(assessment.graph.nodes)} items · "
-        f"{len(assessment.graph.links)} links"
+        Style(styled()).heading(
+            f"Written: {out} · {len(assessment.graph.nodes)} items · "
+            f"{len(assessment.graph.links)} links"
+        ),
+        color=styled(),
     )
-    typer.echo("Offline working-tree snapshot; findings and evidence limits are included. Exit 0.")
+    typer.echo(
+        "Offline working-tree snapshot; findings and evidence limits are included. Exit 0.",
+        color=styled(),
+    )
     return EXIT_OK
 
 
 @outcome
 def paths(
-    ctx: typer.Context, directory: Directory = None, workspace_file: WorkspaceFile = None
+    ctx: typer.Context,
+    directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Show the selected workspace map and checkout locations relative to this trace root.
 
@@ -221,5 +305,8 @@ def paths(
     is found. Shared evidence never includes absolute machine paths.
     """
     view = Workspace.paths(_directory(ctx, directory), workspace=_workspace(ctx, workspace_file))
-    typer.echo(text.paths(view))
+    if CURRENT.get().json:
+        emit(json_configuration.paths(view), code=0, notices=[view.source])
+    else:
+        typer.echo(text.paths(view, style=Style(styled())), color=styled())
     return EXIT_OK

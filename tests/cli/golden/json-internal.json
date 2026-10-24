@@ -1,0 +1,13 @@
+{
+  "format": "qmstrace.cli/1",
+  "command": "status",
+  "scope": "local",
+  "exit_code": 3,
+  "data": null,
+  "notices": [],
+  "error": {
+    "category": "internal",
+    "message": "An internal fault prevented the command from completing.",
+    "next_move": "Report this fault in qmstrace; it is not a finding in the repository."
+  }
+}

@@ -27,4 +27,6 @@ Options:
   --workspace FILE    Select a checkout map; overrides QMSTRACE_WORKSPACE and
                       automatic discovery. Before or after the command. Relative
                       files start at the effective -C directory.
+  --json              Emit versioned JSON for agents, including handled errors.
+                      Before or after the command.
   --help              Show this message and exit.

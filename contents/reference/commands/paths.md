@@ -6,6 +6,9 @@
     repo locations. This is a configuration-only diagnosis, available from a product or
     ledger root. It scans no items and judges no trace evidence.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Invocation
 
 ``` text

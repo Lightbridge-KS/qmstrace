@@ -110,3 +110,5 @@ class Paths:
     ledger: str | None
     repos: tuple[LocationState, ...]
     ledger_available: bool = False
+    workspace_source: str | None = None
+    workspace_filename: str | None = None

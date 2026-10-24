@@ -15,6 +15,41 @@ implement design, and tests verify the items they actually check. Forward reach 
 An `Assumes` link carries impact without satisfying coverage. A test verifying a design
 never implicitly verifies that design's requirements.
 
+## Driving the CLI as an agent
+
+Discover flags with `qmstrace --help` and leaf help. Prefer `--json` for assessment data:
+
+```sh
+qmstrace paths --json
+qmstrace rules --json
+qmstrace status --json
+qmstrace thread REQ-SVC-01 --json
+qmstrace impact REQ-SVC-01 REQ-SVC-02 --json
+qmstrace check --strict --json
+```
+
+Use actual project IDs. `status` is the overview; `check` gives the complete work queue.
+Request a thread or impact instead of dumping the entire graph. JSON is explicit; pipes
+otherwise receive plain text. `NO_COLOR=1` gives plain reports and help. Both root and
+leaf placements of `--json`, `-C` and `--workspace` are supported; give each once.
+
+Parse the JSON even on a nonzero exit. Exit `0` means completed (results may contain failed
+tests); `1` means the check failed; `2` means usage or inability to judge; `3` means an
+internal fault. Branch on `exit_code` and `error.category`, not English messages. Read
+`notices`, findings and their `next_move`; never suppress evidence limits. `--quiet` does
+not remove JSON findings. Capture the command's exit before a `jq` pipeline replaces it.
+
+`qmstrace results REPORT... --json` retains unmatched entries and unverified report
+freshness. For project scope, run `qmstrace -C LEDGER ledger check --strict --json` in the
+ledger trace root; a workspace map does not redirect a product invocation there.
+`ledger table` already emits `qmstrace.table/1`; assessment commands emit `qmstrace.cli/1`.
+Consumers ignore unknown additive fields and check the format version. The manual's
+*CLI JSON format* reference defines the schema and command payloads.
+
+`init`, `graph` and `ledger copy-schema` write files and reject `--json`; use them only for
+an intended writing task. No command's successful completion certifies semantic truth,
+report freshness, complete evidence or human approval.
+
 ## Marker examples
 
 ```markdown

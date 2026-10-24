@@ -6,6 +6,9 @@
     it could be verified, then one line per requirement. Run it first in any traced repo. It is
     not a check — it exits `0` whatever it counts.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Synopsis
 
 ``` text

@@ -16,6 +16,7 @@ from qmstrace.core.judge import test_backed_requirement
 from qmstrace.core.model import Finding, Item
 from qmstrace.render._evidence import _baselines, _external, _schema, _siblings
 from qmstrace.render._presentation import _finding, _noun
+from qmstrace.render._style import PLAIN, Style
 
 # Known status contract: requirement, Category and Verify-by remain schema-specific names.
 
@@ -32,26 +33,32 @@ VERIFY_BY: Final = "Verify-by"
 TESTED: Final = "test"  # compatibility export; grouping now follows coverage rules
 
 
-def status(assessment: Assessment) -> str:
+def status(assessment: Assessment, *, style: Style = PLAIN) -> str:
     """What was scanned, what lies around the repo, and one line per requirement."""
-    lines = [_schema(assessment), f"scanned ({assessment.tree_label}):"]
+    lines = [
+        style.heading(_schema(assessment)),
+        style.heading(f"scanned ({assessment.tree_label}):"),
+    ]
     lines += _scanned(assessment)
     lines.append(f"links: {len(assessment.graph.links)}")
-    lines += [_external(state) for state in assessment.externals]
-    lines += _siblings(assessment)
+    lines += [
+        style.warning(_external(state)) if state.declared is None else _external(state)
+        for state in assessment.externals
+    ]
+    lines += [style.warning(line) for line in _siblings(assessment)]
     lines += _baselines(assessment)
-    lines += [notice.text for notice in assessment.notices]
-    lines += _listing(assessment)
-    lines += _suspects(assessment)
+    lines += [style.warning(notice.text) for notice in assessment.notices]
+    lines += _listing(assessment, style=style)
+    lines += _suspects(assessment, style=style)
     lines += ["", _violations(assessment)]
     return "\n".join(lines)
 
 
-def _suspects(assessment: Assessment) -> list[str]:
+def _suspects(assessment: Assessment, *, style: Style = PLAIN) -> list[str]:
     lines = ["", f"suspects: {len(assessment.suspects)} — informational; this repo only"]
     for suspect in assessment.suspects:
         if suspect.distance == 1:
-            lines.append(_finding(findings.suspect(suspect), indent="  "))
+            lines.append(_finding(findings.suspect(suspect), indent="  ", style=style))
     farther = Counter(s.distance for s in assessment.suspects if s.distance > 1)
     for distance, count in sorted(farther.items()):
         lines.append(f"  distance {distance}: {count} {_noun(count, 'suspect', 'suspects')}")
@@ -87,7 +94,7 @@ def _scanned(assessment: Assessment) -> list[str]:
     return lines
 
 
-def _listing(assessment: Assessment) -> list[str]:
+def _listing(assessment: Assessment, *, style: Style = PLAIN) -> list[str]:
     config, graph = assessment.config, assessment.graph
     listed = graph.items(LISTED)
     if not listed:
@@ -98,7 +105,7 @@ def _listing(assessment: Assessment) -> list[str]:
 
     def line(row: list[str]) -> str:
         cells = [cell.ljust(width) for cell, width in zip(row[:-1], widths, strict=False)]
-        return "  " + "  ".join(cells) + "  — " + row[-1]
+        return "  " + "  ".join([style.heading(cells[0]), *cells[1:]]) + "  — " + row[-1]
 
     tested = [row for item, row in rows if test_backed_requirement(config, item.fields)]
     apart = [(item, row) for item, row in rows if not test_backed_requirement(config, item.fields)]

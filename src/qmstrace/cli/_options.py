@@ -50,3 +50,21 @@ def _workspace(ctx: typer.Context, after: list[Path] | None) -> Path | None:
     if len(selected) > 1:
         raise typer.BadParameter("given twice; give it once.", param_hint="'--workspace'")
     return selected[0] if selected else None
+
+
+JsonOutput = Annotated[
+    bool,
+    typer.Option(
+        "--json",
+        help="Emit versioned JSON for agents, including handled errors. "
+        "Before or after the command.",
+    ),
+]
+
+
+UnsupportedJsonOutput = Annotated[
+    bool,
+    typer.Option(
+        "--json", help="Unsupported for this writing command; assessment commands support JSON."
+    ),
+]

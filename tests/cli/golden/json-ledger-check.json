@@ -1,0 +1,109 @@
+{
+  "format": "qmstrace.cli/1",
+  "command": "ledger check",
+  "scope": "project",
+  "exit_code": 1,
+  "data": {
+    "project": "MINI",
+    "counts": {
+      "items": 15,
+      "links": 17,
+      "violations": 0,
+      "gaps": 3,
+      "suspects": 0,
+      "withdrawn": 0
+    },
+    "strict": true,
+    "violations": [],
+    "gaps": [
+      {
+        "code": "G01",
+        "location": {
+          "path": "../client/docs/req/client-srs.md",
+          "line": 3
+        },
+        "message": "REQ-CLT-01: no design element satisfies it yet.",
+        "next_move": "Fix: on the design element in service, write `Satisfies: REQ-CLT-01` under its heading — only if it is true: the link states that the design element satisfies REQ-CLT-01.",
+        "item": "REQ-CLT-01",
+        "marker": null,
+        "target": null
+      },
+      {
+        "code": "G06",
+        "location": {
+          "path": "../client/src/client/api.py",
+          "line": 1
+        },
+        "message": "client:src/client/api.py: implements no design element — every component points back to one.",
+        "next_move": "Fix: write `Implements: <design element ID>` in its docstring — only if it is true: the link states that this component implements that design element.",
+        "item": "client:src/client/api.py",
+        "marker": null,
+        "target": null
+      },
+      {
+        "code": "G01",
+        "location": {
+          "path": "../service/docs/req/service-srs.md",
+          "line": 28
+        },
+        "message": "REQ-SVC-03: no design element satisfies it yet.",
+        "next_move": "Fix: on the design element in service, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.",
+        "item": "REQ-SVC-03",
+        "marker": null,
+        "target": null
+      }
+    ],
+    "suspects": [],
+    "repos": [
+      {
+        "name": "client",
+        "location": "../client",
+        "baselines": {
+          "counts": {
+            "frozen": 0,
+            "changed": 0,
+            "new": 0,
+            "removed": 0
+          },
+          "governing": [],
+          "comparisons": [],
+          "register": {
+            "location": "change-requests",
+            "available": false,
+            "accepted": "accepted"
+          }
+        }
+      },
+      {
+        "name": "service",
+        "location": "../service",
+        "baselines": {
+          "counts": {
+            "frozen": 0,
+            "changed": 0,
+            "new": 0,
+            "removed": 0
+          },
+          "governing": [],
+          "comparisons": [],
+          "register": {
+            "location": "change-requests",
+            "available": false,
+            "accepted": "accepted"
+          }
+        }
+      }
+    ]
+  },
+  "notices": [
+    "baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines in client: no matching reachable local tag — nothing frozen",
+    "baselines in service: no matching reachable local tag — nothing frozen",
+    "change requests: NOT VERIFIED — change-requests is unavailable",
+    "Project assessment reads working trees, not pins.",
+    "Suspects need review; edits and passing tests do not record review.",
+    "Remote-tag completeness NOT VERIFIED; reachable local tags only.",
+    "Change requests NOT VERIFIED — register unavailable."
+  ],
+  "error": null
+}

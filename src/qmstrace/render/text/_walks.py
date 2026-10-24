@@ -14,6 +14,7 @@ from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Closure, Direction, Home, Node, Step, TraceGraph
 from qmstrace.render._evidence import _external, _problems
 from qmstrace.render._presentation import _heading, _noun, _what
+from qmstrace.render._style import PLAIN, Style
 
 _SECTIONS: Final = {
     Direction.BACKWARD: "backward — what it derives from:",
@@ -21,7 +22,7 @@ _SECTIONS: Final = {
 }
 
 
-def thread(assessment: Assessment, item_id: str) -> str:
+def thread(assessment: Assessment, item_id: str, *, style: Style = PLAIN) -> str:
     """One item, what it derives from, and what hangs off it — each item once, nearest first."""
     return _thread(
         assessment.config,
@@ -30,32 +31,46 @@ def thread(assessment: Assessment, item_id: str) -> str:
         _problems(assessment)
         + [f"  {n.text}" for n in assessment.notices if n.text.startswith("workspace:")],
         "this repo only",
+        style=style,
     )
 
 
-def ledger_thread(project: ProjectAssessment, item_id: str) -> str:
+def ledger_thread(project: ProjectAssessment, item_id: str, *, style: Style = PLAIN) -> str:
     """One item across the whole project, from the ledger — the walk crosses every repo's edge."""
     return _thread(
-        project.config, project.graph, item_id, _project_problems(project), _project_scope(project)
+        project.config,
+        project.graph,
+        item_id,
+        _project_problems(project),
+        _project_scope(project),
+        style=style,
     )
 
 
 def _thread(
-    config: TraceConfig, graph: TraceGraph, item_id: str, problems: list[str], scope: str
+    config: TraceConfig,
+    graph: TraceGraph,
+    item_id: str,
+    problems: list[str],
+    scope: str,
+    *,
+    style: Style = PLAIN,
 ) -> str:
     start = graph.nodes[item_id]
     walks = [graph.backward([item_id]), graph.forward([item_id])]
-    lines = [_heading(start), f"  {_what(start)}"]
-    lines += problems
+    lines = [_heading(start, style=style), f"  {_what(start, style=style)}"]
+    lines += [style.warning(line) for line in problems]
     for walk in walks:
-        lines += ["", _SECTIONS[walk.direction]]
-        lines += _tree(config, walk, item_id) or [f"  {_nothing(start, walk.direction)}"]
+        lines += ["", style.heading(_SECTIONS[walk.direction])]
+        lines += _tree(config, walk, item_id, style=style) or [
+            f"  {_nothing(start, walk.direction)}"
+        ]
     counted = " · ".join(f"{w.direction.value}: {_counts(config, w)}" for w in reversed(walks))
     lines += ["", f"{counted} — {scope}"]
     return "\n".join(lines)
 
 
-def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
+def impact(assessment: Assessment, item_ids: Iterable[str], *, style: Style = PLAIN) -> str:
     """The combined impact of several starts, and a candidate change-request line."""
     graph = assessment.graph
     notes = [f"  {notice.text}" for notice in assessment.notices]
@@ -68,10 +83,13 @@ def impact(assessment: Assessment, item_ids: Iterable[str]) -> str:
         "impact — working-tree analysis, this repo only",
         _problems(assessment) + notes,
         "this repo only",
+        style=style,
     )
 
 
-def ledger_impact(project: ProjectAssessment, item_ids: Iterable[str]) -> str:
+def ledger_impact(
+    project: ProjectAssessment, item_ids: Iterable[str], *, style: Style = PLAIN
+) -> str:
     """The combined impact of several starts across the whole project, from the ledger."""
     return _impact(
         project.config,
@@ -80,6 +98,7 @@ def ledger_impact(project: ProjectAssessment, item_ids: Iterable[str]) -> str:
         f"impact — {_project_scope(project)}",
         _project_problems(project),
         _project_scope(project),
+        style=style,
     )
 
 
@@ -90,6 +109,8 @@ def _impact(
     title: str,
     problems: list[str],
     scope: str,
+    *,
+    style: Style = PLAIN,
 ) -> str:
     starts = set(item_ids)
     forward = graph.forward(starts)
@@ -103,9 +124,12 @@ def _impact(
         and step.node.type in external_types
         and not _is_dependency(config, step)
     }
-    lines = [title, "", "starting items:"]
-    lines += [f"  {_heading(graph.nodes[i])} · {_what(graph.nodes[i])}" for i in sorted(starts)]
-    lines += problems
+    lines = [style.heading(title), "", style.heading("starting items:")]
+    lines += [
+        f"  {_heading(graph.nodes[i], style=style)} · {_what(graph.nodes[i], style=style)}"
+        for i in sorted(starts)
+    ]
+    lines += [style.warning(line) for line in problems]
 
     lines += ["", "downstream — grouped by item type:"]
     order = list(config.item_types)
@@ -115,12 +139,15 @@ def _impact(
             i for i in downstream if (graph.nodes[i].type or "unverified item") == kind
         )
         lines.append(f"  {kind.replace('_', ' ')} ({len(members)}):")
-        lines += [f"    {_line(config, forward, forward.steps[i])}" for i in members]
+        lines += [f"    {_line(config, forward, forward.steps[i], style=style)}" for i in members]
     if not downstream:
         lines.append("  nothing here hangs off the starting items")
 
     lines += ["", "upstream origins — of the starting items:"]
-    lines += [f"  {_heading(graph.nodes[i])} · {_what(graph.nodes[i])}" for i in sorted(origins)]
+    lines += [
+        f"  {_heading(graph.nodes[i], style=style)} · {_what(graph.nodes[i], style=style)}"
+        for i in sorted(origins)
+    ]
     if not origins:
         lines.append("  no upstream origins reached here")
 
@@ -134,7 +161,7 @@ def _impact(
     if unknown:
         lines.append(f"  unknown type, omitted from the candidate: {', '.join(unknown)}")
     if candidates:
-        lines.append(f"Impacts: {', '.join(candidates)}")
+        lines.append(style.heading(f"Impacts: {', '.join(candidates)}"))
     elif not covered:
         lines.append("  no candidate line — no baseline item types are configured")
     else:
@@ -165,7 +192,7 @@ def _project_problems(project: ProjectAssessment) -> list[str]:
     return [f"  {line}" for line in lines]
 
 
-def _tree(config: TraceConfig, walk: Closure, start: str) -> list[str]:
+def _tree(config: TraceConfig, walk: Closure, start: str, *, style: Style = PLAIN) -> list[str]:
     width = max((len(s.via.marker) for s in walk.steps.values()), default=0) + 2
     lines: list[str] = []
     shown = {start}
@@ -177,7 +204,9 @@ def _tree(config: TraceConfig, walk: Closure, start: str) -> list[str]:
                 lines.append(f"{'  ' * depth}{step.via.marker:<{width}}{item} — the item itself")
                 continue
             shown.add(item)
-            text = f"{'  ' * depth}{step.via.marker:<{width}}{_line(config, walk, step)}"
+            text = (
+                f"{'  ' * depth}{step.via.marker:<{width}}{_line(config, walk, step, style=style)}"
+            )
             lines.append(text)
             if not _ends_here(config, walk, step):
                 descend(item, depth + 1)
@@ -186,9 +215,9 @@ def _tree(config: TraceConfig, walk: Closure, start: str) -> list[str]:
     return lines
 
 
-def _line(config: TraceConfig, walk: Closure, step: Step) -> str:
+def _line(config: TraceConfig, walk: Closure, step: Step, *, style: Style = PLAIN) -> str:
     node = step.node
-    text = f"{_heading(node)} · {_what(node)}"
+    text = f"{_heading(node, style=style)} · {_what(node, style=style)}"
     if _is_dependency(config, step):
         text += (
             " · assumes it — counts toward no coverage"

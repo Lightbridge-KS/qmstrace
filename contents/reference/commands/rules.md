@@ -6,6 +6,9 @@
     fields, the coverage rules — and says which part is the project's and which the repo's own.
     It reads the configuration alone, so it answers anywhere, even where nothing else can be read.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Synopsis
 
 ``` text
