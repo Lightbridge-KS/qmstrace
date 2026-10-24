@@ -1,0 +1,51 @@
+{
+  "format": "qmstrace.cli/2",
+  "command": "paths",
+  "scope": "local",
+  "exit_code": 0,
+  "data": {
+    "project": "MINI",
+    "selection": "workspace: profile map mini-service.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used",
+    "workspace": {
+      "source": "profile",
+      "filename": "mini-service.toml"
+    },
+    "anchor": "repository trace roots",
+    "repo": "service",
+    "workspace_profile": "mini-service",
+    "ledger": {
+      "location": {
+        "repo": "ledger",
+        "path": ".",
+        "line": null
+      },
+      "available": true
+    },
+    "repos": [
+      {
+        "name": "client",
+        "location": {
+          "repo": "client",
+          "path": ".",
+          "line": null
+        },
+        "available": true,
+        "current": false
+      },
+      {
+        "name": "service",
+        "location": {
+          "repo": "service",
+          "path": ".",
+          "line": null
+        },
+        "available": true,
+        "current": true
+      }
+    ]
+  },
+  "notices": [
+    "workspace: profile map mini-service.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used"
+  ],
+  "error": null
+}

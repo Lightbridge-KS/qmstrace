@@ -152,11 +152,11 @@ class _Table:
             )
 
 
-def _version(table: _Table) -> None:
+def _version(table: _Table) -> int:
     version = table.whole("version")
-    if version != SUPPORTED_VERSION:
+    if version not in (1, 2):
         raise CouldNotJudge(
-            f"{table.file}: 'version' is {version!r}; this qmstrace reads version "
-            f"{SUPPORTED_VERSION}.",
-            "Fix: set version = 1, or use the qmstrace that matches the file.",
+            f"{table.file}: 'version' is {version!r}; this qmstrace reads version 1 or 2.",
+            "Fix: use a supported configuration version, or the qmstrace that matches the file.",
         )
+    return version

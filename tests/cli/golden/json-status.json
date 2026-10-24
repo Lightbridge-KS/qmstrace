@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "status",
   "scope": "local",
   "exit_code": 0,
@@ -65,7 +65,11 @@
         "type": "requirement",
         "ownership": "local",
         "repo": null,
-        "location": "docs/req/service-srs.md:12",
+        "location": {
+          "repo": null,
+          "path": "docs/req/service-srs.md",
+          "line": 12
+        },
         "fields": {
           "Category": "security",
           "Origin": "AGR-1",
@@ -97,7 +101,11 @@
         "type": "requirement",
         "ownership": "local",
         "repo": null,
-        "location": "docs/req/service-srs.md:21",
+        "location": {
+          "repo": null,
+          "path": "docs/req/service-srs.md",
+          "line": 21
+        },
         "fields": {
           "Category": "reliability",
           "Origin": "AGR-2, AGR-3",
@@ -137,7 +145,11 @@
         "type": "requirement",
         "ownership": "local",
         "repo": null,
-        "location": "docs/req/service-srs.md:28",
+        "location": {
+          "repo": null,
+          "path": "docs/req/service-srs.md",
+          "line": 28
+        },
         "fields": {
           "Category": "maintainability",
           "Origin": "AGR-3",
@@ -160,14 +172,22 @@
         {
           "name": "agreement",
           "prefix": "AGR-",
-          "location": "../ledger/agreement.md",
+          "location": {
+            "repo": null,
+            "path": "../ledger/agreement.md",
+            "line": null
+          },
           "declared": 3
         }
       ],
       "siblings": [
         {
           "name": "client",
-          "location": "../client",
+          "location": {
+            "repo": "client",
+            "path": ".",
+            "line": null
+          },
           "declares": {
             "requirement": 1
           },
@@ -186,7 +206,11 @@
       "governing": [],
       "comparisons": [],
       "register": {
-        "location": "../ledger/change-requests",
+        "location": {
+          "repo": null,
+          "path": "../ledger/change-requests",
+          "line": null
+        },
         "available": false,
         "accepted": "accepted"
       }
@@ -200,7 +224,7 @@
   "notices": [
     "schema: the project's ../ledger/qmstrace.schema.toml, by path — plus this repo's qmstrace.toml",
     "external AGR-*: verified against ../ledger/agreement.md (3 declared)",
-    "sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
     "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
     "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
     "baselines: no matching reachable local tag — nothing frozen locally",

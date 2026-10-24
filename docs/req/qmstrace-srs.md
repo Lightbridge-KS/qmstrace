@@ -250,7 +250,7 @@ makes no connection, and never overwrites an existing file.
 ### REQ-QMT-17 — The project is judged as a whole, from its ledger
 
 `qmstrace ledger check`, run in the ledger repo, reads the working tree of every repo the trace
-schema lists under `[repos]` — the ledger itself too, when it lists itself as `"."` — and
+schema lists under `[repos]` — including the ledger when it is a traced member — and
 reports the project's violations, gaps and suspects in one run. A coverage rule is met by a
 link in any of those repos; each repo's own violations are reported with it; a change to a
 frozen item makes what hangs off it suspect in every repo. A listed repo that cannot be read,

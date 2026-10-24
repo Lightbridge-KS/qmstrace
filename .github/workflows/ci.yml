@@ -35,3 +35,15 @@ jobs:
           uv run python tests/check_wheel.py
       - name: Manual
         run: uv run --isolated --locked --only-group docs zensical build --clean
+
+  windows-cross-drive:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: Install candidate
+        run: uv sync --locked
+      - name: Native distinct-drive acceptance
+        run: uv run python tests/check_cross_drive.py

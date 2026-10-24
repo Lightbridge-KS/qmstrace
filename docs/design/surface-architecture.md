@@ -88,7 +88,7 @@ flowchart TD
 | `qmstrace ledger copy-schema [REPO…]` | In the ledger: writes the project's trace schema into each product repo it names, as a generated, verified copy between markers — every other byte of the repo's `qmstrace.toml` kept; all repos or none; a second run changes nothing. What lets a product repo be judged alone, in its pipeline or at a baseline tag (D9). *In the engine since M9b* | ✔ |
 | `qmstrace ledger check [--strict] [--quiet]` | In the ledger: reads the working tree of every repo in `[repos]` — the ledger too, when it holds documents (ADR-0001) — and judges them as one project: coverage met across repos, each repo's own violations, suspects across repos. Refuses (exit 2) when a repo cannot be read or holds other rules. Says *not pinned* in every form. The ledger's gate with `--strict`. *In the engine since M10a* | ✔ |
 | `qmstrace ledger thread <ID>` · `qmstrace ledger impact <ID>…` | In the ledger: `thread` and `impact` over the project's graph — a walk crosses every repo's edge, from a requirement to every repo's tests, from a module back to its origin clause. A module's or test's ID carries its repo; one given without it is refused with the qualified IDs it may mean. *In the engine since M10b* | ✔ |
-| `qmstrace ledger table matrix \| requirements \| coverage [--report REPO=FILE…] [--out FILE]` | In the ledger: the traceability matrix, the requirements register or the coverage summary, as versioned JSON (`qmstrace.table/1`) a render layer consumes — columns derived from the schema, each repo's commit and cleanliness recorded, not pinned, never committed by qmstrace. Verdict columns come from the reports given — `--report REPO=FILE` — one per level and one overall, each naming its reports ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)) | ✔ — #49 |
+| `qmstrace ledger table matrix \| requirements \| coverage [--report REPO=FILE…] [--out FILE]` | In the ledger: the traceability matrix, the requirements register or the coverage summary, as versioned JSON (`qmstrace.table/2`) a render layer consumes — columns derived from the schema, each repo's commit and cleanliness recorded, not pinned, never committed by qmstrace. Verdict columns come from the reports given — `--report REPO=FILE` — one per level and one overall, each naming its reports ([ADR-0005](../adr/0005-tables-as-data-and-several-reports.md)) | ✔ — #49 |
 | `qmstrace ledger import NAME@PIN …` | In the ledger: reads each product repo at a pin, judges the project as a whole, writes the trace lock. Exercised by the driver of the fourth experiment, not yet by an agent | ✔ (driver) |
 | `qmstrace ledger …` — the rest | Record an event with an evidence pointer; the work-product register; the five audit questions, one command each | ◻ |
 
@@ -151,6 +151,11 @@ traversal at pins belongs to the ledger.
 
 ### Workspace-map selection and paths
 
+**0.3.0 successor:** [names-only v2 configuration](names-only-workspaces.md) specifies
+required `repo`/`workspace_profile`, exact named-user-profile lookup, cross-drive evidence
+locations and uniform CLI JSON `/2`. Table `/2` advances the read-location contract. [ADR-0012](../adr/0012-names-only-configuration.md) records the accepted changes;
+none is supported by v0.2.0. Preserve the shipped v1 selection contract below for legacy input.
+
 **Accepted 2026-10-24 ([ADR-0010](../adr/0010-local-workspace-maps.md)); implementation and
 golden verification belong to the workspace-map slice.** `--workspace FILE` is accepted
 before the command or on a leaf command, including a ledger leaf. Every duplicate is a
@@ -192,23 +197,24 @@ and change-request sources, but does not redirect a `ledger` command launched in
 repo: run it in the ledger, or select that directory with `-C`.
 
 `qmstrace paths` works from either kind of root and reports selection provenance as source
-kind plus map filename, the current-root location anchor, the effective ledger and each
+kind plus map filename, the logical repository-root location anchor, the effective ledger and each
 schema member's location or unavailability. `Paths.source` carries the full notice string.
 It loads configuration and checks locations only: no item extraction, graph construction,
 historical reads, result reports, Git/network activity or writes. A valid map with an
 unavailable sibling can be diagnosed successfully (exit 0); exit 2 means selection,
-configuration or relative representation failed. Existence is not proof that a repo can
-be assessed or that evidence is valid. Cross-drive layouts are exit 2, with no absolute-path
-fallback. Every new diagnostic location is relative to the active trace root.
+configuration failed. Existence is not proof that a repo can be assessed or its evidence
+is valid. Mapped/project source locations use logical repo labels, supporting cross-drive
+layouts without serializing native addresses. Native Windows proof is a separate gate.
 
 When a map is selected, ordinary command output retains its source provenance and evidence
-limits, including `check --quiet`. Existing commands with no map keep their current output;
+limits, including `check --quiet`. V1 commands without a map keep their tracked resolution;
 `paths` explicitly labels the use of tracked defaults. The schema's ledger-relative path
 meaning, copied-schema digest and historical same-tree rules are unchanged (D9).
 The tracked `ledger` pointer is repo-relative; only the schema's repo defaults are
 ledger-relative. Neither base changes when no map is selected.
-The emitted table format remains `qmstrace.table/1`; workspace notices do not introduce a
-new JSON version or change report-verdict semantics.
+For 0.3.0, every JSON assessment emits `qmstrace.cli/2` and tables emit `qmstrace.table/2`,
+including legacy inputs. Source locations are explicit repo/path/line records. Table columns,
+verdicts and exits retain their meaning; no output `/1` selector is added (ADR-0012).
 
 ### Results contract — M4
 
@@ -551,16 +557,16 @@ project-wide browser follows slice 2. The renderer library remains provisional.
   editing the configuration.
 - **Baselines are recognised, not imposed**: a project's own tag names are configuration (D6).
 - **Machine-readable assessment output is explicit** ([ADR-0011](../adr/0011-cli-presentation-and-json.md)).
-  `--json` selects `qmstrace.cli/1` for local status/check/rules/paths/thread/impact/results
+  `--json` selects `qmstrace.cli/2` for local status/check/rules/paths/thread/impact/results
   and ledger check/thread/impact. One stdout document includes handled errors and existing
   exits 0/1/2/3; error categories and next moves are structured. Quiet preserves all JSON
-  findings. JSON retains scope, evidence limits and relative locations. Pipes otherwise keep
+  findings. JSON retains scope, evidence limits and repo-relative source records. Pipes otherwise keep
   plain text; terminals receive semantic styles with conditional Rich help. Selection is
   per invocation and stream: NO_COLOR, FORCE_COLOR, TTY/TERM. Styled reports stripped of ANSI
   equal the plain bytes; authored text is literal. Help/version never assess or discover maps.
-  `ledger table` keeps `qmstrace.table/1` and accepts a redundant JSON flag only without --out;
+  `ledger table` keeps `qmstrace.table/2` and accepts a redundant JSON flag only without --out;
   other writing commands reject it before writes. Format changes that remove/rename fields
-  or change their types/meaning require /2; additive fields remain /1. Public JSON schemas
+  or change their types/meaning require a new format version; additive fields retain /2. Public JSON schemas
   ship with the package and manual. No universal success boolean implies verification.
 
 

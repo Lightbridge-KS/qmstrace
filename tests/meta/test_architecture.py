@@ -598,6 +598,7 @@ def test_shared_render_dependency_gate_rejects_back_edges(
 
 WORKSPACE_IMPORTS: dict[str, set[str]] = {
     "_baselines": {
+        "qmstrace.core.locations",
         "qmstrace.core.baselines",
         "qmstrace.core.config",
         "qmstrace.core.errors",
@@ -645,6 +646,7 @@ WORKSPACE_IMPORTS: dict[str, set[str]] = {
         "qmstrace.infra.tree",
     },
     "_setup": {
+        "qmstrace.core.locations",
         "qmstrace.infra.locations",
         "qmstrace.core.config",
         "qmstrace.core.errors",

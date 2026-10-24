@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — v0.2.0 published at the verified PR 72 merge commit; post-release development version 0.3.0.dev0 merged as PR 73. Consumer migration preparation is handed off separately. External-source issue 60 and M11 remain later.
+summary: The single active qmstrace tracker — v0.2.0 published; 0.3.0 names-only v2 configuration is implemented with passing local gates; native Windows acceptance remains pending. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -10,14 +10,79 @@ read_when:
 
 **Updated 2026-10-24 · Release 0.2.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
-capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
-on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--tables-as-data)
+capability](#landed--m12--the-c-capability): landed.** Now: [0.3.0 names-only configuration](#in-progress--030-names-only-configuration),
+alongside [real-world use](#now--real-world-use) in the layout of ADR-0001.
+[#49 · tables as data](#landed--49--tables-as-data)
 landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps merged as PR #69 (`8223d32`).
 PR #70 merged (`48e5ba1`), terminal/JSON output merged as PR #71 (`5453de2`), and the
 release refresh merged as PR #72 (`e093903`). The rebuilt `v0.2.0` release was published
 at that verified merge commit. PR #73 (`bebf1f1`) advances `main` to `0.3.0.dev0`; M11 · mentions
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
+
+## In progress — 0.3.0 names-only configuration
+
+Design: [names-only workspaces](../design/names-only-workspaces.md).
+Accepted amendment: [ADR-0012](../adr/0012-names-only-configuration.md).
+Fixed measures and measured live results: [N01–N22](../tests/names-only-workspaces.md).
+Implementation is on `codex/names-only-workspaces`; draft PR and hosted CI are pending.
+Consumer rollout remains separate.
+
+Accepted 2026-10-24: required v2 `workspace_profile`, native Windows cross-drive support,
+uniform `qmstrace.cli/2`, `qmstrace.table/2`, preserved v1 starter creation and explicit v2
+bootstrap/init refresh. V1 configuration, historical reads, digests and tracked resolution
+retain their meaning. Mapped/project evidence labels change intentionally in 0.3.0.
+
+- [x] Verify the 0.2.0 enhancement boundary; communicate it to the referenced ledger task.
+- [x] Fix the design/ownership, accepted choices and acceptance measures before implementation.
+- [x] Confirm REQ-QMT-17 is a **new controlled** item, not frozen; make its self-membership
+  wording representation-neutral under existing accepted CR-001, retaining the citation.
+  No baseline or request acceptance state changed. The planning assumption was corrected.
+- [x] Slice A — strict dual-version configuration, sorted v2 membership digest, explicit repo
+  identity, exact named-profile discovery, standalone behavior, rules/paths and CLI `/2`.
+- [x] Slice B — operational roots separated from portable evidence throughout sources,
+  project assessment, historical comparisons, walks, reports, HTML and table `/2`.
+- [x] Slice C — transactional bootstrap/copy, v2 init preservation, unchanged v1 creation
+  policy, packaged schemas/skill, tested goldens and Diátaxis migration/reference/explanation.
+- [x] Run disposable beacon-engine, beacon-split and beacon-dotnet clones in two layouts;
+  verify unchanged logical project outputs/tables, real pytest/TRX reports and baseline/
+  suspect/failure mutations. Independently verify all nine originals are unchanged.
+- [x] Inspect output diffs, built manual examples/navigation/diagram and installed assets;
+  verify focused edge cases including unreadable ledger schema references and absent profiles.
+- [x] Complete `just dry`, isolated wheel/CLI smoke and both strict trace checks;
+  final measured totals are recorded below.
+- [ ] **N12: native Windows distinct-drive proof.** The native probe and required Windows
+  CI job are present. No Windows host was available; a passing same-drive macOS smoke is
+  explicitly not N12. This remains a release gate, not an inferred platform claim.
+- [ ] Open the draft PR and complete hosted gates, including native Windows distinct-drive
+  acceptance. Maintainer review/merge, consumer migration and release preparation follow
+  independently. v0.2.0 is immutable.
+
+**Verified local gates, 2026-10-24:** `just dry` passed **1,520 Python tests, 4 browser
+tests and 98.33% coverage**, formatting, lint, strict mypy, all 37 isolated wheel import
+orders and the strict manual build. Final installed-wheel smoke exercises paths/rules/status/
+check/thread/impact/results/table/graph/copy with portable locations. Both strict trace gates
+exit 0: **890 items, 0 violations, 0 gaps, 32 informational suspects**; **16 frozen, 3 changed,
+7 new, 0 removed, 0 withdrawn**. Remote-tag completeness remains NOT VERIFIED.
+
+Output review confirms business-data parity across all 18 changed existing JSON goldens;
+text diffs change source labels, alignment and version/help wording. A shared presentation
+regression preserves suppression of redundant locations for derived IDs. V2 command goldens
+validate against the packaged/manual CLI `/2` schema. Native Windows is not included in
+these passing local claims.
+
+**Live evidence:** engine/split each yield **177 items / 208 links**; .NET yields **226 /
+257**, all with 0 violations/gaps. Complete project-check JSON and all three tables agree
+byte-for-byte across two layouts. Six real report runs pass without unmatched entries:
+gateways **76 tests / 94 runs**, agents **53 / 67**. Combined report matrices pass. The
+v1-to-v2 baseline probe preserves 11 frozen requirements; one changed root produces 18
+suspects surviving touch/unrelated-test checks. A failed auth report marks REQ-BCN-10 fail
+with informational exit 0; restoration passes. Pins and limits are in the acceptance record.
+
+Planning-only checks (125 documentation meta tests, 36 legacy-map checks) remain historical
+assessment evidence; they are not presented as v2 acceptance. Engine/consumer release tags,
+manifest/lock versions and real consumer configurations are unchanged. Native Windows, PR CI,
+maintainer review and publication remain distinct from the passing local evidence.
 
 ## Landed — post-release development version
 

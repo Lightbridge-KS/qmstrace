@@ -158,7 +158,7 @@ src/qmstrace/
       _schema.py         rules, schema descriptions and schema-copy outcomes
       _paths.py          configuration-only location/provenance diagnostic; no absolute paths
     graph.py             deterministic assessment projection and standalone HTML (M7b)
-    tables.py            one table as a qmstrace.table/1 JSON document, deterministic (#49)
+    tables.py            one table as a qmstrace.table/2 JSON document, deterministic (#49)
   assets/                skill/SKILL.md · stanza.md · starter.toml + items-python/csharp.toml (#38) · ledger-starter.toml (M10c) · graph.html/js · pinned
                          vendor/vis-network and license — package data
 tests/
@@ -193,15 +193,23 @@ workspace package never imports rendering or CLI code.
 
 ### Workspace-map ownership — ADR-0010
 
+**0.3.0 ownership amendment:** the [names-only design](../design/names-only-workspaces.md#implementation-sequence-and-ownership)
+and [ADR-0012](../adr/0012-names-only-configuration.md) extend these owners with
+versioned identities, required profiles and portable evidence. The implementation keeps configuration/history compatibility and the existing import
+boundaries. `TraceConfig.repos` remains a compatibility mapping: v1 carries path defaults;
+v2 carries member keys with empty values and never resolves them without a map. Local
+`version`, `repo`, `workspace_profile` and schema `ledger_repo` keep the distinctions explicit.
+No parallel workspace service is introduced.
+
 The [accepted location contract](../adr/0010-local-workspace-maps.md) adds a local input
 without turning machine paths into trace-schema policy. The implemented owners are below;
 orchestration stays in the existing workspace owners, with no `workspace/_locations.py`.
 
 | Owner under `src/qmstrace/` | Responsibility and boundary |
 |---|---|
-| `core/locations.py` | Frozen `WorkspaceMap`, `Locations` and `Paths` values; strict pure TOML parsing and validation against supplied project/current-root values. No environment, filesystem, canonicalization, Git or CLI access |
-| `infra/locations.py` | `discover` reads selectors/candidates, compares canonical roots and validates current ledger binding; `relative` formats locations or refuses cross-drive layouts. Uses pure values; never imports workspace or renderers |
-| `render/text/_paths.py` | Render `Paths`, whose `source` holds the full notice; source kind plus map filename, root-relative checkout locations only. No discovery, scan, judgment or filesystem access |
+| `core/locations.py` | Frozen `WorkspaceMap`, `Locations`, `Paths` and `EvidenceLocation` values; strict pure TOML parsing and validation against supplied project/current-root values. No environment, filesystem, canonicalization, Git or CLI access |
+| `infra/locations.py` | `discover` reads selectors/candidates, compares canonical roots and validates current ledger binding; native roots stay operational while pure logical source labels avoid cross-drive relpaths. Uses pure values; never imports workspace or renderers |
+| `render/text/_paths.py` | Render `Paths`, whose `source` holds the full notice; source kind plus map filename, logical repo-root labels only. No discovery, scan, judgment or filesystem access |
 
 `Workspace.open`, `project`, `project_results`, `project_thread`, `project_impact`,
 `copy_schema` and `initialize` accept optional `workspace=Path`; `Workspace.paths` supplies
@@ -801,7 +809,7 @@ a source only an automated test, and the other coverage links walked from the re
 the rest, each column named after its item type. From the project's graph it builds the
 traceability matrix (one row per requirement, design element and test case), the requirements
 register and the coverage summary, as columns and rows with no I/O. `render/tables.py` writes
-one as a `qmstrace.table/1` JSON document with what was read — each repo's commit and
+one as a `qmstrace.table/2` JSON document with what was read — each repo's commit and
 cleanliness, which `infra/git.checkout` reads without the index lock and the project assessment
 records before its scan. Given the results `Workspace.project_results` matches across the
 project — each report naming its repo — the matrix gains a verdict per level and an overall

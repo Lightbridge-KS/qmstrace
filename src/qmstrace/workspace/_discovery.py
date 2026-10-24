@@ -100,6 +100,8 @@ def _read(path: Path) -> str | None:
 
 def _ledger(root: Path, config: TraceConfig) -> Path | None:
     """Where the agreement and the project's other repos are looked for."""
+    if config.version == 2:
+        return root if config.repo == config.ledger_repo else None
     if config.schema_form is SchemaForm.OWN:
         return root
     return root / config.ledger if config.ledger else None
@@ -114,8 +116,36 @@ def _shown(root: Path, path: Path) -> str:
 def _report_label(root: Path, path: Path) -> str:
     """A report's label: its path from the root when it is inside the repo, else its file name
     alone — never a path of the machine, nor the climb out of the repo to it."""
-    shown = _shown(root, path)
-    return path.name if shown == ".." or shown.startswith("../") else shown
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.name
+
+
+def _ledger_configuration(root: Path, schema_text: str) -> TraceConfig:
+    """A v2 ledger supplies its real identity/profile; a legacy schema may stand alone."""
+    schema = TraceConfig.of_schema(schema_text)
+    if schema.version == 1:
+        return schema
+    local = _read(root / CONFIG_FILE)
+    if local is None:
+        raise CouldNotJudge(
+            "A v2 ledger requires a readable qmstrace.toml with repo and workspace_profile.",
+            'Fix: create its v2 local header and [schema] path = "qmstrace.schema.toml".',
+        )
+    reference = TraceConfig.schema_reference(local)
+    if reference is None or not _same(root / reference, root / SCHEMA_FILE):
+        raise CouldNotJudge(
+            "A v2 ledger must read its authoritative qmstrace.schema.toml by path.",
+            'Fix: set [schema] path = "qmstrace.schema.toml"; a map cannot repair the reference.',
+        )
+    own = TraceConfig.parse(local, _read(root / reference))
+    if own.repo != schema.ledger_repo or own.schema_digest != schema.schema_digest:
+        raise CouldNotJudge(
+            "The ledger's local identity or schema differs from the schema it owns.",
+            "Fix: declare the ledger role and read its authoritative schema by path.",
+        )
+    return own
 
 
 def _same(one: Path, other: Path) -> bool:

@@ -18,15 +18,14 @@ LOCAL_MAP = Path(".qmstrace/workspace.toml")
 
 
 def relative(root: Path, path: Path) -> str:
-    """Display a location without absolute machine paths; reject cross-drive layouts."""
+    """A legacy bare relative label; mapped sources use repo-qualified evidence instead."""
     try:
         return Path(os.path.relpath(path, root)).as_posix()
     except ValueError:
         raise CouldNotJudge(
-            "Workspace locations span different drives; relative trace locations cannot "
-            "represent this layout.",
-            "Fix: place the project's checkouts on one drive; cross-drive evidence locations "
-            "are not supported yet.",
+            "A legacy relative location spans different drives and has no filesystem relpath.",
+            "Fix: select a workspace map so source evidence uses repository identities "
+            "instead of cross-drive filesystem paths.",
         ) from None
 
 
@@ -78,7 +77,21 @@ def discover(
                 ) from None
             selected = _read(candidate)
             break
-        if selected is None:
+        if selected is None and config.version == 2:
+            source = "profile"
+            candidate = Path.home() / ".qmstrace/workspaces" / f"{config.workspace_profile}.toml"
+            try:
+                candidate.lstat()
+            except FileNotFoundError:
+                pass
+            except OSError:
+                raise CouldNotJudge(
+                    "The named workspace profile cannot be inspected.",
+                    "Fix: restore profile access or select a workspace file explicitly.",
+                ) from None
+            else:
+                selected = _read(candidate)
+        if selected is None and config.version == 1:
             source = "user"
             matches: list[tuple[Path, WorkspaceMap]] = []
             problems: list[str] = []
@@ -121,14 +134,22 @@ def discover(
     file, spec = selected
     roots = _roots(file, spec)
     current = root.resolve()
-    spec.validate(config.project, set(config.repos), roots, current, file.name)
+    spec.validate(
+        config.project,
+        set(config.repos),
+        roots,
+        current,
+        file.name,
+        repo=config.repo,
+        ledger_repo=config.ledger_repo,
+    )
     ledger = roots[spec.ledger_repo]
     if (root / "qmstrace.schema.toml").is_file() and current != ledger:
         raise CouldNotJudge(
             f"Workspace map {file.name} binds this ledger to another trace root.",
             "Fix: bind ledger_repo to the current ledger solution folder.",
         )
-    for name, default in config.repos.items():
+    for name, default in config.repos.items() if config.version == 1 else ():
         if os.path.normpath(default) == "." and (
             name != spec.ledger_repo or roots.get(name) != ledger
         ):
@@ -155,7 +176,34 @@ def discover(
                 f"Mapped ledger belongs to project {ledger_project!r}, not {config.project!r}.",
                 "Fix: bind ledger_repo to the intended project's solution trace root.",
             )
-    for path in roots.values():
-        relative(current, path)
-        relative(ledger, path)
-    return Locations(source, file.name, ledger, MappingProxyType(roots))
+    if config.version == 2:
+        for name, path in sorted(roots.items()):
+            local = path / "qmstrace.toml"
+            if not path.exists():
+                continue
+            try:
+                header = tomllib.loads(local.read_text("utf-8-sig"))
+            except (OSError, UnicodeError, tomllib.TOMLDecodeError):
+                raise CouldNotJudge(
+                    f"Mapped member {name} has no readable trace identity.",
+                    "Fix: map each member to its v2 trace root, with a readable qmstrace.toml.",
+                ) from None
+            if header.get("version") != 2 or header.get("repo") != name:
+                raise CouldNotJudge(
+                    f"Mapped member {name} declares another repository identity or version.",
+                    "Fix: correct the workspace binding; never infer identity from a folder name.",
+                )
+            held = header.get("schema", {})
+            if isinstance(held, dict) and held.get("project", config.project) != config.project:
+                raise CouldNotJudge(
+                    f"Mapped member {name} belongs to another project.",
+                    "Fix: select checkouts belonging to the configured project.",
+                )
+    return Locations(
+        source,
+        file.name,
+        ledger,
+        MappingProxyType(roots),
+        spec.ledger_repo,
+        next((name for name, path in roots.items() if path == current), None),
+    )

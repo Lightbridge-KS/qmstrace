@@ -1,4 +1,4 @@
-"""The ledger's tables as data — one JSON document per table, format `qmstrace.table/1`
+"""The ledger's tables as data — one JSON document per table, format `qmstrace.table/2`
 (ADR-0005).
 
 A document carries what a reader needs to trust it before its rows: the project, the schema's
@@ -14,15 +14,16 @@ from __future__ import annotations
 import json
 
 from qmstrace.core.assessment import Checkout, ProjectAssessment
+from qmstrace.core.locations import EvidenceLocation
 from qmstrace.core.results import Results
 from qmstrace.core.tables import Cell, Column, Table, VerdictCell
 
-FORMAT = "qmstrace.table/1"
+FORMAT = "qmstrace.table/2"
 DRAFT = "generated from the ledger — not an issued revision"
 
 
 def document(project: ProjectAssessment, built: Table, results: Results | None = None) -> str:
-    """One of the project's tables as a `qmstrace.table/1` JSON document — with the reports its
+    """One of the project's tables as a `qmstrace.table/2` JSON document — with the reports its
     verdicts came from, when it carries verdicts."""
     notices = [notice.text for notice in project.notices]
     if project.violations:
@@ -39,7 +40,11 @@ def document(project: ProjectAssessment, built: Table, results: Results | None =
         "schema": project.config.schema_digest,
         "ledger": _checkout(project.ledger),
         "read": [
-            {"repo": repo.name, "location": repo.location, **_read(repo.checkout)}
+            {
+                "repo": repo.name,
+                "location": EvidenceLocation(repo.name, ".").public(),
+                **_read(repo.checkout),
+            }
             for repo in project.repos
         ],
         "pinned": False,

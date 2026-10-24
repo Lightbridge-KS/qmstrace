@@ -54,11 +54,21 @@ class WorkspaceMap:
         return cls(raw["project"], raw["ledger_repo"], MappingProxyType(repos))
 
     def validate(
-        self, project: str, members: Set[str], roots: Mapping[str, Path], current: Path, file: str
+        self,
+        project: str,
+        members: Set[str],
+        roots: Mapping[str, Path],
+        current: Path,
+        file: str,
+        *,
+        repo: str | None = None,
+        ledger_repo: str | None = None,
     ) -> None:
         """Validate canonical roots supplied by infrastructure; never inspect the disk."""
         if self.project != project:
             raise _invalid(file, f"project {self.project!r} does not match {project!r}")
+        if ledger_repo is not None and self.ledger_repo != ledger_repo:
+            raise _invalid(file, "ledger_repo disagrees with the shared schema")
         unknown = sorted(set(self.repos) - members - {self.ledger_repo})
         if unknown:
             raise _invalid(file, f"unknown project member(s): {', '.join(unknown)}")
@@ -66,6 +76,8 @@ class WorkspaceMap:
         seen = {path: name for name, path in roots.items()}
         if current not in seen:
             raise _invalid(file, "the current trace root is not bound by this map")
+        if repo is not None and roots.get(repo) != current:
+            raise _invalid(file, f"the current trace root must be bound as {repo}")
         if seen[current] not in members and seen[current] != self.ledger_repo:
             raise _invalid(file, "the current checkout is not a project member")
 
@@ -86,6 +98,8 @@ class Locations:
     filename: str
     ledger: Path
     roots: Mapping[str, Path]
+    ledger_repo: str | None = None
+    current_repo: str | None = None
 
     @property
     def notice(self) -> str:
@@ -112,3 +126,36 @@ class Paths:
     ledger_available: bool = False
     workspace_source: str | None = None
     workspace_filename: str | None = None
+    repo: str | None = None
+    workspace_profile: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceLocation:
+    """A logical source, independent of native checkout roots and filesystem drives."""
+
+    repo: str | None
+    path: str
+    line: int | None = None
+
+    @classmethod
+    def parse(cls, file: str, line: int | None = None) -> EvidenceLocation:
+        owner, separator, path = file.partition(":")
+        return cls(owner if separator else None, path if separator else file, line)
+
+    def public(self) -> dict[str, object]:
+        return {"repo": self.repo, "path": self.path, "line": self.line}
+
+
+def qualify(repo: str, path: str = ".") -> str:
+    """Join a logical repo label and an internal path without filesystem interpretation."""
+    return f"{repo}:{path.removeprefix('./')}"
+
+
+def joined(location: str, file: str) -> str:
+    """Append an internal source path to a logical or legacy relative location."""
+    import posixpath
+
+    owner, separator, path = location.partition(":")
+    path = posixpath.normpath(posixpath.join(path if separator else location, file))
+    return qualify(owner, path) if separator else path

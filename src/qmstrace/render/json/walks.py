@@ -9,14 +9,14 @@ from qmstrace.core.graph import Closure
 from qmstrace.render.json._common import View, link, node
 
 
-def _walk(value: Closure) -> list[dict[str, object]]:
+def _walk(value: Closure, repo: str | None = None) -> list[dict[str, object]]:
     return [
         {
             "id": s.node.id,
             "distance": s.distance,
             "parent": value.parent(s),
-            "via": link(s.via),
-            "also": [link(k) for k in s.also],
+            "via": link(s.via, repo),
+            "also": [link(k, repo) for k in s.also],
         }
         for s in value.steps.values()
     ]
@@ -30,8 +30,8 @@ def thread(value: View, item_id: str) -> dict[str, object]:
         "project": value.config.project,
         "start": item_id,
         "items": [node(graph.nodes[i]) for i in sorted(ids)],
-        "forward": _walk(forward),
-        "backward": _walk(backward),
+        "forward": _walk(forward, value.config.repo),
+        "backward": _walk(backward, value.config.repo),
     }
 
 
@@ -65,7 +65,7 @@ def impact(value: View, item_ids: Iterable[str]) -> dict[str, object]:
             )
         ],
         "origins": origins,
-        "forward": _walk(forward),
+        "forward": _walk(forward, value.config.repo),
         "candidate_ids": candidates,
         "candidate_line": "Impacts: " + ", ".join(candidates) if candidates else None,
         "candidate_empty_reason": None

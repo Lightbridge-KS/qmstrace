@@ -6,7 +6,7 @@ scanned (working tree, not pinned):
   automated_test    4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one automated test
 links: 14
 external AGR-*: verified against ../ledger/agreement.md (3 declared)
-sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID
+sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID
 controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
 baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
 baselines: no matching reachable local tag — nothing frozen locally

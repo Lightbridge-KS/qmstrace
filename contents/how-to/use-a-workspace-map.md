@@ -6,6 +6,10 @@
     Then run the usual local or ledger check. The project's schema and copied rules stay
     the same across layouts.
 
+For v2, set the local `workspace_profile` stem and use that filename for the user map.
+Explicit/environment/ancestor selectors override it. The unique user-match route below is
+for v1; v2 reads exactly its named file. See [v2 migration](migrate-to-names-only.md).
+
 ## Steps
 
 1. **Create a local map.** In a folder containing the miniature `MINI` project's `ledger`,

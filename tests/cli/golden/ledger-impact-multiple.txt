@@ -1,12 +1,12 @@
 impact — the project's 3 repos, working trees, not pinned
 
 starting items:
-  DSN-SVC-02 — Record store · design element, in ledger · docs/design/service-design.md:8
-  REQ-CLT-01 — The client sends its key on every call · requirement, in ledger · docs/req/client-srs.md:3
+  DSN-SVC-02 — Record store · design element, in ledger · ledger:docs/design/service-design.md:8
+  REQ-CLT-01 — The client sends its key on every call · requirement, in ledger · ledger:docs/req/client-srs.md:3
 
 downstream — grouped by item type:
   design element (1):
-    DSN-CLT-01 — Key header · design element, in ledger · docs/design/client-design.md:3
+    DSN-CLT-01 — Key header · design element, in ledger · ledger:docs/design/client-design.md:3
   component (2):
     client:src/client/api.py · component, in client
     service:src/service/store.py · component, in service

@@ -2,8 +2,8 @@ service:src/service/keys.py
   component, in service
 
 backward — what it derives from:
-  Implements  DSN-SVC-01 — Key check · design element, in ledger · docs/design/service-design.md:3
-    Satisfies   REQ-SVC-01 — A call carries a key · requirement, in ledger · docs/req/service-srs.md:5
+  Implements  DSN-SVC-01 — Key check · design element, in ledger · ledger:docs/design/service-design.md:3
+    Satisfies   REQ-SVC-01 — A call carries a key · requirement, in ledger · ledger:docs/req/service-srs.md:5
       Origin      AGR-1 · origin clause, in the agreement
 
 forward — what hangs off it, nearest first:

@@ -347,6 +347,24 @@ machine, with one name identifying the ledger role. One whole map is selected pe
 it changes current locations, never the trace schema, project membership or historical rules.
 _Avoid_: trace configuration, trace schema, ledger, registry
 
+**Repository Identity**:
+A stable name within a project's membership, independent of a checkout path or Git remote.
+It qualifies path-derived item IDs. V1 schema keys already supply these names; the
+v2 trace configuration also declares its own name as `repo`.
+_Avoid_: directory name, remote URL, global repository identifier
+
+**Workspace Profile**:
+A workspace map named as the default by `workspace_profile` in the v2 trace
+configuration. It uses the existing map format; the name is a portable filename stem,
+not a machine path or a second source of project rules.
+_Avoid_: profile on its own (the standard's catalogue), trace schema
+
+**Evidence Location**:
+The source of evidence identified independently of its machine's checkout layout. The
+v2 output represents a source within a repo by repository identity, a path relative
+to its trace root and an optional line. It is distinct from the source item's ID.
+_Avoid_: operational checkout root, absolute machine path
+
 **Ledger's Check**:
 `qmstrace ledger check`, run in the ledger repo: every repo of the project read from its
 working tree and judged as one — coverage met across repos, each repo's own violations,

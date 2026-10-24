@@ -1,7 +1,7 @@
 read — each repo's working tree, not pinned:
-  client   ../client   1 component · 2 automated tests
-  ledger   .           3 requirements · 3 design elements
-  service  ../service  2 components · 2 automated tests
+  client   client:.   1 component · 2 automated tests
+  ledger   ledger:.   3 requirements · 3 design elements
+  service  service:.  2 components · 2 automated tests
   external AGR-*: verified against agreement.md (3 declared)
   controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
   baselines: judged from each repo's reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
@@ -9,8 +9,8 @@ read — each repo's working tree, not pinned:
   change requests: change-requests (1 readable; 0 malformed) — working tree, not pinned
 
 gaps — coverage not met yet; only the gate (qmstrace ledger check --strict) fails on them:
-  G07  ../client/tests/unit/test_api.py:4  client:tests/unit/test_api.py::test_every_call_carries_the_key: verifies nothing. Fix: write `@pytest.mark.verifies("<requirement or design element ID>")` on the test — only if it is true: the link states that this automated test verifies that requirement or design element.
-  G04  docs/design/client-design.md:3  DSN-CLT-01: no test verifies it yet. Fix: on the automated test in client or service, write `@pytest.mark.verifies("DSN-CLT-01")` on the test — only if it is true: the link states that the automated test verifies DSN-CLT-01.
-  G02  docs/req/client-srs.md:3  REQ-CLT-01: no test verifies it yet. Fix: on the automated test in client or service, write `@pytest.mark.verifies("REQ-CLT-01")` on the test — only if it is true: the link states that the automated test verifies REQ-CLT-01.
+  G07  client:tests/unit/test_api.py:4  client:tests/unit/test_api.py::test_every_call_carries_the_key: verifies nothing. Fix: write `@pytest.mark.verifies("<requirement or design element ID>")` on the test — only if it is true: the link states that this automated test verifies that requirement or design element.
+  G04  ledger:docs/design/client-design.md:3  DSN-CLT-01: no test verifies it yet. Fix: on the automated test in client or service, write `@pytest.mark.verifies("DSN-CLT-01")` on the test — only if it is true: the link states that the automated test verifies DSN-CLT-01.
+  G02  ledger:docs/req/client-srs.md:3  REQ-CLT-01: no test verifies it yet. Fix: on the automated test in client or service, write `@pytest.mark.verifies("REQ-CLT-01")` on the test — only if it is true: the link states that the automated test verifies REQ-CLT-01.
 
 result: 0 violations, 3 gaps in 13 items across 3 repos · 0 suspects (informational) · exit 1 · gate: gaps fail · working trees, not pinned · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED

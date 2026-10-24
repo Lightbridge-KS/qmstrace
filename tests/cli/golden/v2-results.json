@@ -1,0 +1,266 @@
+{
+  "format": "qmstrace.cli/2",
+  "command": "results",
+  "scope": "local",
+  "exit_code": 0,
+  "data": {
+    "project": "MINI",
+    "counts": {
+      "entries": 6,
+      "runs": 5,
+      "matched_runs": 4,
+      "matched_tests": 3,
+      "scanned_tests": 4,
+      "duplicates": 1,
+      "unmatched": 1
+    },
+    "reports": [
+      {
+        "label": "service.xml",
+        "sha256": "aa0748dc47d97075e72d351052dd63207e1790e972857c624dc1aaa9950e3fe4",
+        "repo": null,
+        "entries": 6,
+        "format": "junit"
+      }
+    ],
+    "requirements": [
+      {
+        "id": "REQ-SVC-01",
+        "title": "A call carries a key",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 12
+        },
+        "fields": {
+          "Category": "security",
+          "Origin": "AGR-1",
+          "Verify-by": "test"
+        },
+        "withdrawn": false,
+        "method": "test",
+        "verdict": "pass",
+        "tests": [
+          "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused"
+        ],
+        "runs": 2,
+        "via": []
+      },
+      {
+        "id": "REQ-SVC-02",
+        "title": "Records survive a restart",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 21
+        },
+        "fields": {
+          "Category": "reliability",
+          "Origin": "AGR-2, AGR-3",
+          "Verify-by": "test"
+        },
+        "withdrawn": false,
+        "method": "test",
+        "verdict": "fail",
+        "tests": [
+          "tests/integration/test_store.py::test_a_record_survives_a_restart",
+          "tests/integration/test_store.py::test_a_restart_loses_no_accepted_record"
+        ],
+        "runs": 1,
+        "via": []
+      }
+    ],
+    "other_methods": [
+      {
+        "id": "REQ-SVC-03",
+        "title": "The record format is written down",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 28
+        },
+        "fields": {
+          "Category": "maintainability",
+          "Origin": "AGR-3",
+          "Verify-by": "inspection"
+        },
+        "withdrawn": false,
+        "method": "inspection",
+        "verdict": "untested",
+        "tests": [],
+        "runs": 0,
+        "via": [],
+        "evidence_only": true
+      }
+    ],
+    "unverified_targets": [],
+    "tests": [
+      {
+        "id": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+        "verdict": "fail",
+        "verifies": [
+          "DSN-SVC-02",
+          "REQ-SVC-02"
+        ],
+        "runs": [
+          {
+            "identity": [
+              "tests.integration.test_store",
+              "test_a_record_survives_a_restart"
+            ],
+            "verdict": "fail",
+            "entries": 2,
+            "kinds": [
+              "error",
+              "failure"
+            ],
+            "details": [
+              "error: teardown could not close store",
+              "failure: record missing after restart"
+            ],
+            "sources": [
+              {
+                "label": "service.xml",
+                "sha256": "aa0748dc47d97075e72d351052dd63207e1790e972857c624dc1aaa9950e3fe4",
+                "repo": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tests/integration/test_store.py::test_a_restart_loses_no_accepted_record",
+        "verdict": "no-result",
+        "verifies": [
+          "REQ-SVC-02"
+        ],
+        "runs": []
+      },
+      {
+        "id": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+        "verdict": "skip",
+        "verifies": [
+          "DSN-SVC-01"
+        ],
+        "runs": [
+          {
+            "identity": [
+              "tests.unit.test_keys.TestTheKeyCheck",
+              "test_it_runs_before_any_handler"
+            ],
+            "verdict": "skip",
+            "entries": 1,
+            "kinds": [
+              "skipped"
+            ],
+            "details": [
+              "skipped: handler fixture unavailable"
+            ],
+            "sources": [
+              {
+                "label": "service.xml",
+                "sha256": "aa0748dc47d97075e72d351052dd63207e1790e972857c624dc1aaa9950e3fe4",
+                "repo": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+        "verdict": "pass",
+        "verifies": [
+          "REQ-SVC-01"
+        ],
+        "runs": [
+          {
+            "identity": [
+              "tests.unit.test_keys",
+              "test_a_call_without_a_valid_key_is_refused[empty]"
+            ],
+            "verdict": "pass",
+            "entries": 1,
+            "kinds": [],
+            "details": [],
+            "sources": [
+              {
+                "label": "service.xml",
+                "sha256": "aa0748dc47d97075e72d351052dd63207e1790e972857c624dc1aaa9950e3fe4",
+                "repo": null
+              }
+            ]
+          },
+          {
+            "identity": [
+              "tests.unit.test_keys",
+              "test_a_call_without_a_valid_key_is_refused[wrong[bracket]]"
+            ],
+            "verdict": "pass",
+            "entries": 1,
+            "kinds": [],
+            "details": [],
+            "sources": [
+              {
+                "label": "service.xml",
+                "sha256": "aa0748dc47d97075e72d351052dd63207e1790e972857c624dc1aaa9950e3fe4",
+                "repo": null
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "cases": [],
+    "other_tests": [
+      "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler"
+    ],
+    "other_cases": [],
+    "unmatched": [
+      {
+        "run": {
+          "identity": [
+            "tests.removed.test_old",
+            "test_old"
+          ],
+          "verdict": "pass",
+          "entries": 1,
+          "kinds": [],
+          "details": [],
+          "sources": [
+            {
+              "label": "service.xml",
+              "sha256": "aa0748dc47d97075e72d351052dd63207e1790e972857c624dc1aaa9950e3fe4",
+              "repo": null
+            }
+          ]
+        },
+        "reason": "no scanned automated test matches this identity"
+      }
+    ]
+  },
+  "notices": [
+    "schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml",
+    "external AGR-*: verified against ledger:agreement.md (3 declared)",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
+    "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
+    "workspace: profile map mini-service.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used",
+    "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines: no matching reachable local tag — nothing frozen locally",
+    "change requests: NOT VERIFIED — ledger:change-requests is unavailable; fresh citations are verified at the ledger's import",
+    "Working-tree snapshot; its commit has not been verified. Regenerate to refresh.",
+    "Traversal stops at this repo's edge. Sibling contents are not pinned.",
+    "Suspects need review; edits and passing tests do not record review.",
+    "Report commit and freshness NOT VERIFIED; matched against the current working tree.",
+    "A partial parameter set does not prove all variants ran; retries are not inferred."
+  ],
+  "error": null
+}

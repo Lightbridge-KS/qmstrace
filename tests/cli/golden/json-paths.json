@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "paths",
   "scope": "local",
   "exit_code": 0,
@@ -7,21 +7,35 @@
     "project": "MINI",
     "selection": "workspace: tracked paths (no map selected)",
     "workspace": null,
-    "anchor": "current trace root",
+    "anchor": "repository trace roots",
+    "repo": null,
+    "workspace_profile": null,
     "ledger": {
-      "location": "../ledger",
+      "location": {
+        "repo": null,
+        "path": "../ledger",
+        "line": null
+      },
       "available": true
     },
     "repos": [
       {
         "name": "client",
-        "location": "../client",
+        "location": {
+          "repo": "client",
+          "path": ".",
+          "line": null
+        },
         "available": true,
         "current": false
       },
       {
         "name": "service",
-        "location": ".",
+        "location": {
+          "repo": "service",
+          "path": ".",
+          "line": null
+        },
         "available": true,
         "current": true
       }

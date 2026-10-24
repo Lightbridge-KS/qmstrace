@@ -135,7 +135,7 @@ refuses the whole request, exit `2`.
 
 Every repo is read as `ledger check` reads it, and one table is emitted as a JSON document a
 render layer turns into a formal document — a traceability record, a requirements
-specification's register. Its shape, `qmstrace.table/1`, is in [the table
+specification's register. Its shape, `qmstrace.table/2`, is in [the table
 format](../table-format.md):
 
 - **`matrix`** — one row per requirement, design element and test case, with the origins,

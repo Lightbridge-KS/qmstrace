@@ -3,5 +3,5 @@ controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 with
 workspace: explicit map local.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used
 baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
 baselines: no matching reachable local tag — nothing frozen locally
-change requests: ../../split/ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
+change requests: ledger:change-requests (1 readable; 0 malformed) — current working tree, not pinned
 result: 0 violations, 0 gaps in 4 items · 0 suspects (informational) · exit 0 · authoring: gaps do not fail — the gate is qmstrace check --strict · NOT VERIFIED: sibling client · controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn · remote-tag completeness NOT VERIFIED · workspace map selected

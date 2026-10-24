@@ -49,13 +49,35 @@ not remove JSON findings. Capture the command's exit before a `jq` pipeline repl
 `qmstrace results REPORT... --json` retains unmatched entries and unverified report
 freshness. For project scope, run `qmstrace -C LEDGER ledger check --strict --json` in the
 ledger trace root; a workspace map does not redirect a product invocation there.
-`ledger table` already emits `qmstrace.table/1`; assessment commands emit `qmstrace.cli/1`.
+`ledger table` already emits `qmstrace.table/2`; assessment commands emit `qmstrace.cli/2`.
 Consumers ignore unknown additive fields and check the format version. The manual's
 *CLI JSON format* reference defines the schema and command payloads.
 
 `init`, `graph` and `ledger copy-schema` write files and reject `--json`; use them only for
 an intended writing task. No command's successful completion certifies semantic truth,
 report freshness, complete evidence or human approval.
+
+## Repository identity and workspace profiles
+
+In a v2 `qmstrace.toml`, `repo` is this checkout's stable project member name and
+`workspace_profile` names its default local map. The copied/shared schema lists names,
+not developer paths. Run `paths --json` before assuming a sibling or ledger is available.
+Explicit `--workspace FILE`, `QMSTRACE_WORKSPACE` and the nearest ancestor map override
+`~/.qmstrace/workspaces/<workspace_profile>.toml`. One map is selected; maps never merge.
+An absent implicit profile permits local evidence only. An invalid profile or binding is
+exit 2; ledger operations require every assessed member. V1 inputs retain their original
+tracked defaults and discovery. A map never repairs a schema reference or historical tag.
+
+CLI `/2` locations contain `repo`, an internal `path` and optional `line`; `repo: null`
+keeps a legacy/unidentified source explicit. They are evidence labels, not filesystem paths
+to join to the invocation directory. Do not change an ID when its checkout moves. Table
+`/2` uses the same logical source boundary. Both output versions apply to v1 and v2 inputs.
+Consumers needing output `/1` remain pinned to 0.2.0; no legacy output flag is provided.
+
+`init` still creates v1 starters. V2 setup is explicit: prepare the schema/local identity
+headers and map, use `ledger copy-schema` transactionally, then refresh managed guidance
+with `init`. Preserve local skill edits before using the documented refresh procedure;
+never delete workspace maps or rewrite baseline tags as part of migration.
 
 ## Marker examples
 

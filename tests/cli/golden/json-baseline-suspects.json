@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "check",
   "scope": "local",
   "exit_code": 1,
@@ -18,6 +18,7 @@
       {
         "code": "V10",
         "location": {
+          "repo": null,
           "path": "docs/req/service-srs.md",
           "line": 12
         },
@@ -32,6 +33,7 @@
       {
         "code": "G05",
         "location": {
+          "repo": null,
           "path": "docs/design/service-design.md",
           "line": 8
         },
@@ -44,6 +46,7 @@
       {
         "code": "G01",
         "location": {
+          "repo": null,
           "path": "docs/req/service-srs.md",
           "line": 29
         },
@@ -56,6 +59,7 @@
       {
         "code": "G07",
         "location": {
+          "repo": null,
           "path": "tests/unit/test_keys.py",
           "line": 6
         },
@@ -70,6 +74,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "docs/design/service-design.md",
           "line": 8
         },
@@ -105,6 +110,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "tests/unit/test_keys.py",
           "line": 6
         },
@@ -140,6 +146,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "docs/design/service-design.md",
           "line": 13
         },
@@ -175,6 +182,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "src/service/keys.py",
           "line": 1
         },
@@ -210,6 +218,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "tests/unit/test_keys.py",
           "line": 12
         },
@@ -245,6 +254,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "src/service/store.py",
           "line": 1
         },
@@ -280,6 +290,7 @@
       {
         "code": "S01",
         "location": {
+          "repo": null,
           "path": "tests/integration/test_store.py",
           "line": 5
         },
@@ -380,7 +391,11 @@
         }
       ],
       "register": {
-        "location": "../ledger/change-requests",
+        "location": {
+          "repo": null,
+          "path": "../ledger/change-requests",
+          "line": null
+        },
         "available": false,
         "accepted": "accepted"
       }
@@ -389,7 +404,7 @@
   "notices": [
     "schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml",
     "external AGR-*: verified against ../ledger/agreement.md (3 declared)",
-    "sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
     "baseline requirements (service): baseline/service/requirements/1 @ aed0ab778763",
     "controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 1 withdrawn",
     "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",

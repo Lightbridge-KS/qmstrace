@@ -2,22 +2,22 @@
 
 !!! abstract "TL;DR"
 
-    `qmstrace ledger table` writes one JSON document per table, format `qmstrace.table/1`:
+    `qmstrace ledger table` writes one JSON document per table, format `qmstrace.table/2`:
     what was read, then the columns, then the rows. Columns are named after the project's own
-    item types and found by name; a new key or column keeps `/1`, so a reader ignores what it
+    item types and found by name; a new key or column keeps `/2`, so a reader ignores what it
     does not know. Identical inputs give identical bytes.
 
 ## The document
 
 | Key | Holds |
 |---|---|
-| `format` | `qmstrace.table/1` |
+| `format` | `qmstrace.table/2` |
 | `table` | `matrix`, `requirements` or `coverage` |
 | `project` | the project's name, from its trace schema |
 | `draft` | a reminder that the table is generated, never an issued revision |
 | `schema` | the trace schema's digest — the rules the table was read under |
 | `ledger` | the ledger's `commit` and whether its working tree was `clean`; `null` outside Git |
-| `read` | each repo read: its name, its `location` from the ledger, its `commit` and `clean` |
+| `read` | each repo read: its name, its logical `location` record (`repo`, `path`, `line`), its `commit` and `clean` |
 | `pinned` | `false`: every repo was read from its working tree, not at a pin |
 | `violations`, `gaps` | the counts `ledger check` would report |
 | `notices` | everything that could not be verified or was not pinned, and what the table leaves out |
@@ -100,10 +100,18 @@ requirements those rules select (`of` — a rule's `where` narrows it), how many
 and which are not. An automated test reaches a requirement directly or through test cases,
 never through a design element. Coverage counts links, not passing tests.
 
+## Migration from table /1
+
+Version 0.3.0 emits `/2` for both v1 and v2 configuration. `read[].location` is now a
+repo-relative record instead of a ledger-relative filesystem string. The register's `where`
+text uses a repo-qualified source label. Columns, row grain, verdicts and evidence meanings
+remain unchanged. Native checkout addresses are not exported. See
+[the migration guide](../how-to/migrate-to-names-only.md#update-output-consumers).
+
 ## Versioning
 
-A new key, column, table, cell kind or notice keeps `qmstrace.table/1`: find columns by name, and ignore
+A new key, column, table, cell kind or notice keeps `qmstrace.table/2`: find columns by name, and ignore
 what you do not know. Removing or renaming anything, changing a cell's JSON type, the row grain
-or the order, or what `clean`, `pinned` or `draft` mean, makes `qmstrace.table/2`.
+or the order, or what `clean`, `pinned` or `draft` mean, requires a new format version.
 
 The document is UTF-8. On a console that cannot print UTF-8, write it with `--out` instead.

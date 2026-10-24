@@ -1,8 +1,8 @@
 project: SPLIT
 workspace: tracked paths (no map selected)
-path anchor: current trace root; map entries start at the map's directory
+path anchor: repository trace roots; map entries start at the map's directory
 ledger: ../ledger — available
-repo client: ../client — available
-repo ledger: ../ledger — available
-repo service: . — available · current repo
+repo client: client:. — available
+repo ledger: ledger:. — available
+repo service: service:. — available · current repo
 Locations only; no items scanned or baselines judged. Exit 0.

@@ -69,7 +69,7 @@ def schema_listing(project: Path, extra: str) -> None:
 @pytest.mark.parametrize(
     ("arrange", "said"),
     [
-        (lambda p: shutil.rmtree(p / "client"), "client: there is no ../client/qmstrace.toml"),
+        (lambda p: shutil.rmtree(p / "client"), "client: there is no client:qmstrace.toml"),
         (
             lambda p: (p / "client" / "qmstrace.toml").write_text(
                 config_of(p, "client").replace("../ledger/qmstrace.schema.toml", "other.toml")
@@ -78,7 +78,7 @@ def schema_listing(project: Path, extra: str) -> None:
         ),
         (
             lambda p: schema_listing(p, 'solo    = "../solo"'),
-            "solo: ../solo/qmstrace.toml holds a schema of its own",
+            "solo: solo:qmstrace.toml holds a schema of its own",
         ),
     ],
     ids=["missing", "another-schema", "own-schema"],
@@ -172,7 +172,7 @@ def test_a_repo_whose_markers_conflict_is_named_with_its_own_fix(project: Path) 
     client.write_text(client.read_text() + "# qmstrace:begin — a stray\n", encoding="utf-8")
     with pytest.raises(CouldNotJudge) as caught:
         Workspace.copy_schema(project / "ledger")
-    assert "client: ../client/qmstrace.toml has conflicting qmstrace markers" in caught.value.what
+    assert "client: client:qmstrace.toml has conflicting qmstrace markers" in caught.value.what
     assert "# qmstrace:begin" not in config_of(project, "service")
 
 

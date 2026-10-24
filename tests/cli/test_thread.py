@@ -74,7 +74,7 @@ def test_refused_links_are_counted_in_the_header(project: Path) -> None:
 def test_an_uncited_sibling_item_and_an_uncited_clause_can_be_threaded(project: Path) -> None:
     code, output = thread(project / "client", "REQ-SVC-02")
     assert code == 0
-    assert "requirement, in sibling service — not pinned · ../service/docs/req/" in output
+    assert "requirement, in sibling service — not pinned · service:docs/req/" in output
     assert "nothing here hangs off it" in output
     code, output = thread(project / "client", "AGR-2")
     assert code == 0 and "nothing here hangs off it" in output

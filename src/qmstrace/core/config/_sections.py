@@ -287,8 +287,29 @@ def _tables(schema: _Table) -> Tables:
     return found
 
 
-def _repos(schema: _Table) -> dict[str, str]:
+def _repos(schema: _Table, version: int = 1) -> tuple[dict[str, str], str | None]:
     table = schema.table("repos")
-    found = {name: table.text(name) for name in table.raw}
+    if version == 1:
+        found = {name: table.text(name) for name in table.raw}
+        ledger = None
+    else:
+        ledger = table.text("ledger_repo")
+        names = table.texts("members")
+        if not names or len(set(names)) != len(names):
+            raise CouldNotJudge(
+                f"{schema.file}: repos.members must contain unique repository names "
+                "and cannot be empty.",
+                "Fix: list each traced member once; include the ledger role "
+                "when it holds documents.",
+            )
+        for name in (*names, ledger):
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", name) or name in (".", ".."):
+                raise CouldNotJudge(
+                    f"{schema.file}: invalid repository identity {name!r}.",
+                    "Fix: use portable names without path separators, colons or whitespace.",
+                )
+        # Compatibility mapping: v2 values carry no filesystem defaults. All v2 readers
+        # resolve members through a selected map, never by joining these empty values.
+        found = dict.fromkeys(sorted(names), "")
     table.done()
-    return found
+    return found, ledger

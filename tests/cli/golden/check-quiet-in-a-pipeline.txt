@@ -1,5 +1,5 @@
 external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
-sibling service: NOT REACHABLE at ../service
+sibling service: NOT REACHABLE at service:.
 not verified here: 1 citation of another repo's items (REQ-SVC-01) — judged at the ledger's import
 controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn
 baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches

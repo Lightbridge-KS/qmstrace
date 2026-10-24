@@ -1,5 +1,5 @@
 REQ-SVC-01 — A call carries a key
-  requirement, in sibling service — not pinned · ../service/docs/req/service-srs.md:12
+  requirement, in sibling service — not pinned · service:docs/req/service-srs.md:12
 
 backward — what it derives from:
   declared in sibling service — what it derives from there is not shown

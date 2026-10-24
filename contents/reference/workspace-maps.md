@@ -3,8 +3,8 @@
 !!! abstract "TL;DR"
 
     A local workspace map locates current checkouts without changing project rules.
-    Select one with `--workspace FILE`, `QMSTRACE_WORKSPACE`, ancestor discovery or a unique
-    user-level match. Maps never merge. `qmstrace paths` shows the selected locations;
+    Select one with `--workspace FILE`, `QMSTRACE_WORKSPACE`, ancestor discovery or the configured v2
+    named profile; v1 retains unique user-level matching. Maps never merge. `qmstrace paths` shows the selected locations;
     omitted members stay unavailable.
 
 ## Format
@@ -46,7 +46,18 @@ A ledger self-member declared in the schema keeps its identity and trace-root bi
 A reachable mapped ledger without `qmstrace.schema.toml`, or belonging to another project,
 is refused with guidance to select the ledger trace root rather than its containing Git root.
 
-## Selection order
+## Version 2 named defaults
+
+V2 local configuration requires `repo` and `workspace_profile`. After explicit CLI,
+environment and ancestor selection, read exactly
+`~/.qmstrace/workspaces/<workspace_profile>.toml`; unrelated user files stay unread.
+A genuinely absent implicit file permits local-only evidence. Invalid, unreadable,
+dangling or wrongly bound selections stop with exit `2`. The map's ledger role must agree
+with the schema and its current-root binding must use the declared `repo` name. Available
+mapped v2 checkouts must declare their expected identities. A partial map never borrows
+omitted entries. See [names-only configuration](names-only-configuration.md).
+
+## Version 1 selection order
 
 | Order | Source | Rule |
 |---|---|---|
@@ -91,16 +102,17 @@ Selecting a map in a product repo does not switch command scope.
 ## Boundaries
 
 - Existing schema `[repos]` paths stay ledger-relative defaults. Relative map paths start
-  at the map file; printed checkout locations are relative to the active trace root.
+  at the map file; printed mapped/project checkout locations are logical repo labels.
   Provenance names the selection source kind and map filename.
   The trace configuration's tracked `ledger` pointer remains relative to that repo's trace root.
-  Cross-drive layouts that cannot be expressed relatively are refused with exit `2`.
+  V2 has no tracked cross-repo defaults. Native Windows layouts may span drives;
+  source evidence uses repo-relative records rather than cross-drive filesystem paths.
 - `[schema] path` keeps its existing base at the repo's trace root. A map cannot repair an
   unavailable schema file or supply today's rules to a tagged read.
 - Schema digests, generated schema copies, item text and historical configuration are
   unchanged. No map is copied into the trace schema or written into a repo's configuration.
 - Report and output arguments keep their existing invocation-directory rules.
-- The ledger's emitted tables retain the `qmstrace.table/1` JSON format.
+- The ledger emits the versioned `qmstrace.table/2` format; CLI JSON uses `/2` as well.
 
 Use [qmstrace paths](commands/paths.md) for a configuration-only diagnosis, or follow
 [use a workspace map](../how-to/use-a-workspace-map.md) to configure a layout.

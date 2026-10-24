@@ -43,6 +43,8 @@ def _where_shown_by_id(node: Node) -> bool:
     if node.repo is not None and path.startswith(f"{node.repo}:"):
         path = path[len(node.repo) + 1 :]
     file = node.where.rsplit(":", 1)[0]
+    if node.repo is not None:
+        file = file.removeprefix(f"{node.repo}:")
     return file == path or file.endswith(f"/{path}")
 
 

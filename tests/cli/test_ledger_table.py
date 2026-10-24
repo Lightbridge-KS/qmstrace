@@ -2,7 +2,7 @@
 
 The load-bearing claims, each pinned by a test:
 
-1. Each table is a `qmstrace.table/1` document: the project, the schema's digest, each repo's
+1. Each table is a `qmstrace.table/2` document: the project, the schema's digest, each repo's
    commit and whether its tree was clean, not pinned, the counts, every notice — then columns
    and rows. The `cases` project's three tables are goldens.
 2. The same inputs give the same bytes, with no path of the machine, whichever side of the
@@ -51,7 +51,7 @@ def test_the_cases_matrix(cases: Path, golden: Golden) -> None:
     assert code == 0
     golden(GOLDEN / "ledger-table-matrix-cases.json", output)
     matrix = json.loads(output)
-    assert matrix["format"] == "qmstrace.table/1" and matrix["pinned"] is False
+    assert matrix["format"] == "qmstrace.table/2" and matrix["pinned"] is False
     assert [(r["requirement"], r["test_case"]) for r in matrix["rows"]] == [
         ("REQ-SVC-01", "TC-SVC-01.1"),
         ("REQ-SVC-01", "TC-SVC-01.2"),

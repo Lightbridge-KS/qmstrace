@@ -298,7 +298,7 @@ def paths(
     workspace_file: WorkspaceFile = None,
     json_output: JsonOutput = False,
 ) -> int:
-    """Show the selected workspace map and checkout locations relative to this trace root.
+    """Show the selected workspace map and logical repository trace roots.
 
     Reads configuration only: no source scan, graph or baseline judgment. Missing checkouts
     are informational; invalid or ambiguous maps exit 2. Existing paths apply when no map

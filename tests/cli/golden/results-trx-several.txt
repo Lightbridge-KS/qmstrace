@@ -11,7 +11,7 @@ reports: 2
   2 duplicate XML entries combined by full identity; retry attempts are not inferred
 
 requirements — verdicts along verifies links, from automated tests directly or through test cases:
-  REQ-SVC-01  skip      via TC-SVC-01.1 · 1 automated tests · 1 runs — A call carries a key · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:5
+  REQ-SVC-01  skip      via TC-SVC-01.1 · 1 automated tests · 1 runs — A call carries a key · requirement, in sibling ledger — not pinned · ledger:docs/req/service-srs.md:5
     via TC-SVC-01.1  skip · 1 automated tests · verifies REQ-SVC-01 — A call without a valid key is refused
       skip      tests/Agent.Tests/Unit/KeyCheckTests.cs::KeyCheckTests::Admits_NoKey_IsFalse · 1 runs
         skip: TC-SVC-01.1 a call without a key is refused (NotExecuted) · reported in TestResults/first.trx, TestResults/second.trx

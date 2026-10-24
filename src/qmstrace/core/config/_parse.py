@@ -5,6 +5,7 @@ Implements: DSN-QMT-03
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -55,6 +56,10 @@ class TraceConfig:
     baselines: Mapping[str, BaselineScope]
     repos: Mapping[str, str]
     tables: Tables = field(default_factory=Tables)
+    version: int = 1
+    repo: str | None = None
+    workspace_profile: str | None = None
+    ledger_repo: str | None = None
 
     @staticmethod
     def schema_reference(local_text: str, *, local_name: str = "qmstrace.toml") -> str | None:
@@ -100,8 +105,16 @@ class TraceConfig:
         ```
         """
         local = _Table(_load(local_text, local_name), "", local_name)
-        _version(local)
-        ledger = local.opt_text("ledger")
+        version = _version(local)
+        ledger = local.opt_text("ledger") if version == 1 else None
+        repo = local.text("repo") if version == 2 else None
+        profile = local.text("workspace_profile") if version == 2 else None
+        if profile is not None and not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", profile):
+            raise CouldNotJudge(
+                f"{local_name}: workspace_profile must be a portable filename stem.",
+                "Fix: use lowercase letters, digits, underscores or hyphens, "
+                "without a directory or .toml suffix.",
+            )
 
         holder = local.table("schema", required=True)
         path = holder.opt_text("path")
@@ -144,7 +157,20 @@ class TraceConfig:
                 "project's ledger — or, if this repo is to hold its own schema, remove the two "
                 "marker lines.",
             )
-        _version(schema)
+        schema_version = _version(schema)
+        if schema_version != version:
+            raise CouldNotJudge(
+                f"{local_name}: local version {version} and schema version {schema_version} "
+                "do not match.",
+                "Fix: migrate the local header and regenerate the schema copy together; "
+                "historical trees retain their own versions.",
+            )
+        repos, ledger_repo = _repos(schema, version)
+        if version == 2 and repo not in {*repos, ledger_repo}:
+            raise CouldNotJudge(
+                f"{local_name}: repo {repo!r} is neither a member nor the ledger role.",
+                "Fix: declare the intended schema member identity in the local header.",
+            )
         config = cls(
             project=schema.text("project"),
             ledger=ledger,
@@ -158,9 +184,23 @@ class TraceConfig:
             externals=_externals(schema),
             change_requests=_change_requests(schema),
             baselines=_baselines(schema),
-            repos=_repos(schema),
+            repos=repos,
             tables=_tables(schema),
+            version=version,
+            repo=repo,
+            workspace_profile=profile,
+            ledger_repo=ledger_repo,
         )
+        if (
+            version == 2
+            and repo == ledger_repo
+            and repo not in repos
+            and any(t.declared_here for t in config.item_types.values())
+        ):
+            raise CouldNotJudge(
+                f"{local_name}: the ledger role declares items but is not in repos.members.",
+                "Fix: include its repository identity in the shared member set.",
+            )
         schema.done()
         local.done()
         _cross_check(config, schema.file)
@@ -172,7 +212,15 @@ class TraceConfig:
     ) -> TraceConfig:
         """The project's trace schema on its own — its project, repos and rules, validated as a
         product repo would read them, with no item type declared here."""
-        placeholder = 'version = 1\n[schema]\npath = "qmstrace.schema.toml"\n'
+        raw = _load(schema_text, schema_name)
+        if raw.get("version") == 2:
+            _, ledger = _repos(_Table(raw, "", schema_name), 2)
+            placeholder = (
+                f'version = 2\nrepo = {json.dumps(ledger)}\nworkspace_profile = "schema-reader"\n'
+                '[schema]\npath = "qmstrace.schema.toml"\n'
+            )
+        else:
+            placeholder = 'version = 1\n[schema]\npath = "qmstrace.schema.toml"\n'
         return cls.parse(placeholder, schema_text, local_name=schema_name, schema_name=schema_name)
 
 

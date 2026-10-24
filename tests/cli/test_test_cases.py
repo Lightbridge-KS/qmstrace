@@ -47,7 +47,7 @@ def test_the_ledgers_check_judges_test_cases_with_the_automated_tests_that_run_t
     golden(GOLDEN / "ledger-check-cases.txt", output)
     # Every test case is read whole and run, but one: the planned TC-SVC-02.2.
     (gap,) = gaps(output)
-    assert gap.startswith("G09  docs/test/service-test-cases.md:")
+    assert gap.startswith("G09  ledger:docs/test/service-test-cases.md:")
     assert "TC-SVC-02.2: no automated test runs it yet." in gap
     # Two repos run automated tests, read by two extractors: the next move names both ways.
     assert 'on the automated test in service, `@pytest.mark.verifies("TC-SVC-02.2")`' in gap

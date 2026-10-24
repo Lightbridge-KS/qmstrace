@@ -1,0 +1,308 @@
+{
+  "format": "qmstrace.cli/2",
+  "command": "impact",
+  "scope": "local",
+  "exit_code": 0,
+  "data": {
+    "project": "MINI",
+    "starts": [
+      "REQ-SVC-01"
+    ],
+    "items": [
+      {
+        "id": "AGR-1",
+        "title": null,
+        "type": "origin_clause",
+        "ownership": "external",
+        "repo": "agreement",
+        "location": null,
+        "fields": {},
+        "withdrawn": false
+      },
+      {
+        "id": "DSN-SVC-01",
+        "title": "Key check",
+        "type": "design_element",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/design/service-design.md",
+          "line": 8
+        },
+        "fields": {
+          "Satisfies": "REQ-SVC-01"
+        },
+        "withdrawn": false
+      },
+      {
+        "id": "DSN-SVC-02",
+        "title": "Record store",
+        "type": "design_element",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/design/service-design.md",
+          "line": 13
+        },
+        "fields": {
+          "Assumes": "DSN-SVC-01",
+          "Satisfies": "REQ-SVC-02"
+        },
+        "withdrawn": false
+      },
+      {
+        "id": "REQ-SVC-01",
+        "title": "A call carries a key",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 12
+        },
+        "fields": {
+          "Category": "security",
+          "Origin": "AGR-1",
+          "Verify-by": "test"
+        },
+        "withdrawn": false
+      },
+      {
+        "id": "src/service/keys.py",
+        "title": "keys",
+        "type": "component",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "src/service/keys.py",
+          "line": 1
+        },
+        "fields": {},
+        "withdrawn": false
+      },
+      {
+        "id": "src/service/store.py",
+        "title": "store",
+        "type": "component",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "src/service/store.py",
+          "line": 1
+        },
+        "fields": {},
+        "withdrawn": false
+      },
+      {
+        "id": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+        "title": "test_a_record_survives_a_restart",
+        "type": "automated_test",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "tests/integration/test_store.py",
+          "line": 5
+        },
+        "fields": {},
+        "withdrawn": false
+      },
+      {
+        "id": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+        "title": "test_it_runs_before_any_handler",
+        "type": "automated_test",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "tests/unit/test_keys.py",
+          "line": 12
+        },
+        "fields": {},
+        "withdrawn": false
+      },
+      {
+        "id": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+        "title": "test_a_call_without_a_valid_key_is_refused",
+        "type": "automated_test",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "tests/unit/test_keys.py",
+          "line": 6
+        },
+        "fields": {},
+        "withdrawn": false
+      }
+    ],
+    "downstream": [
+      {
+        "type": "design_element",
+        "ids": [
+          "DSN-SVC-01",
+          "DSN-SVC-02"
+        ]
+      },
+      {
+        "type": "component",
+        "ids": [
+          "src/service/keys.py",
+          "src/service/store.py"
+        ]
+      },
+      {
+        "type": "automated_test",
+        "ids": [
+          "tests/integration/test_store.py::test_a_record_survives_a_restart",
+          "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+          "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused"
+        ]
+      }
+    ],
+    "origins": [
+      "AGR-1"
+    ],
+    "forward": [
+      {
+        "id": "DSN-SVC-01",
+        "distance": 1,
+        "parent": "REQ-SVC-01",
+        "via": {
+          "source": "DSN-SVC-01",
+          "target": "REQ-SVC-01",
+          "marker": "Satisfies",
+          "location": {
+            "repo": "service",
+            "path": "docs/design/service-design.md",
+            "line": 9
+          }
+        },
+        "also": []
+      },
+      {
+        "id": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+        "distance": 1,
+        "parent": "REQ-SVC-01",
+        "via": {
+          "source": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+          "target": "REQ-SVC-01",
+          "marker": "verifies",
+          "location": {
+            "repo": "service",
+            "path": "tests/unit/test_keys.py",
+            "line": 6
+          }
+        },
+        "also": []
+      },
+      {
+        "id": "src/service/keys.py",
+        "distance": 2,
+        "parent": "DSN-SVC-01",
+        "via": {
+          "source": "src/service/keys.py",
+          "target": "DSN-SVC-01",
+          "marker": "Implements",
+          "location": {
+            "repo": "service",
+            "path": "src/service/keys.py",
+            "line": 3
+          }
+        },
+        "also": []
+      },
+      {
+        "id": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+        "distance": 2,
+        "parent": "DSN-SVC-01",
+        "via": {
+          "source": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+          "target": "DSN-SVC-01",
+          "marker": "verifies",
+          "location": {
+            "repo": "service",
+            "path": "tests/unit/test_keys.py",
+            "line": 12
+          }
+        },
+        "also": []
+      },
+      {
+        "id": "DSN-SVC-02",
+        "distance": 2,
+        "parent": "DSN-SVC-01",
+        "via": {
+          "source": "DSN-SVC-02",
+          "target": "DSN-SVC-01",
+          "marker": "Assumes",
+          "location": {
+            "repo": "service",
+            "path": "docs/design/service-design.md",
+            "line": 15
+          }
+        },
+        "also": []
+      },
+      {
+        "id": "src/service/store.py",
+        "distance": 3,
+        "parent": "DSN-SVC-02",
+        "via": {
+          "source": "src/service/store.py",
+          "target": "DSN-SVC-02",
+          "marker": "Implements",
+          "location": {
+            "repo": "service",
+            "path": "src/service/store.py",
+            "line": 3
+          }
+        },
+        "also": []
+      },
+      {
+        "id": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+        "distance": 3,
+        "parent": "DSN-SVC-02",
+        "via": {
+          "source": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+          "target": "DSN-SVC-02",
+          "marker": "verifies",
+          "location": {
+            "repo": "service",
+            "path": "tests/integration/test_store.py",
+            "line": 5
+          }
+        },
+        "also": []
+      }
+    ],
+    "candidate_ids": [
+      "DSN-SVC-01",
+      "DSN-SVC-02",
+      "REQ-SVC-01"
+    ],
+    "candidate_line": "Impacts: DSN-SVC-01, DSN-SVC-02, REQ-SVC-01",
+    "candidate_empty_reason": null,
+    "unknown_types": []
+  },
+  "notices": [
+    "schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml",
+    "external AGR-*: verified against ledger:agreement.md (3 declared)",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
+    "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
+    "workspace: profile map mini-service.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used",
+    "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines: no matching reachable local tag — nothing frozen locally",
+    "change requests: NOT VERIFIED — ledger:change-requests is unavailable; fresh citations are verified at the ledger's import",
+    "Working-tree snapshot; its commit has not been verified. Regenerate to refresh.",
+    "Traversal stops at this repo's edge. Sibling contents are not pinned.",
+    "Suspects need review; edits and passing tests do not record review."
+  ],
+  "error": null
+}

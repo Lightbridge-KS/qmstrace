@@ -212,7 +212,7 @@ def ledger_table(
     workspace_file: WorkspaceFile = None,
     json_output: JsonOutput = False,
 ) -> int:
-    """Emit one of the project's tables as versioned JSON (qmstrace.table/1), for a render
+    """Emit one of the project's tables as versioned JSON (qmstrace.table/2), for a render
     layer to turn into a document.
 
     matrix: one row per requirement, design element and test case. requirements: one row per

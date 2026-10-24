@@ -1,5 +1,5 @@
 {
-  "format": "qmstrace.cli/1",
+  "format": "qmstrace.cli/2",
   "command": "ledger check",
   "scope": "project",
   "exit_code": 1,
@@ -19,7 +19,8 @@
       {
         "code": "G01",
         "location": {
-          "path": "../client/docs/req/client-srs.md",
+          "repo": "client",
+          "path": "docs/req/client-srs.md",
           "line": 3
         },
         "message": "REQ-CLT-01: no design element satisfies it yet.",
@@ -31,7 +32,8 @@
       {
         "code": "G06",
         "location": {
-          "path": "../client/src/client/api.py",
+          "repo": "client",
+          "path": "src/client/api.py",
           "line": 1
         },
         "message": "client:src/client/api.py: implements no design element — every component points back to one.",
@@ -43,7 +45,8 @@
       {
         "code": "G01",
         "location": {
-          "path": "../service/docs/req/service-srs.md",
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
           "line": 28
         },
         "message": "REQ-SVC-03: no design element satisfies it yet.",
@@ -57,7 +60,11 @@
     "repos": [
       {
         "name": "client",
-        "location": "../client",
+        "location": {
+          "repo": "client",
+          "path": ".",
+          "line": null
+        },
         "baselines": {
           "counts": {
             "frozen": 0,
@@ -68,7 +75,11 @@
           "governing": [],
           "comparisons": [],
           "register": {
-            "location": "change-requests",
+            "location": {
+              "repo": null,
+              "path": "change-requests",
+              "line": null
+            },
             "available": false,
             "accepted": "accepted"
           }
@@ -76,7 +87,11 @@
       },
       {
         "name": "service",
-        "location": "../service",
+        "location": {
+          "repo": "service",
+          "path": ".",
+          "line": null
+        },
         "baselines": {
           "counts": {
             "frozen": 0,
@@ -87,7 +102,11 @@
           "governing": [],
           "comparisons": [],
           "register": {
-            "location": "change-requests",
+            "location": {
+              "repo": null,
+              "path": "change-requests",
+              "line": null
+            },
             "available": false,
             "accepted": "accepted"
           }

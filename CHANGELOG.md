@@ -6,6 +6,24 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Names-only v2 project membership and explicit local repository identities, with required
+  `workspace_profile` defaults. Developers and CI can locate independent checkouts through
+  local maps without committing cross-repo checkout paths. V1 inputs, digests, defaults and
+  historical reads retain their meaning.
+- Transactional v2 schema-copy/bootstrap and managed-guidance refresh. New `init` starters
+  remain v1; a migration guide documents explicit v2 setup and local skill preservation.
+
+### Changed
+
+- CLI JSON advances to `qmstrace.cli/2` for every handled outcome, including legacy inputs
+  and parser errors. Source locations use repo-relative records; rules expose named
+  membership. Table output advances to `qmstrace.table/2` with logical read locations.
+  Existing IDs, configured rules, columns, verdict aggregation and exits retain their meaning.
+- Mapped/project source labels no longer depend on checkout nesting or cross-drive relative
+  paths. A native Windows acceptance probe and CI job require distinct-drive proof.
+
 ## [0.2.0] - 2026-10-24
 
 ### Added

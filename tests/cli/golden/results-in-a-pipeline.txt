@@ -4,7 +4,7 @@ report: report.xml
   matched against the current working tree — report commit NOT VERIFIED
   a partial parameter set does not prove every possible variant ran
   external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
-  sibling service: NOT REACHABLE at ../service
+  sibling service: NOT REACHABLE at service:.
   baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches
   baselines: no matching reachable local tag — nothing frozen locally
   change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import

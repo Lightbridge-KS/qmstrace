@@ -1,0 +1,238 @@
+{
+  "format": "qmstrace.cli/2",
+  "command": "status",
+  "scope": "local",
+  "exit_code": 0,
+  "data": {
+    "project": "MINI",
+    "tree": "working tree, not pinned",
+    "counts": {
+      "items": 11,
+      "links": 14,
+      "violations": 0,
+      "gaps": 1,
+      "suspects": 0,
+      "withdrawn": 0
+    },
+    "scanned": [
+      {
+        "type": "automated_test",
+        "patterns": [
+          "tests/**/test_*.py"
+        ],
+        "ignore": [],
+        "files": 2,
+        "items": 4,
+        "ignored": 0
+      },
+      {
+        "type": "component",
+        "patterns": [
+          "src/**/*.py"
+        ],
+        "ignore": [
+          "**/__init__.py"
+        ],
+        "files": 2,
+        "items": 2,
+        "ignored": 1
+      },
+      {
+        "type": "design_element",
+        "patterns": [
+          "docs/design/*.md"
+        ],
+        "ignore": [],
+        "files": 1,
+        "items": 2,
+        "ignored": 0
+      },
+      {
+        "type": "requirement",
+        "patterns": [
+          "docs/req/*-srs.md"
+        ],
+        "ignore": [],
+        "files": 1,
+        "items": 3,
+        "ignored": 0
+      }
+    ],
+    "requirements": [
+      {
+        "id": "REQ-SVC-01",
+        "title": "A call carries a key",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 12
+        },
+        "fields": {
+          "Category": "security",
+          "Origin": "AGR-1",
+          "Verify-by": "test"
+        },
+        "withdrawn": false,
+        "method": "test",
+        "test_backed": true,
+        "incoming": [
+          {
+            "source": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+            "marker": "verifies"
+          },
+          {
+            "source": "DSN-SVC-01",
+            "marker": "Satisfies"
+          }
+        ],
+        "outgoing": [
+          {
+            "target": "AGR-1",
+            "marker": "Origin"
+          }
+        ]
+      },
+      {
+        "id": "REQ-SVC-02",
+        "title": "Records survive a restart",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 21
+        },
+        "fields": {
+          "Category": "reliability",
+          "Origin": "AGR-2, AGR-3",
+          "Verify-by": "test"
+        },
+        "withdrawn": false,
+        "method": "test",
+        "test_backed": true,
+        "incoming": [
+          {
+            "source": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+            "marker": "verifies"
+          },
+          {
+            "source": "tests/integration/test_store.py::test_a_restart_loses_no_accepted_record",
+            "marker": "verifies"
+          },
+          {
+            "source": "DSN-SVC-02",
+            "marker": "Satisfies"
+          }
+        ],
+        "outgoing": [
+          {
+            "target": "AGR-2",
+            "marker": "Origin"
+          },
+          {
+            "target": "AGR-3",
+            "marker": "Origin"
+          }
+        ]
+      },
+      {
+        "id": "REQ-SVC-03",
+        "title": "The record format is written down",
+        "type": "requirement",
+        "ownership": "local",
+        "repo": "service",
+        "location": {
+          "repo": "service",
+          "path": "docs/req/service-srs.md",
+          "line": 28
+        },
+        "fields": {
+          "Category": "maintainability",
+          "Origin": "AGR-3",
+          "Verify-by": "inspection"
+        },
+        "withdrawn": false,
+        "method": "inspection",
+        "test_backed": false,
+        "incoming": [],
+        "outgoing": [
+          {
+            "target": "AGR-3",
+            "marker": "Origin"
+          }
+        ]
+      }
+    ],
+    "sources": {
+      "externals": [
+        {
+          "name": "agreement",
+          "prefix": "AGR-",
+          "location": {
+            "repo": "ledger",
+            "path": "agreement.md",
+            "line": null
+          },
+          "declared": 3
+        }
+      ],
+      "siblings": [
+        {
+          "name": "client",
+          "location": {
+            "repo": "client",
+            "path": ".",
+            "line": null
+          },
+          "declares": {
+            "requirement": 1
+          },
+          "problem": null
+        }
+      ],
+      "siblings_located": true
+    },
+    "baselines": {
+      "counts": {
+        "frozen": 0,
+        "changed": 0,
+        "new": 0,
+        "removed": 0
+      },
+      "governing": [],
+      "comparisons": [],
+      "register": {
+        "location": {
+          "repo": "ledger",
+          "path": "change-requests",
+          "line": null
+        },
+        "available": false,
+        "accepted": "accepted"
+      }
+    },
+    "suspects": {
+      "total": 0,
+      "distance_one": [],
+      "farther": []
+    }
+  },
+  "notices": [
+    "schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml",
+    "external AGR-*: verified against ledger:agreement.md (3 declared)",
+    "sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID",
+    "controlled document items: 0 frozen · 0 changed · 0 new · 0 removed · 0 withdrawn",
+    "workspace: profile map mini-service.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used",
+    "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baselines: no matching reachable local tag — nothing frozen locally",
+    "change requests: NOT VERIFIED — ledger:change-requests is unavailable; fresh citations are verified at the ledger's import",
+    "Working-tree snapshot; its commit has not been verified. Regenerate to refresh.",
+    "Traversal stops at this repo's edge. Sibling contents are not pinned.",
+    "Suspects need review; edits and passing tests do not record review."
+  ],
+  "error": null
+}

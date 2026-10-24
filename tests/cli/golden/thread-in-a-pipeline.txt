@@ -1,7 +1,7 @@
 REQ-SVC-01
   not verified here — judged at the ledger's import
   external AGR-*: NOT VERIFIED — ../ledger/agreement.md is not reachable; each cited AGR-N is judged at the ledger's import
-  sibling service: NOT REACHABLE at ../service
+  sibling service: NOT REACHABLE at service:.
 
 backward — what it derives from:
   not verified here — judged at the ledger's import

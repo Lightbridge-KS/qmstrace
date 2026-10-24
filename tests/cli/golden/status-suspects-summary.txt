@@ -6,7 +6,7 @@ scanned (working tree, not pinned):
   automated_test    4 items in  2 files  tests/**/test_*.py · test functions: a parametrised function is one automated test
 links: 15
 external AGR-*: verified against ../ledger/agreement.md (3 declared)
-sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID
+sibling client: 1 requirement — read from client:.'s working tree, not pinned; cite its items by ID
 baseline requirements (service): baseline/service/requirements/1 @ f5cb96739aa2
   baseline/service/requirements/1: annotated; tagger Fixture; date 2026-01-01T00:00:00+00:00
 controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 0 withdrawn

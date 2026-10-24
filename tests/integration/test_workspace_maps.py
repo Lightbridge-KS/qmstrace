@@ -377,7 +377,7 @@ def relocated(split: Path, embed: Callable[..., str], tmp_path: Path) -> Relocat
 def test_relocated_local_sources_use_the_map_without_changing_trace_rules(
     relocated: Relocated,
 ) -> None:
-    root, ledger = relocated.roots["service"], relocated.roots["ledger"]
+    root = relocated.roots["service"]
     workspace = Workspace.open(root / "src/service", workspace=relocated.file)
     found = workspace.assessment()
     assert workspace.config.schema_digest == relocated.digest
@@ -390,11 +390,9 @@ def test_relocated_local_sources_use_the_map_without_changing_trace_rules(
     )
     agreement = next(source for source in found.externals if source.name == "agreement")
     assert agreement.declared is not None and agreement.declared > 0
-    assert agreement.location == locations.relative(root, ledger / "agreement.md")
+    assert agreement.location == "ledger:agreement.md"
     assert found.baseline_state.register.available
-    assert found.baseline_state.register.location == locations.relative(
-        root, ledger / "change-requests"
-    )
+    assert found.baseline_state.register.location == "ledger:change-requests"
     assert any("workspace:" in notice.text for notice in found.notices)
 
 
@@ -423,7 +421,7 @@ def test_nested_relocated_ledger_reads_all_mapped_repos_and_keeps_portable_locat
     assert found.violations == () and found.gaps == ()
     assert found.config.schema_digest == relocated.digest
     assert {repo.name: repo.location for repo in found.repos} == {
-        name: locations.relative(ledger, root) for name, root in relocated.roots.items()
+        name: f"{name}:." for name in relocated.roots
     }
     assert {
         "service:tests/unit/test_api.py::test_a_call_without_a_key_is_refused",
@@ -483,7 +481,7 @@ def test_paths_reports_current_available_and_unmapped_members_without_scanning(
     view = Workspace.paths(roots["service"], workspace=relocated.file)
     assert (view.project, view.ledger) == (
         "SPLIT",
-        locations.relative(roots["service"], roots["ledger"]),
+        "ledger:.",
     )
     assert "explicit" in view.source and "selected.toml" in view.source
     states = {state.name: state for state in view.repos}
@@ -510,10 +508,10 @@ def test_missing_mapped_directory_stays_unavailable_even_with_a_reachable_defaul
     found = Workspace.open(root, workspace=file).assessment()
     sibling = next(state for state in found.siblings if state.name == "service")
     assert sibling.declares is None and sibling.problem is not None
-    assert sibling.location == locations.relative(root, unavailable)
+    assert sibling.location == "service:."
     paths = Workspace.paths(root, workspace=file)
     state = next(state for state in paths.repos if state.name == "service")
-    assert state.location == locations.relative(root, unavailable)
+    assert state.location == "service:."
     assert not state.available and not state.current
 
 
@@ -541,7 +539,10 @@ def test_untraced_ledger_role_is_resolved_without_becoming_a_project_member(
     assert found.config.schema_digest == before.config.schema_digest
     assert found.violations == before.violations == ()
     paths = Workspace.paths(roots["records"], workspace=file)
-    assert paths.ledger == "." and {state.name for state in paths.repos} == {"client", "service"}
+    assert paths.ledger == "records:." and {state.name for state in paths.repos} == {
+        "client",
+        "service",
+    }
     assert paths.ledger_available
     shutil.rmtree(roots["records"])
     missing = Workspace.paths(roots["service"], workspace=file)
@@ -646,7 +647,7 @@ def test_mapped_copy_refuses_transactionally_before_writing_any_target(
 
 
 @pytest.mark.verifies("REQ-QMT-13")
-def test_cross_drive_refusal_happens_before_any_schema_copy_write(
+def test_schema_copy_never_relativizes_between_mapped_roots(
     relocated: Relocated, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     update_schema(relocated)
@@ -656,11 +657,10 @@ def test_cross_drive_refusal_happens_before_any_schema_copy_write(
         raise ValueError("different drives")
 
     monkeypatch.setattr(locations.os.path, "relpath", different_drives)
-    with pytest.raises(CouldNotJudge, match="different drives"):
-        Workspace.copy_schema(relocated.roots["ledger"], workspace=relocated.file)
-    assert {
-        name: (root / "qmstrace.toml").read_bytes() for name, root in relocated.roots.items()
-    } == before
+    _, copied = Workspace.copy_schema(relocated.roots["ledger"], workspace=relocated.file)
+    assert any(record.changed for record in copied)
+    assert all(record.file.startswith(f"{record.repo}:") for record in copied)
+    assert (relocated.roots["ledger"] / "qmstrace.toml").read_bytes() == before["ledger"]
 
 
 @pytest.mark.verifies("REQ-QMT-13")
@@ -681,13 +681,13 @@ def test_explicit_copy_names_only_require_the_named_mapped_targets(relocated: Re
 
 
 @pytest.mark.verifies("REQ-QMT-15", "DSN-QMT-02")
-def test_no_map_keeps_fallback_locations_digest_and_rendered_bytes(project: Path) -> None:
+def test_no_map_keeps_fallback_resolution_digest_and_deterministic_output(project: Path) -> None:
     root = project / "client"
     assert locations.discover(root, root, config_at(project, "client")) is None
     workspace = Workspace.open(root)
     first, second = workspace.assessment(), Workspace.open(root).assessment()
     assert workspace.config.schema_digest == config_at(project, "client").schema_digest
-    assert [(state.name, state.location) for state in first.siblings] == [("service", "../service")]
+    assert [(state.name, state.location) for state in first.siblings] == [("service", "service:.")]
     assert [source.location for source in first.externals] == ["../ledger/agreement.md"]
     assert text.status(first) == text.status(second)
     assert not any("workspace:" in notice.text for notice in first.notices)
@@ -697,8 +697,8 @@ def test_no_map_keeps_fallback_locations_digest_and_rendered_bytes(project: Path
     assert {
         state.name: (state.location, state.available, state.current) for state in paths.repos
     } == {
-        "client": (".", True, True),
-        "service": ("../service", True, False),
+        "client": ("client:.", True, True),
+        "service": ("service:.", True, False),
     }
 
 
@@ -811,8 +811,8 @@ def test_unicode_worktree_uses_its_own_mapped_trace_root(relocated: Relocated) -
         assert not assessment.violations and not assessment.gaps
         project = Workspace.project(relocated.roots["ledger"], workspace=relocated.file)
         assert not project.violations and not project.gaps
-        assert next(repo.location for repo in project.repos if repo.name == "service").endswith(
-            "บริการ Δ"
+        assert (
+            next(repo.location for repo in project.repos if repo.name == "service") == "service:."
         )
     finally:
         git("worktree", "remove", "--force", str(target))

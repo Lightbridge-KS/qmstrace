@@ -8,9 +8,9 @@ report: report.xml
   change requests: ../ledger/change-requests (1 readable; 0 malformed) — current working tree, not pinned
 
 requirements — verdicts along verifies links, from automated tests directly or through test cases:
-  REQ-SVC-01  pass      via TC-SVC-01.1 · 2 automated tests · 2 runs — A call carries a key · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:5
+  REQ-SVC-01  pass      via TC-SVC-01.1 · 2 automated tests · 2 runs — A call carries a key · requirement, in sibling ledger — not pinned · ledger:docs/req/service-srs.md:5
     via TC-SVC-01.1  pass · 2 automated tests
-  REQ-SVC-02  pass      1 automated tests · 1 runs — Records survive a restart · requirement, in sibling ledger — not pinned · ../ledger/docs/req/service-srs.md:12
+  REQ-SVC-02  pass      1 automated tests · 1 runs — Records survive a restart · requirement, in sibling ledger — not pinned · ledger:docs/req/service-srs.md:12
 
 test cases that reach no requirement — no requirement verdict inferred:
   TC-SVC-01.2  pass · 1 automated tests · verifies DSN-SVC-01 — The key check runs before any handler
