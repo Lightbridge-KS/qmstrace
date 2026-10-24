@@ -1,0 +1,2530 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qmstrace.netlify.app/assets/qmstrace-cli.schema.json",
+  "title": "qmstrace.cli/1 command results",
+  "type": "object",
+  "required": [
+    "format",
+    "command",
+    "scope",
+    "exit_code",
+    "data",
+    "notices",
+    "error"
+  ],
+  "properties": {
+    "format": {
+      "const": "qmstrace.cli/1"
+    },
+    "command": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "scope": {
+      "enum": [
+        "local",
+        "project",
+        null
+      ]
+    },
+    "exit_code": {
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "data": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "category",
+            "message",
+            "next_move"
+          ],
+          "properties": {
+            "category": {
+              "enum": [
+                "usage",
+                "could-not-judge",
+                "internal"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "next_move": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "type",
+        "ownership",
+        "repo",
+        "location",
+        "fields",
+        "withdrawn"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ownership": {
+          "enum": [
+            "local",
+            "sibling",
+            "external",
+            "unverified"
+          ]
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "withdrawn": {
+          "type": "boolean"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": [
+        "code",
+        "location",
+        "message",
+        "next_move",
+        "item",
+        "marker",
+        "target"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "path",
+            "line"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "message": {
+          "type": "string"
+        },
+        "next_move": {
+          "type": "string"
+        },
+        "item": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "marker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "link": {
+      "type": "object",
+      "required": [
+        "source",
+        "target",
+        "marker",
+        "location"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "marker": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "path",
+            "line"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "scope",
+        "subject",
+        "covers",
+        "commit",
+        "tags"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "covers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "commit": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "annotated",
+              "tagger",
+              "date"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "annotated": {
+                "type": "boolean"
+              },
+              "tagger": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "baseline_ref": {
+      "type": "object",
+      "required": [
+        "scope",
+        "subject",
+        "commit",
+        "tags"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "baselines": {
+      "type": "object",
+      "required": [
+        "counts",
+        "governing",
+        "comparisons",
+        "register"
+      ],
+      "properties": {
+        "counts": {
+          "type": "object",
+          "required": [
+            "frozen",
+            "changed",
+            "new",
+            "removed"
+          ],
+          "properties": {
+            "frozen": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "changed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "new": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "removed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "governing": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/baseline"
+          }
+        },
+        "comparisons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "state",
+              "baseline",
+              "fresh_citations"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "frozen",
+                  "changed",
+                  "new",
+                  "removed"
+                ]
+              },
+              "baseline": {
+                "$ref": "#/$defs/baseline_ref"
+              },
+              "fresh_citations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "register": {
+          "type": "object",
+          "required": [
+            "location",
+            "available",
+            "accepted"
+          ],
+          "properties": {
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "available": {
+              "type": "boolean"
+            },
+            "accepted": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "suspect": {
+      "type": "object",
+      "required": [
+        "code",
+        "message",
+        "next_move",
+        "item",
+        "marker",
+        "target",
+        "id",
+        "title",
+        "location",
+        "withdrawn",
+        "distance",
+        "reasons"
+      ],
+      "properties": {
+        "code": {
+          "const": "S01"
+        },
+        "message": {
+          "type": "string"
+        },
+        "next_move": {
+          "type": "string"
+        },
+        "item": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "marker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "path",
+            "line"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "withdrawn": {
+          "type": "boolean"
+        },
+        "distance": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "root",
+              "root_state",
+              "root_withdrawn",
+              "baseline",
+              "edited",
+              "historical_distance",
+              "current_distance",
+              "unpinned_repo"
+            ],
+            "properties": {
+              "root": {
+                "type": "string"
+              },
+              "root_state": {
+                "type": "string"
+              },
+              "root_withdrawn": {
+                "type": "boolean"
+              },
+              "baseline": {
+                "$ref": "#/$defs/baseline_ref"
+              },
+              "edited": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "historical_distance": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "current_distance": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unpinned_repo": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "id",
+        "distance",
+        "parent",
+        "via",
+        "also"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "distance": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parent": {
+          "type": "string"
+        },
+        "via": {
+          "$ref": "#/$defs/link"
+        },
+        "also": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/link"
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "items",
+        "links",
+        "violations",
+        "gaps",
+        "suspects",
+        "withdrawn"
+      ],
+      "properties": {
+        "items": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "links": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "violations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gaps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "suspects": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "withdrawn": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "report_source": {
+      "type": "object",
+      "required": [
+        "label",
+        "sha256",
+        "repo"
+      ],
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "identity",
+        "verdict",
+        "entries",
+        "kinds",
+        "details",
+        "sources"
+      ],
+      "properties": {
+        "identity": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "verdict": {
+          "enum": [
+            "pass",
+            "skip",
+            "no-result",
+            "fail",
+            "untested"
+          ]
+        },
+        "entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_source"
+          }
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "type",
+        "ownership",
+        "repo",
+        "location",
+        "fields",
+        "withdrawn",
+        "method",
+        "verdict",
+        "tests",
+        "runs",
+        "via"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ownership": {
+          "enum": [
+            "local",
+            "sibling",
+            "external",
+            "unverified"
+          ]
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "withdrawn": {
+          "type": "boolean"
+        },
+        "method": {
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "pass",
+            "skip",
+            "no-result",
+            "fail",
+            "untested"
+          ]
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "via": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "type",
+        "ownership",
+        "repo",
+        "location",
+        "fields",
+        "withdrawn",
+        "verdict",
+        "tests",
+        "verifies"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ownership": {
+          "enum": [
+            "local",
+            "sibling",
+            "external",
+            "unverified"
+          ]
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "withdrawn": {
+          "type": "boolean"
+        },
+        "verdict": {
+          "enum": [
+            "pass",
+            "skip",
+            "no-result",
+            "fail",
+            "untested"
+          ]
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verifies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "object",
+      "required": [
+        "project",
+        "tree",
+        "counts",
+        "scanned",
+        "requirements",
+        "sources",
+        "baselines",
+        "suspects"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "tree": {
+          "type": "string"
+        },
+        "counts": {
+          "$ref": "#/$defs/counts"
+        },
+        "scanned": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "patterns",
+              "ignore",
+              "files",
+              "items",
+              "ignored"
+            ],
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "patterns": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ignore": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "files": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "ignored": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/node"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "method",
+                  "test_backed",
+                  "incoming",
+                  "outgoing"
+                ],
+                "properties": {
+                  "method": {
+                    "type": "string"
+                  },
+                  "test_backed": {
+                    "type": "boolean"
+                  },
+                  "incoming": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "source",
+                        "marker"
+                      ],
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "marker": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "outgoing": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "target",
+                        "marker"
+                      ],
+                      "properties": {
+                        "target": {
+                          "type": "string"
+                        },
+                        "marker": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "sources": {
+          "type": "object",
+          "required": [
+            "externals",
+            "siblings",
+            "siblings_located"
+          ],
+          "properties": {
+            "externals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "prefix",
+                  "location",
+                  "declared"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "prefix": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "declared": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "siblings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "location",
+                  "declares",
+                  "problem"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "declares": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "problem": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "siblings_located": {
+              "type": "boolean"
+            }
+          }
+        },
+        "baselines": {
+          "$ref": "#/$defs/baselines"
+        },
+        "suspects": {
+          "type": "object",
+          "required": [
+            "total",
+            "distance_one",
+            "farther"
+          ],
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "distance_one": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/suspect"
+              }
+            },
+            "farther": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "distance",
+                  "count"
+                ],
+                "properties": {
+                  "distance": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "check": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "project",
+            "counts",
+            "strict",
+            "violations",
+            "gaps",
+            "suspects"
+          ],
+          "properties": {
+            "project": {
+              "type": "string"
+            },
+            "counts": {
+              "$ref": "#/$defs/counts"
+            },
+            "strict": {
+              "type": "boolean"
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/finding"
+              }
+            },
+            "gaps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/finding"
+              }
+            },
+            "suspects": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/suspect"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "baselines"
+          ],
+          "properties": {
+            "baselines": {
+              "$ref": "#/$defs/baselines"
+            }
+          }
+        }
+      ]
+    },
+    "ledger_check": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "project",
+            "counts",
+            "strict",
+            "violations",
+            "gaps",
+            "suspects"
+          ],
+          "properties": {
+            "project": {
+              "type": "string"
+            },
+            "counts": {
+              "$ref": "#/$defs/counts"
+            },
+            "strict": {
+              "type": "boolean"
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/finding"
+              }
+            },
+            "gaps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/finding"
+              }
+            },
+            "suspects": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/suspect"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "repos"
+          ],
+          "properties": {
+            "repos": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "location",
+                  "baselines"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "baselines": {
+                    "$ref": "#/$defs/baselines"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "rules": {
+      "type": "object",
+      "required": [
+        "project",
+        "schema",
+        "repos",
+        "repo_path_anchor",
+        "subjects",
+        "item_types",
+        "links",
+        "rules",
+        "externals",
+        "baselines",
+        "change_requests",
+        "tables",
+        "workspace"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "object",
+          "required": [
+            "form",
+            "digest",
+            "path"
+          ],
+          "properties": {
+            "form": {
+              "type": "string"
+            },
+            "digest": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "path": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "repos": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "repo_path_anchor": {
+          "const": "ledger-relative defaults"
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "key"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "item_types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "required",
+              "values",
+              "levels",
+              "extractor",
+              "id_pattern",
+              "id_prefix",
+              "files",
+              "ignore",
+              "declared_here"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "required": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "values": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "extractor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "id_pattern": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "id_prefix": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ignore": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "declared_here": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "marker",
+              "sources",
+              "targets",
+              "counts_for_coverage"
+            ],
+            "properties": {
+              "marker": {
+                "type": "string"
+              },
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "targets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "counts_for_coverage": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code",
+              "item_type",
+              "direction",
+              "marker",
+              "where",
+              "text"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "item_type": {
+                "type": "string"
+              },
+              "direction": {
+                "enum": [
+                  "incoming",
+                  "outgoing"
+                ]
+              },
+              "marker": {
+                "type": "string"
+              },
+              "where": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "text": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "externals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "item_type",
+              "prefix",
+              "source",
+              "declared_as"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "item_type": {
+                "type": "string"
+              },
+              "prefix": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "declared_as": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "baselines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "tag",
+              "covers",
+              "subject"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tag": {
+                "type": "string"
+              },
+              "covers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "subject": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "change_requests": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "prefix",
+                "source",
+                "accepted"
+              ],
+              "properties": {
+                "prefix": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "accepted": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tables": {
+          "type": "object",
+          "required": [
+            "matrix_fields",
+            "matrix_level"
+          ],
+          "properties": {
+            "matrix_fields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "matrix_level": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "source",
+                "filename"
+              ],
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "filename": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "required": [
+        "project",
+        "selection",
+        "workspace",
+        "anchor",
+        "ledger",
+        "repos"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "selection": {
+          "type": "string"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": [
+                "source",
+                "filename"
+              ],
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "filename": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "anchor": {
+          "const": "current trace root"
+        },
+        "ledger": {
+          "type": "object",
+          "required": [
+            "location",
+            "available"
+          ],
+          "properties": {
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "available": {
+              "type": "boolean"
+            }
+          }
+        },
+        "repos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "location",
+              "available",
+              "current"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "available": {
+                "type": "boolean"
+              },
+              "current": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "thread": {
+      "type": "object",
+      "required": [
+        "project",
+        "start",
+        "items",
+        "forward",
+        "backward"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "start": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "forward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "backward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        }
+      }
+    },
+    "impact": {
+      "type": "object",
+      "required": [
+        "project",
+        "starts",
+        "items",
+        "downstream",
+        "origins",
+        "forward",
+        "candidate_ids",
+        "candidate_line",
+        "candidate_empty_reason",
+        "unknown_types"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "starts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "downstream": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "ids"
+            ],
+            "properties": {
+              "type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "origins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "candidate_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "candidate_line": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidate_empty_reason": {
+          "enum": [
+            null,
+            "no-baseline-types",
+            "no-covered-items"
+          ]
+        },
+        "unknown_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "required": [
+        "project",
+        "counts",
+        "reports",
+        "requirements",
+        "other_methods",
+        "unverified_targets",
+        "tests",
+        "cases",
+        "other_tests",
+        "other_cases",
+        "unmatched"
+      ],
+      "properties": {
+        "project": {
+          "type": "string"
+        },
+        "counts": {
+          "type": "object",
+          "required": [
+            "entries",
+            "runs",
+            "matched_runs",
+            "matched_tests",
+            "scanned_tests",
+            "duplicates",
+            "unmatched"
+          ],
+          "properties": {
+            "entries": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "runs": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "matched_runs": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "matched_tests": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "scanned_tests": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "duplicates": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unmatched": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "sha256",
+              "repo",
+              "entries",
+              "format"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string"
+              },
+              "repo": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "entries": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "format": {
+                "enum": [
+                  "junit",
+                  "trx",
+                  null
+                ]
+              }
+            }
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/target"
+          }
+        },
+        "other_methods": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/target"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "evidence_only"
+                ],
+                "properties": {
+                  "evidence_only": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "unverified_targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/target"
+          }
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "verdict",
+              "verifies",
+              "runs"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "verdict": {
+                "enum": [
+                  "pass",
+                  "skip",
+                  "no-result",
+                  "fail",
+                  "untested"
+                ]
+              },
+              "verifies": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/run"
+                }
+              }
+            }
+          }
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/case"
+          }
+        },
+        "other_tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "other_cases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unmatched": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "run",
+              "reason"
+            ],
+            "properties": {
+              "run": {
+                "$ref": "#/$defs/run"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "status"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/status"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "check"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/check"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "rules"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/rules"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "paths"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/paths"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "thread"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/thread"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "impact"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/impact"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "results"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/results"
+          },
+          "scope": {
+            "const": "local"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "ledger check"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/ledger_check"
+          },
+          "scope": {
+            "const": "project"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "ledger thread"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/thread"
+          },
+          "scope": {
+            "const": "project"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": {
+            "const": "ledger impact"
+          },
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/impact"
+          },
+          "scope": {
+            "const": "project"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "error": {
+            "type": "null"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "exit_code": {
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "data": {
+            "type": "object"
+          },
+          "command": {
+            "enum": [
+              "status",
+              "check",
+              "rules",
+              "paths",
+              "thread",
+              "impact",
+              "results",
+              "ledger check",
+              "ledger thread",
+              "ledger impact"
+            ]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "exit_code": {
+            "enum": [
+              2,
+              3
+            ]
+          },
+          "data": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "exit_code": {
+            "const": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "command": {
+            "enum": [
+              "check",
+              "ledger check"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "exit_code": {
+            "const": 3
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "error": {
+            "properties": {
+              "category": {
+                "const": "internal"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

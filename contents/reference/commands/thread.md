@@ -7,6 +7,9 @@
     item here that derives from it. Each item appears once, nearest first. It stops at this
     repo's edge.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Synopsis
 
 ``` text

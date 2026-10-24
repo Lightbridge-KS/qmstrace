@@ -31,6 +31,9 @@ def isolated_workspace_discovery(
 ) -> None:
     """No test borrows a developer's map or environment selector."""
     monkeypatch.delenv("QMSTRACE_WORKSPACE", raising=False)
+    for key in ("NO_COLOR", "FORCE_COLOR", "PY_COLORS", "GITHUB_ACTIONS"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("TERM", "xterm-256color")
     home = tmp_path_factory.getbasetemp() / "workspace-home"
     home.mkdir(exist_ok=True)
     monkeypatch.setenv("HOME", str(home))

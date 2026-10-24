@@ -44,6 +44,12 @@ with TemporaryDirectory() as outside:
         "render.tables",
         "render.graph",
         "render._evidence",
+        "render.json.configuration",
+        "render.json.assessment",
+        "render.json.walks",
+        "render.json.results",
+        "cli._invocation",
+        "cli._terminal",
         "workspace",
         "workspace._project",
         "workspace._setup",
@@ -269,6 +275,32 @@ for command in ((), ('ledger',), *((c.callback.__name__,) for c in cli.app.regis
     assert result.stdout_bytes and not result.stderr_bytes
 assert len(cli.app.registered_commands) == 9 and len(cli.ledger.registered_commands) == 5
 assert len(cli.app.registered_groups) == 1
+import json
+from importlib.resources import files
+schema = json.loads(files('qmstrace').joinpath('assets/cli.schema.json').read_text())
+assert schema['properties']['format']['const'] == 'qmstrace.cli/1'
+with TemporaryDirectory() as fixture:
+    root = Path(fixture)
+    Workspace.initialize(root, subject='example', key='EX')
+    docs = root / 'docs/req'
+    docs.mkdir(parents=True)
+    (docs / 'example-srs.md').write_text(
+        '### REQ-EX-01 — A requirement [literal]\nCategory: security\nVerify-by: test\n')
+    for words, code in ((('paths',), 0), (('rules',), 0), (('status',), 0),
+                        (('check', '--strict'), 1), (('thread', 'REQ-EX-01'), 0),
+                        (('impact', 'REQ-EX-01'), 0), (('thread',), 2)):
+        result = runner.invoke(cli.app, ['-C', str(root), *words, '--json'],
+                               env={'FORCE_COLOR': '1'}, color=True)
+        assert result.exit_code == code, result.output
+        value = json.loads(result.stdout)
+        assert value['format'] == 'qmstrace.cli/1' and value['exit_code'] == code
+        assert not result.stderr and '\x1b[' not in result.stdout
+    import subprocess
+    console = subprocess.run([sys.executable, '-I', '-c',
+        "import sys; sys.path.insert(0, sys.argv.pop(1)); from qmstrace.cli import app; app()",
+        str(sys.argv[1]), '-C', str(root), 'paths', '--json'],
+        capture_output=True, text=True, check=True)
+    assert json.loads(console.stdout)['command'] == 'paths'
 print(f'Wheel package imports and behavior pass in isolation ({sys.argv[4]} first).')
 """,
                 str(wheel_path),

@@ -9,6 +9,10 @@
     matrix, the requirements register or the coverage summary as JSON. `copy-schema` writes the
     project's trace schema into each product repo as a generated, verified copy.
 
+`check`, `thread` and `impact` accept `--json` at the root or leaf, with project scope.
+`table` retains its existing table JSON; `copy-schema` rejects the flag before writes.
+See [CLI output](../output.md) and [the JSON contract](../cli-json.md).
+
 ## The group
 
 ``` text

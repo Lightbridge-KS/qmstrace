@@ -9,6 +9,8 @@ Options:
                     automatic discovery. Before or after the command. Relative
                     files start at the effective -C directory.
   --version         Print the version and exit.
+  --json            Emit versioned JSON for agents, including handled errors.
+                    Before or after the command.
   --help            Show this message and exit.
 
 Commands:

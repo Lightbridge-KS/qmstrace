@@ -8,6 +8,9 @@
     and unmatched entries. Exit `0` means a results view was produced, even if tests failed.
     The report's commit is not verified.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Synopsis
 
 ``` text

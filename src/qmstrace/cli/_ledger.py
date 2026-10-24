@@ -10,13 +10,28 @@ from typing import Annotated
 
 import typer
 
-from qmstrace.cli._options import Directory, WorkspaceFile, _directory, _workspace
+from qmstrace.cli._invocation import CURRENT
+from qmstrace.cli._json import emit
+from qmstrace.cli._options import (
+    Directory,
+    JsonOutput,
+    UnsupportedJsonOutput,
+    WorkspaceFile,
+    _directory,
+    _workspace,
+)
 from qmstrace.cli._outcome import EXIT_FAILED, EXIT_OK, outcome
+from qmstrace.cli._terminal import TerminalCommand, TerminalGroup, styled
 from qmstrace.core.tables import table
 from qmstrace.render import tables, text
+from qmstrace.render._style import Style
+from qmstrace.render.json import assessment as json_assessment
+from qmstrace.render.json import walks as json_walks
+from qmstrace.render.json._common import notices as json_notices
 from qmstrace.workspace import Workspace
 
 ledger = typer.Typer(
+    cls=TerminalGroup,
     no_args_is_help=True,
     add_completion=False,
     rich_markup_mode=None,
@@ -24,7 +39,11 @@ ledger = typer.Typer(
 )
 
 
-@ledger.command("copy-schema", short_help="Copy the project's trace schema into its product repos.")
+@ledger.command(
+    "copy-schema",
+    cls=TerminalCommand,
+    short_help="Copy the project's trace schema into its product repos.",
+)
 @outcome
 def copy_schema(
     ctx: typer.Context,
@@ -36,6 +55,7 @@ def copy_schema(
     ] = None,
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: UnsupportedJsonOutput = False,
 ) -> int:
     """Write the project's trace schema into each product repo as a generated, verified copy.
 
@@ -46,12 +66,14 @@ def copy_schema(
     config, copies = Workspace.copy_schema(
         _directory(ctx, directory), repos or (), workspace=_workspace(ctx, workspace_file)
     )
-    typer.echo(text.schema_copies(config, copies))
+    typer.echo(text.schema_copies(config, copies, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
 @ledger.command(
-    "check", short_help="Judge every repo of the project together — the gate with --strict."
+    "check",
+    cls=TerminalCommand,
+    short_help="Judge every repo of the project together — the gate with --strict.",
 )
 @outcome
 def ledger_check(
@@ -65,6 +87,7 @@ def ledger_check(
     ] = False,
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Read every repo the schema lists under [repos] — the ledger itself too, when it holds
     documents — and judge them as one project.
@@ -77,12 +100,23 @@ def ledger_check(
     project = Workspace.project(
         _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
     )
-    typer.echo(text.ledger_check(project, strict=strict, quiet=quiet))
+    if CURRENT.get().json:
+        emit(
+            json_assessment.check(project, strict=strict),
+            code=1 if project.fails(strict=strict) else 0,
+            notices=json_notices(project),
+        )
+    else:
+        typer.echo(
+            text.ledger_check(project, strict=strict, quiet=quiet, style=Style(styled())),
+            color=styled(),
+        )
     return EXIT_FAILED if project.fails(strict=strict) else EXIT_OK
 
 
 @ledger.command(
     "thread",
+    cls=TerminalCommand,
     short_help="Trace one item across every repo: what it derives from, what hangs off it.",
 )
 @outcome
@@ -98,6 +132,7 @@ def ledger_thread(
     ],
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Walk one item backward to what it derives from, and forward to what hangs off it, across
     every repo the schema lists — from the ledger.
@@ -108,12 +143,17 @@ def ledger_thread(
     project = Workspace.project_thread(
         _directory(ctx, directory), item_id, workspace=_workspace(ctx, workspace_file)
     )
-    typer.echo(text.ledger_thread(project, item_id))
+    if CURRENT.get().json:
+        emit(json_walks.thread(project, item_id), code=0, notices=json_notices(project))
+    else:
+        typer.echo(text.ledger_thread(project, item_id, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
 @ledger.command(
-    "impact", short_help="What changing several items affects across every repo of the project."
+    "impact",
+    cls=TerminalCommand,
+    short_help="What changing several items affects across every repo of the project.",
 )
 @outcome
 def ledger_impact(
@@ -124,6 +164,7 @@ def ledger_impact(
     ],
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Show the combined downstream items and upstream origins of several starting items,
     across every repo the schema lists — from the ledger.
@@ -134,7 +175,10 @@ def ledger_impact(
     project = Workspace.project_impact(
         _directory(ctx, directory), item_ids, workspace=_workspace(ctx, workspace_file)
     )
-    typer.echo(text.ledger_impact(project, item_ids))
+    if CURRENT.get().json:
+        emit(json_walks.impact(project, item_ids), code=0, notices=json_notices(project))
+    else:
+        typer.echo(text.ledger_impact(project, item_ids, style=Style(styled())), color=styled())
     return EXIT_OK
 
 
@@ -143,6 +187,7 @@ TABLES = ("matrix", "requirements", "coverage")
 
 @ledger.command(
     "table",
+    cls=TerminalCommand,
     short_help="The traceability matrix, requirements register or coverage summary, as JSON.",
 )
 @outcome
@@ -165,6 +210,7 @@ def ledger_table(
     ] = None,
     directory: Directory = None,
     workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
 ) -> int:
     """Emit one of the project's tables as versioned JSON (qmstrace.table/1), for a render
     layer to turn into a document.
@@ -196,11 +242,17 @@ def ledger_table(
     built = table(name, project.config, project.graph, view)
     document = tables.document(project, built, view)
     if out is None:
-        typer.echo(document, nl=False)
+        typer.echo(document, nl=False, color=styled())
         return EXIT_OK
     Workspace.save_view(start / out, document)
-    typer.echo(f"Written: {out} · {built.name} · {len(built.rows)} rows")
-    typer.echo("Read from working trees, not pinned; a draft, not an issued revision. Exit 0.")
+    typer.echo(
+        Style(styled()).heading(f"Written: {out} · {built.name} · {len(built.rows)} rows"),
+        color=styled(),
+    )
+    typer.echo(
+        "Read from working trees, not pinned; a draft, not an issued revision. Exit 0.",
+        color=styled(),
+    )
     return EXIT_OK
 
 

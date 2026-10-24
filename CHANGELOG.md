@@ -6,6 +6,14 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Semantic terminal emphasis and conditional Rich help, with plain reports for pipes and
+  `NO_COLOR`. Styling preserves report content, layout and judgment.
+- Explicit `--json` assessment results (`qmstrace.cli/1`), including structured parser and
+  domain errors, evidence notices, a packaged JSON Schema and bundled agent guidance.
+  Existing `qmstrace.table/1` documents and command exit meanings remain unchanged.
+
 ## [0.2.0] - 2026-10-24
 
 ### Added

@@ -1,0 +1,405 @@
+{
+  "format": "qmstrace.cli/1",
+  "command": "check",
+  "scope": "local",
+  "exit_code": 1,
+  "data": {
+    "project": "MINI",
+    "counts": {
+      "items": 11,
+      "links": 14,
+      "violations": 1,
+      "gaps": 3,
+      "suspects": 7,
+      "withdrawn": 1
+    },
+    "strict": true,
+    "violations": [
+      {
+        "code": "V10",
+        "location": {
+          "path": "docs/req/service-srs.md",
+          "line": 12
+        },
+        "message": "REQ-SVC-01 is changed since baseline/service/requirements/1, but cites no fresh change request.",
+        "next_move": "Fix: restore the item, or stop and ask for an accepted change request listing it; add its ID to Change. An old citation does not authorize another edit.",
+        "item": "REQ-SVC-01",
+        "marker": null,
+        "target": null
+      }
+    ],
+    "gaps": [
+      {
+        "code": "G05",
+        "location": {
+          "path": "docs/design/service-design.md",
+          "line": 8
+        },
+        "message": "DSN-SVC-01: satisfies no requirement — every design element points back to one.",
+        "next_move": "Fix: write `Satisfies: <requirement ID>` under its heading — only if it is true: the link states that this design element satisfies that requirement.",
+        "item": "DSN-SVC-01",
+        "marker": null,
+        "target": null
+      },
+      {
+        "code": "G01",
+        "location": {
+          "path": "docs/req/service-srs.md",
+          "line": 29
+        },
+        "message": "REQ-SVC-03: no design element satisfies it yet.",
+        "next_move": "Fix: on the design element, write `Satisfies: REQ-SVC-03` under its heading — only if it is true: the link states that the design element satisfies REQ-SVC-03.",
+        "item": "REQ-SVC-03",
+        "marker": null,
+        "target": null
+      },
+      {
+        "code": "G07",
+        "location": {
+          "path": "tests/unit/test_keys.py",
+          "line": 6
+        },
+        "message": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused: verifies nothing.",
+        "next_move": "Fix: write `@pytest.mark.verifies(\"<requirement or design element ID>\")` on the test — only if it is true: the link states that this automated test verifies that requirement or design element.",
+        "item": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+        "marker": null,
+        "target": null
+      }
+    ],
+    "suspects": [
+      {
+        "code": "S01",
+        "location": {
+          "path": "docs/design/service-design.md",
+          "line": 8
+        },
+        "message": "DSN-SVC-01 — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 1, current distance 1; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "DSN-SVC-01",
+        "marker": null,
+        "target": null,
+        "id": "DSN-SVC-01",
+        "title": "Key check",
+        "withdrawn": false,
+        "distance": 1,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 1,
+            "current_distance": 1,
+            "unpinned_repo": null
+          }
+        ]
+      },
+      {
+        "code": "S01",
+        "location": {
+          "path": "tests/unit/test_keys.py",
+          "line": 6
+        },
+        "message": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 1, current distance 1; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+        "marker": null,
+        "target": null,
+        "id": "tests/unit/test_keys.py::test_a_call_without_a_valid_key_is_refused",
+        "title": "test_a_call_without_a_valid_key_is_refused",
+        "withdrawn": false,
+        "distance": 1,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 1,
+            "current_distance": 1,
+            "unpinned_repo": null
+          }
+        ]
+      },
+      {
+        "code": "S01",
+        "location": {
+          "path": "docs/design/service-design.md",
+          "line": 13
+        },
+        "message": "DSN-SVC-02 — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 2, current distance 2; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "DSN-SVC-02",
+        "marker": null,
+        "target": null,
+        "id": "DSN-SVC-02",
+        "title": "Record store",
+        "withdrawn": false,
+        "distance": 2,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 2,
+            "current_distance": 2,
+            "unpinned_repo": null
+          }
+        ]
+      },
+      {
+        "code": "S01",
+        "location": {
+          "path": "src/service/keys.py",
+          "line": 1
+        },
+        "message": "src/service/keys.py — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 2, current distance 2; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "src/service/keys.py",
+        "marker": null,
+        "target": null,
+        "id": "src/service/keys.py",
+        "title": "keys",
+        "withdrawn": false,
+        "distance": 2,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 2,
+            "current_distance": 2,
+            "unpinned_repo": null
+          }
+        ]
+      },
+      {
+        "code": "S01",
+        "location": {
+          "path": "tests/unit/test_keys.py",
+          "line": 12
+        },
+        "message": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 2, current distance 2; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+        "marker": null,
+        "target": null,
+        "id": "tests/unit/test_keys.py::TestTheKeyCheck::test_it_runs_before_any_handler",
+        "title": "test_it_runs_before_any_handler",
+        "withdrawn": false,
+        "distance": 2,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 2,
+            "current_distance": 2,
+            "unpinned_repo": null
+          }
+        ]
+      },
+      {
+        "code": "S01",
+        "location": {
+          "path": "src/service/store.py",
+          "line": 1
+        },
+        "message": "src/service/store.py — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 3, current distance 3; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "src/service/store.py",
+        "marker": null,
+        "target": null,
+        "id": "src/service/store.py",
+        "title": "store",
+        "withdrawn": false,
+        "distance": 3,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 3,
+            "current_distance": 3,
+            "unpinned_repo": null
+          }
+        ]
+      },
+      {
+        "code": "S01",
+        "location": {
+          "path": "tests/integration/test_store.py",
+          "line": 5
+        },
+        "message": "tests/integration/test_store.py::test_a_record_survives_a_restart — REQ-SVC-01 (changed, withdrawn) since baseline/service/requirements/1: both versions: baseline distance 3, current distance 3; unchanged — needs review.",
+        "next_move": "Review: check this item against the upstream change and test evidence; editing or passing tests does not record review.",
+        "item": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+        "marker": null,
+        "target": null,
+        "id": "tests/integration/test_store.py::test_a_record_survives_a_restart",
+        "title": "test_a_record_survives_a_restart",
+        "withdrawn": false,
+        "distance": 3,
+        "reasons": [
+          {
+            "root": "REQ-SVC-01",
+            "root_state": "changed",
+            "root_withdrawn": true,
+            "baseline": {
+              "scope": "requirements",
+              "subject": "service",
+              "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+              "tags": [
+                "baseline/service/requirements/1"
+              ]
+            },
+            "edited": false,
+            "historical_distance": 3,
+            "current_distance": 3,
+            "unpinned_repo": null
+          }
+        ]
+      }
+    ],
+    "baselines": {
+      "counts": {
+        "frozen": 3,
+        "changed": 1,
+        "new": 0,
+        "removed": 0
+      },
+      "governing": [
+        {
+          "scope": "requirements",
+          "subject": "service",
+          "covers": [
+            "requirement"
+          ],
+          "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+          "tags": [
+            {
+              "name": "baseline/service/requirements/1",
+              "annotated": false,
+              "tagger": null,
+              "date": null
+            }
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "id": "REQ-SVC-01",
+          "state": "changed",
+          "baseline": {
+            "scope": "requirements",
+            "subject": "service",
+            "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+            "tags": [
+              "baseline/service/requirements/1"
+            ]
+          },
+          "fresh_citations": []
+        },
+        {
+          "id": "REQ-SVC-02",
+          "state": "frozen",
+          "baseline": {
+            "scope": "requirements",
+            "subject": "service",
+            "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+            "tags": [
+              "baseline/service/requirements/1"
+            ]
+          },
+          "fresh_citations": []
+        },
+        {
+          "id": "REQ-SVC-03",
+          "state": "frozen",
+          "baseline": {
+            "scope": "requirements",
+            "subject": "service",
+            "commit": "aed0ab77876301c03d489dcad93e3cc12a6a6e4d",
+            "tags": [
+              "baseline/service/requirements/1"
+            ]
+          },
+          "fresh_citations": []
+        }
+      ],
+      "register": {
+        "location": "../ledger/change-requests",
+        "available": false,
+        "accepted": "accepted"
+      }
+    }
+  },
+  "notices": [
+    "schema: the project's, as a verified copy under [schema] — plus this repo's qmstrace.toml",
+    "external AGR-*: verified against ../ledger/agreement.md (3 declared)",
+    "sibling client: 1 requirement — read from ../client's working tree, not pinned; cite its items by ID",
+    "baseline requirements (service): baseline/service/requirements/1 @ aed0ab778763",
+    "controlled document items: 3 frozen · 1 changed · 0 new · 0 removed · 1 withdrawn",
+    "baselines: judged from reachable local tags — remote-tag completeness NOT VERIFIED; qmstrace never fetches",
+    "baseline baseline/service/requirements/1: historical external/sibling citations NOT VERIFIED — snapshot traversal stops at this repo's edge",
+    "baseline baseline/service/requirements/1: lightweight tag — weaker evidence; no tagger or tag date",
+    "change requests: NOT VERIFIED — ../ledger/change-requests is unavailable; fresh citations are verified at the ledger's import",
+    "Working-tree snapshot; its commit has not been verified. Regenerate to refresh.",
+    "Traversal stops at this repo's edge. Sibling contents are not pinned.",
+    "Suspects need review; edits and passing tests do not record review.",
+    "Violations are present; refused links are excluded from graph reach."
+  ],
+  "error": null
+}

@@ -1,0 +1,13 @@
+{
+  "format": "qmstrace.cli/1",
+  "command": "impact",
+  "scope": "local",
+  "exit_code": 2,
+  "data": null,
+  "notices": [],
+  "error": {
+    "category": "could-not-judge",
+    "message": "REQ-SVC-99 is not an item this run can see — nothing here declares or cites it. Fix: check the ID — the closest here: REQ-SVC-01, REQ-SVC-02, REQ-SVC-03; `qmstrace status` lists this repo's requirements.",
+    "next_move": "No impact list was produced. Declare each starting item before requesting its impact; a reservation does not establish its type or links."
+  }
+}

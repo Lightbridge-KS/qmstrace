@@ -18,4 +18,6 @@ Options:
   --workspace FILE  Select a checkout map; overrides QMSTRACE_WORKSPACE and
                     automatic discovery. Before or after the command. Relative
                     files start at the effective -C directory.
+  --json            Unsupported for this writing command; assessment commands
+                    support JSON.
   --help            Show this message and exit.

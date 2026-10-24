@@ -28,7 +28,9 @@ def read_optional(path: Path) -> str | None:
         return path.read_text(encoding="utf-8") if path.exists() else None
     except (OSError, UnicodeError) as exc:
         raise CouldNotJudge(
-            f"Cannot read {path}: {exc}", "Fix: restore readable UTF-8 content."
+            f"Cannot read {path}: {exc}",
+            "Fix: restore readable UTF-8 content.",
+            display_what=f"Cannot read {path.name}: unreadable or invalid UTF-8 content.",
         ) from exc
 
 

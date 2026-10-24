@@ -181,6 +181,8 @@ class Workspace:
             relative(root, ledger) if ledger else None,
             tuple(states),
             bool(ledger and (ledger / "qmstrace.schema.toml").is_file()),
+            locations.source if locations else None,
+            locations.filename if locations else None,
         )
 
     @staticmethod

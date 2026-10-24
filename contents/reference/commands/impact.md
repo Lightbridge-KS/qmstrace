@@ -6,6 +6,9 @@
     shows their upstream origins. It prints a candidate `Impacts:` line for a change request.
     The analysis stops at this repo's edge. An unseen starting ID rejects the whole request.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Synopsis
 
 ``` text

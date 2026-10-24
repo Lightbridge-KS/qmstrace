@@ -206,9 +206,15 @@ PYTHON_COMPATIBILITY = {
     },
 }
 TEXT_IMPORTS: dict[str, set[str]] = {
-    "_schema": {"qmstrace.core.setup", "qmstrace.core.config", "qmstrace.core.locations"},
-    "_paths": {"qmstrace.core.locations"},
+    "_schema": {
+        "qmstrace.render._style",
+        "qmstrace.core.setup",
+        "qmstrace.core.config",
+        "qmstrace.core.locations",
+    },
+    "_paths": {"qmstrace.render._style", "qmstrace.core.locations"},
     "_status": {
+        "qmstrace.render._style",
         "qmstrace.core.model",
         "qmstrace.core.assessment",
         "qmstrace.render._evidence",
@@ -218,12 +224,14 @@ TEXT_IMPORTS: dict[str, set[str]] = {
         "qmstrace.core.judge",
     },
     "_results": {
+        "qmstrace.render._style",
         "qmstrace.render._evidence",
         "qmstrace.core.assessment",  # one repo's assessment: results also carry a project's
         "qmstrace.core.results",
         "qmstrace.render._presentation",
     },
     "_checks": {
+        "qmstrace.render._style",
         "qmstrace.core.model",
         "qmstrace.core.assessment",
         "qmstrace.core.baselines",
@@ -232,6 +240,7 @@ TEXT_IMPORTS: dict[str, set[str]] = {
         "qmstrace.core.findings",
     },
     "_walks": {
+        "qmstrace.render._style",
         "qmstrace.core.assessment",
         "qmstrace.core.graph",
         "qmstrace.render._evidence",
@@ -240,7 +249,7 @@ TEXT_IMPORTS: dict[str, set[str]] = {
     },
 }
 RENDER_SHARED_IMPORTS: dict[str, set[str]] = {
-    "_presentation": {"qmstrace.core.graph", "qmstrace.core.model"},
+    "_presentation": {"qmstrace.core.graph", "qmstrace.core.model", "qmstrace.render._style"},
     "_evidence": {
         "qmstrace.core.baselines",
         "qmstrace.render._presentation",
@@ -732,6 +741,7 @@ def test_workspace_dependency_gate_rejects_back_edges(
 
 CLI_IMPORTS: dict[str, set[str]] = {
     "_app": {
+        "qmstrace.cli._terminal",
         "qmstrace",
         "qmstrace.cli._ledger",
         "qmstrace.cli._local",
@@ -740,6 +750,13 @@ CLI_IMPORTS: dict[str, set[str]] = {
         "typer",
     },
     "_ledger": {
+        "qmstrace.render.json.assessment",
+        "qmstrace.render.json.walks",
+        "qmstrace.render.json._common",
+        "qmstrace.cli._invocation",
+        "qmstrace.cli._json",
+        "qmstrace.cli._terminal",
+        "qmstrace.render._style",
         "qmstrace.cli._options",
         "qmstrace.cli._outcome",
         "qmstrace.core.tables",
@@ -749,6 +766,15 @@ CLI_IMPORTS: dict[str, set[str]] = {
         "typer",
     },
     "_local": {
+        "qmstrace.render.json.assessment",
+        "qmstrace.render.json.configuration",
+        "qmstrace.render.json.results",
+        "qmstrace.render.json.walks",
+        "qmstrace.render.json._common",
+        "qmstrace.cli._invocation",
+        "qmstrace.cli._json",
+        "qmstrace.cli._terminal",
+        "qmstrace.render._style",
         "qmstrace.cli._options",
         "qmstrace.cli._outcome",
         "qmstrace.render.graph",
@@ -757,7 +783,17 @@ CLI_IMPORTS: dict[str, set[str]] = {
         "typer",
     },
     "_options": {"typer"},
-    "_outcome": {"qmstrace.core.errors", "typer"},
+    "_terminal": {"typer", "typer.core", "qmstrace.cli._invocation", "qmstrace.cli._json"},
+    "_invocation": set(),
+    "_json": {"typer", "qmstrace.cli._invocation", "qmstrace.render.json._common"},
+    "_outcome": {
+        "qmstrace.cli._invocation",
+        "qmstrace.cli._json",
+        "qmstrace.core.errors",
+        "typer",
+        "qmstrace.cli._terminal",
+        "qmstrace.render._style",
+    },
 }
 
 CLI_EXPORTS = {

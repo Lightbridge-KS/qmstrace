@@ -27,3 +27,9 @@
 `qmstrace status`, `thread`, `impact` and `results` are informational. In particular,
 `results` exits `0` even when matched tests failed or some report entries did not match;
 a report with no matching tests exits `2`. Use pytest's exit code to gate test success.
+
+## JSON results
+
+With `--json`, handled exits produce one stdout document, including failed checks and
+usage/domain/internal errors. Read `exit_code`, `error` and `notices`; a report containing
+failed tests can still complete with exit zero. See [the JSON contract](cli-json.md).

@@ -1,0 +1,268 @@
+{
+  "format": "qmstrace.cli/1",
+  "command": "rules",
+  "scope": "local",
+  "exit_code": 0,
+  "data": {
+    "project": "MINI",
+    "schema": {
+      "form": "by path",
+      "digest": "sha256:b4129c158e6fdaa3b314b6b5e4d675085ec385e094fd57048bf9cd7796b3a3d1",
+      "path": "../ledger/qmstrace.schema.toml"
+    },
+    "repos": {
+      "service": "../service",
+      "client": "../client"
+    },
+    "repo_path_anchor": "ledger-relative defaults",
+    "subjects": [
+      {
+        "name": "service",
+        "key": "SVC"
+      }
+    ],
+    "item_types": [
+      {
+        "name": "requirement",
+        "required": [
+          "Category",
+          "Origin",
+          "Verify-by"
+        ],
+        "values": {
+          "Category": [
+            "functional-suitability",
+            "performance-efficiency",
+            "compatibility",
+            "usability",
+            "reliability",
+            "maintainability",
+            "portability",
+            "security",
+            "design-constraint",
+            "legal-regulatory"
+          ],
+          "Verify-by": [
+            "test",
+            "inspection",
+            "analysis"
+          ]
+        },
+        "levels": [],
+        "extractor": "markdown",
+        "id_pattern": "^REQ-SVC-\\d{2}$",
+        "id_prefix": "REQ-SVC-",
+        "files": [
+          "docs/req/*-srs.md"
+        ],
+        "ignore": [],
+        "declared_here": true
+      },
+      {
+        "name": "design_element",
+        "required": [],
+        "values": {},
+        "levels": [],
+        "extractor": "markdown",
+        "id_pattern": "^DSN-SVC-\\d{2}$",
+        "id_prefix": "DSN-SVC-",
+        "files": [
+          "docs/design/*.md"
+        ],
+        "ignore": [],
+        "declared_here": true
+      },
+      {
+        "name": "component",
+        "required": [],
+        "values": {},
+        "levels": [],
+        "extractor": "python-module",
+        "id_pattern": null,
+        "id_prefix": null,
+        "files": [
+          "src/**/*.py"
+        ],
+        "ignore": [
+          "**/__init__.py"
+        ],
+        "declared_here": true
+      },
+      {
+        "name": "automated_test",
+        "required": [],
+        "values": {},
+        "levels": [
+          "unit",
+          "integration",
+          "system"
+        ],
+        "extractor": "pytest",
+        "id_pattern": null,
+        "id_prefix": null,
+        "files": [
+          "tests/**/test_*.py"
+        ],
+        "ignore": [],
+        "declared_here": true
+      }
+    ],
+    "links": [
+      {
+        "marker": "Origin",
+        "sources": [
+          "requirement"
+        ],
+        "targets": [
+          "origin_clause"
+        ],
+        "counts_for_coverage": true
+      },
+      {
+        "marker": "Satisfies",
+        "sources": [
+          "design_element"
+        ],
+        "targets": [
+          "requirement"
+        ],
+        "counts_for_coverage": true
+      },
+      {
+        "marker": "Implements",
+        "sources": [
+          "component"
+        ],
+        "targets": [
+          "design_element"
+        ],
+        "counts_for_coverage": true
+      },
+      {
+        "marker": "verifies",
+        "sources": [
+          "automated_test"
+        ],
+        "targets": [
+          "requirement",
+          "design_element"
+        ],
+        "counts_for_coverage": true
+      },
+      {
+        "marker": "Assumes",
+        "sources": [
+          "requirement",
+          "design_element"
+        ],
+        "targets": [
+          "requirement",
+          "design_element"
+        ],
+        "counts_for_coverage": false
+      }
+    ],
+    "rules": [
+      {
+        "code": "G01",
+        "item_type": "requirement",
+        "direction": "incoming",
+        "marker": "Satisfies",
+        "where": {},
+        "text": "no design element satisfies it yet."
+      },
+      {
+        "code": "G02",
+        "item_type": "requirement",
+        "direction": "incoming",
+        "marker": "verifies",
+        "where": {
+          "Verify-by": "test"
+        },
+        "text": "no test verifies it yet."
+      },
+      {
+        "code": "G03",
+        "item_type": "design_element",
+        "direction": "incoming",
+        "marker": "Implements",
+        "where": {},
+        "text": "no component implements it yet."
+      },
+      {
+        "code": "G04",
+        "item_type": "design_element",
+        "direction": "incoming",
+        "marker": "verifies",
+        "where": {},
+        "text": "no test verifies it yet."
+      },
+      {
+        "code": "G05",
+        "item_type": "design_element",
+        "direction": "outgoing",
+        "marker": "Satisfies",
+        "where": {},
+        "text": "satisfies no requirement — every design element points back to one."
+      },
+      {
+        "code": "G06",
+        "item_type": "component",
+        "direction": "outgoing",
+        "marker": "Implements",
+        "where": {},
+        "text": "implements no design element — every component points back to one."
+      },
+      {
+        "code": "G07",
+        "item_type": "automated_test",
+        "direction": "outgoing",
+        "marker": "verifies",
+        "where": {},
+        "text": "verifies nothing."
+      }
+    ],
+    "externals": [
+      {
+        "name": "agreement",
+        "item_type": "origin_clause",
+        "prefix": "AGR-",
+        "source": "agreement.md",
+        "declared_as": "^\\s*[-*]\\s+\\*\\*(AGR-\\d+)\\*\\*"
+      }
+    ],
+    "baselines": [
+      {
+        "name": "requirements",
+        "tag": "^baseline/(?P<subject>[a-z0-9-]+)/requirements/(?P<n>\\d+)$",
+        "covers": [
+          "requirement"
+        ],
+        "subject": null
+      },
+      {
+        "name": "product",
+        "tag": "^v\\d+\\.\\d+\\.\\d+$",
+        "covers": [
+          "requirement",
+          "design_element"
+        ],
+        "subject": "*"
+      }
+    ],
+    "change_requests": {
+      "prefix": "CR-",
+      "source": "change-requests",
+      "accepted": "accepted"
+    },
+    "tables": {
+      "matrix_fields": [],
+      "matrix_level": null
+    },
+    "workspace": null
+  },
+  "notices": [
+    "Configuration only; no items scanned or baselines judged."
+  ],
+  "error": null
+}

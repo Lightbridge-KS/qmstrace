@@ -20,6 +20,7 @@ from qmstrace.render._evidence import (
     _unread,
 )
 from qmstrace.render._presentation import _finding, _noun
+from qmstrace.render._style import PLAIN, Style
 
 VIOLATION_HEADING: Final = "violations — wrong at any stage; each fails the check:"
 
@@ -29,15 +30,17 @@ PROJECT_GAP_HEADING: Final = (
 )
 
 
-def check(assessment: Assessment, *, strict: bool, quiet: bool) -> str:
+def check(assessment: Assessment, *, strict: bool, quiet: bool, style: Style = PLAIN) -> str:
     """Every violation and gap, one line each with its next move, and a result line that says
     what this run could not see — the one line a pipeline or an agent may read alone."""
     notices = _notices(assessment)
     lines: list[str] = []
     if not quiet:
-        lines.append(_read(assessment))
-    lines += notices if quiet else [f"  {n}" for n in notices]
-    lines += _findings_block(assessment.violations, assessment.gaps, assessment.suspects, quiet)
+        lines.append(style.heading(_read(assessment)))
+    lines += [style.warning(n if quiet else f"  {n}") for n in notices]
+    lines += _findings_block(
+        assessment.violations, assessment.gaps, assessment.suspects, quiet, style=style
+    )
     lines.append(_result(assessment, strict=strict))
     return "\n".join(lines)
 
@@ -47,6 +50,8 @@ def _findings_block(
     gaps: tuple[Finding, ...],
     suspects: tuple[Suspect, ...],
     quiet: bool,
+    *,
+    style: Style = PLAIN,
 ) -> list[str]:
     """Violations, gaps and suspects — a heading each, one line per finding with its next move."""
     lines: list[str] = []
@@ -57,30 +62,37 @@ def _findings_block(
         if not found:
             continue
         if not quiet:
-            lines += ["", heading]
-        lines += [_finding(f, indent="" if quiet else "  ") for f in found]
+            lines += ["", style.heading(heading)]
+        lines += [_finding(f, indent="" if quiet else "  ", style=style) for f in found]
     if not quiet:
         lines.append("")
     return lines
 
 
-def ledger_check(project: ProjectAssessment, *, strict: bool, quiet: bool) -> str:
+def ledger_check(
+    project: ProjectAssessment, *, strict: bool, quiet: bool, style: Style = PLAIN
+) -> str:
     """The ledger's check: every repo read, judged as one graph, and a result line that says it
     read working trees, not pins — in every form of the output, `--quiet` too."""
     notices = _project_notices(project)
     lines: list[str] = []
     if not quiet:
-        lines.append("read — each repo's working tree, not pinned:")
-        lines += _project_repos(project)
-    lines += notices if quiet else [f"  {n}" for n in notices]
+        lines.append(style.heading("read — each repo's working tree, not pinned:"))
+        lines += _project_repos(project, style=style)
+    lines += [style.warning(n if quiet else f"  {n}") for n in notices]
     gaps_heading = findings.GAP_HEADING
-    block = _findings_block(project.violations, project.gaps, project.suspects, quiet)
-    lines += [PROJECT_GAP_HEADING + ":" if line == gaps_heading + ":" else line for line in block]
+    block = _findings_block(project.violations, project.gaps, project.suspects, quiet, style=style)
+    lines += [
+        style.heading(PROJECT_GAP_HEADING + ":")
+        if line == style.heading(gaps_heading + ":")
+        else line
+        for line in block
+    ]
     lines.append(_project_result(project, strict=strict))
     return "\n".join(lines)
 
 
-def _project_repos(project: ProjectAssessment) -> list[str]:
+def _project_repos(project: ProjectAssessment, *, style: Style = PLAIN) -> list[str]:
     order = list(project.config.item_types)
     name_width = max(len(repo.name) for repo in project.repos)
     place_width = max(len(repo.location) for repo in project.repos)
@@ -92,7 +104,14 @@ def _project_repos(project: ProjectAssessment) -> list[str]:
             if s.items
         ]
         shown = " · ".join(counted) if counted else "no items"
-        lines.append(f"  {repo.name:<{name_width}}  {repo.location:<{place_width}}  {shown}")
+        lines.append(
+            f"  "
+            f"{style.heading(repo.name.ljust(name_width))}"
+            f"  "
+            f"{style.location(repo.location.ljust(place_width))}"
+            f"  "
+            f"{shown}"
+        )
     return lines
 
 

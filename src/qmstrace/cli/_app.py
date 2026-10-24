@@ -12,10 +12,12 @@ import typer
 from qmstrace import __version__
 from qmstrace.cli._ledger import ledger
 from qmstrace.cli._local import check, graph, impact, init, paths, results, rules, status, thread
-from qmstrace.cli._options import Directory, WorkspaceFile
+from qmstrace.cli._options import Directory, JsonOutput, WorkspaceFile
 from qmstrace.cli._outcome import EXIT_CODES, EXIT_OK
+from qmstrace.cli._terminal import TerminalCommand, TerminalGroup
 
 app = typer.Typer(
+    cls=TerminalGroup,
     no_args_is_help=True,
     add_completion=False,
     rich_markup_mode=None,
@@ -41,6 +43,7 @@ def main(
             "--version", callback=_print_version, is_eager=True, help="Print the version and exit."
         ),
     ] = False,
+    json_output: JsonOutput = False,
 ) -> None:
     """The trace layer under a quality-management system."""
     ctx.obj = directory
@@ -48,18 +51,36 @@ def main(
 
 
 # Register root commands explicitly, preserving their existing order.
-app.command(short_help="Where am I: what was read, and one line per requirement.")(status)
-app.command(short_help="Trace one item: what it derives from, and what hangs off it.")(thread)
-app.command(short_help="What changing several items affects, with a candidate Impacts line.")(
-    impact
-)
-app.command(short_help="Test verdicts per requirement, from a JUnit or TRX report.")(results)
-app.command(short_help="What is wrong, and what is not done yet — the gate with --strict.")(check)
-app.command(short_help="What check holds this repo to, and whose each rule is.")(rules)
-app.command(short_help="Set up trace configuration, agent guidance and pytest markers.")(init)
-app.command(short_help="Write an offline, interactive view of the local trace graph.")(graph)
+app.command(
+    cls=TerminalCommand, short_help="Where am I: what was read, and one line per requirement."
+)(status)
+app.command(
+    cls=TerminalCommand, short_help="Trace one item: what it derives from, and what hangs off it."
+)(thread)
+app.command(
+    cls=TerminalCommand,
+    short_help="What changing several items affects, with a candidate Impacts line.",
+)(impact)
+app.command(
+    cls=TerminalCommand, short_help="Test verdicts per requirement, from a JUnit or TRX report."
+)(results)
+app.command(
+    cls=TerminalCommand,
+    short_help="What is wrong, and what is not done yet — the gate with --strict.",
+)(check)
+app.command(
+    cls=TerminalCommand, short_help="What check holds this repo to, and whose each rule is."
+)(rules)
+app.command(
+    cls=TerminalCommand, short_help="Set up trace configuration, agent guidance and pytest markers."
+)(init)
+app.command(
+    cls=TerminalCommand, short_help="Write an offline, interactive view of the local trace graph."
+)(graph)
 app.add_typer(
     ledger, name="ledger", short_help="The project side's verbs — run them in the ledger repo."
 )
 
-app.command(short_help="Explain checkout locations and workspace-map selection.")(paths)
+app.command(
+    cls=TerminalCommand, short_help="Explain checkout locations and workspace-map selection."
+)(paths)

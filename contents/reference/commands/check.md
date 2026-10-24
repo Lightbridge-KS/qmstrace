@@ -7,6 +7,9 @@
     Gaps — the work not done yet — fail only under
     `--strict`, the gate a pull request passes. Run it after every change.
 
+For machine consumption, add `--json` before the command or after its arguments.
+See [CLI output modes](../output.md) and [the JSON contract](../cli-json.md).
+
 ## Synopsis
 
 ``` text
