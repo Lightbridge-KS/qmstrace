@@ -1,5 +1,5 @@
 ---
-summary: Acceptance protocol and measured 0.3.0 names-only configuration results: unit/CLI and disposable macOS test-bed checks; native Windows distinct-drive acceptance remains unverified.
+summary: Acceptance protocol and measured 0.3.0 names-only configuration results: unit/CLI, disposable macOS test-bed checks and native Windows distinct-drive acceptance verified in PR 74.
 read_when:
   - creating v2 configuration fixtures or live layout test beds
   - verifying names-only migration and native Windows cross-drive support
@@ -8,7 +8,7 @@ read_when:
 
 # Names-only workspaces — acceptance protocol
 
-**Status: implementation and macOS acceptance measured, 2026-10-24. Native Windows N12 remains unverified.**
+**Status: implementation, macOS acceptance and native Windows N12 verified, 2026-10-24. Draft PR #74 awaits review.**
 Parent: [feature design and implementation plan](../design/names-only-workspaces.md).
 Progress belongs in the [existing tracker](../progress/overview-qmstrace.md#in-progress--030-names-only-configuration).
 Tests must distinguish configuration readability, trace judgment, actual test execution,
@@ -140,14 +140,30 @@ working-tree status after live checks. Original generated/untracked files were p
 | Measures | Evidence and limit |
 |---|---|
 | N01–N11 | Configuration/map tests and deterministic v2 command goldens; three migrated beds and two relocated layouts. V1 fallback/digests remain covered by regressions |
-| N12 | **Not run on native Windows.** `tests/check_cross_drive.py` and the Windows CI job require two distinct writable native drives. Its complete same-drive CLI smoke passes on macOS and does not satisfy N12 |
+| N12 | **Passed on native Windows.** [Required cross-drive job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086635317/job/120850811085) at `c4929d4`, Windows Server 2025 / Python 3.13.16; distinct canonical drive roots, real CLI commands and complete cleanup. The separate macOS smoke is not counted as N12 |
 | N13–N14 | Real Git integration tests load v1/v2 historical configurations independently; the live original-v1/synthetic-v2 baseline and mutation probes pass |
 | N15–N20 | Standalone/missing-map and unavailable-source tests, parser/JSON/style regressions, real JUnit/TRX reports, HTML smoke, transactional bootstrap/refusal and v2 init-preservation tests pass |
 | N21 | All nine original repositories independently rehashed after the runs; no consumer, request-acceptance or release changes |
 | N22 | Isolated wheel checks exercise v1/v2 parsing and missing/invalid profiles; manual builds strictly and rendered examples/navigation/diagram inspected |
 
-Native Windows support remains a **release gate**, not an inferred consequence of the macOS
-smoke. The added `windows-cross-drive` CI job has not run on this uncommitted work.
+### Native Windows acceptance, 2026-10-24
+
+The [native Windows job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086635317/job/120850811085) passed against `c4929d4`, checked out through the PR's
+synthetic merge commit. `tests/check_cross_drive.py` requires two writable, distinct canonical
+drive roots and invokes the actual CLI; CI supplies no same-drive smoke flag. It verifies
+paths/rules/status/check, local and ledger thread/impact, JUnit results, table `/2`, graph HTML
+and transactional schema copying. Command JSON and HTML must not contain generated native
+checkout roots. Fixture cleanup completed before the final pass receipt. This is native
+platform evidence, separate from the same-drive macOS smoke and from human approval.
+
+The initial [Windows job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40085869280/job/120848562977)
+failed on CP1252 redirected receipt bytes. Three real-process regressions reproduce that
+failure; `bd356a6` makes redirected stdout/stderr UTF-8 while preserving terminal codecs.
+The [next job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086376767/job/120850053394)
+passed all command assertions but failed removing read-only Git objects. `c4929d4` uses
+standard temporary-directory cleanup and prints success only after cleanup. Neither failing
+job is counted as completed N12 evidence. The required Windows gate remains active for
+subsequent PR revisions and releases.
 
 ### Original-to-migration commit mappings
 

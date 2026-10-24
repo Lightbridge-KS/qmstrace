@@ -1,5 +1,5 @@
 ---
-summary: 0.3.0 design and implementation plan for names-only v2 trace configuration, required workspace_profile selection, portable evidence locations across Windows drives and versioned JSON output. Implementation in the working tree; release pending.
+summary: 0.3.0 design and implementation plan for names-only v2 trace configuration, required workspace_profile selection, portable evidence locations across Windows drives and versioned JSON output. Implementation and native Windows acceptance verified in draft PR 74; review and release pending.
 read_when:
   - implementing names-only repository membership or workspace_profile discovery
   - migrating v1 configuration and schema copies to v2
@@ -8,7 +8,7 @@ read_when:
 
 # Names-only configuration and workspace profiles
 
-**Status: implemented in the working tree, 2026-10-24; unreleased.** The developer accepted three
+**Status: implemented in draft PR #74, 2026-10-24; native acceptance verified; unreleased.** The developer accepted three
 design choices: every v2 trace configuration requires `workspace_profile`; 0.3.0 includes
 cross-drive Windows layouts; `--json` consistently emits `qmstrace.cli/2`, including
 handled parser errors. The examples below are v2 inputs, not v0.2.0 syntax.
@@ -288,5 +288,6 @@ manual. Record measured results and all unverified platforms/evidence limits in 
 Native Windows cross-drive proof is a release gate; POSIX path mocks do not satisfy it.
 
 The three form decisions and both table/setup amendments are accepted. Implementation,
-source-level/live checks and remaining native-platform evidence are recorded in the tracker.
-Consumer migration, commit/PR creation and release publication remain separate actions.
+source-level/live checks and native Windows proof are recorded in the tracker and acceptance
+results. Draft PR #74 contains the implementation. Maintainer review/merge, consumer migration
+and release publication remain separate actions.

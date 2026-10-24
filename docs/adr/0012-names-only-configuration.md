@@ -7,7 +7,7 @@ read_when:
 
 # ADR-0012 — Names-only configuration and local workspace profiles
 
-- **Status:** accepted, 2026-10-24; implementation locally verified; native Windows N12 pending
+- **Status:** accepted, 2026-10-24; implementation and native Windows N12 verified; draft PR #74 awaits review
 - **Accepted direction:** required `workspace_profile` in v2, cross-drive Windows support
   and uniform `qmstrace.cli/2`, chosen by the developer in the design form
 - **Amends:** ADR-0010's retained path defaults/cross-drive refusal,
@@ -47,8 +47,11 @@ resolution flow, ownership and implementation sequence:
   are documented without introducing an automatic migration command.
 
 The developer accepted table `/2` and the v1 starter/v2 bootstrap scope before implementation.
-Native Windows proof remains a recorded acceptance gate; design acceptance is not a platform
-verification claim. Consumer migration and release publication remain separate actions.
+Native Windows proof is recorded in the
+[acceptance results](../tests/names-only-workspaces.md#native-windows-acceptance-2026-10-24);
+the required CI job remains a release gate. Design acceptance is separate from platform
+verification. Consumer migration and release publication
+remain separate actions.
 
 ## Consequences
 

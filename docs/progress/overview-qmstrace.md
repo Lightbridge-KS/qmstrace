@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — v0.2.0 published; 0.3.0 names-only v2 configuration is implemented with passing local gates; native Windows acceptance remains pending. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
+summary: The single active qmstrace tracker — v0.2.0 published; 0.3.0 names-only v2 configuration is implemented with passing local gates and native Windows distinct-drive acceptance; draft PR 74 awaits review. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -26,7 +26,9 @@ Design: [names-only workspaces](../design/names-only-workspaces.md).
 Accepted amendment: [ADR-0012](../adr/0012-names-only-configuration.md).
 Fixed measures and measured live results: [N01–N22](../tests/names-only-workspaces.md).
 Implementation is on `codex/names-only-workspaces`, opened as
-[draft PR #74](https://github.com/Lightbridge-KS/qmstrace/pull/74). Hosted CI is being verified.
+[draft PR #74](https://github.com/Lightbridge-KS/qmstrace/pull/74).
+[Hosted CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086635317) passed at
+`c4929d4`, including native Windows acceptance; the documentation preview also passed.
 Consumer rollout remains separate.
 
 Accepted 2026-10-24: required v2 `workspace_profile`, native Windows cross-drive support,
@@ -52,13 +54,12 @@ retain their meaning. Mapped/project evidence labels change intentionally in 0.3
   verify focused edge cases including unreadable ledger schema references and absent profiles.
 - [x] Complete `just dry`, isolated wheel/CLI smoke and both strict trace checks;
   final measured totals are recorded below.
-- [ ] **N12: native Windows distinct-drive proof.** The native probe and required Windows
-  CI job are present. The first hosted run exposed legacy pipe encoding; the retry passed
-  command assertions but failed cleaning read-only Git objects. UTF-8 pipe regressions
-  pass locally; temporary-directory cleanup is being retried. A green native job remains
-  required; the macOS smoke does not satisfy N12.
-- [ ] Open the draft PR and complete hosted gates, including native Windows distinct-drive
-  acceptance. Maintainer review/merge, consumer migration and release preparation follow
+- [x] **N12: native Windows distinct-drive proof.** The [native job](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40086635317/job/120850811085) passed at
+  `c4929d4` on Windows Server 2025 / Python 3.13.16. Real distinct-drive command assertions
+  and cleanup completed; no same-drive smoke flag or alias setup was used.
+- [x] Open draft PR #74; fix redirected pipe encoding and read-only Git fixture cleanup;
+  complete hosted dry/Windows gates and documentation preview.
+- [ ] Maintainer review/merge. Consumer migration and release preparation follow
   independently. v0.2.0 is immutable.
 
 **Verified local gates, 2026-10-24:** `just dry` passed **1,524 Python tests, 4 browser
@@ -71,8 +72,10 @@ exit 0: **892 items, 0 violations, 0 gaps, 32 informational suspects**; **16 fro
 Output review confirms business-data parity across all 18 changed existing JSON goldens;
 text diffs change source labels, alignment and version/help wording. A shared presentation
 regression preserves suppression of redundant locations for derived IDs. V2 command goldens
-validate against the packaged/manual CLI `/2` schema. Native Windows is not included in
-these passing local claims.
+validate against the packaged/manual CLI `/2` schema. Three real-process code-page
+regressions reproduce the initial Windows failure and pass after UTF-8 pipe normalization;
+a per-stream test preserves native terminal encoding. Native proof is recorded separately
+from these local claims.
 
 **Live evidence:** engine/split each yield **177 items / 208 links**; .NET yields **226 /
 257**, all with 0 violations/gaps. Complete project-check JSON and all three tables agree
@@ -84,8 +87,8 @@ with informational exit 0; restoration passes. Pins and limits are in the accept
 
 Planning-only checks (125 documentation meta tests, 36 legacy-map checks) remain historical
 assessment evidence; they are not presented as v2 acceptance. Engine/consumer release tags,
-manifest/lock versions and real consumer configurations are unchanged. Native Windows, PR CI,
-maintainer review and publication remain distinct from the passing local evidence.
+manifest/lock versions and real consumer configurations are unchanged. Native Windows proof
+and local checks do not constitute maintainer review, consumer rollout or publication.
 
 ## Landed — post-release development version
 
