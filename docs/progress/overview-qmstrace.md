@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — v0.2.0 published at the verified PR 72 merge commit. Post-release development version 0.3.0.dev0 is prepared and verified, awaiting PR review and merge; consumer upgrades remain separate. External-source issue 60 and M11 remain later.
+summary: The single active qmstrace tracker — v0.2.0 published at the verified PR 72 merge commit; post-release development version 0.3.0.dev0 merged as PR 73. Consumer migration preparation is handed off separately. External-source issue 60 and M11 remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -15,21 +15,22 @@ on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--ta
 landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps merged as PR #69 (`8223d32`).
 PR #70 merged (`48e5ba1`), terminal/JSON output merged as PR #71 (`5453de2`), and the
 release refresh merged as PR #72 (`e093903`). The rebuilt `v0.2.0` release was published
-at that verified merge commit. A post-release PR prepares `0.3.0.dev0`; M11 · mentions
+at that verified merge commit. PR #73 (`bebf1f1`) advances `main` to `0.3.0.dev0`; M11 · mentions
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## In progress — post-release development version
+## Landed — post-release development version
 
-On `codex/post-release-0.3.0-dev`, carry the release rebuild/editorial reconciliation and
-record confirmed publication of v0.2.0. Set `pyproject.toml` to `0.3.0.dev0` and regenerate
-`uv.lock` so subsequent development builds identify themselves separately from the release.
+**Merged as [PR #73](https://github.com/Lightbridge-KS/qmstrace/pull/73), `bebf1f1`,
+2026-10-24 (implementation `a07f882`).** The release rebuild/editorial reconciliation and
+confirmed publication of v0.2.0 are recorded. `pyproject.toml` and regenerated `uv.lock`
+name `0.3.0.dev0`, so development builds identify themselves separately from the release.
 The published tag, release notes, wheel, changelog and installation pins remain unchanged.
 
 - [x] Verify publication and unchanged v0.2.0 tag/asset identity; reconcile the tracker.
 - [x] Set the next development version and regenerate the lockfile.
 - [x] Run `just dry`, both strict trace gates and version/package checks; verify no dependency churn.
-- [ ] Review and merge the draft PR; require successful CI on its merge commit.
+- [x] Review and merge the draft PR; require successful CI on its merge commit.
 
 **Verified 2026-10-24:** `just dry` passed **1,470 Python tests, 4 browser tests and
 98.45% coverage**, formatting, lint, strict mypy, isolated wheel checks across 37 import
@@ -43,8 +44,11 @@ record and dependency remains unchanged. Local and isolated installed consoles r
 the temporary environment was removed. All **106 packaged files** match the published
 0.2.0 wheel, with only the version differing in distribution METADATA. Published changelog,
 install pins, release workflow, trace configuration and frozen SRS bytes are unchanged.
-Local evidence remains in the ignored post-release playground. Hosted PR/merge checks and
-consumer installation remain separate gates; no release or tag was changed by this work.
+Local evidence remains in the ignored post-release playground. The PR dry gate and preview
+passed, followed by [merge CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40071569632)
+at `bebf1f1`. Local `main` and `origin/main` were fast-forwarded there; the merged branch
+and stale remote reference were pruned. Consumer migration remains separate; no release
+or tag was changed by this work.
 
 ## Landed — terminal and JSON output
 
@@ -601,7 +605,7 @@ was unnecessary before publication. The post-publication development bump is tra
   manifest/wheel version, CHANGELOG notes and asset checksum; smoke-test the downloaded CI
   wheel and a clean tag installation, including JSON and bundled skill/schema assets.
 - [x] Maintainer review and publication of the rebuilt draft release.
-- [ ] After publication, move `main` to `0.3.0.dev0` with `uv lock` in a follow-up PR;
+- [x] After publication, move `main` to `0.3.0.dev0` with `uv lock` in a follow-up PR;
   reconcile this checklist with the actual release/tag and verification results.
 - [ ] Plan consumer upgrades and workspace-profile rollout separately. Preserve existing
   configurations, inspect stricter ID checks and skill migration before adopting maps.
@@ -719,7 +723,7 @@ asset `671429978` retains SHA-256
 Publication is the maintainer's action, independently confirmed through GitHub. No package
 index publication or consumer upgrade was performed by this reconciliation.
 
-**Pending:** review/merge of the post-publication development-version PR and consumer rollout.
+**Pending:** consumer rollout; the post-publication development-version PR is merged.
 The release workflow is unchanged. Issue #60, M11, cross-drive traversal and the
 schema/member-identity migration remain outside this release-preparation scope.
 
