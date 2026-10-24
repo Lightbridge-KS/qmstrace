@@ -11,8 +11,8 @@ import typer
 
 from qmstrace import __version__
 from qmstrace.cli._ledger import ledger
-from qmstrace.cli._local import check, graph, impact, init, results, rules, status, thread
-from qmstrace.cli._options import Directory
+from qmstrace.cli._local import check, graph, impact, init, paths, results, rules, status, thread
+from qmstrace.cli._options import Directory, WorkspaceFile
 from qmstrace.cli._outcome import EXIT_CODES, EXIT_OK
 
 app = typer.Typer(
@@ -34,6 +34,7 @@ def _print_version(wanted: bool) -> None:
 def main(
     ctx: typer.Context,
     directory: Directory = None,
+    workspace: WorkspaceFile = None,
     version: Annotated[
         bool,
         typer.Option(
@@ -43,6 +44,7 @@ def main(
 ) -> None:
     """The trace layer under a quality-management system."""
     ctx.obj = directory
+    ctx.meta["workspace"] = workspace
 
 
 # Register root commands explicitly, preserving their existing order.
@@ -59,3 +61,5 @@ app.command(short_help="Write an offline, interactive view of the local trace gr
 app.add_typer(
     ledger, name="ledger", short_help="The project side's verbs — run them in the ledger repo."
 )
+
+app.command(short_help="Explain checkout locations and workspace-map selection.")(paths)

@@ -1,0 +1,8 @@
+project: SPLIT
+workspace: explicit map local.toml — mapped checkout locations; tracked ledger pointer and ledger-relative repo defaults not used
+path anchor: current trace root; map entries start at the map's directory
+ledger: ../records — available
+repo client: ../frontend — available
+repo ledger: ../records — available
+repo service: . — available · current repo
+Locations only; no items scanned or baselines judged. Exit 0.

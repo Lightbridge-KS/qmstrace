@@ -9,6 +9,7 @@ import os
 import posixpath
 import re
 from collections.abc import Callable, Sequence
+from dataclasses import replace
 from importlib.resources import files
 from pathlib import Path
 from typing import Final
@@ -17,6 +18,7 @@ from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.infra.files import Link, contained, read_optional, update_files, update_in
+from qmstrace.infra.locations import discover, relative
 from qmstrace.workspace._discovery import CONFIG_FILE, SCHEMA_FILE, _find_ledger, _same
 
 LANGUAGES: Final = ("python", "csharp")
@@ -87,6 +89,7 @@ def initialize(
     subject: str | None = None,
     key: str | None = None,
     language: str | None = None,
+    workspace: Path | None = None,
 ) -> tuple[str, ...]:
     """Set up the selected directory, or refresh an existing ancestor's managed files.
 
@@ -142,6 +145,9 @@ def initialize(
         current = current.replace("__SUBJECT__", subject).replace("__KEY__", key)
         schema = read_optional(root / SCHEMA_FILE) if ledger else None
         config = TraceConfig.parse(current, schema)
+        locations = discover(start, root, config, workspace)
+        if locations:
+            chosen = (locations.notice, *chosen)
     guide_path = contained(root, "AGENTS.md")
     existing = read_optional(guide_path) or ""
     template = assets.joinpath("stanza.md").read_text(encoding="utf-8")
@@ -149,7 +155,8 @@ def initialize(
     if os.path.lexists(root / setup.LEGACY_SKILL):
         raise CouldNotJudge(
             "The qmstrace skill has moved to .agents/skills/qmstrace/.",
-            "Fix: keep any local edits elsewhere, remove .qmstrace/, then run init again.",
+            "Fix: keep any local edits elsewhere, remove only .qmstrace/skill/, "
+            "then run init again; keep workspace maps.",
         )
     skill = assets.joinpath("skill/SKILL.md").read_text(encoding="utf-8")
     prior_skill = read_optional(contained(root, setup.SKILL_FILE))
@@ -199,13 +206,14 @@ def initialize(
 
 
 def copy_schema(
-    start: Path, names: Sequence[str] = ()
+    start: Path, names: Sequence[str] = (), *, workspace: Path | None = None
 ) -> tuple[TraceConfig, tuple[setup.Copied, ...]]:
     """In the ledger: write the project's schema into its product repos as a verified copy —
     every named repo, or every repo in [repos]; all of them, or none (D9)."""
     ledger = _find_ledger(start)
     schema_text = read_optional(ledger / SCHEMA_FILE) or ""
     config = TraceConfig.of_schema(schema_text)
+    locations = discover(start, ledger, config, workspace)
     if not config.repos:
         raise CouldNotJudge(
             f"{SCHEMA_FILE} names no product repos under [repos], so there is nowhere to copy it.",
@@ -226,7 +234,12 @@ def copy_schema(
     reports: list[setup.Copied] = []
     for name in dict.fromkeys(names) if names else sorted(config.repos):
         place = config.repos[name]
-        root = (ledger / place).resolve()
+        root = locations.roots.get(name) if locations else (ledger / place).resolve()
+        if root is None:
+            problems.append(f"{name}: no location in the selected workspace map")
+            continue
+        if locations:
+            place = relative(ledger, root)
         shown = posixpath.normpath(posixpath.join(place, CONFIG_FILE))
         if _same(ledger / place, ledger):  # the ledger reads the schema it holds, by path
             reason = setup.ledger_itself(read_optional(ledger / CONFIG_FILE))
@@ -274,4 +287,7 @@ def copy_schema(
             "Fix: deal with each repo named above, then run qmstrace ledger copy-schema again.",
         )
     update_in({root: {CONFIG_FILE: text} for root, text, _ in planned})
-    return config, tuple(reports)
+    return config, tuple(
+        replace(report, location_notice=locations.notice) if locations else report
+        for report in reports
+    )

@@ -25,6 +25,18 @@ SPLIT = Path(__file__).parent / "fixtures" / "split"
 CASES = Path(__file__).parent / "fixtures" / "cases"
 
 
+@pytest.fixture(autouse=True)
+def isolated_workspace_discovery(
+    monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    """No test borrows a developer's map or environment selector."""
+    monkeypatch.delenv("QMSTRACE_WORKSPACE", raising=False)
+    home = tmp_path_factory.getbasetemp() / "workspace-home"
+    home.mkdir(exist_ok=True)
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
+
+
 def mini_text(*parts: str) -> str:
     return MINI.joinpath(*parts).read_text(encoding="utf-8")
 

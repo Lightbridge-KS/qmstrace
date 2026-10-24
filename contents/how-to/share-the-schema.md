@@ -20,6 +20,9 @@
 
 3. **Copy the schema, in the ledger.**
 
+    For a different checkout layout, [select a workspace map](use-a-workspace-map.md) first.
+    The same selection locates schema-copy destinations and the project's read commands.
+
     ``` sh
     qmstrace ledger copy-schema
     ```

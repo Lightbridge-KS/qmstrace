@@ -59,6 +59,7 @@ flowchart TD
     cli --> check["check ✔"]
     check --> strict["--strict ✔ — the gate"]
     cli --> rules["rules ✔"]
+    cli --> paths["paths — checkout locations (ADR-0010)"]
     cli --> thread["thread ID ✔"]
     cli --> results["results REPORT ✔"]
     cli --> impact["impact ID… ✔"]
@@ -78,6 +79,7 @@ flowchart TD
 | `qmstrace check` | Lists every violation and gap in one pass, each with file, line and what to do next — a gap's next move names the marker's form, the violation that refused its link, or the stray line that is not read. *In the engine since M3* | ✔ |
 | `qmstrace check --strict` | The gate: the same findings, and gaps fail | ✔ |
 | `qmstrace rules` | Reads the link types, required fields, coverage rules and what each baseline freezes — printed from the trace configuration, not from documentation, each part labelled as the project's or the repo's; a rule this repo cannot meet, or that applies to nothing here, says so. *In the engine since M3* | ✔ |
+| `qmstrace paths [--workspace FILE]` | Configuration-only diagnosis of the active root, selected workspace-map source or tracked defaults, ledger role and effective member locations/availability. Every location is root-relative; no marker scanning, baseline judgment or evidence approval | ◻ accepted — ADR-0010 |
 | `qmstrace thread <ID>` | Walks one item backward to what it derives from and forward to what hangs off it — any ID the run can see: a requirement, a test, a clause, a sibling's item. Each item once, nearest first, under the link that reaches it first; `Assumes` followed forward, not backward; it stops at this repo's edge. An unknown ID is *could not judge*, with the closest IDs. *In the engine since M2b* | ✔ |
 | `qmstrace results <report>` | Matches one pytest JUnit report or TRX file to scanned tests and direct `verifies` links; labels counts, shared tests and unmatched entries. Informational even on failure. *In the engine since M4* | ✔ |
 | `qmstrace impact <ID>…` | Shows the starting items, their downstream union grouped by type, and their upstream origins. Prints a candidate `Impacts` line from configured baseline types, with source limitations visible. *In the engine since M3b* | ✔ |
@@ -146,6 +148,67 @@ gate. Notices, unavailable sources and refused links remain visible. Sibling nod
 pinned, and their own links are not scanned. Output ends with labelled counts and *this repo
 only*. M5a's assessment reads reservations and baseline evidence; project-wide
 traversal at pins belongs to the ledger.
+
+### Workspace-map selection and paths
+
+**Accepted 2026-10-24 ([ADR-0010](../adr/0010-local-workspace-maps.md)); implementation and
+golden verification belong to the workspace-map slice.** `--workspace FILE` is accepted
+before the command or on a leaf command, including a ledger leaf. Every duplicate is a
+usage error (exit 2): twice at root, twice at leaf, or across root and leaf, even with the
+same file. CLI selection takes precedence over
+`QMSTRACE_WORKSPACE`; neither is merged with another source. A relative selector file path
+resolves from the effective invocation directory after `-C`. Map entries resolve from the
+map file's directory. Existing report/output arguments keep their own path semantics.
+
+After discovering the current trace root and reading the existing configuration to learn
+the project, selection proceeds in order:
+
+| Stage | Selection | Refusal / next stage |
+|---|---|---|
+| CLI | The one file supplied by `--workspace FILE` | Missing, unreadable, malformed or inapplicable file: exit 2, no fallback |
+| Environment | The file named by `QMSTRACE_WORKSPACE` | Same strict selection as CLI; only reached without a CLI selector |
+| Ancestor | Nearest `.qmstrace/workspace.toml` from the trace root upward | Same strict selection as CLI; unusable or inapplicable file: exit 2. No ancestor candidate: continue to the user stage |
+| User | `~/.qmstrace/workspaces/*.toml` whose project matches and whose mapped canonical root includes the current trace root | Validate every candidate in this stage. Malformed/unreadable candidate or multiple matches: exit 2. Unrelated valid maps ignored; no match uses tracked defaults |
+
+The nearest ancestor candidate is chosen by distance from the **trace root**, not the shell's
+working directory; a map below that root is not a selector. A selected map must name this
+project, include the current canonical trace root and identify a `ledger_repo` entry. Strict
+TOML validation refuses unknown keys, unsupported versions, wrong value types, empty names
+or paths, a missing ledger entry, unknown member names other than the ledger role, and
+canonical checkout aliases. Canonical comparison detects symlink aliases; displayed
+locations remain relative. A map for another checkout of the same project is not a
+user-level match. There is no registry update, map merge or automatic rewrite.
+
+The ledger role preserves an existing schema ledger self-member. A mapped ledger that is
+reachable but lacks `qmstrace.schema.toml` is refused with trace-root guidance; a reachable
+ledger for a different project is also refused. A Git repository's top directory is not
+automatically its ledger trace root.
+
+The selected map supplies **all** current locations. Omitted members and missing mapped
+directories stay unavailable, even when tracked paths could find them. Local reads retain
+their existing *not verified here* policy and quiet-safe notices. Ledger reads and schema
+copies retain refusal/all-or-nothing policies. The selected ledger role resolves external
+and change-request sources, but does not redirect a `ledger` command launched in a product
+repo: run it in the ledger, or select that directory with `-C`.
+
+`qmstrace paths` works from either kind of root and reports selection provenance as source
+kind plus map filename, the current-root location anchor, the effective ledger and each
+schema member's location or unavailability. `Paths.source` carries the full notice string.
+It loads configuration and checks locations only: no item extraction, graph construction,
+historical reads, result reports, Git/network activity or writes. A valid map with an
+unavailable sibling can be diagnosed successfully (exit 0); exit 2 means selection,
+configuration or relative representation failed. Existence is not proof that a repo can
+be assessed or that evidence is valid. Cross-drive layouts are exit 2, with no absolute-path
+fallback. Every new diagnostic location is relative to the active trace root.
+
+When a map is selected, ordinary command output retains its source provenance and evidence
+limits, including `check --quiet`. Existing commands with no map keep their current output;
+`paths` explicitly labels the use of tracked defaults. The schema's ledger-relative path
+meaning, copied-schema digest and historical same-tree rules are unchanged (D9).
+The tracked `ledger` pointer is repo-relative; only the schema's repo defaults are
+ledger-relative. Neither base changes when no map is selected.
+The emitted table format remains `qmstrace.table/1`; workspace notices do not introduce a
+new JSON version or change report-verdict semantics.
 
 ### Results contract — M4
 
@@ -657,7 +720,8 @@ still points at the copy, for any agent whose harness lists no skills.
 | anything else there, or `.claude/skills` as a file | refuses before any write |
 
 A copy in the old home, `.qmstrace/skill/SKILL.md`, makes `init` refuse with the next move:
-remove `.qmstrace/`, then run it again. The link is written inside the same change as the
+remove only `.qmstrace/skill/`, then run it again. Preserve `.qmstrace/workspace.toml` and
+other local configuration. The link is written inside the same change as the
 files, validated first and removed on rollback. Where symbolic links are unavailable, the
 whole change rolls back.
 

@@ -40,6 +40,7 @@ class Copied:
     changed: bool
     before: str  # what it held: by path, a copy of older rules, one edited by hand, …
     skipped: bool = False  # the ledger itself, listed as "." — it reads its schema by path
+    location_notice: str | None = None
 
 
 def ledger_itself(local_text: str | None) -> str:

@@ -206,7 +206,8 @@ PYTHON_COMPATIBILITY = {
     },
 }
 TEXT_IMPORTS: dict[str, set[str]] = {
-    "_schema": {"qmstrace.core.setup", "qmstrace.core.config"},
+    "_schema": {"qmstrace.core.setup", "qmstrace.core.config", "qmstrace.core.locations"},
+    "_paths": {"qmstrace.core.locations"},
     "_status": {
         "qmstrace.core.model",
         "qmstrace.core.assessment",
@@ -267,6 +268,7 @@ PACKAGE_AREAS = {
 }
 EXPORTS: dict[str, dict[str, set[str]]] = {
     "text": {
+        "_paths": {"paths"},
         "qmstrace.render._evidence": {"evidence"},
         "_checks": {"VIOLATION_HEADING", "check", "PROJECT_GAP_HEADING", "ledger_check"},
         "_results": {"results"},
@@ -599,8 +601,15 @@ WORKSPACE_IMPORTS: dict[str, set[str]] = {
         "qmstrace.workspace._discovery",
         "qmstrace.workspace._scanning",
     },
-    "_discovery": {"qmstrace.core.errors", "qmstrace.core.config", "qmstrace.infra.tree"},
+    "_discovery": {
+        "qmstrace.core.errors",
+        "qmstrace.core.config",
+        "qmstrace.infra.tree",
+        "qmstrace.infra.locations",
+    },
     "_project": {
+        "qmstrace.infra.locations",
+        "qmstrace.core.locations",
         "qmstrace.core.assessment",
         "qmstrace.core.baselines",
         "qmstrace.core.config",
@@ -627,6 +636,7 @@ WORKSPACE_IMPORTS: dict[str, set[str]] = {
         "qmstrace.infra.tree",
     },
     "_setup": {
+        "qmstrace.infra.locations",
         "qmstrace.core.config",
         "qmstrace.core.errors",
         "qmstrace.core.setup",
@@ -634,6 +644,7 @@ WORKSPACE_IMPORTS: dict[str, set[str]] = {
         "qmstrace.workspace._discovery",
     },
     "_sources": {
+        "qmstrace.core.locations",
         "qmstrace.core.assessment",
         "qmstrace.core.baselines",
         "qmstrace.core.config",
@@ -646,6 +657,8 @@ WORKSPACE_IMPORTS: dict[str, set[str]] = {
         "qmstrace.workspace._scanning",
     },
     "_workspace": {
+        "qmstrace.infra.locations",
+        "qmstrace.core.locations",
         "qmstrace.core.assessment",
         "qmstrace.core.baselines",
         "qmstrace.core.config",
@@ -758,6 +771,7 @@ CLI_EXPORTS = {
         "ledger_thread",
     },
     "qmstrace.cli._local": {
+        "paths",
         "check",
         "graph",
         "impact",

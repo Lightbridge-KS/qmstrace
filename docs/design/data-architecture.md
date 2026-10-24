@@ -433,6 +433,72 @@ the repo's.
     from the tagged tree, where a path to the ledger leads nowhere: a repo that cut a baseline
     while reading its schema by path can never be judged at that tag.
 
+#### Current checkout locations — ADR-0010
+
+The schema's `[repos]` continues to declare project membership and ledger-relative default
+locations. The local `ledger` pointer remains a default locator relative to its repo's
+trace root. A **workspace map** can
+replace those current checkout locations for one invocation, so the same `MINI` project can
+be checked in a different directory layout without editing or re-copying its schema.
+[ADR-0010](../adr/0010-local-workspace-maps.md) amends location resolution only; it does not
+remove paths from the existing schema format.
+
+```toml
+# .qmstrace/workspace.toml in a folder containing these checkouts
+version = 1
+project = 'MINI'
+ledger_repo = 'ledger'
+
+[repos]
+ledger = '../ledger'
+service = '../service'
+client = '../client'
+```
+
+Relative repo paths in a map resolve from its canonical containing directory, including
+when selected through a symlink; native absolute input paths are also accepted. Environment
+variables inside TOML paths are not interpolated. Here the file is in
+`.qmstrace/`, so `../service` reaches the containing folder's `service` checkout. The
+`ledger_repo` value names an entry in the map; its directory is the ledger trace root, even
+when that root is nested inside a Git repository. The ledger role is required even in the
+older layout where the ledger itself is not a traced member of the schema's `[repos]`.
+
+- **Select one whole map.** Explicit `--workspace FILE`, then `QMSTRACE_WORKSPACE`, then the
+  nearest ancestor `.qmstrace/workspace.toml` searched from the discovered trace root, then
+  `~/.qmstrace/workspaces/*.toml`. User-level matching requires both the schema's `project`
+  and a mapped checkout canonically equal to the current trace root. A malformed candidate
+  encountered in that user-level stage causes exit 2 even when another file matches;
+  unrelated valid maps are ignored, and multiple matches cause exit 2. An earlier selection
+  does not inspect later stages. Full selection/refusal policy is in the
+  [surface contract](surface-architecture.md#workspace-map-selection-and-paths).
+- **No entry-by-entry fallback.** A missing or unreadable mapped member stays unavailable;
+  a member omitted from a selected map is unavailable too, even when its default path
+  exists. Local commands retain visible source notices; whole-project commands refuse an
+  unread member. The map must identify the current root and the ledger role. It cannot
+  invent schema members, grant coverage or hide schema skew. Distinct names cannot alias
+  one canonical checkout. Preserve the schema's ledger self-member when one exists. A
+  reachable mapped ledger without `qmstrace.schema.toml`, or belonging to another project,
+  is refused with guidance to select the ledger's trace root rather than its Git root.
+- **One resolution for current reads and writes.** Sibling discovery, external declarations,
+  change-request registers, project assessment and schema-copy destinations use the selected
+  locations. External and request paths remain ledger-relative. Ledger verbs remain rooted
+  in the ledger; selecting a map from a product repo does not switch command scope.
+- **Historical and digest boundaries stay intact.** `[schema] path` still resolves from the
+  repo's trace root; a map does not repair a missing path-form schema. At a tag, only the
+  tagged configuration and its existing same-tree schema rules apply. Maps are excluded
+  from schema digests and item text and never rewrite a copied `[schema]`, tracked defaults,
+  scan paths, report paths or output destinations.
+- **Relative output only.** Checkout locations are shown relative to the active trace root;
+  selection provenance names the source kind and map filename. Ledger output stays
+  ledger-relative. If the selected layout cannot be
+  expressed relatively across drives, refuse with exit 2 rather than print absolute paths.
+
+**Rejected:** editing schema `[repos]` for each machine (changes the shared digest), merging
+partial maps with defaults (can mix unrelated checkouts), taking the first user match
+(directory order would select evidence), and letting current maps replace historical paths
+(would judge a tagged item against today's rules). Removing location defaults from the
+schema is a separate versioned migration, outside this change.
+
 The shape — settled by writing the examples first and the parser second, because it lands in
 every product repo and is expensive to change. **The annotated reference is the engine's own
 fixture project**: `tests/fixtures/mini/` holds a ledger's trace schema, two product repos'
@@ -483,7 +549,8 @@ tag = '^v\d+\.\d+\.\d+$'   subject = "*"      # a scope names its subject: in th
 - The copy lives under **its own namespace** — both files declare `[items.requirement]`, and a
   TOML parser rejects a table declared twice. Verified.
 - A copy makes the ledger-relative paths to the agreement and the change requests
-  unresolvable, hence the local **`ledger`** pointer.
+  unresolvable, hence the local **`ledger`** pointer, or the ledger role in a selected
+  workspace map for current reads.
 - A coverage rule may not need `Assumes` (D10) — a configuration error.
 - One glob matcher serves every tree; the stand-in's two disagreed about `src/**/*.py`.
   Verified. It needs Python 3.13.

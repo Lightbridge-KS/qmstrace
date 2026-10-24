@@ -24,7 +24,12 @@ _SECTIONS: Final = {
 def thread(assessment: Assessment, item_id: str) -> str:
     """One item, what it derives from, and what hangs off it — each item once, nearest first."""
     return _thread(
-        assessment.config, assessment.graph, item_id, _problems(assessment), "this repo only"
+        assessment.config,
+        assessment.graph,
+        item_id,
+        _problems(assessment)
+        + [f"  {n.text}" for n in assessment.notices if n.text.startswith("workspace:")],
+        "this repo only",
     )
 
 
@@ -150,6 +155,7 @@ def _project_scope(project: ProjectAssessment) -> str:
 def _project_problems(project: ProjectAssessment) -> list[str]:
     """What the ledger's walk could not read, and what it refused — only when there is any."""
     lines = [_external(s) for s in project.externals if s.declared is None]
+    lines += [n.text for n in project.notices if n.text.startswith("workspace:")]
     if project.violations:
         count = len(project.violations)
         lines.append(

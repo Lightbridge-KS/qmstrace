@@ -10,7 +10,7 @@ from typing import Annotated
 
 import typer
 
-from qmstrace.cli._options import Directory, _directory
+from qmstrace.cli._options import Directory, WorkspaceFile, _directory, _workspace
 from qmstrace.cli._outcome import EXIT_FAILED, EXIT_OK, outcome
 from qmstrace.core.tables import table
 from qmstrace.render import tables, text
@@ -35,6 +35,7 @@ def copy_schema(
         ),
     ] = None,
     directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
 ) -> int:
     """Write the project's trace schema into each product repo as a generated, verified copy.
 
@@ -42,7 +43,9 @@ def copy_schema(
     kept. All the repos, or none: a problem in any names every problem and writes nothing.
     A second run changes nothing. Commit the updated qmstrace.toml in each repo.
     """
-    config, copies = Workspace.copy_schema(_directory(ctx, directory), repos or ())
+    config, copies = Workspace.copy_schema(
+        _directory(ctx, directory), repos or (), workspace=_workspace(ctx, workspace_file)
+    )
     typer.echo(text.schema_copies(config, copies))
     return EXIT_OK
 
@@ -61,6 +64,7 @@ def ledger_check(
         typer.Option("--quiet", help="Findings only — what could not be verified still shows."),
     ] = False,
     directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
 ) -> int:
     """Read every repo the schema lists under [repos] — the ledger itself too, when it holds
     documents — and judge them as one project.
@@ -70,7 +74,9 @@ def ledger_check(
     from its working tree, not at a pin, and the output says so. A repo that cannot be read,
     or holds rules other than the ledger's schema, stops the check: exit 2.
     """
-    project = Workspace.project(_directory(ctx, directory))
+    project = Workspace.project(
+        _directory(ctx, directory), workspace=_workspace(ctx, workspace_file)
+    )
     typer.echo(text.ledger_check(project, strict=strict, quiet=quiet))
     return EXIT_FAILED if project.fails(strict=strict) else EXIT_OK
 
@@ -91,6 +97,7 @@ def ledger_thread(
         ),
     ],
     directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
 ) -> int:
     """Walk one item backward to what it derives from, and forward to what hangs off it, across
     every repo the schema lists — from the ledger.
@@ -98,7 +105,9 @@ def ledger_thread(
     Each item is shown once, nearest first, under the link that reaches it first. Each repo is
     read from its working tree, not at a pin, and the output says so.
     """
-    project = Workspace.project_thread(_directory(ctx, directory), item_id)
+    project = Workspace.project_thread(
+        _directory(ctx, directory), item_id, workspace=_workspace(ctx, workspace_file)
+    )
     typer.echo(text.ledger_thread(project, item_id))
     return EXIT_OK
 
@@ -114,6 +123,7 @@ def ledger_impact(
         typer.Argument(metavar="ID…", help="One or more item IDs of the project."),
     ],
     directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
 ) -> int:
     """Show the combined downstream items and upstream origins of several starting items,
     across every repo the schema lists — from the ledger.
@@ -121,7 +131,9 @@ def ledger_impact(
     The Impacts line is a candidate for review, filtered by configured baseline types. Any
     unseen starting ID rejects the whole request.
     """
-    project = Workspace.project_impact(_directory(ctx, directory), item_ids)
+    project = Workspace.project_impact(
+        _directory(ctx, directory), item_ids, workspace=_workspace(ctx, workspace_file)
+    )
     typer.echo(text.ledger_impact(project, item_ids))
     return EXIT_OK
 
@@ -152,6 +164,7 @@ def ledger_table(
         ),
     ] = None,
     directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
 ) -> int:
     """Emit one of the project's tables as versioned JSON (qmstrace.table/1), for a render
     layer to turn into a document.
@@ -175,9 +188,11 @@ def ledger_table(
     start = _directory(ctx, directory)
     given = [_report(start, value) for value in reports or ()]
     if given:
-        project, view = Workspace.project_results(start, given)
+        project, view = Workspace.project_results(
+            start, given, workspace=_workspace(ctx, workspace_file)
+        )
     else:
-        project, view = Workspace.project(start), None
+        project, view = Workspace.project(start, workspace=_workspace(ctx, workspace_file)), None
     built = table(name, project.config, project.graph, view)
     document = tables.document(project, built, view)
     if out is None:

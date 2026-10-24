@@ -12,7 +12,10 @@ Arguments:
   ID  Initially focus this item.
 
 Options:
-  --out <path>  New HTML file; existing files are refused.  [required]
-  -C PATH       Run as if qmstrace had been started in PATH, as with git -C.
-                Before or after the command.
-  --help        Show this message and exit.
+  --out <path>      New HTML file; existing files are refused.  [required]
+  -C PATH           Run as if qmstrace had been started in PATH, as with git -C.
+                    Before or after the command.
+  --workspace FILE  Select a checkout map; overrides QMSTRACE_WORKSPACE and
+                    automatic discovery. Before or after the command. Relative
+                    files start at the effective -C directory.
+  --help            Show this message and exit.

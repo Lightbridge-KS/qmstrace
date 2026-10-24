@@ -124,9 +124,10 @@ runs over a working tree, a tree at a baseline tag, or a sibling.
 ```mermaid
 flowchart TD
     cli["cli — wiring only; maps outcomes to exit codes"]
-    ws["workspace — Workspace.open(root).assessment()"]
+    ws["Workspace — assessment or configuration-only paths"]
     subgraph core["core — pure, no IO"]
         config["config — parse, validate, merge, provenance"]
+        locations["locations — frozen map/path values; pure parser/validation"]
         graph["graph — TraceGraph; an illegal link never enters"]
         judge["judge — coverage, baselines, guard, suspects"]
         find["findings — the catalogue: what is wrong, the next move"]
@@ -140,10 +141,14 @@ flowchart TD
         tree["ISourceTree — working tree · tree at a revision"]
         igit["IGit — state, reachable tags, files and text at a revision"]
         ext["externals — agreement, change requests, siblings"]
+        locate["locations — discover maps; canonical roots; relative locations"]
     end
     render["render — functions returning text"]
     cli --> ws
     ws --> config
+    ws --> locations
+    ws --> locate
+    locate --> locations
     ws --> tree
     tree --> igit
     ws --> extract
@@ -152,6 +157,7 @@ flowchart TD
     ws --> ext
     judge --> find
     cli --> render
+    render --> locations
 ```
 
 Configuration is a package behind the existing `qmstrace.core.config` imports. Its internal
@@ -172,23 +178,36 @@ module paths retain direct compatibility imports. Its initializer stays empty. F
 languages can add sibling packages when implemented, with their own marker and identity
 contracts. Source extraction does not imply test-report support; results remain pytest-specific.
 
-Text rendering has five command owners under `render/text/`: status, walks, checks, results
-and schema output. Local and ledger variants remain together. Shared evidence and presentation
+Text rendering has six command owners under `render/text/`: status, walks, checks, results,
+schema output and the configuration-only paths diagnostic. Local and ledger variants remain together. Shared evidence and presentation
 live directly under `render/`, so the browser reads evidence without importing text commands.
 The move preserves output bytes and the existing traversal and judgment boundaries.
 
-Workspace orchestration is a package behind the unchanged `qmstrace.workspace.Workspace`
-interface. Local assessment and command sequencing remain together; project assessment and
+Workspace orchestration is a package behind `qmstrace.workspace.Workspace`.
+Local assessment and command sequencing remain together; project assessment and
 setup have private owners. Shared discovery, scanning, source evidence and historical-baseline
 reading flow downward without importing the public class. The same source-tree and Git
 injection points remain, as do subclass dispatch, read order, offline historical isolation
 and transactional writes. No service layer or mutable run cache is introduced.
 
 CLI wiring is also a package: the root app registers local handlers and the ledger sub-app,
-while shared invocation and outcome modules own `-C` and exit policy. Handlers retain their
-existing options, annotations and workspace/render calls. The installed `qmstrace.cli:app`
-entry point, public imports, command/help bytes and output channels remain unchanged; no
+while shared invocation and outcome modules own `-C`, `--workspace` and exit policy.
+The installed `qmstrace.cli:app` entry point, existing public imports and output channels
+remain; workspace-map options and `paths` extend the command/help surface. No
 factory or dynamic command discovery is introduced.
+
+**Workspace-map ownership (ADR-0010).** Current checkout
+locations are operational input beside the trace configuration. `core/locations.py` owns
+frozen `WorkspaceMap`, `Locations` and `Paths` values with pure parsing/validation;
+`infra/locations.py` owns `discover`, canonical comparison and `relative`. Existing workspace
+owners use this resolution for current reads and schema-copy writes; no additional
+orchestration module is needed. `Workspace.open`, `project`, `project_results`,
+`project_thread`, `project_impact`, `copy_schema` and `initialize` accept optional
+`workspace=Path`, and `Workspace.paths` provides the configuration-only diagnostic rendered
+by `render/text/_paths.py`. CLI wiring supplies the selector; discovery reads the environment.
+Ledger commands retain their ledger-root scope. The
+[blueprint](../structure/codebase-blueprint.md#workspace-map-ownership--adr-0010) records the
+integration boundaries. Historical configuration and schema digest owners stay unchanged.
 
 Only config, judge, graph, setup, Markdown, text, workspace and CLI may expose their prior
 interfaces through explicit compatibility exports; all other subpackage initializers remain

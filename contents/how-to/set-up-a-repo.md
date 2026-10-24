@@ -32,7 +32,8 @@
    [baselines](../reference/baselines.md).
 5. Review the managed block in `AGENTS.md` and read `.agents/skills/qmstrace/SKILL.md`.
    Keep any existing `CLAUDE.md` alias pointing at the canonical guide. A repo set up before
-   the skill moved there keeps a copy in `.qmstrace/skill/`: remove `.qmstrace/` first.
+   the skill moved there keeps a copy in `.qmstrace/skill/`: remove only `.qmstrace/skill/`
+   first, preserving `.qmstrace/workspace.toml` and other local configuration.
 6. Run `qmstrace rules`, `qmstrace status` and `qmstrace check`. Add real content and markers;
    do not manufacture requirements or evidence merely to silence a finding.
 7. Where the repo's tests are pytest functions, run pytest with `--strict-markers` to confirm

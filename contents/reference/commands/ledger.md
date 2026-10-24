@@ -19,6 +19,12 @@ The ledger's verbs are kept apart from the product-repo loop: an agent reading t
 product repo does not see verbs it must not use. Run one in a product repo and it names the
 ledger; run a product verb in the ledger and it names the product repos.
 
+A [workspace map](../workspace-maps.md) may select the current member locations used by
+these commands, including schema-copy destinations. Pass `--workspace FILE` before the
+command or at a leaf, for example `qmstrace ledger check --workspace FILE`. A map does not
+change the invocation root: ledger verbs still run in the ledger trace root, selected with
+`-C` when needed. `qmstrace paths` inspects resolution from either kind of root.
+
 ## qmstrace ledger check
 
 ``` text

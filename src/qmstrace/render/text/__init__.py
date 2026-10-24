@@ -5,6 +5,7 @@ from qmstrace.render.text._checks import PROJECT_GAP_HEADING as PROJECT_GAP_HEAD
 from qmstrace.render.text._checks import VIOLATION_HEADING as VIOLATION_HEADING
 from qmstrace.render.text._checks import check as check
 from qmstrace.render.text._checks import ledger_check as ledger_check
+from qmstrace.render.text._paths import paths as paths
 from qmstrace.render.text._results import results as results
 from qmstrace.render.text._schema import rules as rules
 from qmstrace.render.text._schema import schema_copies as schema_copies

@@ -6,7 +6,6 @@ Implements: DSN-QMT-02
 from __future__ import annotations
 
 import os
-import posixpath
 import tomllib
 from collections.abc import Callable
 from pathlib import Path
@@ -14,6 +13,7 @@ from typing import Final
 
 from qmstrace.core.config import SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.infra.locations import relative
 from qmstrace.infra.tree import GitTree, ISourceTree
 
 CONFIG_FILE: Final = "qmstrace.toml"
@@ -108,7 +108,7 @@ def _ledger(root: Path, config: TraceConfig) -> Path | None:
 def _shown(root: Path, path: Path) -> str:
     """A path as a reader of this repo would write it — relative, and never resolved, so a
     temporary folder's real location never leaks into the output."""
-    return posixpath.normpath(Path(os.path.relpath(path, root)).as_posix())
+    return relative(root, path)
 
 
 def _report_label(root: Path, path: Path) -> str:

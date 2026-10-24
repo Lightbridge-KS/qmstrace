@@ -29,6 +29,8 @@ in the tool. The standard is data too: ISO/IEC 29110 comes first.
 | To… | Read |
 |---|---|
 | set up an existing product repo | [Set up a repo](how-to/set-up-a-repo.md) |
+| use a different checkout layout | [Use a workspace map](how-to/use-a-workspace-map.md) |
+| inspect checkout selection and locations | [qmstrace paths](reference/commands/paths.md) |
 | explore links and findings interactively | [Explore a trace](how-to/explore-a-trace.md) |
 | see it work, in five minutes | [A first look](tutorials/first-look.md) |
 | prepare a change request's impact analysis | [Write an impact list](how-to/write-an-impact-list.md) |

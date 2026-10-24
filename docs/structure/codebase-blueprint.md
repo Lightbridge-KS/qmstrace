@@ -52,9 +52,9 @@ Verified by running code where it says so.
 src/qmstrace/
   __init__.py            the version, read from package metadata — nothing else
   cli/                   Typer wiring; installed entry point stays qmstrace.cli:app
-    __init__.py          exact compatibility exports of the 22 existing public names
+    __init__.py          existing compatibility exports, plus paths
     _app.py              root app, callback/version and explicit root-command registration
-    _local.py            eight local handlers: arguments → workspace → render → exit code
+    _local.py            local handlers, including paths: arguments → workspace → render → exit code
     _ledger.py           ledger sub-app and its five handlers
     _options.py          Directory annotation and duplicate -C reconciliation
     _outcome.py          exit constants/help and outcome decorator; errors on stderr
@@ -102,6 +102,7 @@ src/qmstrace/
       _pytest.py         pytest section detection and marker registration
       _schema_copy.py    Held, Copied, schema inspection, block generation and proven replacement
     findings.py          the catalogue: each code once — what is wrong, the next move
+    locations.py         frozen WorkspaceMap, Locations and Paths; pure map parsing/validation
     assessment.py        Assessment: violations, gaps, suspects, notices, frozen state, what was scanned;
                          ProjectAssessment and RepoState — the ledger's check (M10a); Checkout,
                          each repo's commit and cleanliness as a table records it (#49)
@@ -131,6 +132,7 @@ src/qmstrace/
     change_requests.py   request text preamble -> metadata or diagnostic; no IO, no approval
                          inferred from examples or prose
   infra/                 everything that touches the world
+    locations.py         discover current workspace maps; canonical roots and relative locations
     tree.py              ISourceTree · WorkingTree — files(), read(), label · GitTree (M5a)
     git.py               the one subprocess helper, run where it asks, redirects scrubbed ·
                          working_files() · checkout(), the commit and a clean tree, read without the
@@ -145,12 +147,13 @@ src/qmstrace/
     _presentation.py     shared item labels, finding lines and pluralized counts
     _evidence.py         source/sibling/baseline evidence, shared by text views and the browser
     text/                command views; callers keep importing qmstrace.render.text
-      __init__.py        eleven functions and six constants, direct compatibility exports only
+      __init__.py        existing compatibility exports, plus paths; direct exports only
       _status.py         scan inventory, requirement rows, categories and compact suspect summary
       _walks.py          thread/impact and ledger variants; shared walk presentation
       _checks.py         check/ledger_check, complete findings, quiet notices and result lines
       _results.py        report verdicts, shared tests and nonpassing run details
       _schema.py         rules, schema descriptions and schema-copy outcomes
+      _paths.py          configuration-only location/provenance diagnostic; no absolute paths
     graph.py             deterministic assessment projection and standalone HTML (M7b)
     tables.py            one table as a qmstrace.table/1 JSON document, deterministic (#49)
   assets/                skill/SKILL.md · stanza.md · starter.toml + items-python/csharp.toml (#38) · ledger-starter.toml (M10c) · graph.html/js · pinned
@@ -184,6 +187,44 @@ nothing from the package: it includes files that tests own.
 `workspace/` and `cli/` sit at the package's top level. Workspace orchestration imports
 core, extraction and infrastructure; CLI wiring imports the workspace and renderers. The
 workspace package never imports rendering or CLI code.
+
+### Workspace-map ownership — ADR-0010
+
+The [accepted location contract](../adr/0010-local-workspace-maps.md) adds a local input
+without turning machine paths into trace-schema policy. The implemented owners are below;
+orchestration stays in the existing workspace owners, with no `workspace/_locations.py`.
+
+| Owner under `src/qmstrace/` | Responsibility and boundary |
+|---|---|
+| `core/locations.py` | Frozen `WorkspaceMap`, `Locations` and `Paths` values; strict pure TOML parsing and validation against supplied project/current-root values. No environment, filesystem, canonicalization, Git or CLI access |
+| `infra/locations.py` | `discover` reads selectors/candidates, compares canonical roots and validates current ledger binding; `relative` formats locations or refuses cross-drive layouts. Uses pure values; never imports workspace or renderers |
+| `render/text/_paths.py` | Render `Paths`, whose `source` holds the full notice; source kind plus map filename, root-relative checkout locations only. No discovery, scan, judgment or filesystem access |
+
+`Workspace.open`, `project`, `project_results`, `project_thread`, `project_impact`,
+`copy_schema` and `initialize` accept optional `workspace=Path`; `Workspace.paths` supplies
+the new diagnostic. Existing callers can omit the selector. The workspace owners consume
+the selected effective locations; no parallel orchestration object is introduced.
+
+`cli/_app.py`, `_local.py` and `_ledger.py` wire `--workspace FILE` at root/leaf positions;
+shared option handling reconciles duplicates with `-C` and passes plain inputs. Existing
+compatibility facades and the installed `qmstrace.cli:app` entry point remain. New options
+and the `paths` command are intentional surface additions; compatibility exports continue
+to forward their existing implementation objects.
+
+`workspace/_discovery.py` keeps trace-root discovery and existing `[schema] path` loading;
+it consumes the resolved current ledger location. `_sources.py` uses effective sibling and
+ledger locations; `_project.py` validates mapped members before the joined assessment;
+`_setup.py` uses the same locations for schema-copy destinations and plans every write
+before committing any file. A member missing from a selected map never falls through to a
+tracked path. The `paths` operation stops after configuration/location resolution and does
+not call assessment, scanning, Git or baseline owners. Current maps never enter
+`workspace/_baselines.py`'s historical schema reads or `core/config/_copy.py`'s digest input.
+
+These dependencies follow the existing import matrix: core stays pure, infrastructure
+depends inward, workspace coordinates, and renderers consume values. No new service layer,
+package facade, mutable registry or schema migration is required. Test obligations are in
+the [scenario catalogue](../tests/scenario-catalogue.md#workspace-maps--adr-0010); assertions
+about implementation belong to the implementation and test work, not this specification.
 
 ## 4. Seams
 
@@ -320,11 +361,12 @@ owns its own sub-app and registration. Local and ledger handlers import shared o
 policy, public workspace operations and renderers; they never import one another or `_app`.
 The shared policy modules are independent and never import workspace, renderers or handlers.
 
-`qmstrace.cli:app` remains the installed entry point. The facade forwards all 22 defined
-public names, including both apps, handlers, `Directory`, `outcome` and exit constants.
-Handlers retain signatures, postponed annotations, docstrings and the `functools.wraps`
-chain that Typer inspects. Registration metadata, help bytes, eager version handling,
-no-argument help, stdout/stderr separation and existing `-C` placements are preserved.
+`qmstrace.cli:app` remains the installed entry point. The facade forwards the existing
+public names, including both apps, handlers, `Directory`, `outcome` and exit constants,
+with `paths` added for ADR-0010. Handlers add the optional workspace selector and retain
+postponed annotations, docstrings and the `functools.wraps` chain that Typer inspects.
+Existing registration order, eager version handling, no-argument help, stdout/stderr
+separation and existing `-C` placements are preserved.
 Report/output path resolution stays in the handler. A command factory, dynamic discovery and
 one module per short handler were rejected: they add machinery without a distinct owner.
 Architecture and wheel gates pin dependencies, export identity and command construction.
@@ -528,8 +570,9 @@ Satisfies: REQ-QMT-14
 siblings, builds the graph, judges it, and returns one frozen `Assessment`
 (`core/assessment.py`). A command renders that value and never computes on the way out.
 The class lives in `workspace/_workspace.py`; discovery, scanning and surrounding-source
-reads have private owners. Its constructor, injection points, public signatures and dispatch
-remain unchanged. Project and setup methods delegate to their own orchestration modules;
+reads have private owners. Its constructor, injection points and dispatch remain;
+ADR-0010 adds the optional `workspace=Path` inputs and `Workspace.paths` documented in
+the ownership section above. Project and setup methods delegate to their own orchestration modules;
 judgment stays in core, transactions in infrastructure. What a run could not read or verify
 becomes a notice in the assessment, never a silence.
 Reasoning: §2 use-case ownership; §5.

@@ -1,0 +1,17 @@
+Usage: qmstrace paths [OPTIONS]
+
+  Show the selected workspace map and checkout locations relative to this trace
+  root.
+
+  Reads configuration only: no source scan, graph or baseline judgment. Missing
+  checkouts are informational; invalid or ambiguous maps exit 2. Existing paths
+  apply when no map is found. Shared evidence never includes absolute machine
+  paths.
+
+Options:
+  -C PATH           Run as if qmstrace had been started in PATH, as with git -C.
+                    Before or after the command.
+  --workspace FILE  Select a checkout map; overrides QMSTRACE_WORKSPACE and
+                    automatic discovery. Before or after the command. Relative
+                    files start at the effective -C directory.
+  --help            Show this message and exit.
