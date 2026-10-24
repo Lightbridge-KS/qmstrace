@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — terminal and JSON output implemented and verified; review and merge pending. The v0.2.0 tag/draft are unchanged and predate this feature; release rebuilding follows review and merge. External-source issue #60 and M11 remain later.
+summary: The single active qmstrace tracker — terminal and JSON output merged as PR 71. The v0.2.0 release-refresh candidate is prepared and verified; maintainer merge and authorized rebuilding remain before publication. The unpublished tag/draft still predate this feature. External-source issue 60 and M11 remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -14,18 +14,20 @@ capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#no
 on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--tables-as-data)
 landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps merged as PR #69 (`8223d32`).
 PR #70 merged (`48e5ba1`); `v0.2.0` is tagged and its release draft awaits maintainer review
-and publication. Terminal/JSON output is implemented and verified; review and merge are pending;
-the existing draft must be rebuilt after that feature merges. M11 · mentions remains later. Commit hashes locate work. Verification claims refer to checks
+and publication. Terminal/JSON output merged as PR #71 (`5453de2`); the existing draft
+predates that feature and must be rebuilt before publication. M11 · mentions remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## Implemented — terminal and JSON output
+## Landed — terminal and JSON output
 
+**Merged as [PR #71](https://github.com/Lightbridge-KS/qmstrace/pull/71)
+(`5453de2`, 2026-10-24; implementation `09029ec`, skill clarification `f65b293`).**
 Two sequential slices on `codex/cli-output`: semantic terminal styling with plain-byte
 parity, then explicit `qmstrace.cli/1` results and agent guidance.
 [ADR-0011](../adr/0011-cli-presentation-and-json.md) records the presentation and machine
 contract. Existing release reconciliation is retained; the `v0.2.0` tag and draft release
-are unchanged. The current draft predates this feature; rebuilding it follows review/merge
-and separate release authorization.
+are unchanged. The current draft predates this feature; rebuilding it requires updated
+release notes, candidate verification and separate release authorization.
 
 - [x] Ship and verify terminal styling, conditional Rich help and the output-mode reference.
 - [x] Ship command JSON, parser/domain/internal errors, schema and command goldens.
@@ -74,7 +76,11 @@ Two disposable-copy mutations prove detection: disabling semantic styles fails *
 parity cases; disabling JSON selection fails **10** command cases. Imported paths were checked
 inside each copy, which was then deleted. Local playground notes retain logs and manual
 inspection evidence. No consumer repository was modified. Local implementation and verification are complete;
-PR review, hosted CI, merge and release rebuilding are separate gates.
+PR review and merge are complete. The [PR dry gate](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40064762632)
+and deploy preview passed. Reconciled 2026-10-24: local `main` and `origin/main` point to
+`5453de2`, which contains both feature commits; the local milestone branch and stale remote
+reference were pruned. [Merge CI](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40064927564)
+passed. Release rebuilding and publication remain separate gates.
 
 ## Landed — workspace maps
 
@@ -512,7 +518,7 @@ src/qmstrace/core/setup` is empty), so `init` after the upgrade changes nothing:
   reports every file unchanged.
 - [x] `main` moves back to `0.2.0.dev0`, with `uv lock`.
 
-### Next — release 0.2.0 (existing draft; feature rebuild pending)
+### Next — release 0.2.0 (refresh verified; maintainer merge pending)
 
 **Initial readiness checked 2026-10-24 on `8223d32`.** At that snapshot the manifest and
 lockfile named `0.2.0.dev0`; GitHub listed only published 0.1.0 and 0.1.1, with no draft
@@ -526,9 +532,11 @@ no package-index publication is configured.
 schema-driven ledger tables and report verdicts, several reports per results view,
 language-aware starters, C# markers for files without a type, ID-authoring integrity,
 verification-method grouping and workspace maps. The stricter configuration refusals and
-new V17 finding need explicit upgrade notes. That release-prep scope is complete. The
-subsequently approved terminal/JSON feature above must be merged and included in a rebuilt
-draft before publication; it is currently under Unreleased in the changelog.
+new V17 finding need explicit upgrade notes. The initial release-prep scope is complete.
+Terminal/JSON output is now merged as PR #71 and must be included in a rebuilt draft before
+publication; its entries are now in the existing 0.2.0 changelog section on the refresh branch.
+The manifest and lockfile already name `0.2.0`; another version bump is unnecessary for this
+unpublished candidate.
 
 - [x] Prepare release changes on `codex/release-0.2.0`; include the tracker reconciliation.
 - [x] Audit `v0.1.1..main` against the CHANGELOG. Consolidate its duplicate `Added`
@@ -547,8 +555,24 @@ draft before publication; it is currently under Unreleased in the changelog.
   merge commit. A release tag is not a requirements baseline; do not create or move one.
 - [x] Let CI gate the tag and draft the GitHub release; verify tag/manifest/wheel metadata,
   release notes and a clean tag installation.
-- [ ] Review/merge the terminal/JSON feature; prepare updated release notes and rebuild the
-  unpublished draft/tag only under separate release authorization.
+- [x] Review and merge the terminal/JSON feature as PR #71; verify its PR dry gate and preview.
+- [x] Prepare release-refresh changes on `codex/release-0.2.0-refresh`: carry this tracker
+  reconciliation, move terminal/JSON notes into the existing 0.2.0 `Added` section,
+  leave `Unreleased` empty and audit the full
+  candidate scope. Keep manifest/lock at `0.2.0` and existing install pins; retain upgrade
+  guidance for ID checks and workspace maps and describe the new agent/output contracts.
+- [x] Verify the refreshed candidate with `just dry`, local/ledger strict checks, manual
+  inspection and an isolated wheel installation. Exercise plain/forced-color/JSON output,
+  nonzero JSON errors, unchanged table JSON and packaged skill/schema assets.
+- [ ] Review/merge the release-refresh PR; require successful CI on that exact merge commit.
+- [ ] With explicit rebuild authorization, recheck that v0.2.0 is still unpublished, remove
+  the obsolete draft and local/remote release tag, and create/push an annotated `v0.2.0`
+  at the verified refresh merge commit. Never move a published release tag or a baseline.
+  The existing workflow creates a draft rather than replacing one, so the old draft must
+  be removed before the tag push triggers it.
+- [ ] Let release CI gate the new tag and create the replacement draft. Verify its commit,
+  manifest/wheel version, CHANGELOG notes and asset checksum; smoke-test the downloaded CI
+  wheel and a clean tag installation, including JSON and bundled skill/schema assets.
 - [ ] Maintainer review and publication of the rebuilt draft release.
 - [ ] After publication, move `main` to `0.3.0.dev0` with `uv lock` in a follow-up PR;
   reconcile this checklist with the actual release/tag and verification results.
@@ -586,8 +610,44 @@ archives. The actual downloaded CI wheel also passes all 30 smoke commands in an
 temporary environment. A separate clean Git-tag installation resolves `v0.2.0` to
 `48e5ba1` and reports `qmstrace 0.2.0`. Both temporary environments were removed.
 
-**Pending:** terminal/JSON review/merge and a separately authorized draft rebuild, then
-maintainer publication, the post-publication development-version PR and consumer rollout. Nothing was published by this step; `main` remains at version 0.2.0.
+**Reconciled after PR #71, 2026-10-24:** GitHub still reports v0.2.0 as an unpublished draft.
+Both local and remote annotated tags resolve to `48e5ba1`, preceding `5453de2`; the draft's
+wheel remains the earlier candidate. Its existing asset checksum is
+`5527f5911d0b9dbb4288103985d9d25eda1e4eb7aaeb53ceeba189f118d5c8a0`.
+Neither tag nor draft was changed during this reconciliation. Earlier installation and
+asset verification above applies to that old candidate, not the merged terminal/JSON feature.
+
+**Release refresh verified, 2026-10-24:** on `codex/release-0.2.0-refresh`, terminal/JSON
+entries are included under 0.2.0, `Unreleased` is empty and the release workflow's exact
+notes extraction includes them. Published changelog history, manifest/lock version 0.2.0,
+install pins, runtime code, trace configuration, frozen SRS and release workflow are unchanged.
+The runbook no longer describes the now-public repository as private and documents the
+unpublished-candidate refresh sequence.
+
+`just dry` passed **1,470 Python tests, 4 browser tests and 98.45% coverage**, formatting,
+lint, strict mypy, isolated wheel checks across 37 import orders and the strict manual build.
+Both local and ledger strict checks exit 0: **869 items, 0 violations, 0 gaps and 32
+informational suspects**; **16 frozen, 3 changed, 7 new, 0 removed, 0 withdrawn**. Remote-tag
+completeness remains unverified; these checks do not record suspect review.
+
+An isolated installation of the refreshed wheel passed **56 recorded subprocess commands**
+outside the source checkout, using hashed locked runtime dependencies, a fresh home and
+disposable split/MINI repositories. Checks include relocated workspace maps, transactional
+schema copies and init preservation, plain/forced-color parity, schema-valid assessment JSON,
+usage/unseen-ID exit 2, failed-check exit 1, complete quiet JSON, unchanged table bytes and
+packaged skill/schema parity. The temporary environment and fixture roots were removed.
+Synthetic reports establish matching behavior, not newly executed consumer tests.
+
+Built JSON and agent/CI pages were inspected in the browser. Two rendered JSON goldens and
+four rendered shell blocks match their sources; the schema download returns HTTP 200 and
+matches the packaged bytes, and the install example still pins v0.2.0. Local logs and
+summaries remain in the ignored release-refresh playground. The existing tag/draft is
+untouched. Candidate preparation stops for maintainer review and merge at release step 3;
+hosted checks for the refresh PR and its eventual merge remain distinct from local checks.
+
+**Pending:** maintainer merge of the release-refresh PR, separately authorized tag/draft
+rebuilding, maintainer publication, the post-publication development-version PR and consumer
+rollout. Nothing was published by this step; `main` remains at version 0.2.0.
 The release workflow is unchanged. Issue #60, M11, cross-drive traversal and the
 schema/member-identity migration remain outside this release-preparation scope.
 

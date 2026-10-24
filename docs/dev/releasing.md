@@ -9,7 +9,7 @@ read_when:
 # Releasing qmstrace
 
 A release is a tag `vX.Y.Z` on `main` and a GitHub release that carries the CHANGELOG's
-section for it and the wheel. The repository is private, so a release is installed from
+section for it and the wheel. A release is installed from
 the tag with `uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@vX.Y.Z"`;
 nothing is published to a package index.
 
@@ -52,3 +52,11 @@ that path is not set up.
 If the workflow fails, fix the cause on `main`, delete the tag (`git push origin :vX.Y.Z`,
 `git tag -d vX.Y.Z`) and any draft it left, and tag again. A published release's tag is
 never moved.
+
+**Refreshing an unpublished candidate.** Additional merged work needs a release-refresh PR
+that updates the version's existing CHANGELOG section and repeats candidate verification.
+After that PR merges and its merge CI passes, explicit rebuild authorization permits removing
+the obsolete draft and local/remote tag and pushing a new annotated tag at that exact commit.
+Remove the old draft before pushing: the workflow creates a draft rather than replacing one.
+Recheck that the release is still unpublished before removing anything. Review the replacement
+CI wheel and notes before publication; a refresh PR alone changes neither tag nor draft.

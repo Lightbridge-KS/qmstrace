@@ -6,18 +6,19 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
-### Added
-
-- Semantic terminal emphasis and conditional Rich help, with plain reports for pipes and
-  `NO_COLOR`. Styling preserves report content, layout and judgment.
-- Explicit `--json` assessment results (`qmstrace.cli/1`), including structured parser and
-  domain errors, evidence notices, a packaged JSON Schema and bundled agent guidance.
-  Existing `qmstrace.table/1` documents and command exit meanings remain unchanged.
-
 ## [0.2.0] - 2026-10-24
 
 ### Added
 
+- Semantic terminal emphasis and conditional Rich help, with plain reports for pipes and
+  `NO_COLOR`. `FORCE_COLOR` enables styling for redirected output. Styling preserves report
+  content, layout and judgment
+  ([#71](https://github.com/Lightbridge-KS/qmstrace/pull/71)).
+- Explicit `--json` assessment results (`qmstrace.cli/1`), including structured parser and
+  domain errors, evidence notices, a packaged JSON Schema and bundled agent guidance.
+  JSON is opt-in; redirected output stays plain without the flag. Existing
+  `qmstrace.table/1` documents and command exit meanings remain unchanged
+  ([#71](https://github.com/Lightbridge-KS/qmstrace/pull/71)).
 - `qmstrace ledger table matrix | requirements | coverage`, run in the ledger: the traceability
   matrix, the requirements register or the coverage summary, as a versioned JSON document
   (`qmstrace.table/1`) for a render layer to turn into a formal document. Columns come from
