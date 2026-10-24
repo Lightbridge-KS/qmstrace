@@ -7,7 +7,7 @@ read_when:
 
 # ADR-0012 — Names-only configuration and local workspace profiles
 
-- **Status:** accepted, 2026-10-24; implementation and native Windows N12 verified; PR #74 merged at `79841ec`; unreleased
+- **Status:** accepted, 2026-10-24; implementation and native Windows N12 verified; PR #74 merged at `79841ec`; shipped in v0.3.0 at `a276e6e`
 - **Accepted direction:** required `workspace_profile` in v2, cross-drive Windows support
   and uniform `qmstrace.cli/2`, chosen by the developer in the design form
 - **Amends:** ADR-0010's retained path defaults/cross-drive refusal,
