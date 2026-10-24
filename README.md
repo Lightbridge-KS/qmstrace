@@ -21,7 +21,7 @@ points at evidence that stays in its home system.
 Install a release as a uv tool. The repository is private, so this needs read access to it:
 
 ```sh
-uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.1.1"
+uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.2.0"
 ```
 
 The pin holds: `uv tool upgrade` keeps it. To move to a later release, run the same command

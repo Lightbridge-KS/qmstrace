@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — slice 1, M10, package refactors and M12 landed; release 0.1.1 published; #25 and #26 landed in PR #67. #57 landed in PR #68; workspace maps are implemented and verified, awaiting review; external-source issue #60 and M11 mentions remain later.
+summary: The single active qmstrace tracker — release 0.1.1 published; workspace maps landed in PR #69. Release 0.2.0 is prepared and locally verified, awaiting release-PR merge; external-source issue #60 and M11 mentions remain later.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -12,15 +12,16 @@ read_when:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#
 capability](#landed--m12--the-c-capability): landed.** Now: [real-world use](#now--real-world-use)
 on a C# repo, in the layout of ADR-0001. [#49 · tables as data](#landed--49--tables-as-data)
-landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps are implemented and verified on
-`codex/workspace-map`. M11 · mentions
+landed; the authoring-integrity fix for #25 and #26 merged as PR #67. Issue #57 merged as PR #68 (`03d0719`). Workspace maps merged as PR #69 (`8223d32`).
+Next: merge the prepared 0.2.0 release PR, then authorize tagging. M11 · mentions
 remains later. Commit hashes locate work. Verification claims refer to checks
 that were actually run.
 
-## Ready for review — workspace maps
+## Landed — workspace maps
 
-**2026-10-24 · `codex/workspace-map`.** Add per-machine checkout maps without changing
-schema formats, digests or historical reads. Consumer rollout remains separate.
+**Merged as [PR #69](https://github.com/Lightbridge-KS/qmstrace/pull/69)
+(`8223d32`, 2026-10-24; implementation `3ac0437`).** Per-machine checkout maps preserve
+schema formats, digests and historical reads. Consumer rollout remains separate.
 
 - [x] Add strict map parsing and shared location resolution, preserving tracked-path fallback.
 - [x] Wire explicit/environment/ancestor/user discovery into reads and transactional copies.
@@ -31,8 +32,8 @@ schema formats, digests or historical reads. Consumer rollout remains separate.
 Accepted discovery: CLI, environment, nearest ancestor map, then a unique user-level match
 by project and canonical current checkout. Malformed user candidates fail discovery; maps
 never merge or replace tagged configuration. Relative locations remain the output contract;
-cross-drive layouts are refused. Implementation is verified; PR review and consumer rollout
-remain separate gates.
+cross-drive layouts are refused. Implementation and PR review are complete; release and
+consumer rollout remain separate gates.
 
 Verified during development: **142 focused workspace-map tests** passed, followed by **107
 setup, CLI-map and workspace-dispatch tests** after adding init provenance coverage.
@@ -49,13 +50,19 @@ remain separate; this change does not migrate consumer repositories. The frozen 
 dependency manifest/lockfile and trace configuration are unchanged. Existing behavior-output
 goldens are unchanged; the 14 existing help goldens add the workspace option and command.
 
-Final `just dry` passed: **1,385 Python tests, 4 browser tests, 98.46% coverage**,
+Verification recorded for PR #69: `just dry` passed **1,385 Python tests, 4 browser tests, 98.46% coverage**,
 formatting, lint, strict mypy, isolated wheel/package checks and the manual build. The
 built paths reference, map reference and developer/CI how-to were inspected: four included
 goldens match exactly, all 16 rendered code blocks are intact, and CI heredoc boundaries
 and cleanup survive rendering. The final review found no remaining concrete defects.
 Accepted limits remain: no cross-drive layout support, schema-format migration, tracked
 member-identity field, or consumer rollout in this increment.
+
+Reconciled 2026-10-24: GitHub confirms the merge; the PR dry gate and deploy preview
+passed. [CI on the merge commit](https://github.com/Lightbridge-KS/qmstrace/actions/runs/40049553446)
+also passed. Local `main` and `origin/main` point to `8223d32`; the merged implementation
+commit is an ancestor. The local milestone branch was deleted. Release 0.1.1 remains the
+latest published release; merge is not publication or consumer installation.
 
 ## Landed — #57 · verification-method grouping
 
@@ -446,6 +453,67 @@ src/qmstrace/core/setup` is empty), so `init` after the upgrade changes nothing:
   reports every file unchanged.
 - [x] `main` moves back to `0.2.0.dev0`, with `uv lock`.
 
+### Next — release 0.2.0 (awaiting merge)
+
+**Readiness checked 2026-10-24 on `8223d32`.** The manifest and lockfile both name
+`0.2.0.dev0`; GitHub lists only published 0.1.0 and 0.1.1, with no draft release. No
+`v0.2.0` tag exists locally or on GitHub. The merge CI is green. The
+[release workflow](../../.github/workflows/release.yml) still gates a pushed version tag,
+checks it against the manifest, extracts CHANGELOG notes and drafts a GitHub release with
+the wheel. The [release runbook](../dev/releasing.md) keeps publication with a maintainer;
+no package-index publication is configured.
+
+**Accepted version and scope: 0.2.0, shipping the merged work since 0.1.1.** This includes
+schema-driven ledger tables and report verdicts, several reports per results view,
+language-aware starters, C# markers for files without a type, ID-authoring integrity,
+verification-method grouping and workspace maps. The stricter configuration refusals and
+new V17 finding need explicit upgrade notes. No new feature is proposed for release prep.
+
+- [x] Prepare release changes on `codex/release-0.2.0`; include the tracker reconciliation.
+- [x] Audit `v0.1.1..main` against the CHANGELOG. Consolidate its duplicate `Added`
+  headings; add the missing #67, #68 and #69 entries and workspace-preserving skill
+  migration guidance. State schema/history, no-map and cross-drive boundaries.
+- [x] Set `pyproject.toml` to `0.2.0`, run `uv lock`, date the release section when it is
+  prepared, retain an empty `Unreleased` section and update comparison links. Update the
+  current install pins in `README.md` and `contents/how-to/set-up-a-repo.md`, without
+  rewriting historical release records.
+- [x] Run `just dry`, local and ledger strict trace gates, and inspect the built manual.
+  Smoke-test the built wheel outside the source checkout: version/help, paths with and
+  without a map, relocated local/ledger reads and setup preserving a local map. Use
+  disposable fixtures; record evidence limits and informational suspects.
+- [ ] Review and merge the release PR; require successful CI on its merge commit.
+- [ ] With release authorization, create and push an annotated `v0.2.0` tag on that exact
+  merge commit. A release tag is not a requirements baseline; do not create or move one.
+- [ ] Let CI gate the tag and draft the GitHub release; verify tag/manifest/wheel metadata,
+  release notes and a clean tag installation. Maintainer review and publication follow.
+- [ ] After publication, move `main` to `0.3.0.dev0` with `uv lock` in a follow-up PR;
+  reconcile this checklist with the actual release/tag and verification results.
+- [ ] Plan consumer upgrades and workspace-profile rollout separately. Preserve existing
+  configurations, inspect stricter ID checks and skill migration before adopting maps.
+
+**Candidate verification, 2026-10-24:** `just dry` passes **1,385 Python tests, 4 browser
+tests and 98.46% coverage**, formatting, lint, strict mypy, isolated wheel checks and the
+manual build. Local and ledger `check --strict --quiet` both exit 0 with **829 items,
+0 violations, 0 gaps and 32 informational suspects**; remote-tag completeness remains
+unverified. The dependency set is unchanged; only the project's version changed in the
+lockfile. The release workflow's notes extraction yields one nonempty 0.2.0 section with
+unique Added/Changed/Fixed headings; published changelog history is unchanged.
+
+An isolated temporary environment installed the wheel with hashed runtime dependencies
+from the lockfile. All 30 recorded commands completed with their expected exits, covering
+import origin, version/help, tracked/default paths, relocated local and ledger strict
+checks, table JSON, report matching, schema-copy byte preservation, setup preserving a
+local map, idempotent setup, C# starter assets and partial-map refusal without writes.
+The synthetic report checks matching, not execution of consumer tests. The sandbox was
+removed; local evidence remains in the ignored release playground session. The final
+wheel is byte-identical to the smoke-tested one. The built installation example pins
+0.2.0, and four workspace-map golden code blocks match their rendered pages.
+
+**Pending, not verified:** release-PR merge/merge CI, tag-triggered release run, clean tag
+installation, publication and consumer rollout. No release tag or draft GitHub release
+has been created. The release workflow is unchanged. Issue #60, M11, cross-drive traversal
+and the schema/member-identity migration remain outside this release-preparation scope.
+
 **Target layout — [ADR-0001](../adr/0001-the-ledger-holds-the-documents.md), 2026-09-28:**
 - **The ledger repo holds the documents:** the SRS and the design documents, beside the
   agreement, the change requests and the schema. It is traced itself, and lists itself in
@@ -462,9 +530,11 @@ Pinned imports and historical cross-repo edit comparisons remain deferred.
    trace end to end.
 2. Install the latest release as a uv tool, as the README says; confirm `qmstrace --version` and
    that `ledger --help` lists `check`, `thread` and `impact` before onboarding with it.
-3. Settle subjects and ID patterns before authoring and before the first baseline. Review
-   #25 and #26: malformed IDs can escape detection, and unknown subject ownership can make
-   a frozen snapshot unusable.
+3. Settle subjects and ID patterns before authoring and before the first baseline. The
+   guards for #25 and #26 merged in #67 and are included in the prepared 0.2.0 release;
+   published 0.1.1 does not yet include them. Audit older IDs and tagged evidence before
+   adopting the stricter checks; historical invalid ownership still needs a valid successor
+   baseline rather than rewriting a tag.
 4. Set up the ledger and code/test repos, then trace the feature and run the project gate.
    Product `init` still generates a repo-owned starter; joining an existing ledger needs
    configuration edits followed by `ledger copy-schema`. See the

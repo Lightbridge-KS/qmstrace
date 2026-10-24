@@ -6,6 +6,8 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-24
+
 ### Added
 
 - `qmstrace ledger table matrix | requirements | coverage`, run in the ledger: the traceability
@@ -31,8 +33,19 @@ All notable changes to this project are recorded here. The format follows
   `[tables.matrix] level` — when its type has none
   ([#49](https://github.com/Lightbridge-KS/qmstrace/issues/49)).
 
-### Added
-
+- Optional workspace maps locate current checkouts independently of committed repo paths.
+  Select one whole map with `--workspace FILE`, `QMSTRACE_WORKSPACE`, the nearest ancestor
+  `.qmstrace/workspace.toml` or a unique user-level match. Relative entries start at the map's
+  canonical directory. Omitted or unavailable members never fall back to tracked locations;
+  ledger commands still run from the ledger trace root. Existing behavior is preserved when
+  discovery finds no map. Schema formats, digests, generated copies and historical reads are
+  unchanged. Cross-drive layouts are refused with exit `2`
+  ([#69](https://github.com/Lightbridge-KS/qmstrace/pull/69)).
+- `qmstrace paths` shows the location source, ledger and member locations and availability,
+  without scanning items or judging baselines. Selected-map provenance remains visible in
+  human output, including quiet checks. Diátaxis reference and developer/CI setup pages
+  explain discovery, path anchors and Git exclusion
+  ([#69](https://github.com/Lightbridge-KS/qmstrace/pull/69)).
 - A C# component whose file has **no type to document** can carry its `Implements:` marker. A
   Razor page is marked in the first `@* Implements: DSN-… *@` of its head — its leading blank
   lines, comments and directives, above the first markup or `@code` block, so the comment may
@@ -67,6 +80,26 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- An explicit `id_prefix` must agree with a literal prefix provably shared by every branch
+  of its ID pattern. Grouped alternatives remain valid when their shared start can be
+  proved; an incompatible prefix is refused with exit `2` before scanning, rather than
+  letting IDs disappear. New finding `V17` reports baseline-covered document IDs without
+  exactly one configured subject key while authoring. If an applicable baseline exists,
+  uncertain ownership still stops judgment with exit `2`; an invalid tagged snapshot needs
+  a valid successor baseline, never a rewritten tag. Existing configurations should be
+  checked before upgrading or cutting another baseline
+  ([#25](https://github.com/Lightbridge-KS/qmstrace/issues/25),
+  [#26](https://github.com/Lightbridge-KS/qmstrace/issues/26)).
+- `status` and `results` group requirements by applicable incoming-`verifies` coverage rules
+  and every condition in their `where` table, rather than a fixed rule code or method list.
+  Requirements with missing or invalid methods do not default to test-backed display.
+  Other verification methods show their declared value and any linked outcomes as test
+  evidence only. Coverage gaps, verdict aggregation, exit codes and ledger-table verdict
+  cells keep their meaning
+  ([#57](https://github.com/Lightbridge-KS/qmstrace/issues/57)).
+- Legacy skill migration guidance removes only `.qmstrace/skill/`, preserving workspace maps
+  and other local files. `init` preserves workspace maps when refreshing managed guidance
+  ([#69](https://github.com/Lightbridge-KS/qmstrace/pull/69)).
 - Two `[externals.*]` tables whose prefixes overlap — equal, or one starting the other — are
   refused when the schema is read, naming both tables and both prefixes. A citation was judged
   against the first table's file only, so a clause declared in the second drew a `V09` that
@@ -284,6 +317,7 @@ All notable changes to this project are recorded here. The format follows
   with — underscores, lower case, a space — is refused with the ID shape and the next move,
   instead of being accepted and silently matching nothing.
 
-[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Lightbridge-KS/qmstrace/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Lightbridge-KS/qmstrace/releases/tag/v0.1.0
