@@ -24,13 +24,18 @@ The load-bearing claims, each pinned by a test:
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.model import Extracted
-from qmstrace.extract.csharp import component, xunit
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+component = SimpleNamespace(extract=CATALOG.extractor("csharp-file"))
+xunit = SimpleNamespace(extract=CATALOG.extractor("xunit"))
 
 CASES = Path(__file__).parents[1] / "fixtures" / "cases"
 AGENT = CASES / "agent"
@@ -41,7 +46,7 @@ BLOCK = (AGENT / "tests" / "Agent.Probe" / "BlockNamespace.cs").read_text(encodi
 
 @pytest.fixture(scope="module")
 def agent() -> TraceConfig:
-    return TraceConfig.parse((AGENT / "qmstrace.toml").read_text(encoding="utf-8"), SCHEMA)
+    return CATALOG.configuration((AGENT / "qmstrace.toml").read_text(encoding="utf-8"), SCHEMA)
 
 
 def files(config: TraceConfig, text: str, path: str = "src/Agent/KeyCheck.cs") -> Extracted:
@@ -304,7 +309,7 @@ def test_a_type_read_by_xunit_carries_exactly_one_link() -> None:
     )
     assert two != SCHEMA
     with pytest.raises(CouldNotJudge) as caught:
-        TraceConfig.parse(local, two)
+        CATALOG.configuration(local, two)
     assert "names no link of its own" in caught.value.what
     assert "2 links to choose from (verifies, Assumes)" in caught.value.what
 

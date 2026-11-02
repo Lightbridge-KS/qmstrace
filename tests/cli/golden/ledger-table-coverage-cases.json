@@ -1,5 +1,40 @@
 {
   "format": "qmstrace.table/2",
+  "toolchain": {
+    "host": {
+      "distribution": "qmstrace",
+      "version": "<host-version>"
+    },
+    "python": {
+      "implementation": "CPython",
+      "version": "<python-version>"
+    },
+    "providers": [
+      {
+        "distribution": "qmstrace-lang-csharp",
+        "version": "<plugin-version>",
+        "package": "qmstrace_lang_csharp",
+        "api": 1,
+        "extractors": [
+          "csharp-file",
+          "xunit"
+        ],
+        "compatible": true,
+        "problems": [],
+        "parser_dependencies": {
+          "tree-sitter": "<parser-version>",
+          "tree-sitter-c-sharp": "<parser-version>"
+        }
+      }
+    ],
+    "extractors": [
+      "csharp-file",
+      "markdown",
+      "pytest",
+      "python-module",
+      "xunit"
+    ]
+  },
   "table": "coverage",
   "project": "CASES",
   "draft": "generated from the ledger — not an issued revision",

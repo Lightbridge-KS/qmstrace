@@ -9,6 +9,12 @@ read_when:
 
 # qmstrace — Codebase Blueprint (slice 1)
 
+**Implemented transition:** [ADR-0013](../adr/0013-extractor-plugins.md)
+supersedes the internal-only language registry. The
+[extensibility design](../design/extensibility-architecture.md) owns the public API and uv
+workspace boundary. The package-boundary section below extends the original tree and import
+matrix; the [tracker](../progress/csharp-extractor-plugin.md) records verification and limits.
+
 > Inputs: [Product Requirements](../req/qmstrace-prd.md) · [Data Architecture](../design/data-architecture.md) · [Surface Architecture](../design/surface-architecture.md) · [System Architecture](../design/system-architecture.md) · [Progress tracker](../progress/overview-qmstrace.md) · [Scenario catalogue](../tests/scenario-catalogue.md) · the framework as installed: Typer 0.27.2, `uv_build`, Python 3.13 · Date: 2026-09-21
 
 The design docs are this document's input, and it has standing to amend them. **The findings
@@ -122,11 +128,6 @@ src/qmstrace/
       __init__.py        empty; callers import the concrete owner
       module.py          module components, docstring markers, strays and syntax-tree digest
       pytest_tests.py    test collection, verifies markers, digest and report_identity(node_id)
-    csharp/              C# (ADR-0004): independent owners over one private parser
-      __init__.py        empty; callers import the concrete owner
-      _syntax.py         the only tree-sitter importer: types, methods, attributes, comments
-      component.py       csharp-file — a .cs file, its first type's /// field lines, strays
-      xunit.py           xunit — [Fact]/[Theory] methods, the DisplayName's ID, run identities
     python_module.py     compatibility imports of python.module extract and form only
     pytest_tests.py      compatibility imports of python.pytest_tests extract, form, report_identity
     reports.py           bytes -> Report: one safe defusedxml parse; the root picks the reader
@@ -451,8 +452,9 @@ deciding eligibility. The check failure predicate remains violations plus strict
   classmethods on `Workspace`, like `init`; the check's result is a value
   (`ProjectAssessment`), not an object. A ledger-side object waits for the import, when the
   ledger holds state of its own.
-- **No plugin system.** Extractors are a registry by name inside the package until two exist
-  outside it.
+- **Bundled and external extraction.** Python and Markdown ship inside the host.
+  [ADR-0013](../adr/0013-extractor-plugins.md) accepts the transition to independently
+  versioned C# extraction. The external manifest catalog now supplies those capabilities.
 - **No `utils.py`, no general barrel re-exports.** `__init__.py` files are empty but for the
   package version and the explicit compatibility exports in `core/config/`, `core/judge/`,
   `core/graph/`, `core/setup/`, `extract/markdown/`, `render/text/`, `workspace/` and `cli/`. Those
@@ -463,7 +465,8 @@ deciding eligibility. The check failure predicate remains violations plus strict
   `extract/python/__init__.py` stays empty and canonical callers import its concrete owners.
 - **No pydantic or direct Rich dependency.** Dataclasses, pure ANSI formatting and JSON;
   conditional Rich help is provided by Typer. The tool installs with Typer,
-  `defusedxml` and, for C#, tree-sitter with its C# grammar (prebuilt wheels; ADR-0004).
+  `defusedxml` for reports and `packaging` for provider metadata admission. The C# member owns
+  tree-sitter and its C# grammar (prebuilt wheels; ADR-0013).
 - **No use of the framework's private modules.** Typer's vendored click is not ours to import.
 - **No second item type named in `status`.** It lists `requirement` items and reads `Category`
   and `Verify-by` by name — a known hard-coding in `render/text/_status.py`, since every trace schema so
@@ -781,7 +784,7 @@ Satisfies: REQ-QMT-17, REQ-QMT-18
 
 ### DSN-QMT-15 — C# is read by two extractors, and Razor by neither parser
 
-`extract/csharp/_syntax.py` parses a `.cs` file once with tree-sitter into frozen values — types
+`qmstrace_lang_csharp/_syntax.py` parses a `.cs` file once with tree-sitter into frozen values — types
 with their namespace, enclosing types, bases and leading `///` lines; methods with their
 attributes and arguments; comments — and reports a parse error only inside something read.
 `component.py` (`csharp-file`) makes one component per file and reads its first type's doc
@@ -792,7 +795,7 @@ concrete subclass in the file. Every unread form is V15, a commented-out test at
 stray.
 
 A file with **no type to document** is marked in its own leading comment (#64): `component.py`
-dispatches on the path, reading a `.razor` page through `extract/csharp/_razor.py` — a line
+dispatches on the path, reading a `.razor` page through `qmstrace_lang_csharp/_razor.py` — a line
 scanner importing neither `_syntax` nor tree-sitter, since whether the C# grammar refuses a
 Razor file depends on where its markup sits — and a `.cs` file with no type through the comment
 block it opens with. A marker a Razor page cannot carry is a `razor` stray. Reasoning:
@@ -846,3 +849,29 @@ The CLI schema is a packaged asset, with a byte-identical published copy checked
 Only development tests import jsonschema. Renderers remain standard-library/core-only.
 Public locations use display labels, never the map's operational roots. Paths retains
 structured map source/filename in addition to its existing human provenance string.
+
+
+## Extractor package boundary (ADR-0013)
+
+The host source tree adds `plugin_api/v1.py` (immutable contract and ID/digest helpers),
+`plugins/catalog.py` (distribution admission and lazy handler cache), and
+`plugins/adapter.py` (runtime result validation and internal conversion).
+`render/plugins.py` owns inspection text. The C# implementation now lives in
+`packages/qmstrace-lang-csharp/src/qmstrace_lang_csharp/`: component, xunit, syntax, Razor,
+field-line parsing and source diagnostics. There is no host C# implementation fallback.
+
+Import rules extend the earlier matrix: core may import the dependency-free public API for
+shared ID/digest definitions; the public API imports only the standard library. The catalog
+may import core descriptors, the adapter, bundled registry and distribution metadata APIs.
+Workspace assembly imports the catalog. The CLI error boundary recognizes its provider
+fault. The language package imports only `qmstrace.plugin_api.v1` from the host and owns
+its parser dependencies. Tests enforce that boundary and the host's absence of parser imports.
+
+Configuration parsing remains filesystem-free and accepts descriptor data explicitly. No
+core call discovers distributions. `copy_schema` receives the same data for validation.
+The old `EXTRACTORS`/`REGISTRY` compatibility exports describe only bundled extractors;
+workspace callers use their invocation's catalog for external capabilities.
+
+Both production source roots and member tests are traced. A moved module gains a path-derived
+identity; the move does not fabricate continuity or clear downstream suspects. Each package
+has its own 90% coverage gate; aggregate host coverage cannot hide plugin under-coverage.

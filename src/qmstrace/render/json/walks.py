@@ -28,6 +28,7 @@ def thread(value: View, item_id: str) -> dict[str, object]:
     ids = {item_id, *forward.steps, *backward.steps}
     return {
         "project": value.config.project,
+        "toolchain": dict(value.toolchain),
         "start": item_id,
         "items": [node(graph.nodes[i]) for i in sorted(ids)],
         "forward": _walk(forward, value.config.repo),
@@ -56,6 +57,7 @@ def impact(value: View, item_ids: Iterable[str]) -> dict[str, object]:
     kinds = {graph.nodes[i].type for i in downstream}
     return {
         "project": config.project,
+        "toolchain": dict(value.toolchain),
         "starts": sorted(starts),
         "items": [node(graph.nodes[i]) for i in sorted(starts | downstream | set(origins))],
         "downstream": [

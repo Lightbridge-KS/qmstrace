@@ -4,9 +4,11 @@ import re
 from importlib.resources import files
 from pathlib import Path
 
-from qmstrace.core.config import TraceConfig
 from qmstrace.core.findings import CODES
-from qmstrace.extract.base import REGISTRY
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+REGISTRY = {name: CATALOG.extractor(name) for name in CATALOG.descriptors}
 
 
 def test_all_shipped_marker_examples_parse(service) -> None:
@@ -14,11 +16,11 @@ def test_all_shipped_marker_examples_parse(service) -> None:
     blocks = re.findall(r"```(markdown|python|csharp|razor)\n(.*?)\n```", skill, re.S)
     assert len(blocks) == 8
     cases = Path(__file__).parents[1] / "fixtures" / "cases" / "ledger"
-    ledger = TraceConfig.parse(
+    ledger = CATALOG.configuration(
         (cases / "qmstrace.toml").read_text("utf-8"),
         (cases / "qmstrace.schema.toml").read_text("utf-8"),
     )
-    agent = TraceConfig.parse(
+    agent = CATALOG.configuration(
         (cases.parent / "agent" / "qmstrace.toml").read_text("utf-8"),
         (cases / "qmstrace.schema.toml").read_text("utf-8"),
     )

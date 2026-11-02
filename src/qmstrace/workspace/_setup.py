@@ -19,6 +19,7 @@ from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.locations import joined, qualify
 from qmstrace.infra.files import Link, contained, read_optional, update_files, update_in
 from qmstrace.infra.locations import discover
+from qmstrace.plugins.catalog import Catalog, ProviderUnavailable
 from qmstrace.workspace._discovery import (
     CONFIG_FILE,
     SCHEMA_FILE,
@@ -92,6 +93,7 @@ def initialize(
     start: Path,
     *,
     load_config: Callable[[Path], TraceConfig],
+    catalog: Catalog | None = None,
     subject: str | None = None,
     key: str | None = None,
     language: str | None = None,
@@ -103,6 +105,7 @@ def initialize(
     holds the project's documents (ADR-0001): its own configuration reads the schema by
     path, and its stanza names the ledger's verbs (M10c).
     """
+    catalog = catalog or Catalog()
     root = start.resolve()
     if not root.is_dir():
         raise CouldNotJudge(
@@ -142,6 +145,16 @@ def initialize(
             current = assets.joinpath("ledger-starter.toml").read_text(encoding="utf-8")
         else:
             picked, why = _language(root, language)
+            if picked == "csharp":
+                try:
+                    catalog.require("csharp-file")
+                    catalog.require("xunit")
+                except ProviderUnavailable as stopped:
+                    raise ProviderUnavailable(
+                        stopped.what,
+                        "Fix: install the qmstrace-lang-csharp wheel in the host environment: "
+                        "uv tool install --with CSHARP_WHEEL HOST_WHEEL.",
+                    ) from None
             current = (
                 assets.joinpath("starter.toml").read_text(encoding="utf-8")
                 + "\n"
@@ -150,7 +163,7 @@ def initialize(
             chosen = (f"starter: {picked} ({why})",)
         current = current.replace("__SUBJECT__", subject).replace("__KEY__", key)
         schema = read_optional(root / SCHEMA_FILE) if ledger else None
-        config = TraceConfig.parse(current, schema)
+        config = catalog.configuration(current, schema)
         locations = discover(start, root, config, workspace)
         if locations:
             chosen = (locations.notice, *chosen)
@@ -222,7 +235,8 @@ def copy_schema(
     every named repo, or every repo in [repos]; all of them, or none (D9)."""
     ledger = _find_ledger(start)
     schema_text = read_optional(ledger / SCHEMA_FILE) or ""
-    config = _ledger_configuration(ledger, schema_text)
+    catalog = Catalog()
+    config = _ledger_configuration(ledger, schema_text, catalog)
     locations = discover(start, ledger, config, workspace)
     if config.version == 2 and locations is None:
         raise CouldNotJudge(
@@ -282,8 +296,10 @@ def copy_schema(
                     f"{config.project}'s"
                 )
                 continue
-            updated = setup.copy_schema(local, held, block, shown)
-            candidate = TraceConfig.parse(updated, local_name=shown)
+            updated = setup.copy_schema(local, held, block, shown, descriptors=catalog.descriptors)
+            candidate = TraceConfig.parse(
+                updated, local_name=shown, descriptors=catalog.descriptors
+            )
             if config.version == 2 and candidate.repo != name:
                 raise CouldNotJudge(
                     f"{shown} declares another repository identity.",

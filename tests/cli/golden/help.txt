@@ -23,6 +23,7 @@ Commands:
   init     Set up trace configuration, agent guidance and pytest markers.
   graph    Write an offline, interactive view of the local trace graph.
   paths    Explain checkout locations and workspace-map selection.
+  plugins  Inspect installed extractor providers and problems.
   ledger   The project side's verbs — run them in the ledger repo.
 
   Exit codes:

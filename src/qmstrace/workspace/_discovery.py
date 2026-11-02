@@ -15,6 +15,7 @@ from qmstrace.core.config import SchemaForm, TraceConfig
 from qmstrace.core.errors import CouldNotJudge
 from qmstrace.infra.locations import relative
 from qmstrace.infra.tree import GitTree, ISourceTree
+from qmstrace.plugins.catalog import Catalog
 
 CONFIG_FILE: Final = "qmstrace.toml"
 
@@ -69,7 +70,7 @@ def _find_ledger(start: Path) -> Path:
     )
 
 
-def _configuration(root: Path, tree: ISourceTree) -> TraceConfig:
+def _configuration(root: Path, tree: ISourceTree, catalog: Catalog | None = None) -> TraceConfig:
     try:
         local = tree.read(CONFIG_FILE)
     except UnicodeDecodeError:
@@ -88,7 +89,7 @@ def _configuration(root: Path, tree: ISourceTree) -> TraceConfig:
             f"Historical schema '{reference}' is not UTF-8 text.",
             "Fix: inspect the tagged schema; a current schema cannot replace it.",
         ) from None
-    return TraceConfig.parse(local, schema)
+    return (catalog or Catalog()).configuration(local, schema)
 
 
 def _read(path: Path) -> str | None:
@@ -122,9 +123,12 @@ def _report_label(root: Path, path: Path) -> str:
         return path.name
 
 
-def _ledger_configuration(root: Path, schema_text: str) -> TraceConfig:
+def _ledger_configuration(
+    root: Path, schema_text: str, catalog: Catalog | None = None
+) -> TraceConfig:
     """A v2 ledger supplies its real identity/profile; a legacy schema may stand alone."""
-    schema = TraceConfig.of_schema(schema_text)
+    catalog = catalog or Catalog()
+    schema = TraceConfig.of_schema(schema_text, descriptors=catalog.descriptors)
     if schema.version == 1:
         return schema
     local = _read(root / CONFIG_FILE)
@@ -139,7 +143,7 @@ def _ledger_configuration(root: Path, schema_text: str) -> TraceConfig:
             "A v2 ledger must read its authoritative qmstrace.schema.toml by path.",
             'Fix: set [schema] path = "qmstrace.schema.toml"; a map cannot repair the reference.',
         )
-    own = TraceConfig.parse(local, _read(root / reference))
+    own = catalog.configuration(local, _read(root / reference))
     if own.repo != schema.ledger_repo or own.schema_digest != schema.schema_digest:
         raise CouldNotJudge(
             "The ledger's local identity or schema differs from the schema it owns.",

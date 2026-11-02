@@ -3,11 +3,13 @@
 import os
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
-wheel_path = next(Path("dist").glob("*.whl")).resolve()
+version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+wheel_path = Path(f"dist/qmstrace-{version}-py3-none-any.whl").resolve()
 with ZipFile(wheel_path) as wheel:
     for asset in Path("src/qmstrace/assets").rglob("*"):
         if asset.is_file():
@@ -34,9 +36,8 @@ with TemporaryDirectory() as outside:
         "extract.python.pytest_tests",
         "extract.python_module",
         "extract.pytest_tests",
-        "extract.csharp._syntax",
-        "extract.csharp.component",
-        "extract.csharp.xunit",
+        "plugin_api.v1",
+        "plugins.catalog",
         "extract.reports",
         "extract.junit",
         "extract.trx",
@@ -148,17 +149,9 @@ assert [link.dst for link in read.links] == ['REQ-SVC-01']
 assert pytest_tests.report_identity(read.items[0].id) == (
     'tests.unit.test_key.TestKey', 'test_valid')
 assert 'pytest' not in sys.modules  # source scanning never imports the test framework
-from qmstrace.extract.csharp import component as csharp_file, xunit
-assert REGISTRY['csharp-file'] is csharp_file.extract and REGISTRY['xunit'] is xunit.extract
-assert FORMS['csharp-file'] is csharp_file.form and FORMS['xunit'] is xunit.form
-assert csharp_file.__file__.startswith(sys.argv[1] + '/')
-source = '/// Implements: DSN-SVC-01\npublic class Key { }\n'
-read = csharp_file.extract('src/Key.cs', source, by_path.item_types['component'], by_path)
-assert [link.dst for link in read.links] == ['DSN-SVC-01'] and not read.findings
 from importlib.resources import files
 starter = files('qmstrace').joinpath('assets/starter.toml').read_text()
-for language, extractors in (('python', ('python-module', 'pytest')),
-                             ('csharp', ('csharp-file', 'xunit'))):
+for language, extractors in (('python', ('python-module', 'pytest')),):
     tail = files('qmstrace').joinpath(f'assets/items-{language}.toml').read_text()
     joined = (starter + '\n' + tail).replace('__SUBJECT__', 'service').replace('__KEY__', 'SVC')
     types = TraceConfig.parse(joined).item_types
@@ -274,7 +267,7 @@ for command in ((), ('ledger',), *((c.callback.__name__,) for c in cli.app.regis
     result = runner.invoke(entry.load(), [*command, '--help'], prog_name='qmstrace')
     assert result.exit_code == 0, result.output
     assert result.stdout_bytes and not result.stderr_bytes
-assert len(cli.app.registered_commands) == 9 and len(cli.ledger.registered_commands) == 5
+assert len(cli.app.registered_commands) == 10 and len(cli.ledger.registered_commands) == 5
 assert len(cli.app.registered_groups) == 1
 import json
 from importlib.resources import files

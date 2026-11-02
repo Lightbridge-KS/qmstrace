@@ -73,7 +73,10 @@ as text — is reported, never silently dropped.
 - Category: functional-suitability
 - Origin: AGR-2, AGR-6
 - Verify-by: test
-- Change: CR-003, CR-006
+C# extraction is supplied by an explicitly installed compatible language package; its existing
+marker, identity, digest and test-report matching behavior is preserved.
+
+- Change: CR-003, CR-006, CR-007
 
 ## Checking
 
@@ -204,7 +207,11 @@ nothing; it refuses to replace a file it did not write, and then writes nothing.
 - Category: usability
 - Origin: AGR-5
 - Verify-by: test
-- Change: CR-003, CR-005
+Before writing a starter that requires an external extractor, init verifies that a compatible
+provider is installed. If unavailable, it refuses without writing files and explains the
+required installation.
+
+- Change: CR-003, CR-005, CR-007
 
 ### REQ-QMT-13 — The schema is authored once and copied, verified
 
@@ -229,8 +236,11 @@ Every command exits 0 when it completed, 1 when the check failed, 2 when it coul
 
 ### REQ-QMT-15 — The same inputs give the same bytes
 
-Two runs of a command on the same tree print identical bytes, with no path of the machine
-it ran on.
+Two runs of a command on the same source tree, with the same external inputs and resolved
+host, plugin, runtime and parser-dependency versions, print identical bytes, with no path of
+the machine it ran on.
+
+- Change: CR-007
 
 - Category: reliability
 - Origin: AGR-15
@@ -303,3 +313,39 @@ inputs give the same document, whatever order the reports are given in.
 - Origin: AGR-4, AGR-8, AGR-13
 - Verify-by: test
 - Change: CR-004
+
+## Independently versioned extractors
+
+### REQ-QMT-24 — Compatible language packages extend extraction
+
+A compatible independently versioned language package adds named source/test extractors
+without a host source change. The host validates declarations before handler import and uses
+one provider per extractor and one catalog across current, sibling and historical scans.
+Missing, incompatible or ambiguous required providers refuse assessment; plugin faults never
+yield successful empty extraction.
+
+- Category: compatibility
+- Origin: AGR-2, AGR-5
+- Verify-by: test
+- Change: CR-007
+
+### REQ-QMT-25 — Installed extractors can be inspected without execution
+
+The plugins command lists installed providers, declared capabilities, API compatibility and
+discovery problems in text or JSON, without requiring trace configuration or importing handlers.
+
+- Category: usability
+- Origin: AGR-5
+- Verify-by: test
+- Change: CR-007
+
+### REQ-QMT-26 — Assessment identifies the extraction toolchain
+
+Assessment and table JSON identify the executing host, Python runtime, used plugin
+distributions, API versions and parser dependency versions as deterministic additive metadata,
+preserving source notices and avoiding machine-specific paths.
+
+- Category: reliability
+- Origin: AGR-9, AGR-15
+- Verify-by: test
+- Change: CR-007

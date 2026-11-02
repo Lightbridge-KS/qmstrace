@@ -34,6 +34,7 @@ def document(project: ProjectAssessment, built: Table, results: Results | None =
     notices += built.notices
     body: dict[str, object] = {
         "format": FORMAT,
+        "toolchain": dict(project.toolchain),
         "table": built.name,
         "project": project.config.project,
         "draft": DRAFT,

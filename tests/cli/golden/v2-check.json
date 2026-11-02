@@ -5,6 +5,22 @@
   "exit_code": 0,
   "data": {
     "project": "MINI",
+    "toolchain": {
+      "host": {
+        "distribution": "qmstrace",
+        "version": "<host-version>"
+      },
+      "python": {
+        "implementation": "CPython",
+        "version": "<python-version>"
+      },
+      "providers": [],
+      "extractors": [
+        "markdown",
+        "pytest",
+        "python-module"
+      ]
+    },
     "counts": {
       "items": 11,
       "links": 14,

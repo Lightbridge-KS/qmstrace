@@ -13,9 +13,9 @@ from qmstrace.core import findings
 from qmstrace.core.assessment import Scanned
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import Extracted, Finding, Item
-from qmstrace.extract.base import REGISTRY
 from qmstrace.infra.globbing import matches
 from qmstrace.infra.tree import ISourceTree
+from qmstrace.plugins.catalog import Catalog
 
 _MARKDOWN: Final = ("*.md", "**/*.md", "*.qmd", "**/*.qmd")
 
@@ -30,8 +30,14 @@ class _Scan:
 
 
 def _scan(
-    tree: ISourceTree, config: TraceConfig, types: Iterable[ItemType], *, with_misplaced: bool
+    tree: ISourceTree,
+    config: TraceConfig,
+    types: Iterable[ItemType],
+    *,
+    with_misplaced: bool,
+    catalog: Catalog | None = None,
 ) -> _Scan:
+    catalog = catalog or Catalog()
     files = tree.files()
     texts: dict[str, str | None] = {}
     unreadable: list[Finding] = []
@@ -55,7 +61,7 @@ def _scan(
         ignored = {p for p in selected if matches(p, item_type.ignore)}
         chosen = [p for p in selected if p not in ignored]
         read_for[item_type.name] = set(selected)
-        extract = REGISTRY[item_type.extractor]
+        extract = catalog.extractor(item_type.extractor)
         before = len(extracted)
         for path in chosen:
             text = text_of(path)
@@ -77,6 +83,6 @@ def _scan(
             for path in (p for p in documents if p not in read_for[item_type.name]):
                 text = text_of(path)
                 if text is not None:
-                    misplaced += REGISTRY["markdown"](path, text, item_type, config).items
+                    misplaced += catalog.extractor("markdown")(path, text, item_type, config).items
     extracted.append(Extracted(findings=tuple(unreadable)))
     return _Scan(tuple(extracted), tuple(scanned), tuple(misplaced))

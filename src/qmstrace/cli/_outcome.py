@@ -15,6 +15,7 @@ from qmstrace.cli._invocation import CURRENT
 from qmstrace.cli._json import error
 from qmstrace.cli._terminal import styled
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.plugins.catalog import PluginFault
 from qmstrace.render._style import Style
 
 # The leading \b in EXIT_CODES prevents framework reflow.
@@ -75,7 +76,9 @@ def outcome[**P](handler: Callable[P, int]) -> Callable[P, None]:
             if CURRENT.get().json:
                 error(
                     "internal",
-                    "An internal fault prevented the command from completing.",
+                    str(bug)
+                    if isinstance(bug, PluginFault)
+                    else "An internal fault prevented the command from completing.",
                     "Report this fault in qmstrace; it is not a finding in the repository.",
                     code=3,
                 )

@@ -6,19 +6,11 @@ Implements: DSN-QMT-12
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Final
 
 from qmstrace.core.config import CoverageRule, SchemaForm, TraceConfig
 from qmstrace.core.locations import Locations
 from qmstrace.core.setup import Copied
 from qmstrace.render._style import PLAIN, Style
-
-_DERIVED: Final = {
-    "python-module": "ID: the module's path",
-    "pytest": "ID: the test's node ID",
-    "csharp-file": "ID: the file's path",
-    "xunit": "ID: path::Class::Method",
-}
 
 
 def rules(config: TraceConfig, *, locations: Locations | None = None, style: Style = PLAIN) -> str:
@@ -113,7 +105,9 @@ def _declares_block(config: TraceConfig) -> list[str]:
     rows = []
     for item_type in (t for t in config.item_types.values() if t.declared_here):
         extractor = item_type.extractor or ""
-        how = item_type.id_pattern.pattern if item_type.id_pattern else _DERIVED.get(extractor, "")
+        how = (
+            item_type.id_pattern.pattern if item_type.id_pattern else item_type.descriptor.identity
+        )
         ignored = f" · ignores {', '.join(item_type.ignore)}" if item_type.ignore else ""
         rows.append(
             [item_type.name.replace("_", " "), extractor, how, ", ".join(item_type.files) + ignored]

@@ -8,6 +8,11 @@ read_when:
 
 # Data architecture
 
+**Implemented under CR-007:** [ADR-0013](../adr/0013-extractor-plugins.md)
+introduces independent language packages and additive toolchain provenance. The
+[extensibility design](extensibility-architecture.md) preserves existing extracted item,
+link, digest and report-identity meanings; controlled requirement changes are authorized by accepted CR-007.
+
 **Status:** half written (2026-09-21). The decisions and the **product-repo half** are settled
 — the latter by two experiments on a test bed, so it is marked *v0*: proven once, on one small
 application. The **ledger half**, under *Not yet written*, waits for the next experiment and

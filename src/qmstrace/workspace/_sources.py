@@ -18,6 +18,7 @@ from qmstrace.core.locations import Locations, joined, qualify
 from qmstrace.core.model import ID_TOKEN, Item, Link
 from qmstrace.extract import change_requests
 from qmstrace.infra.externals import request_files
+from qmstrace.plugins.catalog import Catalog, ProviderUnavailable
 from qmstrace.workspace._discovery import (
     CONFIG_FILE,
     TreeFactory,
@@ -101,10 +102,12 @@ def _siblings(
     trees: TreeFactory,
     ledger: Path | None,
     locations: Locations | None = None,
+    catalog: Catalog | None = None,
 ) -> tuple[list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]], bool, bool]:
     """Each sibling with its items (None when not read) and the links those items declare;
     whether the siblings could be located at all; whether this repo is among the project's
     repos."""
+    catalog = catalog or Catalog()
     if ledger is None:
         return [], not config.repos, False
     found: list[tuple[SiblingState, dict[str, Item] | None, tuple[Link, ...]]] = []
@@ -130,7 +133,9 @@ def _siblings(
             continue
         try:
             tree = trees(path)
-            own = _configuration(path, tree)
+            own = _configuration(path, tree, catalog)
+        except ProviderUnavailable:
+            raise
         except CouldNotJudge as stopped:
             problem = f"its configuration could not be read — {stopped.what}"
             found.append((SiblingState(name, location, None, problem), None, ()))
@@ -141,7 +146,7 @@ def _siblings(
                 "Fix: bind the member to the intended project's trace root.",
             )
         authored = [t for t in own.item_types.values() if t.id_pattern is not None]
-        scan = _scan(tree, own, authored, with_misplaced=False)
+        scan = _scan(tree, own, authored, with_misplaced=False, catalog=catalog)
         # Logical source labels never reconstruct native sibling checkout paths.
         items = {
             i.id: replace(i, file=joined(location, i.file))

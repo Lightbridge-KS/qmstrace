@@ -10,6 +10,7 @@ sync:
 # run the tests, with the coverage floor
 test:
     uv run pytest -q
+    uv run python tests/check_coverage.py
     node --test tests/browser/*.test.cjs
 
 # check formatting and lint — changes nothing
@@ -26,11 +27,19 @@ fmt:
 types:
     uv run mypy
 
-# build a wheel and prove that the package data is inside it
-wheel:
-    rm -rf dist
-    uv build --wheel --quiet
+# build each distribution without workspace source overrides
+build-wheels:
+    uv build --package qmstrace --wheel --no-sources --quiet
+    uv build --package qmstrace-lang-csharp --wheel --no-sources --quiet
+
+# network preparation, separate from offline installed-wheel verification
+prepare-wheelhouse: build-wheels
+    uv run python tests/check_plugin_wheels.py --prepare
+
+# assets, import order, isolated installations and independent plugin replacement
+wheel: build-wheels
     uv run python tests/check_wheel.py
+    uv run python tests/check_plugin_wheels.py
 
 # the user manual, served with live reload at http://localhost:8000
 manual:

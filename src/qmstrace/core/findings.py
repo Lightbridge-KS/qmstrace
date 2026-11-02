@@ -462,27 +462,12 @@ def fix_refused(violation: Finding) -> str:
 
 def fix_stray(stray: Stray) -> str:
     where, marker = f"{stray.file}:{stray.line}", stray.marker
+    if stray.guidance is not None:
+        return stray.guidance.replace("{location}", where)
     if stray.kind == "table":
         return (
             f"the '{marker}' table row at {where} is not read — a table declares nothing; "
             f"write `{marker}: …` as a line in the item's section."
-        )
-    if stray.kind == "doccomment":
-        return (
-            f"the '{marker}:' line at {where} is in neither the first type's leading `///` doc "
-            "comment nor, in a file that declares no type, the comment block the file opens "
-            "with, so it is not read — move it to whichever the file has."
-        )
-    if stray.kind == "razor":
-        return (
-            f"the '{marker}:' line at {where} is not in a `@* … *@` comment above the page's "
-            "first markup or code block, so it is not read — move it there, among the "
-            "directives; `///` is a C# comment, which Razor renders as page text."
-        )
-    if stray.kind == "comment":
-        return (
-            f"the test attribute at {where} is in a comment, so it is not read — a commented-out "
-            "test links nothing; restore the attribute or remove the comment."
         )
     if stray.kind == "outside":
         return (

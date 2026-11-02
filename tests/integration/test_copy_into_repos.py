@@ -113,8 +113,8 @@ def test_reasons_that_end_their_own_sentence_are_not_given_a_second_stop(project
     with pytest.raises(CouldNotJudge) as caught:
         Workspace.copy_schema(project / "ledger")
     said = f"{caught.value.what} {caught.value.next_move}"  # as the command prints it
-    assert "Fix: use one of those; service:" in said
-    assert "Fix: use one of those. Fix: deal with each repo named above" in said
+    assert "or use a listed extractor; service:" in said
+    assert "or use a listed extractor. Fix: deal with each repo named above" in said
     assert ".. " not in said and ".;" not in said
 
 

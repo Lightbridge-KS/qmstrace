@@ -10,56 +10,26 @@ Implements: DSN-QMT-05, DSN-QMT-14
 
 from __future__ import annotations
 
-import hashlib
-import re
-import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
-from typing import Final, Literal
+from typing import Literal
 
 from qmstrace.core.locations import joined
-
-# What an item ID looks like, whatever the project's own patterns: capitals and digits in
-# hyphenated parts, ending in a number, where a number may carry dotted parts — REQ-SVC-01,
-# DSN-BCN-08, AGR-3, CR-001, TC-SVC-04.1-01. A project's patterns decide which of these are
-# *its* items; this decides what reads as an ID at all (ADR-0002).
-ID_TOKEN: Final = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+(?:\.\d+)*)*-\d+(?:\.\d+)*")
-# An ID in running text, bounded on both sides: `TC-SVC-03.1a` is no ID at all — never
-# `TC-SVC-03` — and the full stop that ends a sentence is not part of the ID before it.
-ID_IN_TEXT: Final = re.compile(rf"(?<![A-Za-z0-9-])({ID_TOKEN.pattern})(?![A-Za-z0-9-]|\.\d)")
-
-
-def id_tokens(text: str) -> tuple[str, ...]:
-    """Every whole ID in running text, in order — an ID is read whole or not at all."""
-    return tuple(found.group(1) for found in ID_IN_TEXT.finditer(text))
-
-
-def id_order(item_id: str) -> tuple[tuple[str | int, ...], str]:
-    """Sort key for any ID, a repo-qualified one included: each run of digits compares as a
-    number, so AGR-2 comes before AGR-10, TC-4.2 before TC-4.10 and REQ-SVC-02 before
-    REQ-SVC-10. The ID itself breaks ties."""
-    parts = re.split(r"(\d+)", item_id)
-    return tuple(int(p) if i % 2 else p for i, p in enumerate(parts)), item_id
-
-
-def text_digest(text: str) -> str:
-    """The digest of an item's text, with layout ignored.
-
-    Every run of whitespace — line breaks included — counts as one space, and the text is
-    normalised to NFC first, so re-wrapping a paragraph or saving it with other line endings is
-    not a change. The algorithm is part of the value: it becomes a format once a trace lock
-    records it.
-
-    Examples
-    --------
-    ```python
-    text_digest("one\\ntwo") == text_digest("one   two")    # True
-    text_digest("one two").startswith("sha256:")           # True
-    ```
-    """
-    normal = " ".join(unicodedata.normalize("NFC", text).split())
-    return "sha256:" + hashlib.sha256(normal.encode("utf-8")).hexdigest()
-
+from qmstrace.plugin_api.v1 import (
+    ID_IN_TEXT as ID_IN_TEXT,
+)
+from qmstrace.plugin_api.v1 import (
+    ID_TOKEN as ID_TOKEN,
+)
+from qmstrace.plugin_api.v1 import (
+    id_order as id_order,
+)
+from qmstrace.plugin_api.v1 import (
+    id_tokens as id_tokens,
+)
+from qmstrace.plugin_api.v1 import (
+    text_digest as text_digest,
+)
 
 # One run's identity in a test report: the class and the test's name as the report gives them.
 Identity = tuple[str, str]
@@ -137,8 +107,9 @@ class Stray:
     targets: tuple[str, ...]
     file: str
     line: int
-    kind: Literal["docstring", "outside", "table", "doccomment", "comment", "razor"] = "docstring"
+    kind: str = "docstring"
     item: str | None = None
+    guidance: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

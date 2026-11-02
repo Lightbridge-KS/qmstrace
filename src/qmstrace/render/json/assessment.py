@@ -22,6 +22,7 @@ from qmstrace.render.json._common import (
 def check(value: View, *, strict: bool) -> dict[str, object]:
     result: dict[str, object] = {
         "project": value.config.project,
+        "toolchain": dict(value.toolchain),
         "counts": counts(value),
         "strict": strict,
         "violations": [finding(f, value.config.repo) for f in value.violations],
@@ -61,6 +62,7 @@ def status(value: Assessment) -> dict[str, object]:
         )
     return {
         "project": value.config.project,
+        "toolchain": dict(value.toolchain),
         "tree": value.tree_label,
         "counts": counts(value),
         "scanned": scanned(value.scanned),

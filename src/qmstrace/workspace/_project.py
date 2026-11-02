@@ -18,11 +18,11 @@ from qmstrace.core.errors import CouldNotJudge
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.locations import Locations, joined, qualify
 from qmstrace.core.model import Extracted, Finding, Item, Notice
-from qmstrace.extract.base import FORMS
 from qmstrace.infra.files import read_optional
 from qmstrace.infra.git import GitCli, IGit, checkout
 from qmstrace.infra.locations import discover
 from qmstrace.infra.tree import ISourceTree, WorkingTree
+from qmstrace.plugins.catalog import Catalog
 from qmstrace.workspace._baselines import _baseline_notices, _judged_baselines
 from qmstrace.workspace._discovery import (
     CONFIG_FILE,
@@ -50,7 +50,11 @@ class _Member:
 
 
 def _members(
-    ledger: Path, config: TraceConfig, trees: TreeFactory, locations: Locations | None = None
+    ledger: Path,
+    config: TraceConfig,
+    trees: TreeFactory,
+    locations: Locations | None = None,
+    catalog: Catalog | None = None,
 ) -> list[_Member]:
     """Every repo the schema lists, opened — or one refusal naming every repo that cannot be
     judged with the others."""
@@ -85,7 +89,7 @@ def _members(
             continue
         try:
             tree = trees(root)
-            own = _configuration(root, tree)
+            own = _configuration(root, tree, catalog)
         except CouldNotJudge as stopped:
             problems.append(f"{name}: its configuration could not be read — {stopped.what}")
             continue
@@ -179,17 +183,20 @@ def project(
         schema — a repo that was not read would make a clean result a false one. Every
         problem is named at once.
     """
+    catalog = Catalog()
     ledger = _find_ledger(start)
-    config = _ledger_configuration(ledger, read_optional(ledger / SCHEMA_FILE) or "")
+    config = _ledger_configuration(ledger, read_optional(ledger / SCHEMA_FILE) or "", catalog)
     locations = discover(start, ledger, config, workspace)
-    members = _members(ledger, config, trees, locations)
+    members = _members(ledger, config, trees, locations, catalog)
     # read before the scan: a table records which commit each repo had checked out
     checkouts = {member.name: _checkout(member.root) for member in members}
 
     parts: dict[str, tuple[_Member, _Scan, tuple[Extracted, ...], tuple[Item, ...]]] = {}
     for member in members:
         own = member.config
-        scan = _scan(member.tree, own, own.item_types.values(), with_misplaced=True)
+        scan = _scan(
+            member.tree, own, own.item_types.values(), with_misplaced=True, catalog=catalog
+        )
         derived = frozenset(t.name for t in own.item_types.values() if t.derives_ids)
         extracted = tuple(
             p.qualified(member.name, member.location, derived) for p in scan.extracted
@@ -233,7 +240,7 @@ def project(
     strays = [s for _, _, extracted, _ in parts.values() for p in extracted for s in p.strays]
     ways: dict[str, tuple[judge.Way, ...]] = {}
     for (item_type, extractor), names in sorted(readers.items()):
-        way = judge.Way(FORMS[extractor], tuple(sorted(names)))
+        way = judge.Way(catalog.form(extractor), tuple(sorted(names)))
         ways[item_type] = (*ways.get(item_type, ()), way)
     gaps = judge.coverage(config, union, violations, strays, ways, whole_project=True)
 
@@ -254,6 +261,7 @@ def project(
                 gits(member.root),
                 graphs[name].items(),
                 register,
+                catalog=catalog,
                 repo=name,
                 location=member.location,
             )
@@ -306,6 +314,7 @@ def project(
         register=register,
         notices=tuple(notices),
         suspects=judge.suspects(union, comparisons),
+        toolchain=catalog.toolchain(),
         ledger=_checkout(ledger),
         locations=locations,
     )

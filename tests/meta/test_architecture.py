@@ -20,7 +20,7 @@ SRC = Path(__file__).parents[2] / "src" / "qmstrace"
 
 # rows may import columns — third-party and first-party only; the standard library is free
 ALLOWED: dict[str, set[str]] = {
-    "core": {"qmstrace.core"},
+    "core": {"qmstrace.core", "qmstrace.plugin_api"},
     "extract": {
         "qmstrace.core",
         "qmstrace.extract",
@@ -28,10 +28,32 @@ ALLOWED: dict[str, set[str]] = {
         "tree_sitter",
         "tree_sitter_c_sharp",
     },
+    "plugin_api": set(),
+    "plugins": {
+        "qmstrace",
+        "qmstrace.core",
+        "qmstrace.extract.base",
+        "qmstrace.plugin_api",
+        "qmstrace.plugins",
+        "packaging",
+    },
     "infra": {"qmstrace.core", "qmstrace.infra"},
     "render": {"qmstrace.core", "qmstrace.render"},
-    "workspace": {"qmstrace.core", "qmstrace.extract", "qmstrace.infra", "qmstrace.workspace"},
-    "cli": {"qmstrace", "qmstrace.core", "qmstrace.render", "qmstrace.workspace", "typer"},
+    "workspace": {
+        "qmstrace.core",
+        "qmstrace.extract",
+        "qmstrace.infra",
+        "qmstrace.workspace",
+        "qmstrace.plugins",
+    },
+    "cli": {
+        "qmstrace",
+        "qmstrace.core",
+        "qmstrace.render",
+        "qmstrace.workspace",
+        "qmstrace.plugins",
+        "typer",
+    },
 }
 FIRST_OR_THIRD_PARTY = (
     "qmstrace",
@@ -41,6 +63,7 @@ FIRST_OR_THIRD_PARTY = (
     "pytest",
     "tree_sitter",
     "tree_sitter_c_sharp",
+    "packaging",
 )
 
 
@@ -181,24 +204,6 @@ PYTHON_IMPORTS: dict[str, set[str]] = {
         "qmstrace.core.results",
     },
 }
-CSHARP_IMPORTS: dict[str, set[str]] = {
-    "_syntax": {"tree_sitter", "tree_sitter_c_sharp"},
-    "_razor": set(),
-    "component": {
-        "qmstrace.core.findings",
-        "qmstrace.core.config",
-        "qmstrace.core.model",
-        "qmstrace.extract.csharp._razor",
-        "qmstrace.extract.csharp._syntax",
-        "qmstrace.extract.fields",
-    },
-    "xunit": {
-        "qmstrace.core.findings",
-        "qmstrace.core.config",
-        "qmstrace.core.model",
-        "qmstrace.extract.csharp._syntax",
-    },
-}
 PYTHON_COMPATIBILITY = {
     "python_module": {"qmstrace.extract.python.module": {"extract", "form"}},
     "pytest_tests": {
@@ -264,7 +269,6 @@ PACKAGE_IMPORTS = {
     "setup": SETUP_IMPORTS,
     "markdown": MARKDOWN_IMPORTS,
     "python": PYTHON_IMPORTS,
-    "csharp": CSHARP_IMPORTS,
     "text": TEXT_IMPORTS,
 }
 PACKAGE_AREAS = {
@@ -313,6 +317,8 @@ EXPORTS: dict[str, dict[str, set[str]]] = {
         "_parse": {"TraceConfig"},
         "_schema": {
             "EXTRACTORS",
+            "BUILTINS",
+            "ExtractorDescriptor",
             "BaselineScope",
             "ChangeRequests",
             "CoverageRule",
@@ -701,7 +707,7 @@ WORKSPACE_EXPORTS = {
 
 
 def _check_workspace_dependencies(path: Path) -> None:
-    assert _imports(path) <= WORKSPACE_IMPORTS[path.stem]
+    assert _imports(path) <= WORKSPACE_IMPORTS[path.stem] | {"qmstrace.plugins.catalog"}
 
 
 def test_workspace_owners_are_one_way_and_callers_use_the_facade() -> None:
@@ -768,6 +774,7 @@ CLI_IMPORTS: dict[str, set[str]] = {
         "typer",
     },
     "_local": {
+        "qmstrace.render.plugins",
         "qmstrace.render.json.assessment",
         "qmstrace.render.json.configuration",
         "qmstrace.render.json.results",
@@ -810,6 +817,7 @@ CLI_EXPORTS = {
     },
     "qmstrace.cli._local": {
         "paths",
+        "plugins",
         "check",
         "graph",
         "impact",
@@ -832,7 +840,10 @@ CLI_EXPORTS = {
 
 
 def _check_cli_dependencies(path: Path) -> None:
-    assert _imports(path) <= CLI_IMPORTS[path.stem]
+    allowed = CLI_IMPORTS[path.stem]
+    if path.stem == "_outcome":
+        allowed = allowed | {"qmstrace.plugins.catalog"}
+    assert _imports(path) <= allowed
 
 
 def test_cli_owners_are_one_way_and_callers_use_the_facade() -> None:
@@ -877,7 +888,14 @@ def test_only_the_csharp_syntax_module_imports_the_parser() -> None:
         for p in SRC.rglob("*.py")
         if any(n.split(".")[0] in ("tree_sitter", "tree_sitter_c_sharp") for n in _imports(p))
     )
-    assert users == ["extract/csharp/_syntax.py"]
+    assert users == []
+    member = SRC.parents[1] / "packages/qmstrace-lang-csharp/src/qmstrace_lang_csharp"
+    users = [
+        p.name
+        for p in member.glob("*.py")
+        if any(n.split(".")[0] in ("tree_sitter", "tree_sitter_c_sharp") for n in _imports(p))
+    ]
+    assert users == ["_syntax.py"]
 
 
 def test_only_the_report_reader_parses_xml() -> None:
@@ -888,3 +906,12 @@ def test_only_the_report_reader_parses_xml() -> None:
         if any(n.split(".")[0] == "defusedxml" for n in _imports(p))
     )
     assert users == ["extract/reports.py"]
+
+
+@pytest.mark.verifies("REQ-QMT-24", "DSN-QMT-17")
+def test_language_package_imports_only_public_host_api():
+    member = SRC.parents[1] / "packages/qmstrace-lang-csharp/src/qmstrace_lang_csharp"
+    for path in member.rglob("*.py"):
+        for imported in _imports(path):
+            if imported == "qmstrace" or imported.startswith("qmstrace."):
+                assert imported == "qmstrace.plugin_api.v1", (path.name, imported)

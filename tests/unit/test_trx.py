@@ -18,13 +18,16 @@ The load-bearing claims, each pinned by a test:
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
-from qmstrace.core.config import TraceConfig
 from qmstrace.core.results import Report
 from qmstrace.extract import reports
-from qmstrace.extract.csharp import xunit
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+xunit = SimpleNamespace(extract=CATALOG.extractor("xunit"))
 
 TRX = Path(__file__).parents[1] / "fixtures" / "trx"
 CASES = Path(__file__).parents[1] / "fixtures" / "cases"
@@ -187,7 +190,7 @@ def test_no_path_name_output_or_trace_reaches_the_report() -> None:
 @pytest.mark.verifies("REQ-QMT-22", "DSN-QMT-09", "DSN-QMT-15")
 def test_every_probe_run_matches_the_identity_its_extractor_recorded() -> None:
     schema = (CASES / "ledger" / "qmstrace.schema.toml").read_text(encoding="utf-8")
-    config = TraceConfig.parse(
+    config = CATALOG.configuration(
         (CASES / "agent" / "qmstrace.toml").read_text(encoding="utf-8"), schema
     )
     probe = CASES / "agent" / "tests" / "Agent.Probe"

@@ -1,0 +1,7 @@
+Installed extractor providers
+  No external providers installed.
+Extractors
+  markdown: ID: derived by the extractor
+  pytest: ID: the test's node ID
+  python-module: ID: the module's path
+Manifest inspection only; handler execution and source evidence not assessed.

@@ -115,3 +115,6 @@ what you do not know. Removing or renaming anything, changing a cell's JSON type
 or the order, or what `clean`, `pinned` or `draft` mean, requires a new format version.
 
 The document is UTF-8. On a console that cannot print UTF-8, write it with `--out` instead.
+
+The additive top-level `toolchain` object records the host, Python runtime, used provider/API
+and parser versions. It has the same meaning as assessment JSON toolchain metadata.

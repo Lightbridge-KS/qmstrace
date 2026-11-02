@@ -6,22 +6,23 @@ Implements: DSN-QMT-03
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from typing import Final
 
 from qmstrace.core.config._prefix import common_prefix
 from qmstrace.core.config._schema import (
-    EXTRACTORS,
     BaselineScope,
     ChangeRequests,
     CoverageRule,
     ExternalSource,
+    ExtractorDescriptor,
     ItemType,
     LinkType,
     Subject,
     Tables,
 )
 from qmstrace.core.config._toml import _Table
-from qmstrace.core.errors import CouldNotJudge
+from qmstrace.core.errors import CouldNotJudge, ProviderUnavailable
 
 _GLOB: Final = set("*?[")  # what makes a path a pattern
 # Any start of the one shape every ID has (`model.ID_TOKEN`): capitals and digits in
@@ -57,7 +58,9 @@ def _id_start(start: str, what: str, fix: str) -> None:
         )
 
 
-def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
+def _item_types(
+    schema: _Table, local: _Table, descriptors: Mapping[str, ExtractorDescriptor]
+) -> dict[str, ItemType]:
     declared = schema.tables("item_types")
     locals_ = local.tables("items")
     for name, table in locals_.items():
@@ -82,7 +85,7 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
         files: tuple[str, ...] = ()
         ignore: tuple[str, ...] = ()
         if here is not None:
-            extractor = _extractor(here, name)
+            extractor = _extractor(here, name, descriptors)
             pattern = here.pattern("id_pattern")
             prefix = here.opt_text("id_prefix")
             files, ignore = here.texts("files"), here.texts("ignore")
@@ -91,13 +94,15 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
                     f"{here.file}: [items.{name}] names no files to scan.",
                     'Fix: add files = ["…"] — one or more glob patterns.',
                 )
-            if EXTRACTORS[extractor] and pattern is None:
+            if descriptors[extractor].authored_ids and pattern is None:
                 raise CouldNotJudge(
                     f"{here.file}: [items.{name}] is read by '{extractor}', which reads IDs "
                     "someone wrote, but gives no id_pattern.",
                     "Fix: add id_pattern = '^…$' — what an ID of this type looks like.",
                 )
-            if not EXTRACTORS[extractor] and (pattern is not None or prefix is not None):
+            if not descriptors[extractor].authored_ids and (
+                pattern is not None or prefix is not None
+            ):
                 raise CouldNotJudge(
                     f"{here.file}: [items.{name}] is read by '{extractor}', which derives each "
                     "ID from where the item is — an ID pattern would never be applied.",
@@ -137,18 +142,33 @@ def _item_types(schema: _Table, local: _Table) -> dict[str, ItemType]:
                         )
             here.done()
         found[name] = ItemType(
-            name, required, values, levels, extractor, pattern, prefix, files, ignore
+            name,
+            required,
+            values,
+            levels,
+            extractor,
+            pattern,
+            prefix,
+            files,
+            ignore,
+            descriptors[extractor] if extractor else ExtractorDescriptor(),
         )
     return found
 
 
-def _extractor(here: _Table, name: str) -> str:
+def _extractor(here: _Table, name: str, descriptors: Mapping[str, ExtractorDescriptor]) -> str:
     extractor = here.text("extractor")
-    if extractor not in EXTRACTORS:
-        raise CouldNotJudge(
+    if extractor not in descriptors:
+        raise ProviderUnavailable(
             f"{here.file}: [items.{name}] names the extractor '{extractor}', which this "
-            f"qmstrace does not have (it has: {', '.join(EXTRACTORS)}).",
-            "Fix: use one of those.",
+            f"qmstrace does not have (it has: {', '.join(descriptors)}).",
+            "Fix: install the compatible provider in the qmstrace environment; "
+            "inspect `qmstrace plugins`, or use a listed extractor.",
+        )
+    if descriptors[extractor].problem:
+        raise ProviderUnavailable(
+            f"Extractor {extractor}: {descriptors[extractor].problem}",
+            "Fix: install exactly one compatible provider; inspect `qmstrace plugins`.",
         )
     return extractor
 

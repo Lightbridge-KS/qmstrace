@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from qmstrace.core import judge, results, setup
@@ -21,11 +21,11 @@ from qmstrace.core.locations import Locations, LocationState, Paths, qualify
 from qmstrace.core.model import Finding, Item, Link, Notice
 from qmstrace.core.results import Results
 from qmstrace.extract import reports
-from qmstrace.extract.base import FORMS
 from qmstrace.infra.files import read_optional, write_new
 from qmstrace.infra.git import GitCli, IGit
 from qmstrace.infra.locations import discover, relative
 from qmstrace.infra.tree import ISourceTree, WorkingTree
+from qmstrace.plugins.catalog import Catalog
 from qmstrace.workspace._baselines import _judged_baselines
 from qmstrace.workspace._discovery import (
     TreeFactory,
@@ -63,6 +63,12 @@ class Workspace:
     trees: TreeFactory
     git: IGit | None = None
     locations: Locations | None = None
+    catalog: Catalog = field(default_factory=Catalog, compare=False)
+
+    @staticmethod
+    def plugins() -> dict[str, object]:
+        """Inspect installed manifests without a traced repository or handler imports."""
+        return Catalog().inspection()
 
     @classmethod
     def open(
@@ -73,6 +79,7 @@ class Workspace:
         trees: TreeFactory = WorkingTree,
         git: IGit | None = None,
         _invocation: Path | None = None,
+        catalog: Catalog | None = None,
     ) -> Workspace:
         """Find the product repo at or above `start`, and read its trace configuration.
 
@@ -84,9 +91,10 @@ class Workspace:
         """
         root = _find_root(start)
         tree = trees(root)
-        config = _configuration(root, tree)
+        catalog = catalog or Catalog()
+        config = _configuration(root, tree, catalog)
         locations = discover(_invocation or start, root, config, workspace)
-        return cls(root, tree, config, trees, git, locations)
+        return cls(root, tree, config, trees, git, locations, catalog)
 
     @classmethod
     def initialize(
@@ -108,16 +116,18 @@ class Workspace:
         its build files choose unless `language` names one (ADR-0006).
         """
         locations: Locations | None = None
+        catalog = Catalog()
 
         def load_config(root: Path) -> TraceConfig:
             nonlocal locations
-            opened = cls.open(root, workspace=workspace, _invocation=start)
+            opened = cls.open(root, workspace=workspace, _invocation=start, catalog=catalog)
             locations = opened.locations
             return opened.config
 
         written = _initialize(
             start,
             load_config=load_config,
+            catalog=catalog,
             subject=subject,
             key=key,
             language=language,
@@ -216,7 +226,9 @@ class Workspace:
     def assessment(self) -> Assessment:
         """Scan, read what lies around the repo, build the graph — once."""
         config = self.config
-        scan = _scan(self.tree, config, config.item_types.values(), with_misplaced=True)
+        scan = _scan(
+            self.tree, config, config.item_types.values(), with_misplaced=True, catalog=self.catalog
+        )
         ledger = self.locations.ledger if self.locations else _ledger(self.root, config)
         externals = [
             _external(ledger, config.externals[name], self.root, self.locations, config)
@@ -238,7 +250,7 @@ class Workspace:
         )
         violations += list(judge.ownership_findings(config, graph.items()))
         ways = {
-            t.name: (judge.Way(FORMS[t.extractor]),)
+            t.name: (judge.Way(self.catalog.form(t.extractor)),)
             for t in config.item_types.values()
             if t.declared_here and t.extractor is not None
         }
@@ -326,6 +338,7 @@ class Workspace:
                 )
         return Assessment(
             config=config,
+            toolchain=self.catalog.toolchain(),
             tree_label=self.tree.label,
             schema_location=config.schema_path,
             scanned=scan.scanned,
@@ -534,7 +547,9 @@ class Workspace:
         if not self.config.baselines:
             return BaselineState(register=register), ()
         source = self.git or GitCli(self.root)
-        return _judged_baselines(self.root, self.config, source, graph.items(), register)
+        return _judged_baselines(
+            self.root, self.config, source, graph.items(), register, catalog=self.catalog
+        )
 
     def _unseen(self, assessment: Assessment, item_id: str) -> CouldNotJudge:
         """An unseen start, with the same source limits and next move in every walk."""
@@ -568,8 +583,10 @@ class Workspace:
         """Each sibling with its items (None when not read) and their own links; whether the
         siblings could be located at all; whether this repo is among the project's repos."""
         if self.locations:
-            return _read_siblings(self.root, self.config, self.trees, ledger, self.locations)
-        return _read_siblings(self.root, self.config, self.trees, ledger)
+            return _read_siblings(
+                self.root, self.config, self.trees, ledger, self.locations, self.catalog
+            )
+        return _read_siblings(self.root, self.config, self.trees, ledger, catalog=self.catalog)
 
 
 def _read_reports(

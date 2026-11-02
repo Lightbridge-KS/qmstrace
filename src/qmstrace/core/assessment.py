@@ -71,6 +71,8 @@ class Assessment:
     baseline_state: BaselineState = field(default_factory=BaselineState)
     suspects: tuple[Suspect, ...] = ()
 
+    toolchain: Mapping[str, object] = field(default_factory=dict)
+
     def fails(self, *, strict: bool) -> bool:
         """Whether the check fails: on any violation, and — under the gate — on any gap too."""
         return bool(self.violations) or (strict and bool(self.gaps))
@@ -115,6 +117,8 @@ class ProjectAssessment:
     suspects: tuple[Suspect, ...] = ()
     locations: Locations | None = None
     ledger: Checkout | None = None  # the ledger's own checkout, whether or not it is in [repos]
+
+    toolchain: Mapping[str, object] = field(default_factory=dict)
 
     def fails(self, *, strict: bool) -> bool:
         """Whether the check fails: on any violation, and — under the gate — on any gap too."""

@@ -6,6 +6,30 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-02
+
+### Added
+
+- Stable `qmstrace.plugin_api.v1` for trusted, independently versioned extraction packages.
+  Manifest admission precedes lazy handler import. Missing, incompatible or ambiguous
+  required providers refuse assessment; plugin faults identify their provider and exit 3.
+- `qmstrace plugins` text/JSON inspection without a traced repository or handler imports.
+- Additive toolchain metadata in assessment/table JSON records host, runtime, used providers,
+  extraction API and parser versions. Ordinary assessment text retains its existing format.
+
+### Changed
+
+- C# and Razor extraction moves to the separately versioned `qmstrace-lang-csharp` package.
+  The host no longer installs tree-sitter. Existing trace configuration, markers, IDs, digests
+  and TRX matching remain compatible when the plugin is installed.
+
+### Migration
+
+- Install both release wheels in the same environment with `uv tool install --with`.
+  Host-only installations support Python and Markdown. C# initialization refuses before any
+  write when its compatible provider is absent. See the installation manual for exact pins,
+  dependency constraints, upgrade and rollback.
+
 ## [0.3.0] - 2026-10-24
 
 ### Added

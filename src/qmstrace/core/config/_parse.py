@@ -12,11 +12,12 @@ from dataclasses import dataclass, field
 
 from qmstrace.core.config._copy import marked, schema_digest
 from qmstrace.core.config._schema import (
-    ONE_LINK,
+    BUILTINS,
     BaselineScope,
     ChangeRequests,
     CoverageRule,
     ExternalSource,
+    ExtractorDescriptor,
     ItemType,
     LinkType,
     SchemaForm,
@@ -77,6 +78,7 @@ class TraceConfig:
         local_text: str,
         schema_text: str | None = None,
         *,
+        descriptors: Mapping[str, ExtractorDescriptor] = BUILTINS,
         local_name: str = "qmstrace.toml",
         schema_name: str = "qmstrace.schema.toml",
     ) -> TraceConfig:
@@ -178,7 +180,7 @@ class TraceConfig:
             schema_path=path,
             schema_digest=stated,
             subjects=_subjects(local),
-            item_types=_item_types(schema, local),
+            item_types=_item_types(schema, local, descriptors),
             links=_links(schema),
             rules=_rules(schema),
             externals=_externals(schema),
@@ -208,7 +210,11 @@ class TraceConfig:
 
     @classmethod
     def of_schema(
-        cls, schema_text: str, *, schema_name: str = "qmstrace.schema.toml"
+        cls,
+        schema_text: str,
+        *,
+        schema_name: str = "qmstrace.schema.toml",
+        descriptors: Mapping[str, ExtractorDescriptor] = BUILTINS,
     ) -> TraceConfig:
         """The project's trace schema on its own — its project, repos and rules, validated as a
         product repo would read them, with no item type declared here."""
@@ -221,7 +227,13 @@ class TraceConfig:
             )
         else:
             placeholder = 'version = 1\n[schema]\npath = "qmstrace.schema.toml"\n'
-        return cls.parse(placeholder, schema_text, local_name=schema_name, schema_name=schema_name)
+        return cls.parse(
+            placeholder,
+            schema_text,
+            local_name=schema_name,
+            schema_name=schema_name,
+            descriptors=descriptors,
+        )
 
 
 def _cross_check(config: TraceConfig, schema_file: str) -> None:
@@ -240,14 +252,15 @@ def _cross_check(config: TraceConfig, schema_file: str) -> None:
             if name not in known:
                 raise unknown_type(f"link '{link.marker}'", name)
     for item_type in config.item_types.values():
-        if item_type.extractor not in ONE_LINK or not item_type.declared_here:
+        if not item_type.descriptor.single_link or not item_type.declared_here:
             continue
         carried = [m for m, link in config.links.items() if item_type.name in link.sources]
         if len(carried) != 1:
             said = ", ".join(carried) if carried else "none"
             raise CouldNotJudge(
-                f"[items.{item_type.name}] is read by '{item_type.extractor}', whose marker — the "
-                "ID that starts a test's DisplayName — names no link of its own; the schema gives "
+                f"[items.{item_type.name}] is read by '{item_type.extractor}', whose marker — "
+                f"{item_type.descriptor.single_link_description} — names no link of its own; "
+                "the schema gives "
                 f"{item_type.name} {len(carried)} links to choose from ({said}).",
                 f"Fix: give {item_type.name} exactly one link in the schema's [links], or read "
                 "it with another extractor.",
