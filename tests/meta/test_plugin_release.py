@@ -12,6 +12,11 @@ import pytest
     [
         ("qmstrace", "v", "pyproject.toml"),
         (
+            "qmstrace-lang-python",
+            "qmstrace-lang-python-v",
+            "packages/qmstrace-lang-python/pyproject.toml",
+        ),
+        (
             "qmstrace-lang-csharp",
             "qmstrace-lang-csharp-v",
             "packages/qmstrace-lang-csharp/pyproject.toml",

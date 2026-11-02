@@ -15,6 +15,7 @@ from pathlib import Path
 
 from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
+from qmstrace.plugins.catalog import Catalog
 
 ROOT = Path(__file__).parents[2]
 ASSETS = files("qmstrace").joinpath("assets")
@@ -37,7 +38,9 @@ def test_claude_code_reaches_the_skill_through_its_link() -> None:
 
 
 def test_the_agent_guide_carries_the_current_stanza() -> None:
-    config = TraceConfig.parse((ROOT / "qmstrace.toml").read_text(encoding="utf-8"))
+    config = TraceConfig.parse(
+        (ROOT / "qmstrace.toml").read_text(encoding="utf-8"), descriptors=Catalog().descriptors
+    )
     block = setup.stanza(ASSETS.joinpath("stanza.md").read_text(encoding="utf-8"), config)
     guide = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     assert setup.guide(guide, block) == guide, f"AGENTS.md carries a stale stanza. Fix: {RERUN}"

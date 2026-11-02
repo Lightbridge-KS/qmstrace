@@ -23,6 +23,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "qmstrace-lang-python",
     "qmstrace-lang-csharp",
     "jsonschema>=4.26,<5",
     "mypy>=2.3.1",
@@ -50,17 +51,19 @@ ban-relative-imports = "all"  # the import matrix is checked on absolute names
 
 [tool.mypy]
 strict = true
-files = ["src", "packages/qmstrace-lang-csharp/src"]
+files = ["src", "packages/qmstrace-lang-csharp/src", "packages/qmstrace-lang-python/src"]
 
 [tool.pytest.ini_options]
 markers = ["verifies(*ids): trace the items this test actually verifies"]
-testpaths = ["tests", "packages/qmstrace-lang-csharp/tests"]
-addopts = "--strict-markers --cov=qmstrace --cov=qmstrace_lang_csharp --cov-report=term-missing:skip-covered --cov-report=json:dist/coverage.json --cov-fail-under=90"
+testpaths = ["tests", "packages/qmstrace-lang-csharp/tests", "packages/qmstrace-lang-python/tests"]
+addopts = "--strict-markers --cov=qmstrace --cov=qmstrace_lang_csharp --cov=qmstrace_lang_python --cov-report=term-missing:skip-covered --cov-report=json:dist/coverage.json --cov-fail-under=90"
 
 [tool.uv.workspace]
 members = [
     "packages/qmstrace-lang-csharp",
+    "packages/qmstrace-lang-python",
 ]
 
 [tool.uv.sources]
+qmstrace-lang-python = { workspace = true }
 qmstrace-lang-csharp = { workspace = true }

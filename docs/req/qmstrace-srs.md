@@ -41,10 +41,14 @@ component's links by `Implements:` in its module docstring; an automated test's 
 verifies directly. A marker written in a form that is not read is reported, never silently
 dropped.
 
+Python module and pytest extraction are supplied by an explicitly installed compatible
+language package; existing marker, identity, digest and test-report matching behavior is
+preserved.
+
 - Category: functional-suitability
 - Origin: AGR-2
 - Verify-by: test
-- Change: CR-003
+- Change: CR-003, CR-008
 
 ### REQ-QMT-20 — An ID is read whole, dotted parts and all
 
@@ -204,6 +208,10 @@ files the repo holds, and `init` names the starter it chose and why; a repo hold
 files of two languages is refused, with the option that settles it. Run again, it changes
 nothing; it refuses to replace a file it did not write, and then writes nothing.
 
+The Python starter, including default Python selection, requires its extraction provider
+before any files are written. When unavailable, setup explains explicit installation;
+it does not install a provider or fall back to a reduced configuration.
+
 - Category: usability
 - Origin: AGR-5
 - Verify-by: test
@@ -211,7 +219,7 @@ Before writing a starter that requires an external extractor, init verifies that
 provider is installed. If unavailable, it refuses without writing files and explains the
 required installation.
 
-- Change: CR-003, CR-005, CR-007
+- Change: CR-003, CR-005, CR-007, CR-008
 
 ### REQ-QMT-13 — The schema is authored once and copied, verified
 

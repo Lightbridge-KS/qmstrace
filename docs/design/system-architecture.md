@@ -8,6 +8,12 @@ read_when:
 
 # qmstrace — System & OOP Architecture
 
+Python extraction is now explicitly installed under accepted CR-008 and
+[ADR-0014](../adr/0014-python-extractor-plugin.md). The public API and extractor names remain
+unchanged; default Python setup checks provider availability before writes. Verification
+state is recorded in the [Python tracker](../progress/python-extractor-plugin.md).
+
+
 **Implemented under CR-007:** [ADR-0013](../adr/0013-extractor-plugins.md)
 adds independently versioned language packages within the host process. Source-tree reads
 and judgment stay in the host. The [extensibility design](extensibility-architecture.md)

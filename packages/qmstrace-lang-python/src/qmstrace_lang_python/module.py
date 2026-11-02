@@ -12,25 +12,36 @@ from __future__ import annotations
 
 import ast
 
-from qmstrace.core import findings
-from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import Extracted, Finding, Item, Link, Stray, id_tokens, text_digest
-from qmstrace.extract.fields import FIELD, link_line
+from qmstrace.plugin_api.v1 import (
+    Diagnostic,
+    Extraction,
+    ExtractRequest,
+    Item,
+    Link,
+    Stray,
+    id_tokens,
+    text_digest,
+)
+from qmstrace_lang_python import _diagnostics as findings
+from qmstrace_lang_python._fields import FIELD, link_line
 
 
-def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> Extracted:
+def extract(request: ExtractRequest) -> Extraction:
     """Read one module: the component it is, the links its docstring declares, and strays."""
+    path, text = request.path, request.text
     if not text.strip():
-        return Extracted()
+        return Extraction()
     try:
         module = ast.parse(text, filename=path)
     except SyntaxError as broken:
-        return Extracted(findings=(findings.cannot_parse(path, broken.lineno or 1, broken.msg),))
+        return Extraction(
+            diagnostics=(findings.cannot_parse(path, broken.lineno or 1, broken.msg),)
+        )
 
     name = path.rsplit("/", 1)[-1].removesuffix(".py")
-    item = Item(path, item_type.name, path, 1, name, text_digest(ast.dump(module)))
+    item = Item(path, request.item_type, path, 1, name, text_digest(ast.dump(module)))
     links: list[Link] = []
-    wrong: list[Finding] = []
+    wrong: list[Diagnostic] = []
     docstring: range = range(0)
     first = module.body[0] if module.body else None
     if (
@@ -41,15 +52,15 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
         docstring = range(first.lineno, (first.end_lineno or first.lineno) + 1)
         for offset, raw in enumerate(first.value.value.splitlines()):
             found = FIELD.match(raw)
-            if found and found.group(1) in config.links:
+            if found and found.group(1) in request.markers:
                 made, bad = link_line(
                     path, found.group(1), found.group(2), path, first.lineno + offset
                 )
                 links += made
                 wrong += bad
-    carried = {m for m, link in config.links.items() if item_type.name in link.sources}
+    carried = set(request.permitted_markers)
     strays = _strays(path, text, docstring, carried)
-    return Extracted((item,), tuple(links), tuple(wrong), strays=strays)
+    return Extraction((item,), tuple(links), tuple(wrong), strays=strays)
 
 
 def form(marker: str, target: str) -> str:
@@ -69,5 +80,17 @@ def _strays(path: str, text: str, docstring: range, markers: set[str]) -> tuple[
             continue
         targets = id_tokens(match.group(2))
         if targets:
-            found.append(Stray(match.group(1), targets, path, number, "docstring"))
+            found.append(
+                Stray(
+                    match.group(1),
+                    targets,
+                    path,
+                    number,
+                    f"the '{match.group(1)}:' line at {{location}} "
+                    "is outside the module docstring, "
+                    "so it is not "
+                    "read — move it into the docstring.",
+                    kind="docstring",
+                )
+            )
     return tuple(found)

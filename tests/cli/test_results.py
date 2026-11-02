@@ -5,11 +5,11 @@ from pathlib import Path
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 import pytest
+from qmstrace_lang_python.pytest_tests import report_identity
 from typer.testing import CliRunner
 
 from qmstrace.cli import app
 from qmstrace.core.results import Results
-from qmstrace.extract.pytest_tests import report_identity
 from qmstrace.render import text
 from qmstrace.workspace import Workspace
 

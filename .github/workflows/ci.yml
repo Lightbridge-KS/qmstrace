@@ -63,6 +63,7 @@ jobs:
         run: |
           uv build --package qmstrace --wheel --no-sources
           uv build --package qmstrace-lang-csharp --wheel --no-sources
+          uv build --package qmstrace-lang-python --wheel --no-sources
       - name: Prepare dependency wheelhouse
         run: uv run python tests/check_plugin_wheels.py --prepare
       - name: Offline installed-wheel compatibility

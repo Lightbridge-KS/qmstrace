@@ -145,15 +145,20 @@ def initialize(
             current = assets.joinpath("ledger-starter.toml").read_text(encoding="utf-8")
         else:
             picked, why = _language(root, language)
-            if picked == "csharp":
+            if picked in LANGUAGES:
                 try:
-                    catalog.require("csharp-file")
-                    catalog.require("xunit")
+                    required = (
+                        ("csharp-file", "xunit")
+                        if picked == "csharp"
+                        else ("python-module", "pytest")
+                    )
+                    for extractor in required:
+                        catalog.require(extractor)
                 except ProviderUnavailable as stopped:
                     raise ProviderUnavailable(
                         stopped.what,
-                        "Fix: install the qmstrace-lang-csharp wheel in the host environment: "
-                        "uv tool install --with CSHARP_WHEEL HOST_WHEEL.",
+                        f"Fix: install the qmstrace-lang-{picked} wheel in the host environment: "
+                        f"uv tool install --with {picked.upper()}_WHEEL HOST_WHEEL.",
                     ) from None
             current = (
                 assets.joinpath("starter.toml").read_text(encoding="utf-8")

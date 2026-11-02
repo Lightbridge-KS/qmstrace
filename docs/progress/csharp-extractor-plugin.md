@@ -1,5 +1,5 @@
 ---
-summary: C# plugin implementation under accepted CR-007. Host 0.4.0 and plugin 0.1.0 are prepared; dry, trace, mutation and macOS/Linux installed-wheel checks pass. Native Windows and historical released API-v1 combinations remain unverified. No commit or publication.
+summary: C# plugin merged in PR 77 at de02a3a. Linux/macOS/Windows installed-wheel and native Windows distinct-drive CI passed. Historical released combinations and publication remain unverified.
 read_when:
   - resuming the C# plugin and uv workspace implementation
   - checking package acceptance, evidence or remaining platform gates
@@ -12,6 +12,15 @@ Design: [extensibility architecture](../design/extensibility-architecture.md).
 Decision: [ADR-0013](../adr/0013-extractor-plugins.md).
 
 ## Now
+
+Merged through [PR 77](https://github.com/Lightbridge-KS/qmstrace/pull/77) at `de02a3a`.
+Verified on 2026-11-02: [CI run 41411640695](https://github.com/Lightbridge-KS/qmstrace/actions/runs/41411640695)
+passed the dry gate, installed-wheel checks on Linux/macOS/Windows, and native Windows
+distinct-drive acceptance for candidate `03defc6`. This supersedes the local Windows
+limitation below. Host 0.4.0 and C# 0.1.0 remain unpublished. Successor:
+[Python plugin migration](python-extractor-plugin.md).
+
+## Local verification record before PR submission
 
 Implementation and local verification completed on 2026-11-02. Host `0.4.0` and C#
 plugin `0.1.0` are prepared in separate uv workspace packages. Changes remain uncommitted;
@@ -57,10 +66,10 @@ to requirements 12, 15 and 21 and additions 24–26. The ledger record is author
 - [x] Execute macOS and Linux installed-wheel checks; configure the Linux/Windows/macOS CI matrix.
 - [x] Preserve browser checks and the native Windows distinct-drive gate.
 - [x] Run the complete dry gate, both strict trace gates and disposable-copy marker mutation checks.
-- [ ] Execute native Windows installed-wheel and distinct-drive checks for this candidate.
+- [x] Execute native Windows installed-wheel and distinct-drive checks for this candidate (PR 77 CI).
 - [ ] Verify released historical API-v1 combinations when those artifacts exist.
 
-**Acceptance limit:** platform closure is pending native Windows evidence. Fixture versions
+**Acceptance limit:** platform CI now passes; historical local-only evidence remains below. Fixture versions
 prove the update mechanism; they are not historical release evidence.
 
 ## Phase 5 — release preparation
@@ -130,8 +139,7 @@ only toolchain metadata. New command help and plugin-inspection goldens describe
 
 ## Remaining evidence and review
 
-- Native Windows checks must pass before cross-platform acceptance. The existing distinct-drive
-  acceptance from an earlier release does not establish this candidate's result.
+- Native Windows candidate checks passed in PR 77 CI, superseding the local run limitation.
 - Oldest supported released host with candidate plugin, and candidate host with a previously
   released plugin, are unavailable at this first API-v1 release. Fixture successors remain
   explicitly separate from those combinations.

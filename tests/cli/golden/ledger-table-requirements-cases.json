@@ -25,6 +25,19 @@
           "tree-sitter": "<parser-version>",
           "tree-sitter-c-sharp": "<parser-version>"
         }
+      },
+      {
+        "distribution": "qmstrace-lang-python",
+        "version": "<plugin-version>",
+        "package": "qmstrace_lang_python",
+        "api": 1,
+        "extractors": [
+          "pytest",
+          "python-module"
+        ],
+        "compatible": true,
+        "problems": [],
+        "parser_dependencies": {}
       }
     ],
     "extractors": [

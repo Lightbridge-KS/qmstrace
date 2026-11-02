@@ -16,7 +16,7 @@ Installation into an unrelated environment does not make the plugin visible to q
 Existing C# trace configuration and TRX reports retain their meaning. Parser versions affect
 extraction, so retain the exact environment constraints with audit evidence.
 
-From the workspace root, `uv sync` installs both packages editably. `uv run pytest` exercises
+From the workspace root, `uv sync` installs the host and both language packages editably. `uv run pytest` exercises
 the extraction reference cases and plugin seam. Build this package independently with
 `uv build --package qmstrace-lang-csharp --wheel --no-sources`. The workspace lock represents
 one development combination, not all supported released combinations.

@@ -20,9 +20,17 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 
-from qmstrace.core import findings
-from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import ID_TOKEN, Extracted, Finding, Identity, Item, Link, text_digest
+from qmstrace.plugin_api.v1 import (
+    ID_TOKEN,
+    Diagnostic,
+    Extraction,
+    ExtractRequest,
+    Identity,
+    Item,
+    Link,
+    text_digest,
+)
+from qmstrace_lang_python import _diagnostics as findings
 
 _Owner = ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
 
@@ -32,27 +40,30 @@ class _Reading:
     """One module being read."""
 
     path: str
-    item_type: ItemType
+    request: ExtractRequest
     level: str | None
     items: list[Item] = field(default_factory=list)
     links: list[Link] = field(default_factory=list)
-    wrong: list[Finding] = field(default_factory=list)
+    wrong: list[Diagnostic] = field(default_factory=list)
     read: set[int] = field(default_factory=set)  # id() of every marker node that was read
 
 
-def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> Extracted:
+def extract(request: ExtractRequest) -> Extraction:
     """Read one test module for test cases and the links their markers declare."""
+    path, text = request.path, request.text
     try:
         module = ast.parse(text, filename=path)
     except SyntaxError as broken:
-        return Extracted(findings=(findings.cannot_parse(path, broken.lineno or 1, broken.msg),))
+        return Extraction(
+            diagnostics=(findings.cannot_parse(path, broken.lineno or 1, broken.msg),)
+        )
 
     folders = path.split("/")[:-1]
-    level = next((part for part in folders if part in item_type.levels), None)
-    reading = _Reading(path, item_type, level)
+    level = next((part for part in folders if part in request.levels), None)
+    reading = _Reading(path, request, level)
     _visit(reading, module.body, path, ())
-    reading.wrong += _unread(reading, module, frozenset(config.links))
-    return Extracted(tuple(reading.items), tuple(reading.links), tuple(reading.wrong))
+    reading.wrong += _unread(reading, module, frozenset(request.markers))
+    return Extraction(tuple(reading.items), tuple(reading.links), tuple(reading.wrong))
 
 
 def form(marker: str, target: str) -> str:
@@ -78,7 +89,7 @@ def _visit(
             test_id = f"{scope}::{node.name}"
             item = Item(
                 test_id,
-                reading.item_type.name,
+                reading.request.item_type,
                 reading.path,
                 node.lineno,
                 node.name,
@@ -87,8 +98,8 @@ def _visit(
                 runs_as=(report_identity(test_id),),
             )
             reading.items.append(item)
-            if reading.level is None and reading.item_type.levels:
-                reading.wrong.append(findings.no_level(item, reading.item_type.levels))
+            if reading.level is None and reading.request.levels:
+                reading.wrong.append(findings.no_level(item, reading.request.levels))
             for link in (*inherited, *_declared(reading, node, test_id)):
                 reading.links.append(
                     Link(test_id, link.dst, link.marker, reading.path, node.lineno)
@@ -103,7 +114,11 @@ def _declared(reading: _Reading, owner: _Owner, src: str) -> tuple[Link, ...]:
             continue
         marker = _marker(decorator.func)
         values = [a.value for a in decorator.args if isinstance(a, ast.Constant)]
-        if marker is None or len(values) != len(decorator.args):
+        if (
+            marker is None
+            or marker not in reading.request.markers
+            or len(values) != len(decorator.args)
+        ):
             continue
         if not all(isinstance(value, str) for value in values):
             continue
@@ -141,12 +156,12 @@ def _marker(node: ast.expr) -> str | None:
     return None
 
 
-def _unread(reading: _Reading, module: ast.Module, markers: frozenset[str]) -> list[Finding]:
+def _unread(reading: _Reading, module: ast.Module, markers: frozenset[str]) -> list[Diagnostic]:
     """A finding for every `mark.<link marker>` that `_declared` did not read."""
     parents = {
         id(child): parent for parent in ast.walk(module) for child in ast.iter_child_nodes(parent)
     }
-    unread: list[Finding] = []
+    unread: list[Diagnostic] = []
     for node in ast.walk(module):
         if not isinstance(node, ast.Attribute) or id(node) in reading.read:
             continue

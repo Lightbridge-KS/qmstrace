@@ -126,6 +126,12 @@ class Stray:
 
 @dataclass(frozen=True, slots=True)
 class Extraction:
+    """All extracted declarations, including repeated IDs for host duplicate findings.
+
+    Providers must preserve duplicate declarations and their locations. The host owns
+    graph uniqueness validation; a source duplicate is not a plugin contract fault.
+    """
+
     items: tuple[Item, ...] = ()
     links: tuple[Link, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()

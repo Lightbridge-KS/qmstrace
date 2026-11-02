@@ -3,7 +3,7 @@ name: release
 # Annotated host/plugin tags select independent manifests. CI drafts; a human publishes.
 on:
   push:
-    tags: ['v*', 'qmstrace-lang-csharp-v*']
+    tags: ['v*', 'qmstrace-lang-csharp-v*', 'qmstrace-lang-python-v*']
 
 jobs:
   gate:

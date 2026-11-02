@@ -25,7 +25,10 @@ from qmstrace.core.graph._validation import _numbered
 from qmstrace.core.model import ID_TOKEN, id_tokens
 from qmstrace.extract import change_requests
 from qmstrace.extract.markdown import extract as markdown
-from qmstrace.extract.python import module, pytest_tests
+from qmstrace.plugins.catalog import Catalog
+
+PYTHON_MODULE = Catalog().extractor("python-module")
+PYTEST_TESTS = Catalog().extractor("pytest")
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 MINI = FIXTURES / "mini"
@@ -42,7 +45,7 @@ def dotted() -> TraceConfig:
         r"'^DSN-SVC-\d{2}$'", r"'^DSN-SVC-\d{2}(?:\.\d+)?$'"
     )
     assert local != SERVICE
-    return TraceConfig.parse(local, SCHEMA)
+    return TraceConfig.parse(local, SCHEMA, descriptors=Catalog().descriptors)
 
 
 # ── 1. the shape ───────────────────────────────────────────────────────────────────────────
@@ -131,7 +134,7 @@ def test_a_table_row_and_a_later_heading_mention_dotted_ids_whole(dotted: TraceC
 @pytest.mark.verifies("REQ-QMT-20", "DSN-QMT-04")
 def test_a_stray_in_a_module_names_dotted_ids_whole(dotted: TraceConfig) -> None:
     text = '"""Keys."""\n\n# Implements: DSN-SVC-04.1, DSN-SVC-04.2\n'
-    found = module.extract("src/service/keys.py", text, dotted.item_types["component"], dotted)
+    found = PYTHON_MODULE("src/service/keys.py", text, dotted.item_types["component"], dotted)
     (stray,) = found.strays
     assert stray.targets == ("DSN-SVC-04.1", "DSN-SVC-04.2")
 
@@ -139,7 +142,7 @@ def test_a_stray_in_a_module_names_dotted_ids_whole(dotted: TraceConfig) -> None
 @pytest.mark.verifies("REQ-QMT-20", "DSN-QMT-04")
 def test_a_pytest_marker_names_a_dotted_id(dotted: TraceConfig) -> None:
     text = 'import pytest\n\n@pytest.mark.verifies("REQ-SVC-04.1")\ndef test_x():\n    pass\n'
-    found = pytest_tests.extract(
+    found = PYTEST_TESTS(
         "tests/unit/test_keys.py", text, dotted.item_types["automated_test"], dotted
     )
     assert [link.dst for link in found.links] == ["REQ-SVC-04.1"]
@@ -187,7 +190,7 @@ def test_a_configuration_may_give_a_dotted_prefix() -> None:
     local = SERVICE.replace(
         "[items.requirement]\n", '[items.requirement]\nid_prefix  = "REQ-SVC-04.1-"\n', 1
     ).replace(r"'^REQ-SVC-\d{2}$'", r"'^REQ-SVC-04\.1-\d{2}$'")
-    config = TraceConfig.parse(local, SCHEMA)
+    config = TraceConfig.parse(local, SCHEMA, descriptors=Catalog().descriptors)
     assert config.item_types["requirement"].id_prefix == "REQ-SVC-04.1-"
 
 

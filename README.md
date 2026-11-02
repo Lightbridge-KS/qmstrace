@@ -18,16 +18,17 @@ points at evidence that stays in its home system.
 
 ## Use it
 
-The 0.4.0 host and 0.1.0 C# plugin are prepared as separate release wheels. Installation
-requires read access to this private repository and human publication of the release pair.
-After downloading the two wheels from their respective GitHub releases:
+The 0.4.0 host and 0.1.0 Python/C# plugins are prepared as separate release wheels. Installation
+requires read access to this private repository and human publication of the selected releases.
+After downloading the host and desired plugin wheels from their respective GitHub releases:
 
 ```sh
 uv tool install --python 3.13 --with ./qmstrace_lang_csharp-0.1.0-py3-none-any.whl ./qmstrace-0.4.0-py3-none-any.whl
 qmstrace plugins
 ```
 
-Omit `--with` for a Python/Markdown-only installation. The C# plugin must be installed into
+Use the Python wheel with `--with` for Python extraction; repeat `--with` for both languages.
+Omit `--with` only for a Markdown-only installation. The C# plugin must be installed into
 the host's environment. See [installation, exact pins and rollback](contents/how-to/install.md)
 and the [CHANGELOG](CHANGELOG.md). Consumer upgrades and release publication are separate
 from repository verification. Preserve local skill edits before refreshing managed guidance.

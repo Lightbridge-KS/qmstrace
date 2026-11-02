@@ -98,13 +98,20 @@ def test_the_copy_example_is_what_the_command_writes(
 def test_names_only_reference_inputs_are_valid_configurations() -> None:
     from qmstrace.core.config import TraceConfig
     from qmstrace.core.locations import WorkspaceMap
+    from qmstrace.plugins.catalog import Catalog
 
     source = (CONTENTS / "reference/names-only-configuration.md").read_text(encoding="utf-8")
     schema, product, ledger, workspace = re.findall(r"```toml\n(.*?)```", source, re.S)
-    service = TraceConfig.parse(product + '\n[schema]\npath = "qmstrace.schema.toml"\n', schema)
+    service = TraceConfig.parse(
+        product + '\n[schema]\npath = "qmstrace.schema.toml"\n',
+        schema,
+        descriptors=Catalog().descriptors,
+    )
     assert service.version == 2 and service.repo == "service"
     assert service.workspace_profile == "mini-service"
-    assert TraceConfig.parse(ledger, schema).ledger_repo == "ledger"
+    assert (
+        TraceConfig.parse(ledger, schema, descriptors=Catalog().descriptors).ledger_repo == "ledger"
+    )
     spec = WorkspaceMap.parse(workspace, "mini-service.toml")
     assert set(spec.repos) == set(service.repos)
     assert spec.ledger_repo == service.ledger_repo

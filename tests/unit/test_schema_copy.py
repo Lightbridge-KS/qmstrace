@@ -21,6 +21,7 @@ import pytest
 from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.plugins.catalog import Catalog
 
 MINI = Path(__file__).parents[1] / "fixtures" / "mini"
 SCHEMA = (MINI / "ledger" / "qmstrace.schema.toml").read_text(encoding="utf-8")
@@ -30,7 +31,9 @@ BLOCK = setup.schema_block(SCHEMA, "MINI")
 
 
 def copied(local: str, block: str = BLOCK) -> str:
-    return setup.copy_schema(local, setup.held_schema(local), block)
+    return setup.copy_schema(
+        local, setup.held_schema(local), block, descriptors=Catalog().descriptors
+    )
 
 
 def outside(text: str) -> list[str]:
@@ -57,7 +60,10 @@ def same_rules(a: TraceConfig, b: TraceConfig) -> bool:
 @pytest.mark.verifies("DSN-QMT-11")
 def test_a_copy_reads_as_the_schema_by_path_and_keeps_every_other_byte(local: str) -> None:
     new = copied(local)
-    by_path, copy = TraceConfig.parse(local, SCHEMA), TraceConfig.parse(new)
+    by_path, copy = (
+        TraceConfig.parse(local, SCHEMA, descriptors=Catalog().descriptors),
+        TraceConfig.parse(new, descriptors=Catalog().descriptors),
+    )
     assert same_rules(by_path, copy)
     assert copy.schema_digest == by_path.schema_digest
     assert copy.schema_form.value == "a generated, verified copy"
@@ -68,7 +74,11 @@ def test_a_copy_reads_as_the_schema_by_path_and_keeps_every_other_byte(local: st
 def test_the_block_is_marked_digested_and_keeps_the_ledgers_comments() -> None:
     lines = BLOCK.splitlines()
     assert lines[0].startswith("# qmstrace:begin — the MINI trace schema, generated in its ledger")
-    assert lines[1:3] == ["[schema]", f'digest = "{TraceConfig.of_schema(SCHEMA).schema_digest}"']
+    digest = TraceConfig.of_schema(SCHEMA, descriptors=Catalog().descriptors).schema_digest
+    assert lines[1:3] == [
+        "[schema]",
+        f'digest = "{digest}"',
+    ]
     assert lines[-1] == "# qmstrace:end"
     assert "[schema.links]" in lines and "[[schema.rules]]" in lines
     comments = [line for line in SCHEMA.splitlines() if line.startswith("#")]
@@ -92,17 +102,32 @@ def test_a_copy_of_older_rules_is_replaced() -> None:
     old = copied(SERVICE)
     newer = SCHEMA.replace("no test verifies it yet.", "no test verifies this requirement.")
     held = setup.held_schema(old)
-    new = setup.copy_schema(old, held, setup.schema_block(newer, "MINI"))
-    assert held.digest != TraceConfig.of_schema(newer).schema_digest
-    assert TraceConfig.parse(new).schema_digest == TraceConfig.of_schema(newer).schema_digest
+    new = setup.copy_schema(
+        old, held, setup.schema_block(newer, "MINI"), descriptors=Catalog().descriptors
+    )
+    assert (
+        held.digest != TraceConfig.of_schema(newer, descriptors=Catalog().descriptors).schema_digest
+    )
+    assert (
+        TraceConfig.parse(new, descriptors=Catalog().descriptors).schema_digest
+        == TraceConfig.of_schema(newer, descriptors=Catalog().descriptors).schema_digest
+    )
 
 
 def test_a_comment_only_change_is_layout_the_digest_stays() -> None:
     old = copied(SERVICE)
     commented = SCHEMA.replace("# ", "#  ", 1)
-    new = setup.copy_schema(old, setup.held_schema(old), setup.schema_block(commented, "MINI"))
+    new = setup.copy_schema(
+        old,
+        setup.held_schema(old),
+        setup.schema_block(commented, "MINI"),
+        descriptors=Catalog().descriptors,
+    )
     assert new != old
-    assert setup.held_schema(old).digest == TraceConfig.parse(new).schema_digest
+    assert (
+        setup.held_schema(old).digest
+        == TraceConfig.parse(new, descriptors=Catalog().descriptors).schema_digest
+    )
 
 
 def test_a_copy_edited_by_hand_is_seen_and_replaced() -> None:
@@ -134,7 +159,9 @@ def test_subjects_before_schema_and_the_comment_above_the_next_table_stay_put() 
         .strip("\n")
         .replace("# qmstrace:end", "")
     )  # only blank lines between the copy and the comment that belongs to the next table
-    assert TraceConfig.parse(new).subjects["service"].key == "SVC"
+    assert (
+        TraceConfig.parse(new, descriptors=Catalog().descriptors).subjects["service"].key == "SVC"
+    )
 
 
 def test_crlf_line_endings_are_kept() -> None:
@@ -152,14 +179,21 @@ def test_a_bracket_inside_a_multi_line_string_is_never_a_header() -> None:
     assert tricky != SCHEMA
     new = copied(SERVICE, setup.schema_block(tricky, "MINI"))
     assert "\n[not a header]\n" in new and "[schema.not a header]" not in new
-    assert TraceConfig.parse(new).rules[1].text.startswith("no test verifies it yet.\n[not a")
+    assert (
+        TraceConfig.parse(new, descriptors=Catalog().descriptors)
+        .rules[1]
+        .text.startswith("no test verifies it yet.\n[not a")
+    )
     assert copied(new, setup.schema_block(tricky, "MINI")) == new
 
 
 def test_a_quoted_spaced_schema_header_is_found() -> None:
     quoted = SERVICE.replace("[schema]", '[ "schema" ]', 1)
     assert setup.held_schema(quoted).kind == "path"
-    assert TraceConfig.parse(copied(quoted)).schema_form.value == "a generated, verified copy"
+    assert (
+        TraceConfig.parse(copied(quoted), descriptors=Catalog().descriptors).schema_form.value
+        == "a generated, verified copy"
+    )
 
 
 # ── 4. what is held, and what is refused ───────────────────────────────────────────────────

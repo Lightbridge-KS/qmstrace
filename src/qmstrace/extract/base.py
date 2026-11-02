@@ -16,7 +16,6 @@ from typing import Final, Protocol
 from qmstrace.core.config import ItemType, TraceConfig
 from qmstrace.core.model import Extracted
 from qmstrace.extract import markdown
-from qmstrace.extract.python import module, pytest_tests
 
 
 class IExtractor(Protocol):
@@ -29,14 +28,10 @@ class IExtractor(Protocol):
 
 REGISTRY: Final[Mapping[str, IExtractor]] = {
     "markdown": markdown.extract,
-    "python-module": module.extract,
-    "pytest": pytest_tests.extract,
 }
 
 # How each extractor's items declare a link — `form(marker, target)`, for a gap's next move. The
 # syntax lives with the extractor that reads it, and a test round-trips every form.
 FORMS: Final[Mapping[str, Callable[[str, str], str]]] = {
     "markdown": markdown.form,
-    "python-module": module.form,
-    "pytest": pytest_tests.form,
 }

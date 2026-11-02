@@ -1,9 +1,9 @@
 """The report boundary accepts pytest XML, retains its entries and refuses unsafe payloads."""
 
 import pytest
+from qmstrace_lang_python.pytest_tests import report_identity
 
 from qmstrace.extract import reports
-from qmstrace.extract.python.pytest_tests import report_identity
 
 
 @pytest.mark.parametrize(

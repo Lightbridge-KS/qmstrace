@@ -8,6 +8,11 @@
     or Python — and the run says which starter it chose. In a ledger, it sets the ledger up to
     hold the project's documents. Repeating setup makes no further changes.
 
+Python and C# starters require their explicitly installed provider in the host environment.
+This includes default Python selection. A missing provider refuses before any files are
+written and explains installation; setup neither installs packages nor selects a reduced
+configuration. See [installation](../../how-to/install.md).
+
 ## Invocation
 
 ``` text

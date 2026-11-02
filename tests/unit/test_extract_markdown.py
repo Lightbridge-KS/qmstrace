@@ -25,6 +25,7 @@ import pytest
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.model import Extracted
 from qmstrace.extract.markdown import extract
+from qmstrace.plugins.catalog import Catalog
 
 SRS = """\
 ---
@@ -305,7 +306,11 @@ PINNED = [
 
 def _config(repo: str) -> TraceConfig:
     local = (MINI / repo / "qmstrace.toml").read_text(encoding="utf-8")
-    return TraceConfig.parse(local) if repo == "solo" else TraceConfig.parse(local, SCHEMA_TEXT)
+    return (
+        TraceConfig.parse(local, descriptors=Catalog().descriptors)
+        if repo == "solo"
+        else TraceConfig.parse(local, SCHEMA_TEXT, descriptors=Catalog().descriptors)
+    )
 
 
 @pytest.mark.parametrize(("repo", "path", "item_type"), sorted({p[:3] for p in PINNED}))

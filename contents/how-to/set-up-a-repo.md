@@ -6,17 +6,14 @@
     and scan paths, and commit the configuration and guidance. Reuse the project's schema when joining
     an existing ledger; setup preserves an existing configuration.
 
-1. Install qmstrace once per machine, from a release, with [uv](https://docs.astral.sh/uv/).
-   The repository is private, so this needs read access to it:
+1. Install the host and the required Python or C# provider into the same tool environment
+   using the [release-wheel installation guide](install.md). The private repository requires
+   read access. Python is explicitly installed even when it is the default starter language.
 
-    ``` sh
-    uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.3.0"
-    ```
-
-    The tag is the pin: `uv tool upgrade` keeps it, and a later release is installed with the
-    same command and its tag. Then run `qmstrace init` again in each traced repo, so its stanza
-    and skill follow the release; an unedited skill copy from the earlier release is refused
-    until it is removed ([#16](https://github.com/Lightbridge-KS/qmstrace/issues/16)).
+    Keep the host/plugin wheels, dependency constraints and Python runtime version as the
+    installation pins. After changing versions, run `qmstrace init` in each traced repo so
+    its stanza and skill follow the release; an earlier skill copy is refused until it is
+    preserved and removed ([#16](https://github.com/Lightbridge-KS/qmstrace/issues/16)).
 
 2. In a new product root, run `qmstrace init --subject service --key SVC`.
    For an existing traced repo, run `qmstrace init` without subject options.

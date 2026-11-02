@@ -28,11 +28,6 @@ class ExtractorDescriptor:
 BUILTINS: Final[Mapping[str, ExtractorDescriptor]] = MappingProxyType(
     {
         "markdown": ExtractorDescriptor(authored_ids=True),
-        "python-module": ExtractorDescriptor(identity="ID: the module's path"),
-        "pytest": ExtractorDescriptor(
-            identity="ID: the test's node ID",
-            scan="test functions: a parametrised function is one automated test",
-        ),
     }
 )
 EXTRACTORS: Final[Mapping[str, bool]] = MappingProxyType(

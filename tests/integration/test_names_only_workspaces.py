@@ -12,6 +12,7 @@ import pytest
 from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.plugins.catalog import Catalog
 from qmstrace.workspace import Workspace
 
 
@@ -50,7 +51,12 @@ def migrate(project: Path) -> Path:
         )
         write(
             path,
-            setup.copy_schema(local, setup.held_schema(local), setup.schema_block(schema, "MINI")),
+            setup.copy_schema(
+                local,
+                setup.held_schema(local),
+                setup.schema_block(schema, "MINI"),
+                descriptors=Catalog().descriptors,
+            ),
         )
     map_file(
         Path.home() / ".qmstrace/workspaces/mini-service.toml",
@@ -121,16 +127,17 @@ def test_v2_refuses_ambiguous_or_invalid_configuration(v2: Path, change: str) ->
     else:
         local = local.replace("version = 2", 'version = 2\nledger = "../ledger"', 1)
     with pytest.raises(CouldNotJudge):
-        TraceConfig.parse(local, schema)
+        TraceConfig.parse(local, schema, descriptors=Catalog().descriptors)
 
 
 @pytest.mark.verifies("DSN-QMT-03")
 def test_v2_member_order_does_not_change_digest(v2: Path) -> None:
     source = (v2 / "ledger/qmstrace.schema.toml").read_text()
     assert (
-        TraceConfig.of_schema(source).schema_digest
+        TraceConfig.of_schema(source, descriptors=Catalog().descriptors).schema_digest
         == TraceConfig.of_schema(
-            source.replace('["service", "client"]', '["client", "service"]')
+            source.replace('["service", "client"]', '["client", "service"]'),
+            descriptors=Catalog().descriptors,
         ).schema_digest
     )
 
@@ -323,7 +330,12 @@ def test_v2_init_refresh_preserves_maps_and_refuses_local_skill_edits(v2: Path) 
     before = file.read_bytes()
     Workspace.initialize(root)
     assert file.read_bytes() == before
-    assert TraceConfig.parse((root / "qmstrace.toml").read_text()).version == 2
+    assert (
+        TraceConfig.parse(
+            (root / "qmstrace.toml").read_text(), descriptors=Catalog().descriptors
+        ).version
+        == 2
+    )
     skill = root / ".agents/skills/qmstrace/SKILL.md"
     write(skill, skill.read_text() + "\nLocal addition\n")
     with pytest.raises(CouldNotJudge, match="differs"):
@@ -340,7 +352,13 @@ def test_current_v2_keeps_original_v1_baseline_configuration(project: Path) -> N
     local = file.read_text()
     schema = (project / "ledger/qmstrace.schema.toml").read_text()
     write(
-        file, setup.copy_schema(local, setup.held_schema(local), setup.schema_block(schema, "MINI"))
+        file,
+        setup.copy_schema(
+            local,
+            setup.held_schema(local),
+            setup.schema_block(schema, "MINI"),
+            descriptors=Catalog().descriptors,
+        ),
     )
     for args in (
         ("add", "qmstrace.toml"),
@@ -448,6 +466,9 @@ def test_logical_locations_do_not_repeat_a_derived_id_in_human_walks(v2: Path) -
 @pytest.mark.verifies("DSN-QMT-03")
 def test_v2_schema_only_errors_name_the_authored_key_not_a_synthetic_header() -> None:
     with pytest.raises(CouldNotJudge) as stopped:
-        TraceConfig.of_schema('version = 2\nproject = "MINI"\n[repos]\nmembers = ["service"]\n')
+        TraceConfig.of_schema(
+            'version = 2\nproject = "MINI"\n[repos]\nmembers = ["service"]\n',
+            descriptors=Catalog().descriptors,
+        )
     assert "repos.ledger_repo" in stopped.value.what
     assert "not valid TOML" not in stopped.value.what
