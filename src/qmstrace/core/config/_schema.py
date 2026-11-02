@@ -7,23 +7,37 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Final
 
-# The extractors this qmstrace ships, and whether each reads IDs someone wrote — so an ID
-# pattern is required — or derives them from a path or a test function, so one is refused.
-# `extract/` registers exactly these names; a test keeps the two in step.
-EXTRACTORS: Final[Mapping[str, bool]] = {
-    "markdown": True,
-    "python-module": False,
-    "pytest": False,
-    "csharp-file": False,
-    "xunit": False,
-}
-# Extractors whose one marker names no link type of its own — an xUnit DisplayName starts with
-# an ID and nothing else — so the item type they read must carry exactly one link.
-ONE_LINK: Final = frozenset({"xunit"})
+
+@dataclass(frozen=True, slots=True)
+class ExtractorDescriptor:
+    """Validated capability data injected by the workspace; no discovery in core."""
+
+    authored_ids: bool = False
+    single_link: bool = False
+    identity: str = "ID: derived by the extractor"
+    scan: str = ""
+    single_link_description: str = "an unnamed link"
+    problem: str | None = None
+
+
+BUILTINS: Final[Mapping[str, ExtractorDescriptor]] = MappingProxyType(
+    {
+        "markdown": ExtractorDescriptor(authored_ids=True),
+        "python-module": ExtractorDescriptor(identity="ID: the module's path"),
+        "pytest": ExtractorDescriptor(
+            identity="ID: the test's node ID",
+            scan="test functions: a parametrised function is one automated test",
+        ),
+    }
+)
+EXTRACTORS: Final[Mapping[str, bool]] = MappingProxyType(
+    {name: descriptor.authored_ids for name, descriptor in BUILTINS.items()}
+)
 
 
 class SchemaForm(Enum):
@@ -48,6 +62,8 @@ class ItemType:
     files: tuple[str, ...]
     ignore: tuple[str, ...]
 
+    descriptor: ExtractorDescriptor = field(default_factory=ExtractorDescriptor)
+
     @property
     def declared_here(self) -> bool:
         """Whether this repo scans for items of this type at all."""
@@ -57,7 +73,7 @@ class ItemType:
     def derives_ids(self) -> bool:
         """Whether this repo's extractor derives each ID from where the item is — a module's
         path, a test's node ID — rather than reading one someone wrote."""
-        return self.extractor is not None and not EXTRACTORS[self.extractor]
+        return self.extractor is not None and not self.descriptor.authored_ids
 
     @property
     def fields(self) -> frozenset[str]:

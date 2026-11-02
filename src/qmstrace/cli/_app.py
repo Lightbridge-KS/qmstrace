@@ -11,7 +11,18 @@ import typer
 
 from qmstrace import __version__
 from qmstrace.cli._ledger import ledger
-from qmstrace.cli._local import check, graph, impact, init, paths, results, rules, status, thread
+from qmstrace.cli._local import (
+    check,
+    graph,
+    impact,
+    init,
+    paths,
+    plugins,
+    results,
+    rules,
+    status,
+    thread,
+)
 from qmstrace.cli._options import Directory, JsonOutput, WorkspaceFile
 from qmstrace.cli._outcome import EXIT_CODES, EXIT_OK
 from qmstrace.cli._terminal import TerminalCommand, TerminalGroup
@@ -84,3 +95,7 @@ app.add_typer(
 app.command(
     cls=TerminalCommand, short_help="Explain checkout locations and workspace-map selection."
 )(paths)
+
+app.command(cls=TerminalCommand, short_help="Inspect installed extractor providers and problems.")(
+    plugins
+)

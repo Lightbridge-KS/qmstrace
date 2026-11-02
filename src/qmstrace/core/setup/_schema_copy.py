@@ -7,10 +7,19 @@ from __future__ import annotations
 
 import re
 import tomllib
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Literal
 
-from qmstrace.core.config import COPY_BEGIN, COPY_END, TraceConfig, schema_digest, structural
+from qmstrace.core.config import (
+    BUILTINS,
+    COPY_BEGIN,
+    COPY_END,
+    ExtractorDescriptor,
+    TraceConfig,
+    schema_digest,
+    structural,
+)
 from qmstrace.core.errors import CouldNotJudge
 
 
@@ -171,7 +180,13 @@ def schema_block(schema_text: str, project: str) -> str:
     return "".join(block) + COPY_END + "\n"
 
 
-def copy_schema(local_text: str, held: Held, block: str, file: str = "qmstrace.toml") -> str:
+def copy_schema(
+    local_text: str,
+    held: Held,
+    block: str,
+    file: str = "qmstrace.toml",
+    descriptors: Mapping[str, ExtractorDescriptor] = BUILTINS,
+) -> str:
     """Put the block where the held schema was, keeping every other byte — then prove it."""
     lines = local_text.splitlines(keepends=True)
     newline = "\r\n" if "\r\n" in local_text else "\n"
@@ -186,5 +201,7 @@ def copy_schema(local_text: str, held: Held, block: str, file: str = "qmstrace.t
             f"{file}: the schema copy could not be written without changing something else.",
             "Fix: nothing was written — report this, with the ledger's schema and this file.",
         )
-    TraceConfig.parse(updated, local_name=file)  # the repo still loads under the new rules
+    TraceConfig.parse(
+        updated, local_name=file, descriptors=descriptors
+    )  # the repo still loads under the new rules
     return updated

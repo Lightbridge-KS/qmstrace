@@ -1214,6 +1214,9 @@
               }
             }
           }
+        },
+        "toolchain": {
+          "$ref": "#/$defs/toolchain"
         }
       }
     },
@@ -1270,7 +1273,12 @@
             }
           }
         }
-      ]
+      ],
+      "properties": {
+        "toolchain": {
+          "$ref": "#/$defs/toolchain"
+        }
+      }
     },
     "ledger_check": {
       "allOf": [
@@ -1913,6 +1921,9 @@
           "items": {
             "$ref": "#/$defs/step"
           }
+        },
+        "toolchain": {
+          "$ref": "#/$defs/toolchain"
         }
       }
     },
@@ -2014,6 +2025,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "toolchain": {
+          "$ref": "#/$defs/toolchain"
         }
       }
     },
@@ -2226,6 +2240,9 @@
               }
             }
           }
+        },
+        "toolchain": {
+          "$ref": "#/$defs/toolchain"
         }
       }
     },
@@ -2255,6 +2272,49 @@
         }
       },
       "additionalProperties": false
+    },
+    "toolchain": {
+      "type": "object",
+      "required": [
+        "host",
+        "python",
+        "providers",
+        "extractors"
+      ],
+      "properties": {
+        "host": {
+          "type": "object",
+          "required": [
+            "distribution",
+            "version"
+          ]
+        },
+        "python": {
+          "type": "object",
+          "required": [
+            "implementation",
+            "version"
+          ]
+        },
+        "providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "distribution",
+              "version",
+              "api",
+              "parser_dependencies"
+            ]
+          }
+        },
+        "extractors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "allOf": [
@@ -2508,7 +2568,8 @@
               "results",
               "ledger check",
               "ledger thread",
-              "ledger impact"
+              "ledger impact",
+              "plugins"
             ]
           }
         }

@@ -122,10 +122,10 @@ files      = ["docs/design/*.md", "docs/structure/*.md"]
 
 [items.component]                   # ID = the module's path
 extractor = "python-module"
-files     = ["src/**/*.py"]
+files     = ["src/**/*.py", "packages/*/src/**/*.py"]
 ignore    = ["**/__init__.py"]
 
 [items.automated_test]              # ID = the test function's node id; level = its folder
 extractor = "pytest"
-files     = ["tests/**/test_*.py"]
+files     = ["tests/**/test_*.py", "packages/*/tests/**/test_*.py"]
 ignore    = ["tests/fixtures/**"]   # the miniature project's own tests are data, not ours

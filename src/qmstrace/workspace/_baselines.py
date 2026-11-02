@@ -18,6 +18,7 @@ from qmstrace.core.locations import joined
 from qmstrace.core.model import Finding, Item, Notice
 from qmstrace.infra.git import IGit
 from qmstrace.infra.tree import GitTree
+from qmstrace.plugins.catalog import Catalog
 from qmstrace.workspace._discovery import CONFIG_FILE, _configuration
 from qmstrace.workspace._scanning import _scan
 
@@ -29,12 +30,14 @@ def _judged_baselines(
     items: Iterable[Item],
     register: Register,
     *,
+    catalog: Catalog | None = None,
     repo: str | None = None,
     location: str = ".",
 ) -> tuple[BaselineState, tuple[Finding, ...]]:
     """One repo's baselines, read from its reachable tags, and the guard over its items. In
     the ledger's check, `repo` names it: its snapshots are read with the same qualified IDs and
     locations as today's items, so the two can be compared."""
+    catalog = catalog or Catalog()
     source.state()
     tags = tuple(
         t
@@ -53,8 +56,10 @@ def _judged_baselines(
             continue
         tags_here = ", ".join(t.name for t in tags if t.commit == commit)
         try:
-            tagged = _configuration(root, tree)
-            scan = _scan(tree, tagged, tagged.item_types.values(), with_misplaced=True)
+            tagged = _configuration(root, tree, catalog)
+            scan = _scan(
+                tree, tagged, tagged.item_types.values(), with_misplaced=True, catalog=catalog
+            )
         except CouldNotJudge as stopped:
             raise CouldNotJudge(
                 f"Historical trace data at {tags_here} ({commit}) cannot be read: {stopped.what}",

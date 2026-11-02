@@ -23,6 +23,7 @@ from qmstrace.cli._options import (
 from qmstrace.cli._outcome import EXIT_FAILED, EXIT_OK, outcome
 from qmstrace.cli._terminal import styled
 from qmstrace.render import graph as browser
+from qmstrace.render import plugins as plugin_text
 from qmstrace.render import text
 from qmstrace.render._style import Style
 from qmstrace.render.json import assessment as json_assessment
@@ -309,4 +310,20 @@ def paths(
         emit(json_configuration.paths(view), code=0, notices=[view.source])
     else:
         typer.echo(text.paths(view, style=Style(styled())), color=styled())
+    return EXIT_OK
+
+
+@outcome
+def plugins(
+    ctx: typer.Context,
+    directory: Directory = None,
+    workspace_file: WorkspaceFile = None,
+    json_output: JsonOutput = False,
+) -> int:
+    """Inspect installed provider manifests without importing their implementations."""
+    data = Workspace.plugins()
+    if CURRENT.get().json:
+        emit(data)
+    else:
+        typer.echo(plugin_text.report(data))
     return EXIT_OK

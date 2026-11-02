@@ -92,3 +92,10 @@ tests and cases once, with ID references from requirement rows. `other_methods` 
 
 An added key keeps `/1`. Removing or renaming a field, changing its type, meaning or an
 established ordering requires `/2`. The format does not persist results or record review.
+
+## Extraction toolchain
+
+Assessment payloads add `data.toolchain`: host distribution/version, Python implementation/version,
+used provider distributions and extraction API versions, parser dependency versions and extractor names.
+Rules and paths remain configuration-only views. `plugins` exposes metadata inspection without handlers.
+The metadata has no timestamp or machine path; output equality assumes the same toolchain versions.

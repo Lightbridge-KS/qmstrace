@@ -16,7 +16,11 @@ import re
 import pytest
 
 from qmstrace.core.config import TraceConfig
-from qmstrace.extract.base import FORMS, REGISTRY
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+FORMS = {n: CATALOG.form(n) for n in CATALOG.descriptors}
+REGISTRY = {n: CATALOG.extractor(n) for n in CATALOG.descriptors}
 
 CODE = re.compile(r"`([^`]+)`")
 
@@ -176,7 +180,7 @@ def test_every_suggested_csharp_form_round_trips(
     from pathlib import Path
 
     cases = Path(__file__).parents[1] / "fixtures" / "cases"
-    agent = TraceConfig.parse(
+    agent = CATALOG.configuration(
         (cases / "agent" / "qmstrace.toml").read_text("utf-8"),
         (cases / "ledger" / "qmstrace.schema.toml").read_text("utf-8"),
     )
@@ -209,7 +213,7 @@ def test_every_place_a_csharp_component_may_be_marked_round_trips(
     from pathlib import Path
 
     cases = Path(__file__).parents[1] / "fixtures" / "cases"
-    agent = TraceConfig.parse(
+    agent = CATALOG.configuration(
         (cases / "agent" / "qmstrace.toml").read_text("utf-8"),
         (cases / "ledger" / "qmstrace.schema.toml").read_text("utf-8"),
     )

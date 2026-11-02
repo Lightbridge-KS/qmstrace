@@ -1,0 +1,17 @@
+manifest = 1
+api = 1
+parser_dependencies = ["tree-sitter", "tree-sitter-c-sharp"]
+
+[extractors.csharp-file]
+module = "qmstrace_lang_csharp.component"
+ids = "derived"
+links = "named"
+identity = "ID: the file's path"
+
+[extractors.xunit]
+module = "qmstrace_lang_csharp.xunit"
+ids = "derived"
+links = "single"
+identity = "ID: path::Class::Method"
+scan = "[Fact]/[Theory] methods: a Theory is one automated test"
+single_link_description = "the ID that starts a test's DisplayName"

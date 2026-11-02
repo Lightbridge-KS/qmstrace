@@ -15,6 +15,19 @@ this glossary says which word wins.
 
 ## Language
 
+### Extraction plugins
+
+**Extraction Plugin**:
+An independently versioned Python package supplying named source/test extractors through
+the engine's public API. It recognizes syntax; the engine owns source access and judgment.
+The implemented boundary is described in
+[`extensibility-architecture.md`](docs/design/extensibility-architecture.md).
+
+**Extractor Catalog**:
+The capabilities and provider identities resolved once for an invocation. It supplies
+configuration validation with data and resolves required handlers when first used.
+_Avoid_: trace schema (project rules), workspace map (checkout locations).
+
 ### The standard
 
 **Profile**:

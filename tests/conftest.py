@@ -4,6 +4,7 @@ The fixture project `tests/fixtures/mini/` is plain files. Unit tests read its c
 as text; integration tests copy it into a temporary directory and make real Git repositories.
 """
 
+import json
 import os
 import shutil
 import subprocess
@@ -15,6 +16,7 @@ import pytest
 
 from qmstrace.core import setup
 from qmstrace.core.config import TraceConfig
+from qmstrace.plugins.catalog import Catalog
 
 # The fixture project holds product repos with test files of their own. They are data for the
 # engine to read, never tests for this suite to collect.
@@ -48,7 +50,9 @@ def _embed(local: str, schema: str) -> str:
     """The configuration with the project's schema copied in — by the production transform,
     exactly as `qmstrace ledger copy-schema` writes it."""
     block = setup.schema_block(schema, str(tomllib.loads(schema)["project"]))
-    return setup.copy_schema(local, setup.held_schema(local), block)
+    return setup.copy_schema(
+        local, setup.held_schema(local), block, descriptors=Catalog().descriptors
+    )
 
 
 @pytest.fixture(scope="session")
@@ -90,6 +94,20 @@ def golden() -> Callable[[Path, str], None]:
     read the diff before committing it."""
 
     def check(path: Path, text: str) -> None:
+        # Runtime versions are asserted by plugin provenance tests. Goldens preserve
+        # the metadata shape and extractor selection across Python patch versions.
+        if path.suffix == ".json":
+            value = json.loads(text)
+            chain = value.get("toolchain") or (value.get("data") or {}).get("toolchain")
+            if chain:
+                chain["host"]["version"] = "<host-version>"
+                chain["python"]["version"] = "<python-version>"
+                for provider in chain["providers"]:
+                    provider["version"] = "<plugin-version>"
+                    provider["parser_dependencies"] = dict.fromkeys(
+                        provider["parser_dependencies"], "<parser-version>"
+                    )
+                text = json.dumps(value, ensure_ascii=False, indent=2) + "\n"
         if os.environ.get("QMSTRACE_REGOLD"):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding="utf-8")

@@ -56,6 +56,7 @@ def results(value: Results) -> dict[str, object]:
     }
     return {
         "project": value.assessment.config.project,
+        "toolchain": dict(value.assessment.toolchain),
         "counts": {
             "entries": value.entries,
             "runs": value.runs,

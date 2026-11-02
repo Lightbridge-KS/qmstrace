@@ -13,6 +13,7 @@ from qmstrace.cli._local import graph as graph
 from qmstrace.cli._local import impact as impact
 from qmstrace.cli._local import init as init
 from qmstrace.cli._local import paths as paths
+from qmstrace.cli._local import plugins as plugins
 from qmstrace.cli._local import results as results
 from qmstrace.cli._local import rules as rules
 from qmstrace.cli._local import status as status

@@ -667,7 +667,9 @@ def test_the_section_survives_a_verified_copy(embed: Embed) -> None:
     local = (
         Path(__file__).parents[1] / "fixtures" / "cases" / "agent" / "qmstrace.toml"
     ).read_text(encoding="utf-8")
-    copy = TraceConfig.parse(embed(local, listed))
+    from qmstrace.plugins.catalog import Catalog
+
+    copy = TraceConfig.parse(embed(local, listed), descriptors=Catalog().descriptors)
     assert copy.schema_form is SchemaForm.VERIFIED_COPY
     assert copy.tables.matrix_fields == ("Category",)
 

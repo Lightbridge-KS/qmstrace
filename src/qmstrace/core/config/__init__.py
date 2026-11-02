@@ -18,6 +18,7 @@ from qmstrace.core.config._copy import (
 from qmstrace.core.config._parse import (
     TraceConfig as TraceConfig,
 )
+from qmstrace.core.config._schema import BUILTINS as BUILTINS
 from qmstrace.core.config._schema import (
     EXTRACTORS as EXTRACTORS,
 )
@@ -33,6 +34,7 @@ from qmstrace.core.config._schema import (
 from qmstrace.core.config._schema import (
     ExternalSource as ExternalSource,
 )
+from qmstrace.core.config._schema import ExtractorDescriptor as ExtractorDescriptor
 from qmstrace.core.config._schema import (
     ItemType as ItemType,
 )

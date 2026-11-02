@@ -28,10 +28,11 @@ jobs:
       - name: Tests
         run: |
           uv run pytest -q
+          uv run python tests/check_coverage.py
           node --test tests/browser/*.test.cjs
       - name: Wheel carries the package data
         run: |
-          uv build --wheel --quiet
+          uv build --package qmstrace --wheel --no-sources --quiet
           uv run python tests/check_wheel.py
       - name: Manual
         run: uv run --isolated --locked --only-group docs zensical build --clean
@@ -47,3 +48,28 @@ jobs:
         run: uv sync --locked
       - name: Native distinct-drive acceptance
         run: uv run python tests/check_cross_drive.py
+
+  installed-plugins:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install build and verification tools
+        run: uv sync --locked
+      - name: Build distributions independently
+        run: |
+          uv build --package qmstrace --wheel --no-sources
+          uv build --package qmstrace-lang-csharp --wheel --no-sources
+      - name: Prepare dependency wheelhouse
+        run: uv run python tests/check_plugin_wheels.py --prepare
+      - name: Offline installed-wheel compatibility
+        run: uv run python tests/check_plugin_wheels.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin-compatibility-${{ matrix.os }}
+          path: |
+            dist/compatibility-*.json
+            dist/*.whl

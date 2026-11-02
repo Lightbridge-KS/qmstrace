@@ -8,6 +8,12 @@ read_when:
 
 # qmstrace — System & OOP Architecture
 
+**Implemented under CR-007:** [ADR-0013](../adr/0013-extractor-plugins.md)
+adds independently versioned language packages within the host process. Source-tree reads
+and judgment stay in the host. The [extensibility design](extensibility-architecture.md)
+defines admission and the public API; the [tracker](../progress/csharp-extractor-plugin.md)
+records implementation, verification and remaining platform acceptance.
+
 > Source: the PRD, decisions D1–D10, the surface architecture, the slice-1 tracker and four experiments on a test bed · Date: 2026-09-21 · Mode: Design · Type: Application (a command-line tool)
 > See also: [Data Architecture](data-architecture.md) · [Surface Architecture](surface-architecture.md) · [Product Requirements](../req/qmstrace-prd.md) · [Progress tracker](../progress/overview-qmstrace.md)
 

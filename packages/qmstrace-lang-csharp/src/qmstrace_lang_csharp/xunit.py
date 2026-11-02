@@ -26,19 +26,19 @@ from __future__ import annotations
 import re
 from typing import Final
 
-from qmstrace.core import findings
-from qmstrace.core.config import ItemType, TraceConfig
-from qmstrace.core.model import (
+from qmstrace.plugin_api.v1 import (
     ID_IN_TEXT,
-    Extracted,
-    Finding,
+    Diagnostic,
+    Extraction,
+    ExtractRequest,
     Identity,
     Item,
     Link,
     Stray,
     text_digest,
 )
-from qmstrace.extract.csharp import _syntax
+from qmstrace_lang_csharp import _diagnostics as findings
+from qmstrace_lang_csharp import _syntax
 
 _XUNIT: Final = {"Fact", "Theory"}
 _DISPLAY: Final = "DisplayName"
@@ -59,19 +59,20 @@ _FIX: Final = (
 )
 
 
-def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> Extracted:
+def extract(request: ExtractRequest) -> Extraction:
     """Read one C# test file for automated tests and the link each one's DisplayName declares."""
+    path, text = request.path, request.text
     source = _syntax.parse(text)
     if source.error is not None:
-        return Extracted(findings=(findings.cannot_parse(path, *source.error),))
-    carried = [m for m, link in config.links.items() if item_type.name in link.sources]
+        return Extraction(diagnostics=(findings.cannot_parse(path, *source.error),))
+    carried = list(request.permitted_markers)
     marker = carried[0] if len(carried) == 1 else None  # the configuration refuses otherwise
     folders = [part.lower() for part in path.split("/")[:-1]]
-    level = next((lv for part in folders for lv in item_type.levels if part == lv.lower()), None)
+    level = next((lv for part in folders for lv in request.levels if part == lv.lower()), None)
 
     items: list[Item] = []
     links: list[Link] = []
-    wrong: list[Finding] = []
+    wrong: list[Diagnostic] = []
     starts: list[tuple[int, str]] = []  # each method's line and test ID, for the strays
     for declared in source.types:
         for method in declared.methods:
@@ -122,7 +123,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                 continue
             item = Item(
                 test_id,
-                item_type.name,
+                request.item_type,
                 path,
                 method.line,
                 method.name,
@@ -131,8 +132,8 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                 runs_as=_identities(declared, method.name, source.types),
             )
             items.append(item)
-            if level is None and item_type.levels:
-                wrong.append(findings.no_level(item, item_type.levels))
+            if level is None and request.levels:
+                wrong.append(findings.no_level(item, request.levels))
             if marker is None:
                 continue
             display = next((a for a in tests[0].arguments if a.name == _DISPLAY), None)
@@ -158,7 +159,15 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
                     findings.not_an_id(test_id, marker, first, path, display.line, _NOT_AN_ID_FIX)
                 )
     strays = tuple(
-        Stray(marker, (leading.group(1),), path, comment.line, "comment", _below(comment, starts))
+        Stray(
+            marker,
+            (leading.group(1),),
+            path,
+            comment.line,
+            _COMMENT_GUIDANCE,
+            _below(comment, starts),
+            kind="comment",
+        )
         for comment in source.comments
         if marker is not None
         for found in [_COMMENTED.search(comment.text)]
@@ -166,7 +175,7 @@ def extract(path: str, text: str, item_type: ItemType, config: TraceConfig) -> E
         for leading in [ID_IN_TEXT.match(found.group(1))]
         if leading is not None
     )
-    return Extracted(tuple(items), tuple(links), tuple(wrong), strays=strays)
+    return Extraction(tuple(items), tuple(links), tuple(wrong), strays=strays)
 
 
 def form(marker: str, target: str) -> str:
@@ -215,5 +224,11 @@ def _trait_names(attribute: _syntax.Attribute, marker: str) -> bool:
     return first is not None and first.value == marker
 
 
-def _unread(path: str, line: int, marker: str, form: str, test_id: str) -> Finding:
+def _unread(path: str, line: int, marker: str, form: str, test_id: str) -> Diagnostic:
     return findings.unread_marker(path, line, marker, form, fix=_FIX, item=test_id)
+
+
+_COMMENT_GUIDANCE = (
+    "the test attribute at {location} is in a comment, so it is not read — a commented-out "
+    "test links nothing; restore the attribute or remove the comment."
+)

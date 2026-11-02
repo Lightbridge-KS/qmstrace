@@ -86,10 +86,8 @@ def _scanned(assessment: Assessment) -> list[str]:
         if s.ignored:
             line += f" · {s.ignored} {_noun(s.ignored, 'file', 'files')} ignored by "
             line += ", ".join(s.ignore)
-        if item_type.extractor == "pytest":
-            line += " · test functions: a parametrised function is one automated test"
-        elif item_type.extractor == "xunit":
-            line += " · [Fact]/[Theory] methods: a Theory is one automated test"
+        if item_type.descriptor.scan:
+            line += " · " + item_type.descriptor.scan
         lines.append(line)
     return lines
 

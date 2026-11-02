@@ -32,3 +32,7 @@ class CouldNotJudge(Exception):
         self.display_next_move = display_next_move
         self.what = what
         self.next_move = next_move
+
+
+class ProviderUnavailable(CouldNotJudge):
+    """A required extractor cannot be admitted, including in sibling and tagged reads."""

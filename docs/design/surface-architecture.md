@@ -9,6 +9,12 @@ read_when:
 
 # qmstrace — User-Facing Surface & Agent Experience
 
+**Implemented under CR-007:** the
+[extensibility design](extensibility-architecture.md) adds metadata-only plugin inspection,
+explicit C# installation and additive JSON provenance. Existing text output and exit-code
+meanings remain the compatibility reference. See [ADR-0013](../adr/0013-extractor-plugins.md)
+and the [implementation tracker](../progress/csharp-extractor-plugin.md).
+
 > Source: the PRD, experiments E1, E3 and E4 on the beacon test bed, and the design conversation behind decisions D1–D7 · Date: 2026-09-21 · Mode: Design · Surface: Hybrid — a command line (primary), generated documents, a generated read-only view
 > See also: [Data Architecture](data-architecture.md) · [Product Requirements](../req/qmstrace-prd.md) · [Experiments](../tests/beacon-authoring-experiment.md)
 

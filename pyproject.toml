@@ -1,6 +1,6 @@
 [project]
 name = "qmstrace"
-version = "0.4.0.dev0"
+version = "0.4.0"
 description = "The trace layer under a quality-management system: state, traceability and audit evidence for a software project's work products."
 authors = [
     { name = "Lightbridge-KS", email = "ki11ip0.s.a.s@gmail.com" }
@@ -10,8 +10,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
     "defusedxml>=0.7.1",
-    "tree-sitter>=0.26,<0.27",
-    "tree-sitter-c-sharp>=0.23.5,<0.24",
+    "packaging>=26.0",
     "typer>=0.27.2",
 ]
 
@@ -24,6 +23,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "qmstrace-lang-csharp",
     "jsonschema>=4.26,<5",
     "mypy>=2.3.1",
     "pre-commit-hooks>=6.0.0",
@@ -31,6 +31,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.16.8",
     "types-defusedxml>=0.7.0.20260504",
+    "pip>=26.2.2",
 ]
 docs = [
     "zensical>=0.0.63",
@@ -49,9 +50,17 @@ ban-relative-imports = "all"  # the import matrix is checked on absolute names
 
 [tool.mypy]
 strict = true
-files = ["src"]
+files = ["src", "packages/qmstrace-lang-csharp/src"]
 
 [tool.pytest.ini_options]
 markers = ["verifies(*ids): trace the items this test actually verifies"]
-testpaths = ["tests"]
-addopts = "--strict-markers --cov=qmstrace --cov-report=term-missing:skip-covered --cov-fail-under=90"
+testpaths = ["tests", "packages/qmstrace-lang-csharp/tests"]
+addopts = "--strict-markers --cov=qmstrace --cov=qmstrace_lang_csharp --cov-report=term-missing:skip-covered --cov-report=json:dist/coverage.json --cov-fail-under=90"
+
+[tool.uv.workspace]
+members = [
+    "packages/qmstrace-lang-csharp",
+]
+
+[tool.uv.sources]
+qmstrace-lang-csharp = { workspace = true }

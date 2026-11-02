@@ -1,5 +1,5 @@
 ---
-summary: The single active qmstrace tracker — v0.3.0 published at a276e6e after PR 75; tag and CI wheel identity verified unchanged. The next development version, 0.4.0.dev0, is being prepared on codex/post-release-0.3.0. Names-only v2 configuration and native Windows distinct-drive acceptance are verified. Required workspace_profile, cross-drive Windows support and uniform CLI JSON /2 are accepted. Consumer migration remains separate; issue 60 and M11 remain later.
+summary: Repository overview — C# plugin implementation under accepted CR-007 has passing dry, trace and macOS/Linux installed-wheel checks; native Windows candidate acceptance remains pending. Host 0.4.0 and plugin 0.1.0 are prepared but uncommitted and unpublished. Historical v0.3.0 release and earlier acceptance evidence are retained below.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -7,6 +7,12 @@ read_when:
 ---
 
 # qmstrace — progress
+
+**Current work, 2026-11-02:** [C# extractor plugin](csharp-extractor-plugin.md) —
+implemented under accepted CR-007. Host 0.4.0 and plugin 0.1.0 are prepared; dry,
+trace and macOS/Linux installed-wheel checks pass. Native Windows verification remains
+pending. Work is uncommitted and unpublished; historical sections below retain their
+original evidence.
 
 **Updated 2026-10-24 · Release 0.3.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#

@@ -6,6 +6,12 @@ resolution-markers = [
     "python_full_version < '3.15'",
 ]
 
+[manifest]
+members = [
+    "qmstrace",
+    "qmstrace-lang-csharp",
+]
+
 [[package]]
 name = "annotated-doc"
 version = "0.0.5"
@@ -500,6 +506,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pip"
+version = "26.2.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fa/e8/0842d757e483e895e670f655084cfe8b8c72580c6769a76b30b2789a0608/pip-26.2.2.tar.gz", hash = "sha256:3a8e5c800492787f33a4114ef54444546c340df428974ebba17e0fd47e11af2f", size = 1863336, upload-time = "2026-10-20T16:36:29.008Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl", hash = "sha256:fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70", size = 1819850, upload-time = "2026-10-20T16:36:27.046Z" },
+]
+
+[[package]]
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -610,12 +625,11 @@ wheels = [
 
 [[package]]
 name = "qmstrace"
-version = "0.4.0.dev0"
+version = "0.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "defusedxml" },
-    { name = "tree-sitter" },
-    { name = "tree-sitter-c-sharp" },
+    { name = "packaging" },
     { name = "typer" },
 ]
 
@@ -623,9 +637,11 @@ dependencies = [
 dev = [
     { name = "jsonschema" },
     { name = "mypy" },
+    { name = "pip" },
     { name = "pre-commit-hooks" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "qmstrace-lang-csharp" },
     { name = "ruff" },
     { name = "types-defusedxml" },
 ]
@@ -636,8 +652,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "defusedxml", specifier = ">=0.7.1" },
-    { name = "tree-sitter", specifier = ">=0.26,<0.27" },
-    { name = "tree-sitter-c-sharp", specifier = ">=0.23.5,<0.24" },
+    { name = "packaging", specifier = ">=26.0" },
     { name = "typer", specifier = ">=0.27.2" },
 ]
 
@@ -645,13 +660,32 @@ requires-dist = [
 dev = [
     { name = "jsonschema", specifier = ">=4.26,<5" },
     { name = "mypy", specifier = ">=2.3.1" },
+    { name = "pip", specifier = ">=26.2.2" },
     { name = "pre-commit-hooks", specifier = ">=6.0.0" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
+    { name = "qmstrace-lang-csharp", editable = "packages/qmstrace-lang-csharp" },
     { name = "ruff", specifier = ">=0.16.8" },
     { name = "types-defusedxml", specifier = ">=0.7.0.20260504" },
 ]
 docs = [{ name = "zensical", specifier = ">=0.0.63" }]
+
+[[package]]
+name = "qmstrace-lang-csharp"
+version = "0.1.0"
+source = { editable = "packages/qmstrace-lang-csharp" }
+dependencies = [
+    { name = "qmstrace" },
+    { name = "tree-sitter" },
+    { name = "tree-sitter-c-sharp" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "qmstrace", editable = "." },
+    { name = "tree-sitter", specifier = ">=0.26,<0.27" },
+    { name = "tree-sitter-c-sharp", specifier = ">=0.23.5,<0.24" },
+]
 
 [[package]]
 name = "referencing"
@@ -931,7 +965,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ea/c3/17bd69cfbb3a3e965e867f23bae357675357203eb17aad0605de429f7942/zensical-0.0.63-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:069af2ee0254eaa7099faad908f0ae0017c151ef0160b21a039d08efaa61b38a", size = 14255818, upload-time = "2026-09-19T12:29:20.874Z" },
     { url = "https://files.pythonhosted.org/packages/c7/55/4b0397fc1acf2fec14e40c0d2b29000b58ffd79a88eafb02bc910ac57192/zensical-0.0.63-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:6ec02283d946569f68fdd1ab4a1dd2de560c0ad540874d5ecd4a4f1e96bdbe1d", size = 14000456, upload-time = "2026-09-19T12:29:23.393Z" },
     { url = "https://files.pythonhosted.org/packages/83/59/42f0acd63eadf3654918caf5b24c60d63efecc0486e81474bbcab97bfdf1/zensical-0.0.63-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:af2711ff1397338c730cc9232f687066da7181751257f317877501b1b77a44ea", size = 14273842, upload-time = "2026-09-19T12:29:26.007Z" },
-    { url = "https://files.pythonhosted.org/packages/d3/94/16e063e3b5afe48e553ab86bc21a3c66554eedf8f58e879e07f2140277d7/zensical-0.0.63-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:f1afb0e2819a588d956c1684c90e23fc0c7efc89e1ec141403a9fb41b75b1993", size = 14296845, upload-time = "2026-09-19T12:29:28.575Z" },
     { url = "https://files.pythonhosted.org/packages/be/cc/123b3c094aeba073d092354b196ac08e6bed36460a78b7cff50e63152ad0/zensical-0.0.63-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:925b3dd8bb6812b780f5e00828c42bd1eebd675b1eb6b4a58135926bb716bdde", size = 14554473, upload-time = "2026-09-19T12:29:30.588Z" },
     { url = "https://files.pythonhosted.org/packages/bb/26/425698bb072f7ce521e23d33a9701b27868cbf648f969379637d21cdab5f/zensical-0.0.63-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:6365bce465a7f6755533eaa80aa20c8a48d1b39fa7b12cd394eece3921e2c530", size = 14448833, upload-time = "2026-09-19T12:29:33.018Z" },
     { url = "https://files.pythonhosted.org/packages/54/f5/8117a427df0d9b99569a552672649e51a8218c54b3daa0a57c669221a368/zensical-0.0.63-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:63706419125f4c46461b322c8aaed1bbc3b917dd389ecf29601d713fc962bfb6", size = 14782142, upload-time = "2026-09-19T12:29:35.72Z" },

@@ -8,6 +8,9 @@
     string literal. Then run `qmstrace check`, and read a test run's verdicts from the TRX file
     `dotnet test --logger trx` writes with `qmstrace results`.
 
+C# extraction requires the compatible `qmstrace-lang-csharp` wheel in the host environment.
+See [Install and pin packages](install.md), then inspect `qmstrace plugins`.
+
 ## Steps
 
 1. **Let `init` declare the two item types** — components from the source files, automated tests

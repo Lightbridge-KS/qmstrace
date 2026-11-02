@@ -18,17 +18,19 @@ points at evidence that stays in its home system.
 
 ## Use it
 
-Install a release as a uv tool. The repository is private, so this needs read access to it:
+The 0.4.0 host and 0.1.0 C# plugin are prepared as separate release wheels. Installation
+requires read access to this private repository and human publication of the release pair.
+After downloading the two wheels from their respective GitHub releases:
 
 ```sh
-uv tool install --python 3.13 "git+https://github.com/Lightbridge-KS/qmstrace@v0.3.0"
+uv tool install --python 3.13 --with ./qmstrace_lang_csharp-0.1.0-py3-none-any.whl ./qmstrace-0.4.0-py3-none-any.whl
+qmstrace plugins
 ```
 
-The pin holds: `uv tool upgrade` keeps it. To move to a later release, run the same command
-with its tag, then `qmstrace init` in each traced repo so its stanza and skill follow; an
-unedited skill copy from the earlier release is refused until it is removed ([#16](https://github.com/Lightbridge-KS/qmstrace/issues/16)). Each
-release's wheel is also attached to its [GitHub release](https://github.com/Lightbridge-KS/qmstrace/releases),
-and the [CHANGELOG](CHANGELOG.md) says what changed.
+Omit `--with` for a Python/Markdown-only installation. The C# plugin must be installed into
+the host's environment. See [installation, exact pins and rollback](contents/how-to/install.md)
+and the [CHANGELOG](CHANGELOG.md). Consumer upgrades and release publication are separate
+from repository verification. Preserve local skill edits before refreshing managed guidance.
 
 ```sh
 qmstrace init --subject service --key SVC
@@ -65,7 +67,8 @@ control tests (no npm installation). Python 3.13 is
 fetched by uv.
 
 ```sh
-just sync     # install the project and its tools
+just sync     # install the workspace and its tools
+just prepare-wheelhouse  # download dependencies for offline installed-wheel checks
 just dry      # the dry gate: format, lint, types, tests, the wheel's package data, the manual
 just manual   # the user manual (contents/), served with live reload
 just          # list every recipe
