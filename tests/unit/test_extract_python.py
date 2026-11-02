@@ -16,16 +16,18 @@ import pytest
 
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.model import Extracted
-from qmstrace.extract.python import module as python_module
-from qmstrace.extract.python import pytest_tests
+from qmstrace.plugins.catalog import Catalog
+
+PYTHON_MODULE = Catalog().extractor("python-module")
+PYTEST_TESTS = Catalog().extractor("pytest")
 
 
 def module(config: TraceConfig, text: str, path: str = "src/service/keys.py") -> Extracted:
-    return python_module.extract(path, text, config.item_types["component"], config)
+    return PYTHON_MODULE(path, text, config.item_types["component"], config)
 
 
 def cases_in(config: TraceConfig, text: str, path: str = "tests/unit/test_keys.py") -> Extracted:
-    return pytest_tests.extract(path, text, config.item_types["automated_test"], config)
+    return PYTEST_TESTS(path, text, config.item_types["automated_test"], config)
 
 
 # ── 1. modules ─────────────────────────────────────────────────────────────────────────────
@@ -271,22 +273,10 @@ def test_a_test_case_digest_covers_its_own_function_only(service: TraceConfig) -
 
 
 @pytest.mark.parametrize(
-    ("legacy_name", "owner_name", "key", "names"),
-    [
-        ("python_module", "module", "python-module", ("extract", "form")),
-        ("pytest_tests", "pytest_tests", "pytest", ("extract", "form", "report_identity")),
-    ],
+    "legacy",
+    ["qmstrace.extract.python_module", "qmstrace.extract.pytest_tests", "qmstrace.extract.python"],
 )
-def test_python_compatibility_imports_keep_the_implementation_objects(
-    legacy_name: str, owner_name: str, key: str, names: tuple[str, ...]
-) -> None:
-    from importlib import import_module
+def test_legacy_python_imports_are_removed(legacy):
+    from importlib.util import find_spec
 
-    from qmstrace.extract.base import FORMS, REGISTRY
-
-    legacy = import_module(f"qmstrace.extract.{legacy_name}")
-    owner = import_module(f"qmstrace.extract.python.{owner_name}")
-    for name in names:
-        assert getattr(legacy, name) is getattr(owner, name)
-    assert REGISTRY[key] is owner.extract
-    assert FORMS[key] is owner.form
+    assert find_spec(legacy) is None

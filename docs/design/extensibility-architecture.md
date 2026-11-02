@@ -20,7 +20,9 @@ Python distributions. The first package supplies the existing `csharp-file` and 
 extractors. Trusted maintainers and collaborators author these packages. The host retains
 source access, graph validity, coverage, baseline judgment and verdict propagation.
 
-The host keeps Python and Markdown in an internal registry. External source/test extraction
+The host keeps only Markdown in its internal registry. Python module and pytest extraction
+use the explicitly installed `qmstrace-lang-python` package under accepted CR-008
+([ADR-0014](../adr/0014-python-extractor-plugin.md)). External source/test extraction
 uses the **registered** shape: metadata admission followed by synchronous calls in
 the host process. One invocation uses one fixed catalog. Package changes take effect on
 the next invocation. No hot reload, event bus or worker process is needed.
@@ -207,7 +209,7 @@ manifest owns its version; CI checks the corresponding tag, gates that tree and 
 release from its own changelog. Human publication remains separate. Private GitHub wheels
 remain the distribution channel; no package index is added.
 
-Existing Python extraction, Markdown, change requests and JUnit/TRX readers stay in the
+Markdown, change requests and JUnit/TRX readers stay in the
 host. New-framework report normalization and new-language onboarding are separate work.
 
 The seam test is falsifiable: install a fixture plugin without editing a host allowlist,
@@ -279,3 +281,10 @@ parent package. Other editable backends and namespace packages are outside the f
 Assessment metadata is `data.toolchain`; tables use top-level `toolchain`. Provider versions
 and parser dependencies are reported only for handlers used in that invocation. Configuration
 inspection describes installed declarations without claiming execution acceptance.
+
+
+Under CR-008, duplicate item IDs within a valid Extraction remain source evidence. The
+adapter preserves all declarations and locations; graph validation emits V01. This accepted
+validation relaxation restores Python compatibility without changing API v1 fields.
+Extractor ownership still must be unique, and invalid DTOs, paths, types, digests, link
+sources, marker names and targets remain plugin faults.

@@ -24,7 +24,10 @@ import pytest
 from qmstrace.core.config import TraceConfig
 from qmstrace.core.graph import Closure, Home, Surroundings, TraceGraph
 from qmstrace.core.model import Extracted, Finding, Item
-from qmstrace.extract.base import REGISTRY
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+REGISTRY = {name: CATALOG.extractor(name) for name in CATALOG.descriptors}
 
 SRS = """\
 ### REQ-SVC-01 — A call carries a key

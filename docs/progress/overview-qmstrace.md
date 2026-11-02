@@ -1,5 +1,5 @@
 ---
-summary: Repository overview — C# plugin implementation under accepted CR-007 has passing dry, trace and macOS/Linux installed-wheel checks; native Windows candidate acceptance remains pending. Host 0.4.0 and plugin 0.1.0 are prepared but uncommitted and unpublished. Historical v0.3.0 release and earlier acceptance evidence are retained below.
+summary: Python plugin migration preparation is active; CR-008 is accepted; the dry gate and macOS/Linux installed-wheel checks pass, with native Windows candidate verification pending. C# plugin merged in PR 77 with passing platform CI. Host 0.4.0 and language releases remain unpublished.
 read_when:
   - starting a session in this repo — read this first
   - planning or finishing a milestone, or checking whether slice 1 is done
@@ -8,11 +8,12 @@ read_when:
 
 # qmstrace — progress
 
-**Current work, 2026-11-02:** [C# extractor plugin](csharp-extractor-plugin.md) —
-implemented under accepted CR-007. Host 0.4.0 and plugin 0.1.0 are prepared; dry,
-trace and macOS/Linux installed-wheel checks pass. Native Windows verification remains
-pending. Work is uncommitted and unpublished; historical sections below retain their
-original evidence.
+**Current work, 2026-11-02:** [Python extractor plugin](python-extractor-plugin.md) —
+implementation is under accepted CR-008. The dry gate passes 1,565 tests, and macOS/Linux
+package checks pass. Duplicate declarations retain host V01 findings; native Windows candidate
+verification remains pending. [C# extraction](csharp-extractor-plugin.md) merged in PR 77 at
+`de02a3a`; Linux/macOS/Windows installed-wheel and native Windows distinct-drive CI passed.
+Host 0.4.0 and plugin releases remain unpublished. Historical release sections follow.
 
 **Updated 2026-10-24 · Release 0.3.0 published. Slice 1, the product-repo half: landed. M10, the project-wide check:
 landed. [Package refactors](#landed--package-refactors) and [M12 · the C#

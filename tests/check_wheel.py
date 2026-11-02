@@ -32,10 +32,6 @@ with TemporaryDirectory() as outside:
         "core.findings",
         "extract.markdown",
         "extract.base",
-        "extract.python.module",
-        "extract.python.pytest_tests",
-        "extract.python_module",
-        "extract.pytest_tests",
         "plugin_api.v1",
         "plugins.catalog",
         "extract.reports",
@@ -81,6 +77,11 @@ from qmstrace.core.config import (
 assert config.__file__.startswith(sys.argv[1] + '/')
 assert TraceConfig.__module__ == 'qmstrace.core.config._parse'
 local, schema = sys.argv[2:4]
+# This host-only probe exercises document configuration. Language installations are
+# verified by check_plugin_wheels.py, without inheriting editable development providers.
+import re
+local = re.sub(r"\[items\.(?:component|automated_test)\][\s\S]*?(?=\n\[|\Z)", "", local)
+
 by_path = TraceConfig.parse(local, schema)
 copy = setup.copy_schema(local, setup.held_schema(local),
                          setup.schema_block(schema, by_path.project))
@@ -122,40 +123,8 @@ assert [(link.dst, link.line) for link in extracted.links] == [('REQ-SVC-01', 5)
 assert [(s.targets, s.line, s.kind) for s in extracted.strays] == [(('REQ-SVC-02',), 6, 'table')]
 assert not extracted.findings and not extracted.leads and not extracted.mentions
 assert markdown.form('Satisfies', 'REQ-SVC-01') == '`Satisfies: REQ-SVC-01` under its heading'
-from qmstrace.extract import python_module as legacy_module, pytest_tests as legacy_pytest
-from qmstrace.extract.python import module, pytest_tests
-for legacy, owner, key, names in (
-    (legacy_module, module, 'python-module', ('extract', 'form')),
-    (legacy_pytest, pytest_tests, 'pytest', ('extract', 'form', 'report_identity')),
-):
-    assert owner.__file__.startswith(sys.argv[1] + '/')
-    assert legacy.__file__.startswith(sys.argv[1] + '/')
-    for name in names:
-        assert getattr(legacy, name) is getattr(owner, name)
-    assert REGISTRY[key] is owner.extract
-    assert FORMS[key] is owner.form
-source = "'Implements: DSN-SVC-01'\n# Implements: DSN-SVC-02\n"
-component = module.extract('src/service.py', source, by_path.item_types['component'], by_path)
-assert [i.id for i in component.items] == ['src/service.py']
-assert [link.dst for link in component.links] == ['DSN-SVC-01']
-assert [s.targets for s in component.strays] == [('DSN-SVC-02',)]
-source = ('@pytest.mark.verifies("REQ-SVC-01")\nclass TestKey:\n'
-          '    def test_valid(self): pass\n')
-read = pytest_tests.extract('tests/unit/test_key.py', source,
-                           by_path.item_types['automated_test'], by_path)
-assert not read.findings
-assert [i.id for i in read.items] == ['tests/unit/test_key.py::TestKey::test_valid']
-assert [link.dst for link in read.links] == ['REQ-SVC-01']
-assert pytest_tests.report_identity(read.items[0].id) == (
-    'tests.unit.test_key.TestKey', 'test_valid')
-assert 'pytest' not in sys.modules  # source scanning never imports the test framework
 from importlib.resources import files
-starter = files('qmstrace').joinpath('assets/starter.toml').read_text()
-for language, extractors in (('python', ('python-module', 'pytest')),):
-    tail = files('qmstrace').joinpath(f'assets/items-{language}.toml').read_text()
-    joined = (starter + '\n' + tail).replace('__SUBJECT__', 'service').replace('__KEY__', 'SVC')
-    types = TraceConfig.parse(joined).item_types
-    assert (types['component'].extractor, types['automated_test'].extractor) == extractors
+assert set(REGISTRY) == {'markdown'}
 block = setup.stanza(files('qmstrace').joinpath('assets/stanza.md').read_text(), by_path)
 guide = setup.guide('Existing guide', block)
 assert setup.guide(guide, block) == guide

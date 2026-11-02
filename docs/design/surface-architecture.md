@@ -9,6 +9,12 @@ read_when:
 
 # qmstrace — User-Facing Surface & Agent Experience
 
+Python extraction is now explicitly installed under accepted CR-008 and
+[ADR-0014](../adr/0014-python-extractor-plugin.md). The public API and extractor names remain
+unchanged; default Python setup checks provider availability before writes. Verification
+state is recorded in the [Python tracker](../progress/python-extractor-plugin.md).
+
+
 **Implemented under CR-007:** the
 [extensibility design](extensibility-architecture.md) adds metadata-only plugin inspection,
 explicit C# installation and additive JSON provenance. Existing text output and exit-code

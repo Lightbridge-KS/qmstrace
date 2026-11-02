@@ -1,0 +1,279 @@
+{
+  "reference_commit": "de02a3aadcd0d6cbd58c7d5d5ed940a15a742d14",
+  "python": "3.13.2",
+  "configuration": [
+    "tests/fixtures/mini/service/qmstrace.toml",
+    "tests/fixtures/mini/ledger/qmstrace.schema.toml"
+  ],
+  "cases": [
+    {
+      "name": "module",
+      "source": "\"\"\"Checks the key a call carries.\n\nImplements: DSN-SVC-01\n\"\"\"\n\n# Implements: DSN-SVC-02  \u2014 a comment, not a marker\n\n\ndef check(key: str) -> bool:\n    return bool(key)\n",
+      "extraction": {
+        "items": [
+          {
+            "id": "src/service/keys.py",
+            "type": "component",
+            "file": "src/service/keys.py",
+            "line": 1,
+            "title": "keys",
+            "digest": "sha256:010452e3619b4d072f84b8efcf5e43fc1ae78d422860ef6534a96e280704190c",
+            "fields": {},
+            "level": null,
+            "runs_as": []
+          }
+        ],
+        "links": [
+          {
+            "src": "src/service/keys.py",
+            "dst": "DSN-SVC-01",
+            "marker": "Implements",
+            "file": "src/service/keys.py",
+            "line": 3
+          }
+        ],
+        "findings": [],
+        "leads": [],
+        "strays": [
+          {
+            "marker": "Implements",
+            "targets": [
+              "DSN-SVC-02"
+            ],
+            "file": "src/service/keys.py",
+            "line": 6,
+            "kind": "docstring",
+            "item": null,
+            "guidance": null
+          }
+        ],
+        "mentions": []
+      },
+      "stray_guidance": [
+        "the 'Implements:' line at src/service/keys.py:6 is outside the module docstring, so it is not read \u2014 move it into the docstring."
+      ]
+    },
+    {
+      "name": "pytest",
+      "source": "import pytest\nfrom pytest import mark\n\n\n@pytest.mark.verifies(\"REQ-SVC-01\")\n@pytest.mark.parametrize(\"key\", [\"\", \"wrong\"])\ndef test_a_call_without_a_key_is_refused(key):\n    assert key is not None\n\n\n@pytest.mark.verifies(\"DSN-SVC-01\")\nclass TestTheCheck:\n    def test_an_empty_key_fails(self):\n        assert True\n\n    @mark.verifies(\"REQ-SVC-02\", \"DSN-SVC-02\")\n    def test_a_good_key_passes(self):\n        assert True\n\n    class TestNested:\n        def test_deep(self):\n            assert True\n\n\ndef helper():\n    return 1\n",
+      "extraction": {
+        "items": [
+          {
+            "id": "tests/unit/test_keys.py::test_a_call_without_a_key_is_refused",
+            "type": "automated_test",
+            "file": "tests/unit/test_keys.py",
+            "line": 7,
+            "title": "test_a_call_without_a_key_is_refused",
+            "digest": "sha256:bed3574ca12eaf3a2be9e7d8942f9807bebe8f81b05f77dae58f2891ca48758c",
+            "fields": {},
+            "level": "unit",
+            "runs_as": [
+              [
+                "tests.unit.test_keys",
+                "test_a_call_without_a_key_is_refused"
+              ]
+            ]
+          },
+          {
+            "id": "tests/unit/test_keys.py::TestTheCheck::test_an_empty_key_fails",
+            "type": "automated_test",
+            "file": "tests/unit/test_keys.py",
+            "line": 13,
+            "title": "test_an_empty_key_fails",
+            "digest": "sha256:06537af31cb8f6b5789c635299bf8ee91c7932d3398665496838c2d691f01703",
+            "fields": {},
+            "level": "unit",
+            "runs_as": [
+              [
+                "tests.unit.test_keys.TestTheCheck",
+                "test_an_empty_key_fails"
+              ]
+            ]
+          },
+          {
+            "id": "tests/unit/test_keys.py::TestTheCheck::test_a_good_key_passes",
+            "type": "automated_test",
+            "file": "tests/unit/test_keys.py",
+            "line": 17,
+            "title": "test_a_good_key_passes",
+            "digest": "sha256:27f9d4970114f7f0e39c5230c3fd64fae79c5200de32a0a37b2c1655ab425737",
+            "fields": {},
+            "level": "unit",
+            "runs_as": [
+              [
+                "tests.unit.test_keys.TestTheCheck",
+                "test_a_good_key_passes"
+              ]
+            ]
+          },
+          {
+            "id": "tests/unit/test_keys.py::TestTheCheck::TestNested::test_deep",
+            "type": "automated_test",
+            "file": "tests/unit/test_keys.py",
+            "line": 21,
+            "title": "test_deep",
+            "digest": "sha256:bdd11b42b1140afb6e468d883971d0c9374b58d29499287087349b6a9ccf44bb",
+            "fields": {},
+            "level": "unit",
+            "runs_as": [
+              [
+                "tests.unit.test_keys.TestTheCheck.TestNested",
+                "test_deep"
+              ]
+            ]
+          }
+        ],
+        "links": [
+          {
+            "src": "tests/unit/test_keys.py::test_a_call_without_a_key_is_refused",
+            "dst": "REQ-SVC-01",
+            "marker": "verifies",
+            "file": "tests/unit/test_keys.py",
+            "line": 7
+          },
+          {
+            "src": "tests/unit/test_keys.py::TestTheCheck::test_an_empty_key_fails",
+            "dst": "DSN-SVC-01",
+            "marker": "verifies",
+            "file": "tests/unit/test_keys.py",
+            "line": 13
+          },
+          {
+            "src": "tests/unit/test_keys.py::TestTheCheck::test_a_good_key_passes",
+            "dst": "DSN-SVC-01",
+            "marker": "verifies",
+            "file": "tests/unit/test_keys.py",
+            "line": 17
+          },
+          {
+            "src": "tests/unit/test_keys.py::TestTheCheck::test_a_good_key_passes",
+            "dst": "REQ-SVC-02",
+            "marker": "verifies",
+            "file": "tests/unit/test_keys.py",
+            "line": 17
+          },
+          {
+            "src": "tests/unit/test_keys.py::TestTheCheck::test_a_good_key_passes",
+            "dst": "DSN-SVC-02",
+            "marker": "verifies",
+            "file": "tests/unit/test_keys.py",
+            "line": 17
+          },
+          {
+            "src": "tests/unit/test_keys.py::TestTheCheck::TestNested::test_deep",
+            "dst": "DSN-SVC-01",
+            "marker": "verifies",
+            "file": "tests/unit/test_keys.py",
+            "line": 21
+          }
+        ],
+        "findings": [],
+        "leads": [],
+        "strays": [],
+        "mentions": []
+      },
+      "stray_guidance": []
+    },
+    {
+      "name": "invalid-id",
+      "source": "\"\"\"Implements: TBD\"\"\"",
+      "extraction": {
+        "items": [
+          {
+            "id": "src/service/keys.py",
+            "type": "component",
+            "file": "src/service/keys.py",
+            "line": 1,
+            "title": "keys",
+            "digest": "sha256:2753603d05745b64a84ceb0cc61ba664a11932d5fdd0d040c8fdbf519495310e",
+            "fields": {},
+            "level": null,
+            "runs_as": []
+          }
+        ],
+        "links": [],
+        "findings": [
+          {
+            "code": "V14",
+            "file": "src/service/keys.py",
+            "line": 1,
+            "what": "src/service/keys.py \u2192 Implements: 'TBD' is not an ID, so it links nothing.",
+            "next_move": "Fix: the 'Implements' line holds IDs only, comma-separated. If nothing real fits, remove the line and tell the developer what is missing \u2014 never invent an ID.",
+            "item": "src/service/keys.py",
+            "marker": "Implements",
+            "target": null
+          }
+        ],
+        "leads": [],
+        "strays": [],
+        "mentions": []
+      },
+      "stray_guidance": []
+    },
+    {
+      "name": "parse",
+      "source": "def broken(",
+      "extraction": {
+        "items": [],
+        "links": [],
+        "findings": [
+          {
+            "code": "V08",
+            "file": "src/service/keys.py",
+            "line": 1,
+            "what": "src/service/keys.py cannot be parsed: '(' was never closed.",
+            "next_move": "Fix: correct the file \u2014 nothing in it can be traced until it parses.",
+            "item": null,
+            "marker": null,
+            "target": null
+          }
+        ],
+        "leads": [],
+        "strays": [],
+        "mentions": []
+      },
+      "stray_guidance": []
+    },
+    {
+      "name": "unread",
+      "source": "import pytest\npytestmark = pytest.mark.verifies(\"REQ-SVC-01\")\ndef test_it(): pass\n",
+      "extraction": {
+        "items": [
+          {
+            "id": "tests/unit/test_keys.py::test_it",
+            "type": "automated_test",
+            "file": "tests/unit/test_keys.py",
+            "line": 3,
+            "title": "test_it",
+            "digest": "sha256:eda245c2baf174adc61bfefe1e8ce6c7b583c8fca79d1e1c96c1798e0f4c8670",
+            "fields": {},
+            "level": "unit",
+            "runs_as": [
+              [
+                "tests.unit.test_keys",
+                "test_it"
+              ]
+            ]
+          }
+        ],
+        "links": [],
+        "findings": [
+          {
+            "code": "V15",
+            "file": "tests/unit/test_keys.py",
+            "line": 2,
+            "what": "a 'verifies' marker set through pytestmark \u2014 this tool does not read that form, so it links nothing.",
+            "next_move": "Fix: write @pytest.mark.verifies(\"ID\", \u2026) with literal IDs, directly on a test function or on its test class.",
+            "item": null,
+            "marker": "verifies",
+            "target": null
+          }
+        ],
+        "leads": [],
+        "strays": [],
+        "mentions": []
+      },
+      "stray_guidance": []
+    }
+  ]
+}

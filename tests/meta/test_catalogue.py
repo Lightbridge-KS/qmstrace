@@ -22,8 +22,11 @@ from qmstrace.core.findings import CODES
 from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.judge import guard, ownership_findings, suspects
 from qmstrace.core.model import Finding, Item
-from qmstrace.extract.base import REGISTRY
 from qmstrace.infra.globbing import matches
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+REGISTRY = {name: CATALOG.extractor(name) for name in CATALOG.descriptors}
 
 GOLDEN = Path(__file__).parents[1] / "cli" / "golden"
 

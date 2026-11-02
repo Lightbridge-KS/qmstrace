@@ -31,6 +31,7 @@ types:
 build-wheels:
     uv build --package qmstrace --wheel --no-sources --quiet
     uv build --package qmstrace-lang-csharp --wheel --no-sources --quiet
+    uv build --package qmstrace-lang-python --wheel --no-sources --quiet
 
 # network preparation, separate from offline installed-wheel verification
 prepare-wheelhouse: build-wheels

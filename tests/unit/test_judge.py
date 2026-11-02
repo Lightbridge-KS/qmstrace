@@ -25,7 +25,11 @@ from qmstrace.core.judge import Way, coverage
 from qmstrace.core.judge._coverage import _fix
 from qmstrace.core.judge._coverage import test_backed_requirement as _test_backed_requirement
 from qmstrace.core.model import Extracted, Finding, Item
-from qmstrace.extract.base import FORMS, REGISTRY
+from qmstrace.plugins.catalog import Catalog
+
+CATALOG = Catalog()
+FORMS = {name: CATALOG.form(name) for name in CATALOG.descriptors}
+REGISTRY = {name: CATALOG.extractor(name) for name in CATALOG.descriptors}
 
 SRS = """\
 ### REQ-SVC-01 — A call carries a key
@@ -329,7 +333,11 @@ def _xunit_like(marker: str, target: str) -> str:
 
 @pytest.fixture(scope="module")
 def cases_config() -> TraceConfig:
-    return TraceConfig.parse(CASES_LEDGER.read_text("utf-8"), CASES_SCHEMA.read_text("utf-8"))
+    return TraceConfig.parse(
+        CASES_LEDGER.read_text("utf-8"),
+        CASES_SCHEMA.read_text("utf-8"),
+        descriptors=Catalog().descriptors,
+    )
 
 
 @pytest.mark.verifies("DSN-QMT-06", "DSN-QMT-14")

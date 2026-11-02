@@ -18,6 +18,7 @@ from qmstrace.core.graph import Home
 from qmstrace.infra import locations
 from qmstrace.infra.git import GitCli
 from qmstrace.infra.tree import GitTree
+from qmstrace.plugins.catalog import Catalog
 from qmstrace.render import text
 from qmstrace.workspace import Workspace
 from qmstrace.workspace._discovery import _configuration
@@ -54,6 +55,7 @@ def config_at(project: Path, name: str = "service") -> TraceConfig:
     return TraceConfig.parse(
         (project / name / "qmstrace.toml").read_text(encoding="utf-8"),
         (project / "ledger/qmstrace.schema.toml").read_text(encoding="utf-8"),
+        descriptors=Catalog().descriptors,
     )
 
 
@@ -289,7 +291,9 @@ def test_a_traced_ledger_cannot_be_rebound_away_from_its_schema(
         project="SPLIT",
         ledger="service" if bad_binding == "self-member" else "ledger",
     )
-    config = TraceConfig.of_schema((root / "qmstrace.schema.toml").read_text())
+    config = TraceConfig.of_schema(
+        (root / "qmstrace.schema.toml").read_text(), descriptors=Catalog().descriptors
+    )
     with pytest.raises(CouldNotJudge):
         locations.discover(root, root, config, file)
 
@@ -356,7 +360,7 @@ class Relocated:
 @pytest.fixture
 def relocated(split: Path, embed: Callable[..., str], tmp_path: Path) -> Relocated:
     schema = (split / "ledger/qmstrace.schema.toml").read_text(encoding="utf-8")
-    digest = TraceConfig.of_schema(schema).schema_digest
+    digest = TraceConfig.of_schema(schema, descriptors=Catalog().descriptors).schema_digest
     # Embed before moving: a stale by-path schema is a separate refusal, not a map fixture.
     for name in ("service", "client"):
         config = split / name / "qmstrace.toml"
@@ -736,7 +740,10 @@ def test_historical_embedded_schema_ignores_even_a_broken_environment_map(
     monkeypatch.setenv("QMSTRACE_WORKSPACE", str(bad))
     config.write_text("version = = 1", encoding="utf-8")
     historical = _configuration(root, GitTree(GitCli(root), revision))
-    assert historical.schema_digest == TraceConfig.of_schema(schema).schema_digest
+    assert (
+        historical.schema_digest
+        == TraceConfig.of_schema(schema, descriptors=Catalog().descriptors).schema_digest
+    )
 
 
 @pytest.mark.verifies("DSN-QMT-10")
@@ -786,7 +793,12 @@ def test_equivalent_self_path_preserves_ledger_member_identity(relocated: Reloca
         ledger="service",
     )
     with pytest.raises(CouldNotJudge, match="self membership"):
-        locations.discover(ledger, ledger, TraceConfig.of_schema(schema), relocated.file)
+        locations.discover(
+            ledger,
+            ledger,
+            TraceConfig.of_schema(schema, descriptors=Catalog().descriptors),
+            relocated.file,
+        )
 
 
 @pytest.mark.verifies("DSN-QMT-10", "REQ-QMT-17")

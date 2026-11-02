@@ -62,8 +62,8 @@ def adapt(value: object, source: v1.ExtractRequest) -> model.Extracted:
     if any(v.file != source.path or v.line < 1 for v in records):
         raise ValueError("output locations must use the request path and positive line numbers")
     ids = {i.id for i in value.items}
-    if len(ids) != len(value.items):
-        raise ValueError("duplicate extracted identity")
+    # Duplicate source declarations are evidence for host V01 validation, not a
+    # provider fault. Keep every item and location; the set only validates link sources.
     for item in value.items:
         if (
             not item.id

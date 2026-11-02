@@ -190,26 +190,6 @@ MARKDOWN_IMPORTS: dict[str, set[str]] = {
         "qmstrace.extract.markdown._tables",
     },
 }
-PYTHON_IMPORTS: dict[str, set[str]] = {
-    "module": {
-        "qmstrace.core.findings",
-        "qmstrace.core.config",
-        "qmstrace.core.model",
-        "qmstrace.extract.fields",
-    },
-    "pytest_tests": {
-        "qmstrace.core.findings",
-        "qmstrace.core.config",
-        "qmstrace.core.model",
-        "qmstrace.core.results",
-    },
-}
-PYTHON_COMPATIBILITY = {
-    "python_module": {"qmstrace.extract.python.module": {"extract", "form"}},
-    "pytest_tests": {
-        "qmstrace.extract.python.pytest_tests": {"extract", "form", "report_identity"}
-    },
-}
 TEXT_IMPORTS: dict[str, set[str]] = {
     "_schema": {
         "qmstrace.render._style",
@@ -268,7 +248,6 @@ PACKAGE_IMPORTS = {
     "graph": GRAPH_IMPORTS,
     "setup": SETUP_IMPORTS,
     "markdown": MARKDOWN_IMPORTS,
-    "python": PYTHON_IMPORTS,
     "text": TEXT_IMPORTS,
 }
 PACKAGE_AREAS = {
@@ -467,10 +446,6 @@ def test_package_dependencies_are_one_way_and_callers_use_the_public_interface(n
         ("text", "_checks", "from qmstrace.render.text import _status"),
         ("text", "_results", "from qmstrace.render import graph"),
         ("text", "_walks", "from qmstrace import workspace"),
-        ("python", "module", "from qmstrace.extract import python_module"),
-        ("python", "pytest_tests", "from qmstrace.extract.python import module"),
-        ("python", "module", "from qmstrace.extract.python.pytest_tests import report_identity"),
-        ("python", "pytest_tests", "import pytest"),
         ("markdown", "_headings", "from qmstrace.extract.markdown import extract"),
         ("markdown", "_tables", "from qmstrace.extract.markdown import _extract"),
         ("markdown", "_extract", "from qmstrace.extract import base"),
@@ -526,47 +501,12 @@ def test_an_extractor_never_touches_the_file_system() -> None:
             )
 
 
-def _check_python_callers(path: Path) -> None:
-    old = {f"qmstrace.extract.{name}" for name in PYTHON_COMPATIBILITY}
-    assert not (_imports(path) & old), "production callers must use extract.python owners"
-
-
-def test_python_compatibility_modules_only_forward_the_supported_functions() -> None:
-    for name, expected in PYTHON_COMPATIBILITY.items():
-        path = SRC / "extract" / f"{name}.py"
-        _check_exports(path.read_text(encoding="utf-8"), expected)
+def test_python_extraction_is_not_bundled():
+    assert not (SRC / "extract/python").exists()
+    assert not (SRC / "extract/python_module.py").exists()
+    assert not (SRC / "extract/pytest_tests.py").exists()
     for path in SRC.rglob("*.py"):
-        _check_python_callers(path)
-
-
-@pytest.mark.parametrize(
-    "source",
-    [
-        "from qmstrace.extract.python.module import *",
-        "from qmstrace.extract.python.module import _strays as _strays",
-        "from qmstrace.extract.python.module import extract",
-        "def extract(*args): return None",
-    ],
-)
-def test_python_compatibility_gate_rejects_extra_exports_and_wrappers(source: str) -> None:
-    with pytest.raises(AssertionError):
-        _check_exports(source, PYTHON_COMPATIBILITY["python_module"])
-
-
-@pytest.mark.parametrize(
-    "source",
-    [
-        "from qmstrace.extract import python_module",
-        "from qmstrace.extract.pytest_tests import report_identity",
-        "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n"
-        "    from qmstrace.extract import pytest_tests",
-    ],
-)
-def test_python_callers_gate_rejects_legacy_imports(tmp_path: Path, source: str) -> None:
-    path = tmp_path / "caller.py"
-    path.write_text(source, encoding="utf-8")
-    with pytest.raises(AssertionError):
-        _check_python_callers(path)
+        assert not any(n.startswith("qmstrace_lang_python") for n in _imports(path))
 
 
 def _check_shared_render_dependencies(path: Path) -> None:
@@ -909,8 +849,9 @@ def test_only_the_report_reader_parses_xml() -> None:
 
 
 @pytest.mark.verifies("REQ-QMT-24", "DSN-QMT-17")
-def test_language_package_imports_only_public_host_api():
-    member = SRC.parents[1] / "packages/qmstrace-lang-csharp/src/qmstrace_lang_csharp"
+@pytest.mark.parametrize("language", ["csharp", "python"])
+def test_language_package_imports_only_public_host_api(language):
+    member = SRC.parents[1] / f"packages/qmstrace-lang-{language}/src/qmstrace_lang_{language}"
     for path in member.rglob("*.py"):
         for imported in _imports(path):
             if imported == "qmstrace" or imported.startswith("qmstrace."):

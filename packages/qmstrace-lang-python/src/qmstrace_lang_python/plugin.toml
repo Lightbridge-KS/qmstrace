@@ -1,0 +1,16 @@
+manifest = 1
+api = 1
+parser_dependencies = []
+
+[extractors.python-module]
+module = "qmstrace_lang_python.module"
+ids = "derived"
+links = "named"
+identity = "ID: the module's path"
+
+[extractors.pytest]
+module = "qmstrace_lang_python.pytest_tests"
+ids = "derived"
+links = "named"
+identity = "ID: the test's node ID"
+scan = "test functions: a parametrised function is one automated test"

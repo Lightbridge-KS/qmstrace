@@ -120,7 +120,9 @@ def golden() -> Callable[[Path, str], None]:
 def service() -> TraceConfig:
     """The `service` repo's configuration, merged with the project's trace schema."""
     return TraceConfig.parse(
-        mini_text("service", "qmstrace.toml"), mini_text("ledger", "qmstrace.schema.toml")
+        mini_text("service", "qmstrace.toml"),
+        mini_text("ledger", "qmstrace.schema.toml"),
+        descriptors=Catalog().descriptors,
     )
 
 

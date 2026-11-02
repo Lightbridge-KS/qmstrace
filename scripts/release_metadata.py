@@ -10,10 +10,15 @@ from pathlib import Path
 
 
 def prepare(tag: str) -> tuple[str, str, str]:
-    plugin = tag.startswith("qmstrace-lang-csharp-v")
-    package = "qmstrace-lang-csharp" if plugin else "qmstrace"
-    prefix = "qmstrace-lang-csharp-v" if plugin else "v"
-    root = Path("packages/qmstrace-lang-csharp") if plugin else Path(".")
+    packages = {
+        "v": ("qmstrace", Path(".")),
+        "qmstrace-lang-csharp-v": ("qmstrace-lang-csharp", Path("packages/qmstrace-lang-csharp")),
+        "qmstrace-lang-python-v": ("qmstrace-lang-python", Path("packages/qmstrace-lang-python")),
+    }
+    prefix = next((p for p in packages if tag.startswith(p)), None)
+    if prefix is None:
+        raise ValueError("unknown package release tag")
+    package, root = packages[prefix]
     version = tomllib.loads((root / "pyproject.toml").read_text())["project"]["version"]
     if tag != prefix + version or not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise ValueError("tag must match the selected manifest release version")

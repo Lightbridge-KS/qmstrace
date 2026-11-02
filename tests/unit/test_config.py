@@ -19,6 +19,7 @@ import pytest
 
 from qmstrace.core.config import SchemaForm, TraceConfig, schema_digest
 from qmstrace.core.errors import CouldNotJudge
+from qmstrace.plugins.catalog import Catalog
 
 Embed = Callable[..., str]
 
@@ -31,7 +32,7 @@ SOLO = (MINI / "solo" / "qmstrace.toml").read_text(encoding="utf-8")
 
 def refusal(local: str, schema: str | None = SCHEMA) -> CouldNotJudge:
     with pytest.raises(CouldNotJudge) as caught:
-        TraceConfig.parse(local, schema)
+        TraceConfig.parse(local, schema, descriptors=Catalog().descriptors)
     return caught.value
 
 
@@ -40,7 +41,7 @@ def refusal(local: str, schema: str | None = SCHEMA) -> CouldNotJudge:
 
 @pytest.mark.verifies("DSN-QMT-03")
 def test_the_example_parses_and_merges_the_projects_part_with_the_repos() -> None:
-    config = TraceConfig.parse(SERVICE, SCHEMA)
+    config = TraceConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors)
 
     assert config.project == "MINI"
     assert config.ledger == "../ledger"
@@ -60,7 +61,7 @@ def test_the_example_parses_and_merges_the_projects_part_with_the_repos() -> Non
 
 
 def test_links_rules_externals_and_baselines_are_read() -> None:
-    config = TraceConfig.parse(SERVICE, SCHEMA)
+    config = TraceConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors)
 
     assert config.links["verifies"].targets == ("requirement", "design_element")
     assert config.links["Assumes"].counts_for_coverage is False
@@ -86,14 +87,22 @@ def test_links_rules_externals_and_baselines_are_read() -> None:
 
 
 def test_a_type_the_repo_does_not_declare_is_known_but_not_scanned() -> None:
-    config = TraceConfig.parse(SOLO)
+    config = TraceConfig.parse(SOLO, descriptors=Catalog().descriptors)
     assert set(config.item_types) == {"requirement", "automated_test"}
     without = re.sub(r"(?ms)^\[items\.component\].*?(?=^\[items\.automated_test\])", "", SERVICE)
-    assert TraceConfig.parse(without, SCHEMA).item_types["component"].declared_here is False
+    assert (
+        TraceConfig.parse(without, SCHEMA, descriptors=Catalog().descriptors)
+        .item_types["component"]
+        .declared_here
+        is False
+    )
 
 
 def test_a_second_repo_of_the_project_shares_the_schema_and_differs_locally() -> None:
-    service, client = TraceConfig.parse(SERVICE, SCHEMA), TraceConfig.parse(CLIENT, SCHEMA)
+    service, client = (
+        TraceConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors),
+        TraceConfig.parse(CLIENT, SCHEMA, descriptors=Catalog().descriptors),
+    )
 
     assert client.schema_digest == service.schema_digest  # one project, one schema
     assert client.rules == service.rules
@@ -108,12 +117,15 @@ def test_a_second_repo_of_the_project_shares_the_schema_and_differs_locally() ->
 
 def test_by_path_says_where_the_schema_is() -> None:
     assert TraceConfig.schema_reference(SERVICE) == "../ledger/qmstrace.schema.toml"
-    assert TraceConfig.parse(SERVICE, SCHEMA).schema_form is SchemaForm.BY_PATH
+    assert (
+        TraceConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors).schema_form
+        is SchemaForm.BY_PATH
+    )
 
 
 def test_a_verified_copy_gives_the_same_configuration_as_the_path(embed: Embed) -> None:
-    by_path = TraceConfig.parse(SERVICE, SCHEMA)
-    copy = TraceConfig.parse(embed(SERVICE, SCHEMA))
+    by_path = TraceConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors)
+    copy = TraceConfig.parse(embed(SERVICE, SCHEMA), descriptors=Catalog().descriptors)
 
     assert copy.schema_form is SchemaForm.VERIFIED_COPY
     assert TraceConfig.schema_reference(embed(SERVICE, SCHEMA)) is None
@@ -132,7 +144,7 @@ def test_a_copy_edited_by_hand_is_refused(embed: Embed) -> None:
 
 
 def test_a_repo_on_its_own_carries_its_own_schema() -> None:
-    config = TraceConfig.parse(SOLO)
+    config = TraceConfig.parse(SOLO, descriptors=Catalog().descriptors)
     assert config.schema_form is SchemaForm.OWN
     assert config.ledger is None
     assert config.project == "SOLO"
@@ -237,13 +249,28 @@ def test_an_item_type_the_project_does_not_know_is_refused() -> None:
 
 def test_grouped_alternatives_with_a_proven_shared_start_are_accepted() -> None:
     grouped = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^(REQ|RQ)-SVC-\d{2}$'")
-    assert TraceConfig.parse(grouped, SCHEMA).item_types["requirement"].id_prefix == "R"
+    assert (
+        TraceConfig.parse(grouped, SCHEMA, descriptors=Catalog().descriptors)
+        .item_types["requirement"]
+        .id_prefix
+        == "R"
+    )
     given = grouped.replace(
         'files      = ["docs/req', 'id_prefix  = "R"\nfiles      = ["docs/req', 1
     )
-    assert TraceConfig.parse(given, SCHEMA).item_types["requirement"].id_prefix == "R"
+    assert (
+        TraceConfig.parse(given, SCHEMA, descriptors=Catalog().descriptors)
+        .item_types["requirement"]
+        .id_prefix
+        == "R"
+    )
     shared = SERVICE.replace(r"'^REQ-SVC-\d{2}$'", r"'^REQ-(SVC|CLT)-\d{2}$'")
-    assert TraceConfig.parse(shared, SCHEMA).item_types["requirement"].id_prefix == "REQ-"
+    assert (
+        TraceConfig.parse(shared, SCHEMA, descriptors=Catalog().descriptors)
+        .item_types["requirement"]
+        .id_prefix
+        == "REQ-"
+    )
 
 
 @pytest.mark.parametrize(
@@ -302,7 +329,9 @@ def test_an_id_pattern_that_no_id_can_match_is_refused(pattern: str, start: str)
     "pattern", [r"'^REQ-SVC-\d{2}$'", r"'^R-\d+$'", r"'^REQ-SVC-0\d$'", r"'^REQ-SVC-04\.1-\d{2}$'"]
 )
 def test_an_id_pattern_in_the_shape_is_accepted(pattern: str) -> None:
-    config = TraceConfig.parse(SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern, 1), SCHEMA)
+    config = TraceConfig.parse(
+        SERVICE.replace(r"'^REQ-SVC-\d{2}$'", pattern, 1), SCHEMA, descriptors=Catalog().descriptors
+    )
     assert config.item_types["requirement"].id_pattern is not None
 
 
@@ -398,6 +427,7 @@ def test_externals_whose_prefixes_do_not_overlap_are_read() -> None:
     config = TraceConfig.parse(
         SERVICE,
         externals(("eng1", "AC-E1-", "eng1/agreement.md"), ("eng2", "AC-E2-", "eng2/agreement.md")),
+        descriptors=Catalog().descriptors,
     )
     assert [e.prefix for e in config.externals.values()] == ["AGR-", "AC-E1-", "AC-E2-"]
 
@@ -412,7 +442,9 @@ def test_an_external_source_that_is_a_pattern_is_refused(source: str) -> None:
         stopped.what
     )
     assert stopped.next_move.startswith('Fix: name one file, e.g. source = "eng1/agreement.md"')
-    assert TraceConfig.parse(SERVICE, externals(("eng", "AC-", "eng1/agreement.md"))).externals
+    assert TraceConfig.parse(
+        SERVICE, externals(("eng", "AC-", "eng1/agreement.md")), descriptors=Catalog().descriptors
+    ).externals
 
 
 @pytest.mark.parametrize(
@@ -496,7 +528,7 @@ def test_rules_must_be_an_array_of_tables() -> None:
 
 def test_a_schema_with_no_rules_has_none() -> None:
     bare = re.sub(r"(?ms)^\[\[rules\]\].*?(?=^# ── what is declared)", "", SCHEMA)
-    assert TraceConfig.parse(SERVICE, bare).rules == ()
+    assert TraceConfig.parse(SERVICE, bare, descriptors=Catalog().descriptors).rules == ()
 
 
 def test_a_subjects_key_is_capitals_and_digits() -> None:
@@ -528,9 +560,15 @@ def test_a_marked_copy_without_its_digest_is_refused() -> None:
     from qmstrace.core import setup
 
     copy = setup.copy_schema(
-        SERVICE, setup.held_schema(SERVICE), setup.schema_block(SCHEMA, "MINI")
+        SERVICE,
+        setup.held_schema(SERVICE),
+        setup.schema_block(SCHEMA, "MINI"),
+        descriptors=Catalog().descriptors,
     )
-    assert TraceConfig.parse(copy).schema_form is SchemaForm.VERIFIED_COPY
+    assert (
+        TraceConfig.parse(copy, descriptors=Catalog().descriptors).schema_form
+        is SchemaForm.VERIFIED_COPY
+    )
     undigested = re.sub(r'(?m)^digest = "sha256:[0-9a-f]+"\n', "", copy, count=1)
     stopped = refusal(undigested, None)
     assert "the qmstrace markers hold a generated copy" in stopped.what
@@ -538,13 +576,16 @@ def test_a_marked_copy_without_its_digest_is_refused() -> None:
 
 
 def test_the_ledgers_schema_is_read_on_its_own() -> None:
-    config = TraceConfig.of_schema(SCHEMA)
+    config = TraceConfig.of_schema(SCHEMA, descriptors=Catalog().descriptors)
     assert (config.project, config.repos) == (
         "MINI",
         {"service": "../service", "client": "../client"},
     )
     assert not any(t.declared_here for t in config.item_types.values())
-    assert config.schema_digest == TraceConfig.parse(SERVICE, SCHEMA).schema_digest
+    assert (
+        config.schema_digest
+        == TraceConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors).schema_digest
+    )
 
 
 def test_compatibility_exports_are_the_original_objects() -> None:
@@ -578,8 +619,11 @@ def test_constructors_preserve_the_calling_class() -> None:
     class ProjectConfig(TraceConfig):
         pass
 
-    assert type(ProjectConfig.parse(SERVICE, SCHEMA)) is ProjectConfig
-    assert type(ProjectConfig.of_schema(SCHEMA)) is ProjectConfig
+    assert (
+        type(ProjectConfig.parse(SERVICE, SCHEMA, descriptors=Catalog().descriptors))
+        is ProjectConfig
+    )
+    assert type(ProjectConfig.of_schema(SCHEMA, descriptors=Catalog().descriptors)) is ProjectConfig
 
 
 @pytest.mark.parametrize(
@@ -615,7 +659,13 @@ def test_refusal_order_and_complete_diagnostics(
     local: str, schema: str, what: str, next_move: str
 ) -> None:
     with pytest.raises(CouldNotJudge) as caught:
-        TraceConfig.parse(local, schema, local_name="local.toml", schema_name="schema.toml")
+        TraceConfig.parse(
+            local,
+            schema,
+            local_name="local.toml",
+            schema_name="schema.toml",
+            descriptors=Catalog().descriptors,
+        )
     assert (caught.value.what, caught.value.next_move) == (what, next_move)
 
 
@@ -628,13 +678,18 @@ CASES_SCHEMA = (
 
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_schema_without_tables_carries_no_extra_field() -> None:
-    assert TraceConfig.of_schema(CASES_SCHEMA).tables.matrix_fields == ()
+    assert (
+        TraceConfig.of_schema(CASES_SCHEMA, descriptors=Catalog().descriptors).tables.matrix_fields
+        == ()
+    )
 
 
 @pytest.mark.verifies("DSN-QMT-16")
 def test_the_matrix_carries_the_requirement_fields_the_schema_lists_in_order() -> None:
     listed = CASES_SCHEMA + '\n[tables.matrix]\nfields = ["Verify-by", "Category"]\n'
-    assert TraceConfig.of_schema(listed).tables.matrix_fields == ("Verify-by", "Category")
+    assert TraceConfig.of_schema(
+        listed, descriptors=Catalog().descriptors
+    ).tables.matrix_fields == ("Verify-by", "Category")
 
 
 @pytest.mark.parametrize(
@@ -650,14 +705,19 @@ def test_the_matrix_carries_the_requirement_fields_the_schema_lists_in_order() -
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_field_the_matrix_cannot_carry_is_refused(section: str, said: str) -> None:
     with pytest.raises(CouldNotJudge) as caught:
-        TraceConfig.of_schema(CASES_SCHEMA + f"\n[tables.matrix]\n{section}\n")
+        TraceConfig.of_schema(
+            CASES_SCHEMA + f"\n[tables.matrix]\n{section}\n", descriptors=Catalog().descriptors
+        )
     assert said in caught.value.what and caught.value.next_move.startswith("Fix:")
 
 
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_table_the_ledger_does_not_emit_is_refused() -> None:
     with pytest.raises(CouldNotJudge) as caught:
-        TraceConfig.of_schema(CASES_SCHEMA + '\n[tables.other]\nfields = ["Category"]\n')
+        TraceConfig.of_schema(
+            CASES_SCHEMA + '\n[tables.other]\nfields = ["Category"]\n',
+            descriptors=Catalog().descriptors,
+        )
     assert "unknown key 'tables.other' (known here: matrix)" in caught.value.what
 
 
@@ -680,7 +740,12 @@ def test_the_test_case_field_that_names_a_level_must_be_declared() -> None:
         "[item_types.test_case]", '[item_types.test_case]\nrequired = ["Level"]', 1
     )
     level = '\n[tables.matrix]\nlevel = "Level"\n'
-    assert TraceConfig.of_schema(declared + level).tables.matrix_level == "Level"
+    assert (
+        TraceConfig.of_schema(
+            declared + level, descriptors=Catalog().descriptors
+        ).tables.matrix_level
+        == "Level"
+    )
     with pytest.raises(CouldNotJudge) as caught:
-        TraceConfig.of_schema(CASES_SCHEMA + level)
+        TraceConfig.of_schema(CASES_SCHEMA + level, descriptors=Catalog().descriptors)
     assert "which the test_case type does not declare" in caught.value.what

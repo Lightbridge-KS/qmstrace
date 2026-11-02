@@ -124,12 +124,7 @@ src/qmstrace/
       _extract.py        section state, fields, fences/frontmatter, findings, mentions and item text
       _headings.py       decorated IDs, heading values, normalized titles and item-shaped boundaries
       _tables.py         cells, delimiter rows, cell decoration and misplaced table markers
-    python/              language-specific owners, independent of one another
-      __init__.py        empty; callers import the concrete owner
-      module.py          module components, docstring markers, strays and syntax-tree digest
-      pytest_tests.py    test collection, verifies markers, digest and report_identity(node_id)
-    python_module.py     compatibility imports of python.module extract and form only
-    pytest_tests.py      compatibility imports of python.pytest_tests extract, form, report_identity
+
     reports.py           bytes -> Report: one safe defusedxml parse; the root picks the reader
     junit.py             pytest JUnit XML root -> Report entries; no summary count trusted
     trx.py               TRX root -> Report entries by class and method; no path, name or output
@@ -313,27 +308,18 @@ Within `extract/markdown`, `_extract` owns the section loop and imports `_headin
 `_tables`; those syntax owners never import one another or the extraction state. Heading
 values and regular expressions stay with their owner. Fence state and frontmatter remain
 beside item assembly because fence lines contribute to digests while declaring nothing.
-`fields.py` remains shared with Python and request extraction; their parsing contracts are
+`fields.py` remains shared by Markdown and request extraction; their parsing contracts are
 not unified. Public `extract`, `form` and `CHANGE` imports forward their original objects.
 Splitting section state into additional handlers was rejected: it would scatter the ordering
 that governs fields, mentions, section boundaries and digest text without simplifying callers.
 
-Within `extract/python`, `module.py` and `pytest_tests.py` own independent language/framework
-policies. Neither imports the other, the registry, the workspace or a compatibility module;
-neither imports pytest at runtime. Both retain their own short syntax-error conversion.
-A shared Python parser helper is deferred until there is shared policy beyond that small
-block. `base.py` registers these concrete owners under the unchanged `python-module` and
-`pytest` names. The old `extract/python_module.py` and `extract/pytest_tests.py` files only
-forward their supported functions, without wrappers; production callers use the canonical
-owners. `python/__init__.py` remains empty. Architecture and wheel gates pin these boundaries.
+Python extraction lives in `packages/qmstrace-lang-python/src/qmstrace_lang_python`.
+`module.py` and `pytest_tests.py` own source and test syntax; neither imports pytest or the
+other extractor. Private field and diagnostic helpers depend only on public API v1 values.
+The manifest declares the unchanged `python-module` and `pytest` names. Host registration
+contains only Markdown; the catalog admits installed language descriptors before import.
+The old Python implementation and compatibility import paths are removed (ADR-0014).
 
-Language packages sit side by side — `python/`, and `csharp/` since M12d — each implementing
-`IExtractor` under explicit names; language dispatch by extension and a generic language base
-class are not introduced. Component granularity, marker syntax and test-framework identities
-are chosen per language: for C#, a component is a file and an xUnit test's report identity is
-its namespace-qualified class and method (ADR-0004). A test extractor records each item's run
-identities (`Item.runs_as`), so `results` matches any language's tests without importing it;
-reading a report format stays outside the language packages.
 
 Within `render/text`, command owners do not import one another or the compatibility facade.
 They import `_evidence` and `_presentation` from `render/` when needed. Shared evidence
@@ -385,8 +371,8 @@ Architecture and wheel gates pin dependencies, export identity and command const
 
 M4's report boundary is not an item extractor and is not registered in `IExtractor`.
 `Workspace.results` reads explicitly supplied bytes (outside the Git-filtered tree), converts
-parse diagnostics and zero matches to `CouldNotJudge`, obtains identities from
-`python.pytest_tests.report_identity`, then calls `core.results.summarize`. The CLI resolves the
+parse diagnostics and zero matches to `CouldNotJudge`, obtains report identities from
+scanned items' `runs_as` values, then calls `core.results.summarize`. The CLI resolves the
 report path before opening the workspace. Matching and aggregation stay in core; the renderer
 only presents frozen values. Graph nodes retain authored fields for sibling verification
 methods without making sibling nodes local items. No pytest runtime import is needed.
@@ -452,17 +438,17 @@ deciding eligibility. The check failure predicate remains violations plus strict
   classmethods on `Workspace`, like `init`; the check's result is a value
   (`ProjectAssessment`), not an object. A ledger-side object waits for the import, when the
   ledger holds state of its own.
-- **Bundled and external extraction.** Python and Markdown ship inside the host.
-  [ADR-0013](../adr/0013-extractor-plugins.md) accepts the transition to independently
-  versioned C# extraction. The external manifest catalog now supplies those capabilities.
+- **Bundled and external extraction.** Only Markdown ships inside the host.
+  [ADR-0013](../adr/0013-extractor-plugins.md) and [ADR-0014](../adr/0014-python-extractor-plugin.md)
+  place C# and Python in independently installed packages admitted by the manifest catalog.
 - **No `utils.py`, no general barrel re-exports.** `__init__.py` files are empty but for the
   package version and the explicit compatibility exports in `core/config/`, `core/judge/`,
   `core/graph/`, `core/setup/`, `extract/markdown/`, `render/text/`, `workspace/` and `cli/`. Those
   exceptions forward the original objects; they contain no wrappers or initialization logic. Internal modules import their
   owners directly, never the compatibility facade. The architecture gate checks nested
   initializers, exact exports, each package's dependency direction and callers' public imports.
-  The two legacy Python extractor modules also permit only exact forwarding imports;
-  `extract/python/__init__.py` stays empty and canonical callers import its concrete owners.
+  The former Python compatibility modules are removed under ADR-0014;
+  external providers import only API v1, and the host never imports their modules directly.
 - **No pydantic or direct Rich dependency.** Dataclasses, pure ANSI formatting and JSON;
   conditional Rich help is provided by Typer. The tool installs with Typer,
   `defusedxml` for reports and `packaging` for provider metadata admission. The C# member owns
@@ -616,17 +602,17 @@ Satisfies: REQ-QMT-01, REQ-QMT-04
 
 ### DSN-QMT-04 — Extractors read markers from text, chosen by configured name
 
-`extract/base.py` registers an extractor per name the configuration gives an item type.
-`markdown/` reads headings, sections and fields (`fields.py`), `python/module.py` the module
-docstring's `Implements:` line, `python/pytest_tests.py` test functions and their `verifies`
+`extract/base.py` registers only Markdown; the plugin catalog resolves external extractor
+names. `markdown/` reads headings, sections and fields (`fields.py`),
+`qmstrace_lang_python.module` the module
+docstring's `Implements:` line, `qmstrace_lang_python.pytest_tests` test functions and their `verifies`
 decorators. Each takes text and never opens a file; a marker in a form it does not read is
 returned as a stray or a finding, never dropped. Markdown's `_extract.py` keeps section
 state and digest assembly together; `_headings.py` owns heading normalization and item-shaped
 boundaries; `_tables.py` owns cells and table markers. Compatibility exports preserve the
 registry's function identities. Source lines, result ordering, findings and digest bytes
 remain unchanged by this ownership split. Python source and pytest extraction have separate
-owners under `python/`; the old module paths preserve function identity through direct
-compatibility imports. The registry chooses extractors by configured name. Every reader finds
+owners in `qmstrace_lang_python`; the old internal import paths are removed. The catalog chooses extractors by configured name. Every reader finds
 IDs with one shape, `model.ID_TOKEN`, whose number may carry dotted parts; in running text
 `model.id_tokens` reads an ID whole or not at all, and a heading that starts with a malformed
 ID is handed back as a lead (ADR-0002). Reasoning: data architecture § Marker syntax v0; §4.
@@ -689,7 +675,7 @@ Satisfies: REQ-QMT-09, REQ-QMT-17
 
 `extract/reports.py` parses a report's bytes once, safely, and its root element picks the
 reader: `extract/junit.py` for pytest JUnit XML, `extract/trx.py` for TRX. Neither trusts a
-summary count. `extract/python/pytest_tests.py` `report_identity` gives the identity a pytest
+summary count. `qmstrace_lang_python.pytest_tests` `report_identity` gives the identity a pytest
 entry must match; `core/results.py` matches entries to scanned automated tests and gives a
 requirement the worst verdict of every automated test that reaches it. `Workspace.results`
 reads the explicitly supplied report.

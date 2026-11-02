@@ -8,6 +8,13 @@ All notable changes to this project are recorded here. The format follows
 
 ## [0.4.0] - 2026-11-02
 
+### Changed
+
+- Python module and pytest extraction now require explicitly installed qmstrace-lang-python.
+  Existing extractor names remain; legacy internal Python extraction import paths are removed.
+  Default Python setup refuses before writes when its provider is missing.
+
+
 ### Added
 
 - Stable `qmstrace.plugin_api.v1` for trusted, independently versioned extraction packages.

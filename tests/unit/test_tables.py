@@ -26,6 +26,7 @@ from qmstrace.core.graph import Surroundings, TraceGraph
 from qmstrace.core.model import Extracted, Item, Link
 from qmstrace.core.results import Report, ReportEntry, ReportSource, Results, summarize
 from qmstrace.core.tables import VerdictCell, coverage, matrix, requirements
+from qmstrace.plugins.catalog import Catalog
 
 TYPES = """\
 version = 1
@@ -93,7 +94,7 @@ def link(src: str, marker: str, dst: str) -> Link:
 def graph_of(
     schema: str, items: Sequence[Item], links: Sequence[Link]
 ) -> tuple[TraceConfig, TraceGraph]:
-    config = TraceConfig.of_schema(schema)
+    config = TraceConfig.of_schema(schema, descriptors=Catalog().descriptors)
     part = Extracted(items=tuple(items), links=tuple(links))
     graph, wrong = TraceGraph.build(config, [part], AGREEMENT)
     assert not wrong, wrong
@@ -211,7 +212,9 @@ def test_a_schema_without_verifies_has_no_test_columns() -> None:
 
 @pytest.mark.verifies("DSN-QMT-16")
 def test_a_schema_without_a_requirement_type_cannot_be_tabled() -> None:
-    config = TraceConfig.of_schema('version = 1\nproject = "T"\n[item_types.component]\n')
+    config = TraceConfig.of_schema(
+        'version = 1\nproject = "T"\n[item_types.component]\n', descriptors=Catalog().descriptors
+    )
     with pytest.raises(CouldNotJudge) as caught:
         matrix(config, TraceGraph.build(config, [])[0])
     assert "declares no requirement type" in caught.value.what

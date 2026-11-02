@@ -143,7 +143,7 @@ def test_new_provider_needs_no_host_registration_and_tracks_only_use(tmp_path, m
         "manifest=1\napi=1\nextractors=[]",
     ],
 )
-def test_rejected_provider_is_inspectable_and_does_not_block_python(
+def test_rejected_provider_is_inspectable_and_does_not_block_markdown(
     tmp_path, monkeypatch, manifest
 ):
     catalog = Catalog([distribution(tmp_path, monkeypatch, manifest)])
@@ -154,7 +154,7 @@ def test_rejected_provider_is_inspectable_and_does_not_block_python(
     inspected = CliRunner().invoke(app, ["plugins", "--json"])
     assert inspected.exit_code == 0, inspected.output
     assert json.loads(inspected.output)["data"]["providers"][0]["compatible"] is False
-    catalog.require("python-module")
+    catalog.require("markdown")
     with pytest.raises(CouldNotJudge):
         catalog.require("fixture")
     assert "fixture_plugin" not in sys.modules
@@ -178,10 +178,10 @@ def test_duplicate_ownership_including_bundled_names_has_no_winner(tmp_path, mon
     with pytest.raises(CouldNotJudge, match="ambiguous"):
         catalog.require("fixture")
     duplicate = distribution(
-        tmp_path, monkeypatch, MANIFEST.replace("extractors.fixture", "extractors.pytest")
+        tmp_path, monkeypatch, MANIFEST.replace("extractors.fixture", "extractors.markdown")
     )
     with pytest.raises(CouldNotJudge, match="ambiguous"):
-        Catalog([duplicate]).require("pytest")
+        Catalog([duplicate]).require("markdown")
 
 
 @pytest.mark.verifies("REQ-QMT-24")
@@ -245,7 +245,6 @@ def test_public_contract_rejects_nested_mutability_and_invalid_values():
         Extraction(items=(replace(item, digest="bad"),)),
         Extraction(items=(replace(item, type="other"),)),
         Extraction(items=(replace(item, line=0),)),
-        Extraction(items=(item, item)),
         replace(good, links=(replace(good.links[0], src="absent"),)),
         replace(good, links=(replace(good.links[0], marker="absent"),)),
         replace(good, links=(replace(good.links[0], dst="not-an-id"),)),
@@ -347,7 +346,9 @@ files = ['*.txt']
         raw.replace("extractor = 'fixture'", "extractor = 'python-module'")
     )
     with pytest.raises(CouldNotJudge, match="Historical trace data"):
-        Workspace.open(repo, catalog=Catalog([])).assessment()
+        Workspace.open(
+            repo, catalog=Catalog([metadata.distribution("qmstrace-lang-python")])
+        ).assessment()
 
 
 @pytest.mark.verifies("REQ-QMT-24")
@@ -416,4 +417,20 @@ def test_malformed_editable_metadata_does_not_block_other_extractors(tmp_path, m
     inspected = CliRunner().invoke(app, ["plugins", "--json"])
     assert inspected.exit_code == 0, inspected.output
     assert json.loads(inspected.output)["data"]["providers"][0]["compatible"] is False
-    catalog.require("python-module")
+    catalog.require("markdown")
+
+
+@pytest.mark.verifies("REQ-QMT-02", "REQ-QMT-24", "DSN-QMT-17")
+def test_adapter_preserves_duplicate_declarations_for_host_validation(service):
+    from qmstrace.core.graph import TraceGraph
+
+    source = ExtractRequest("text", "src/key.py", "component")
+    first = Item("src/key.py", "component", "src/key.py", 1, "first", text_digest("first"))
+    second = replace(first, line=4, title="second", digest=text_digest("second"))
+    found = adapt(Extraction(items=(first, second)), source)
+    assert [(i.line, i.title, i.digest) for i in found.items] == [
+        (1, "first", first.digest),
+        (4, "second", second.digest),
+    ]
+    _, findings = TraceGraph.build(service, [found])
+    assert [f.code for f in findings] == ["V01"]

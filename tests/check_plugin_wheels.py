@@ -34,11 +34,14 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def main():
+def main(language):
+    package_name = f"qmstrace-lang-{language}"
+    package_module = package_name.replace("-", "_")
+    other_language = "python" if language == "csharp" else "csharp"
     host_version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
-    plugin_version = tomllib.loads(
-        (ROOT / "packages/qmstrace-lang-csharp/pyproject.toml").read_text()
-    )["project"]["version"]
+    plugin_version = tomllib.loads((ROOT / f"packages/{package_name}/pyproject.toml").read_text())[
+        "project"
+    ]["version"]
 
     def successor_version(version):
         major, minor, patch = version.split(".")
@@ -47,7 +50,11 @@ def main():
     plugin_successor_version = successor_version(plugin_version)
     host_successor_version = successor_version(host_version)
     host = DIST / f"qmstrace-{host_version}-py3-none-any.whl"
-    plugin = DIST / f"qmstrace_lang_csharp-{plugin_version}-py3-none-any.whl"
+    plugin = DIST / f"{package_module}-{plugin_version}-py3-none-any.whl"
+    other_version = tomllib.loads(
+        (ROOT / f"packages/qmstrace-lang-{other_language}/pyproject.toml").read_text()
+    )["project"]["version"]
+    other_plugin = DIST / f"qmstrace_lang_{other_language}-{other_version}-py3-none-any.whl"
     if "--prepare" in sys.argv:
         run(
             sys.executable,
@@ -59,6 +66,7 @@ def main():
             str(WHEELS),
             str(host),
             str(plugin),
+            str(other_plugin),
             "uv_build>=0.11.8,<0.12.0",
             cwd=ROOT,
         )
@@ -67,7 +75,7 @@ def main():
         print("Dependency wheelhouse prepared.")
         return
     assert WHEELS.is_dir(), "prepare dist/wheelhouse first; see just prepare-wheelhouse"
-    for wheel, package in [(host, "qmstrace"), (plugin, "qmstrace_lang_csharp")]:
+    for wheel, package in [(host, "qmstrace"), (plugin, package_module)]:
         with zipfile.ZipFile(wheel) as archive:
             names = archive.namelist()
             meta = archive.read(
@@ -78,10 +86,16 @@ def main():
             assert any(n.endswith("/licenses/LICENSE") for n in names)
             if package == "qmstrace":
                 assert "Requires-Dist: tree-sitter" not in meta
-                assert not any("/extract/csharp/" in n for n in names)
+                assert not any(
+                    "/extract/csharp/" in n
+                    or "/extract/python" in n
+                    or "/extract/pytest_tests" in n
+                    for n in names
+                )
             else:
                 assert "Requires-Dist: qmstrace>=" in meta
-                assert "Requires-Dist: tree-sitter" in meta
+                assert ("Requires-Dist: tree-sitter" in meta) == (language == "csharp")
+                assert "Requires-Dist: pytest" not in meta
                 assert f"{package}/plugin.toml" in names
     with tempfile.TemporaryDirectory(prefix="qmstrace-wheels-") as temp:
         outside = Path(temp)
@@ -126,12 +140,17 @@ from typer.testing import CliRunner
 from qmstrace.cli import app
 assert importlib.util.find_spec('tree_sitter') is None
 assert importlib.util.find_spec('qmstrace_lang_csharp') is None
+assert importlib.util.find_spec('qmstrace_lang_python') is None
 root = Path('host-only'); root.mkdir()
 r = CliRunner().invoke(app, ['-C', str(root), 'init', '--language', 'csharp'])
 assert r.exit_code == 2, r.output
 assert not list(root.iterdir())
 r = CliRunner().invoke(app, ['-C', str(root), 'init', '--language', 'python'])
-assert r.exit_code == 0, r.output
+assert r.exit_code == 2, r.output
+assert not list(root.iterdir())
+(root / 'qmstrace.toml').write_text('version=1\\n[schema]\\nversion=1\\nproject="DOC"\\n'
+    '[schema.item_types.requirement]\\n[items.requirement]\\nextractor="markdown"\\n'
+    'files=["*.md"]\\nid_pattern="^REQ-DOC-[0-9]+$"\\nid_prefix="REQ-DOC-"\\n')
 assert CliRunner().invoke(app, ['-C', str(root), 'status']).exit_code == 0
 """)
         install(plugin)
@@ -141,6 +160,8 @@ catalog = Catalog()
 assert catalog.providers[0].problems == (), catalog.inspection()
 assert 'qmstrace_lang_csharp' not in sys.modules
 assert 'tree_sitter' not in sys.modules
+assert 'qmstrace_lang_python' not in sys.modules
+assert 'pytest' not in sys.modules
 """)
         code = """import json, hashlib
 from pathlib import Path
@@ -165,6 +186,41 @@ if not (root / 'qmstrace.toml').exists(): Workspace.initialize(root, language='c
 assert Workspace.open(root).assessment().toolchain['providers']
 print(json.dumps([asdict(found), asdict(tests)], sort_keys=True))
 """
+        if language == "python":
+            code = """import json, sys
+from dataclasses import asdict
+from pathlib import Path
+from qmstrace.plugin_api.v1 import ExtractRequest
+from qmstrace_lang_python import module, pytest_tests
+from qmstrace.workspace import Workspace
+request = ExtractRequest("'Implements: DSN-SVC-01'", 'src/key.py', 'component',
+    markers=('Implements',), permitted_markers=('Implements',))
+found = module.extract(request)
+assert found.items[0].id == 'src/key.py'
+assert found.links[0].dst == 'DSN-SVC-01'
+source = '@pytest.mark.verifies("REQ-SVC-01")\\ndef test_key(): pass'
+tests = pytest_tests.extract(ExtractRequest(source, 'tests/unit/test_key.py', 'automated_test',
+    ('unit',), ('verifies',), ('verifies',)))
+assert tests.items[0].runs_as == (('tests.unit.test_key', 'test_key'),)
+assert 'pytest' not in sys.modules
+root = Path('python'); root.mkdir(exist_ok=True)
+if not (root / 'qmstrace.toml').exists(): Workspace.initialize(root, language='python')
+(root / 'src').mkdir(exist_ok=True)
+(root / 'src/key.py').write_text('pass')
+assert Workspace.open(root).assessment().toolchain['providers']
+print(json.dumps([asdict(found), asdict(tests)], sort_keys=True))
+"""
+        probe(code)  # this language works with only its provider installed
+        probe(
+            "import importlib.util; assert importlib.util.find_spec('qmstrace_lang_"
+            + other_language
+            + "') is None"
+        )
+        install(other_plugin)
+        probe(
+            "from qmstrace.plugins.catalog import Catalog; c=Catalog(); "
+            "assert len(c.providers)==2 and all(not p.problems for p in c.providers)"
+        )
         # A separately built package adds a name absent from the host's registration.
         fixture = outside / "fixture"
         fixture_package = fixture / "src/wheel_fixture"
@@ -231,6 +287,24 @@ found = catalog.extractor('wheel-fixture')(
     'x.txt', 'fixture', config.item_types['component'], config)
 assert found.items[0].id == 'x.txt'
 """)
+        other_probe = (
+            "import json; from dataclasses import asdict; "
+            "from qmstrace.plugin_api.v1 import ExtractRequest; "
+            "from qmstrace_lang_"
+            + other_language
+            + " import "
+            + ("module" if other_language == "python" else "component")
+            + " as extractor; "
+            "print(json.dumps(asdict(extractor.extract(ExtractRequest("
+            + repr(
+                "'Implements: DSN-SVC-01'"
+                if other_language == "python"
+                else "/// Implements: DSN-SVC-01\npublic class Key {}"
+            )
+            + ", 'src/key', 'component', markers=('Implements',), "
+            "permitted_markers=('Implements',)))), sort_keys=True))"
+        )
+        other_before = probe(other_probe)
         before = probe(code)
         host_hash = sha(host)
         host_install_hash = probe(
@@ -255,7 +329,7 @@ assert found.items[0].id == 'x.txt'
         import shutil
 
         shutil.copytree(
-            ROOT / "packages/qmstrace-lang-csharp",
+            ROOT / f"packages/{package_name}",
             source,
             ignore=shutil.ignore_patterns("__pycache__", ".venv", "dist"),
         )
@@ -282,6 +356,7 @@ assert found.items[0].id == 'x.txt'
         install(successor)
         after = probe(code)
         assert before == after
+        assert probe(other_probe) == other_before
         assert sha(host) == host_hash
         assert (
             probe(
@@ -304,7 +379,7 @@ assert found.items[0].id == 'x.txt'
             )
         )
         delta = {v["name"] for v in environment_after if v not in environment_before}
-        assert delta == {"qmstrace-lang-csharp"}, delta
+        assert delta == {package_name}, delta
         # Fixture host successor, retaining the original plugin. This is mechanism
         # evidence only: neither fixture successor is a released compatibility baseline.
         host_source = outside / "host-successor"
@@ -335,15 +410,17 @@ assert found.items[0].id == 'x.txt'
         )
         host_successor = next((outside / "host-built").glob("*.whl"))
         install(plugin)
+        owner_module = "component" if language == "csharp" else "module"
         plugin_hash_code = (
             "import hashlib; from pathlib import Path; "
-            "from qmstrace_lang_csharp import component; "
+            f"from {package_module} import {owner_module} as component; "
             "print(hashlib.sha256(Path(component.__file__).read_bytes()).hexdigest())"
         )
         plugin_hash = probe(plugin_hash_code)
         install(host_successor)
         assert probe(plugin_hash_code) == plugin_hash
         assert probe(code) == before
+        assert probe(other_probe) == other_before
         host_update_environment = json.loads(
             run(
                 "uv",
@@ -357,6 +434,9 @@ assert found.items[0].id == 'x.txt'
                 env=env,
             )
         )
+        assert {v["name"] for v in host_update_environment if v not in environment_before} == {
+            "qmstrace"
+        }
         tool_env = {
             **env,
             "UV_TOOL_DIR": str(outside / "tools"),
@@ -374,6 +454,8 @@ assert found.items[0].id == 'x.txt'
                 "qmstrace",
                 "--exclude",
                 "qmstrace-lang-csharp",
+                "--exclude",
+                "qmstrace-lang-python",
                 "--exclude",
                 "wheel-fixture",
                 cwd=outside,
@@ -403,11 +485,33 @@ assert found.items[0].id == 'x.txt'
             assert inspection["data"]["providers"][0]["compatible"]
             expected_version = plugin_successor_version if wheel == successor else plugin_version
             assert inspection["data"]["providers"][0]["version"] == expected_version
+        # Explicit combined tool installation uses both --with arguments.
+        run(
+            "uv",
+            "tool",
+            "install",
+            "--force",
+            "--python",
+            sys.executable,
+            "--constraints",
+            str(constraints),
+            "--with",
+            str(plugin),
+            "--with",
+            str(other_plugin),
+            str(host),
+            cwd=outside,
+            env=tool_env,
+        )
+        inspection = json.loads(run(str(command), "plugins", "--json", cwd=outside, env=tool_env))
+        assert len(inspection["data"]["providers"]) == 2
+        assert all(p["compatible"] for p in inspection["data"]["providers"])
         result = {
             "platform": platform.system(),
             "python": platform.python_version(),
             "host_wheel": {"name": host.name, "sha256": host_hash},
             "plugin_wheel": {"name": plugin.name, "sha256": sha(plugin)},
+            "other_plugin_wheel": {"name": other_plugin.name, "sha256": sha(other_plugin)},
             "fixture_successor": {"name": successor.name, "sha256": sha(successor)},
             "fixture_host_successor": {"name": host_successor.name, "sha256": sha(host_successor)},
             "host_update_environment": host_update_environment,
@@ -431,11 +535,15 @@ assert found.items[0].id == 'x.txt'
                 "previous-released-plugin": "UNVERIFIED: first plugin release",
             },
         }
-        (DIST / f"compatibility-{platform.system().lower()}.json").write_text(
+        (DIST / f"compatibility-{platform.system().lower()}-{language}.json").write_text(
             json.dumps(result, indent=2) + "\n"
         )
-        print("Installed-wheel compatibility passed; only the plugin changed in the update.")
+        print(
+            f"{package_name}: installed-wheel compatibility passed; "
+            "only this plugin changed in its update."
+        )
 
 
 if __name__ == "__main__":
-    main()
+    for language in ("csharp", "python"):
+        main(language)
